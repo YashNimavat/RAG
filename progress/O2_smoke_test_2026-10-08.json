@@ -1,0 +1,83 @@
+{
+  "date": "2026-10-08",
+  "python": "3.12.8",
+  "checks": {
+    "local_embedding_cosine_top1": {
+      "status": "PASS",
+      "model": "all-MiniLM-L6-v2",
+      "max_seq_length": 256,
+      "dim": 384,
+      "top1": 1,
+      "score": 0.519,
+      "torch": "2.14.1+cpu",
+      "cuda": false,
+      "seconds": 6.8
+    },
+    "bm25_top1": {
+      "status": "PASS",
+      "top1": 2,
+      "score": 1.365
+    },
+    "cohere_embed": {
+      "status": "PASS",
+      "model": "embed-v4.0",
+      "dim": 1536,
+      "input_type": "search_document",
+      "context_length": 8192,
+      "seconds": 0.46,
+      "embed_models_listed": 7,
+      "embed_models": [
+        [
+          "embed-english-light-v3.0",
+          512
+        ],
+        [
+          "embed-english-v3.0",
+          512
+        ],
+        [
+          "embed-multilingual-light-v3.0",
+          512
+        ],
+        [
+          "embed-multilingual-v3.0",
+          512
+        ],
+        [
+          "embed-v4.0",
+          8192
+        ],
+        [
+          "embed-v5.0-fast",
+          8192
+        ],
+        [
+          "embed-v5.0-pro",
+          8192
+        ]
+      ]
+    },
+    "groq_chat": {
+      "status": "PASS",
+      "model": "openai/gpt-oss-20b",
+      "reply": "smoke test ok",
+      "prompt_tokens": 78,
+      "completion_tokens": 23,
+      "seconds": 0.53,
+      "models_listed": 11,
+      "models_available": [
+        "allam-2-7b",
+        "canopylabs/orpheus-arabic-saudi",
+        "canopylabs/orpheus-v1-english",
+        "meta-llama/llama-prompt-guard-2-22m",
+        "meta-llama/llama-prompt-guard-2-86m",
+        "openai/gpt-oss-120b",
+        "openai/gpt-oss-20b",
+        "openai/gpt-oss-safeguard-20b",
+        "qwen/qwen3.8-27b",
+        "whisper-large-v3",
+        "whisper-large-v3-turbo"
+      ]
+    }
+  }
+}

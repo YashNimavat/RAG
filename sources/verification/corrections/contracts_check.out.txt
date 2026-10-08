@@ -1,0 +1,219 @@
+python 3.12.8 | PyMuPDF 1.26.7 | root C:\Yash\New-Work\Book RAG\rag_learning
+pdf C:/Yash/New-Work/Book RAG/upstream/RAG_Techniques/data/Understanding_Climate_Change.pdf
+
+== M-01 snapshot contract ==
+[PASS] M-01 06 §5.3 lock: pdf sha256/bytes/pages match the PDF -- 1d58a0fac243 206372 B 33 pp
+[PASS] M-01 06 §5.3 manifest has every required field
+[PASS] M-01 06 §5.3 manifest doc_text_sha256 / pdf_sha256 match recomputation -- 5106772efa77003b
+[PASS] M-01 06 §5.3 page_table rows 1-3 match recomputation -- p1 [0,2424); p2 [2425,4835); p3 [4836,7019)
+[PASS] M-01 06 §5.3 doc_chars and p.8/10/23/29 starts match -- doc_chars=72593 starts={8: 16074, 10: 20555, 23: 49209, 29: 62565}
+[PASS] M-01 real Corpus D manifest passes validate_binding (06 §5.3 recipe, exact-bytes digest) -- snapshot_id=ea07572562ac (06 §5.3 recipe); manifest sha256=2928a91ead4aaa5d…
+
+== R-02 fail-closed binding and page-table integrity (06 §5.3 rule 4, §6.1) ==
+[PASS] R-02 checker's required-field lists equal the 06 §5.3 manifest JSON keys -- top=10 doc=6 row=4
+[PASS] R-02 06 §5.3 recipe executed from the document == independent transcription (Corpus D + 2 toy inputs) -- recipe: parts = ["snapshot-v1", f"parser={backend}@{version}", "options=" + json.dumps(options, so…
+[PASS] R-02 06 §5.3: parser version, options, cleaning version or doc text change => new snapshot_id -- Corpus D snapshot_id = ea07572562ac
+[PASS] R-02 checker no longer uses a private snapshot serialization (old recipe id differs; M-04 sid() uses 06)
+[PASS] R-02 control: with a valid binding the invalid gold segment raises ValueError (decoder bound)
+[PASS] R-02 wrong snapshot_manifest_sha256 rejected before gold translation (3 variants incl. CRLF re-save)
+[PASS] R-02 digest is over the exact stored bytes: semantically equal re-serialized manifest is rejected
+[PASS] R-02 each missing dataset binding field rejected (snapshot_id, manifest sha256, scorer, evidence logic) -- []
+[PASS] R-02 each missing manifest field rejected, nested parser/cleaning fields included (26 fields) -- []
+[PASS] R2-01 manifest without cleaning.steps (digest recomputed) raises BindingError before translation
+[PASS] R2-01 valid manifest with cleaning {version: none, steps: []} still passes
+[PASS] R-02 valid ["abc","def"] page-2 [0,1) -> doc [4,5) = "d" -- doc (4, 5)
+[PASS] R-02 negative control: round-1 hash+length check accepts the shifted table and maps p2[0,1) to 'e' -- legacy map (5, 6)
+[PASS] R-02 page 2 start AND end shifted +1 (hash, length, digest consistent) is rejected by validate_binding -- toy p.2: start != previous end + len(page_join)
+[PASS] R-02 the same item on the valid table loads and maps to doc [4,5) = 'd'
+[PASS] R-02 structural / hash / id mutations rejected (9 variants) -- []
+[PASS] R-02 dataset snapshot_id != recomputed/manifest snapshot_id rejected
+[PASS] R-02 page texts that differ from the manifest (one page dropped) rejected
+[PASS] R-02 a Snapshot cannot be built without validate_binding
+
+== R-05 gold_to_doc vs chunk_segment_to_doc (06 §2.3, §6.4; 07 H.3) ==
+[PASS] R-05 07 H.3 whole-document chunk of ["abc","def"] has page segments p1 [0,4), p2 [0,3) -- [(1, 0, 4), (2, 0, 3)]
+[PASS] R-05 chunk_segment_to_doc accepts p1 [0,4) -> doc [0,4) and p2 [0,3) -> doc [4,7)
+[PASS] R-05 gold_to_doc rejects p1 [0,4) (virtual join) and accepts p1 [0,3) -> doc [0,3)
+[PASS] R-05 chunk decoder allows exactly one extra position, never on the last page; empty/negative rejected
+[PASS] M-01 06 §9.6 D-002 p.10 [438,537) -> doc [20993,21092), same text (via gold_to_doc) -- doc [20993,21092)
+[PASS] R-05 07 H.1 join_pages equals the validated snapshot (doc text and page starts)
+[PASS] R-05 2000 random doc spans -> 07 to_page_segments -> chunk_segment_to_doc round-trip exactly; gold decoder agrees wherever it applies and refuses only segments ending on the virtual join -- 1999 segments accepted by both; 2653 include the join (gold refuses)
+[PASS] R-05 every real Corpus D chunk (recursive 1000/200, both scopes) decodes back through chunk_segment_to_doc -- 189 chunks
+[PASS] R-05 rule stated in 06 §2.3, §6.4 and 07 H.3 (both decoders named; [0,4)/[0,3) example in §2.3 and H.3) -- []
+[PASS] M-01 06 §2.3 Chunk fields == 07 H.3 DocChunk fields (+ meta in 06) -- doc_id,snapshot_id,chunk_id,seq,char_start,char_end,page_segments,text,text_sha256,chunker,params_hash
+[PASS] M-01 06 §2.3 PageSegment == 07 H.3 PageSegment
+[PASS] M-01 page-2 and pp.12-13 spans score identically under per-page and cross-page chunks -- recursive/FX-P2: per_page=(1, 1.0, 1.0) cross_page=(1, 1.0, 1.0) | recursive/FX-P12-13: per_page=(1, 1.0, 1.0) cross_page=(1, 1.0, 1.0) | fixed/FX-P2: per_page=(1, 1.0, 1.0) cross_page=(1, 1.0, 1.0) | fixed/FX-P12-13: per_page=(1, 1.0, 1.0) cross_page=(1, 1.0, 1.0)
+[PASS] M-01 negative control: unconverted page offsets give a different CE (conversion matters)
+[PASS] M-01 tampered page-5 text hash stops scoring (SnapshotMismatch)
+[PASS] M-01 dataset bound to another snapshot_id is refused (extraction change cannot reuse gold) -- ea07572562ac vs 7295d41ee6f4
+[PASS] M-01 06 §6.1 dataset header names snapshot_id, snapshot_manifest_sha256, scorer_version
+
+== M-02 evidence groups / CE@k (seed items from 06 §6.7) ==
+[PASS] M-02 06 §6.7 JSONL parses: 10 seeds D-001..D-010
+[PASS] M-02 every seed has the required fields and no gold_evidence/evidence_mode -- []
+[PASS] M-02 group/alternative shapes match the M-03 conversion -- {'D-001': [1], 'D-002': [1], 'D-003': [1], 'D-004': [2], 'D-005': [1, 1], 'D-006': [1, 1], 'D-007': [1, 1], 'D-008': [1], 'D-009': [], 'D-010': []}
+[PASS] M-02 unanswerables have evidence_groups [] and answerables do not
+[PASS] M-03 all seeds llm-draft, split 'unassigned', group == qid
+[PASS] M-02 every quote is a prefix of/equal to its normalized span, <= 25 words, once on its page, on no other page -- []
+[PASS] M-03 D-004 p.23 [1437,1566); D-007 p.10 [137,339) and p.29 [963,1106)
+[PASS] M-02 06 §6.7 table quotes equal the JSONL quotes -- []
+[PASS] M-02 06 §6.1 D-002 example uses evidence_groups identical to the seed
+[PASS] M-01 scored run rejects the seeds' split 'unassigned'
+[PASS] M-02 06 §9.6 constants P2, P8, P23 equal the page_table
+[PASS] M-02 fragment texts are the Codex counterexample
+[PASS] M-02 D-005 half-span fragments => CE 0 -- CE=0 GR=0.0 SC=0.504 Hit=1
+[PASS] M-02 D-005 with only one of two groups => CE 0 (Group-Recall 0.5)
+[PASS] M-02 D-004 with either alternative => CE 1
+[PASS] M-02 span covered jointly by two chunks => CE 1
+[PASS] M-02 D-007 multi-hop: both pages => CE 1; p.29 alone => CE 0
+[PASS] M-02 06 §9.6 sketch test_sufficiency_contract() passes on the reference implementation
+[PASS] M-02 06 §9.6 sketch test_page_to_doc_conversion() passes on the reference implementation
+[PASS] M-02 06 §9.6 sketch test_gold_quotes_resolve() passes on the reference implementation
+[PASS] M-02 06 §7.3 toy: CE@3/5=0/1, GR 0.5/1.0, SC 0.5/1.0, Hit@1/3=0/1, P 0.333/0.4, RR 0.5, nDCG 0.651/0.640, CP@5 0.5 -- (0, 1, 0.5, 1.0, 0.5, 1.0, 0, 1, 0.333, 0.4, 0.5, 0.651, 0.64, 0.5)
+[PASS] M-02 06 §2.4 YAML and §7.2 carry the same scoring config; no min_span_coverage/relevance_rule in the YAML
+
+== M-04 content identity / cache keys (07 H.3 code as written) ==
+[PASS] M-04 07 embedding_cache_key == reference sha256(provider|model_id|revision|input_type|preproc|text)
+[PASS] M-04 params_hash of fixed 40/10 is the Codex counterexample's c5c8dfd3d707
+[PASS] M-04 same content + config => same chunk_id and same cache key
+[PASS] M-04 changed text => different snapshot_id, chunk_id, text_sha256 and cache key -- doc1:a585e8345376:c5c8dfd3d707:00000 vs doc1:b277aaccdbf5:c5c8dfd3d707:00000
+[PASS] M-04 stale snapshot_id reused: id collides but cache key still follows the text
+[PASS] M-04 query vs document input_type => different keys
+[PASS] M-04 real-PDF chunk ids follow doc_id:snapshot_id:params_hash:seq and differ across snapshots -- 97 chunks, e.g. climate:ea07572562ac:77bc4c45809b:00000
+[PASS] M-04 07 H.3 quoted ids (with its stand-in snap()) reproduce -- ('doc1:65232ca1fd98:c5c8dfd3d707:00000', 'doc1:656cee243439:c5c8dfd3d707:00000')
+[PASS] M-04 06 §2.3 chunk_id comment and §2.4 cache comment match the contract
+
+== M-05 paired comparisons / splits ==
+[PASS] M-05 reference: shuffled candidate order gives the identical result -- (-0.05, (-0.225, 0.15))
+[PASS] M-05 reference: mismatched qid sets raise
+[PASS] M-05 reference cluster bootstrap resamples base+paraphrase together (CI exactly [0, 0])
+[PASS] M-05 06 §9.3 sketch: shuffled order identical; mean equals reference -- diff=-0.0500 CI=[-0.25  0.15]
+[PASS] M-05 06 §9.3 sketch: mismatched qid sets raise
+[PASS] M-05 06 §9.3 sketch: group resampling keeps base+paraphrase together -- grouped CI=[0.0, 0.0] ungrouped CI=[-0.6, 0.6]
+[INFO] numpy 2.3.3 used to execute the 06 §9.3 sketch
+[PASS] M-05 group-level split keeps base and paraphrase in the same split (50 seeds)
+[PASS] M-05 06 §6.7 paraphrase example shares its base item's group
+[PASS] M-05 comparison keys: identical accepted; any differing key (hash, scorer) rejected
+
+== R-07 order-insensitive qid metadata (06 §9.2/§9.3) ==
+[PASS] R-07 construction stores qids as a canonical sorted list (shuffled input -> identical metadata)
+[PASS] R-07 identical metadata with qids in a different order is accepted (Codex probe q1,q2 vs q2,q1)
+[PASS] R-07 different qid sets are rejected (one missing, one extra, one swapped)
+[PASS] R-07 duplicate qids and missing comparison keys are rejected at construction
+[PASS] R-07 06 §9.3 states canonical sorted qids, compared as sets
+
+== M-06 interval numbers ==
+Wilson 95% for 8/10: [0.4902, 0.9433]   exact two-sided 95% lower bound for 6/6: 0.5407 (closed form 0.025**(1/6) = 0.5407)
+[PASS] M-06 06 §8.4 Wilson 8/10 ~ 0.49–0.94 -- Wilson 95% CI is about 0.49–0.94
+[PASS] M-06 06 §8.4 exact lower bound 6/6 ~ 0.54 -- lower bound of about 0.54
+[PASS] M-06 06 §6.2 repeats 0.54
+
+== R-03 interval methods by statistic (06 §8.4) ==
+[PASS] R-03 κ example: p_o = 0, p_e = 0.5, κ = (0 − 0.5)/(1 − 0.5) = −1 -- κ=-1.0
+[PASS] R-03 paired bootstrap (seed 0, 2000 resamples) gives a valid κ interval inside [−1, 1] -- κ=-1.0 95% CI [-1.000, 0.000], undefined resamples=0
+[PASS] R-03 a Wilson interval cannot represent κ = −1 (it lives in [0, 1]) -- Wilson(0/4)=[0.000, 0.490]
+[PASS] R2-02 constant identical labels: kappa undefined -> explicit (None, None, n_undefined), no IndexError -- point=None ci=None undefined=2000
+[PASS] R-03 cluster bootstrap over answers resamples all units of an answer together -- κ=0.500 CI [0.000, 1.000]
+[PASS] R-03 06 §8.4: confusion matrix reported as raw counts with no interval (no Wilson) -- - **Confusion matrix:** report the raw **counts**, with no interval.
+[PASS] R-03 06 §8.4: κ is not a proportion, Wilson does not apply; paired bootstrap or κ variance; −1 example
+[PASS] R-03 06 §8.4: Wilson only for binomial rates; cluster bootstrap over answers for clustered units
+[PASS] R-03 06 §8.4 states the lower-bound decision rule (Assumption): recall LB ≥ 0.70 and κ LB ≥ 0.40 -- und** of failure-class recall is **≥ 0.70** and the **lower 95% bound** of κ is **≥ 0.40**
+[PASS] R-03 scanner control: the old blanket wordings are detected
+[PASS] R-03 no clause in 06/08/BACKBONE/02/03 applies Wilson to κ or to the confusion matrix -- {}
+[PASS] R-03 8/10 Wilson example kept as a binomial-rate example
+
+== M-07 typed prerequisite registry (03 §2.1) ==
+[PASS] M-07 03 §2 claimed counts match the registry -- registry=(56, 78, 4, 8, 5, 5)
+[PASS] M-07 every referenced ID exists in the registry -- set()
+[PASS] M-07 hard edges (requires_all + any-group members + exposure) are acyclic
+[PASS] M-07 no edge points from a later phase to an earlier one -- []
+[PASS] M-07 every any-group has >= 2 distinct members -- []
+[PASS] M-07 no any-group is satisfied by zero members -- []
+[PASS] M-07 every Phase 4–11 concept requires Gate 3→4 (S2 included) -- []
+[PASS] M-07 03 field note: a concept listing Gate 8→9/9→10 also lists Gate 3→4 -- []
+[PASS] M-07 K1's requires_all closure (and full closure) contains no A*/S* concept -- |closure|=36
+[PASS] M-07 K1 unlocks with no A*/S* mastered (v6 -> K1)
+[PASS] M-07 K1: requires_all {I-CMP, V3, D2}, Gate 9→10, D3 advice only
+[PASS] M-07 A5 any-group [A1|A2]; S3 any-group [S1|R5]; I-CMP exposure I2..I6
+[PASS] M-07 A5 cannot unlock without A1 or A2; unlocks with exactly one
+[PASS] M-07 S3 cannot unlock without S1 or R5; unlocks with exactly one
+
+== R-04 exposure ≠ mastery (03 §2.1 unlock rule; 05 §6.1) ==
+[PASS] R-04 I1 mastered + I2–I6 exposed only (not mastered) => I-CMP unlocks -- |mastered|=21 exposed=['I2', 'I3', 'I4', 'I5', 'I6']
+[PASS] R-04 any one of I2–I6 neither exposed nor mastered => I-CMP blocked (5 cases) -- []
+[PASS] R-04 an exposure satisfied by mastery also counts (I2 mastered, I3–I6 exposed => unlocks)
+[PASS] R-04 round-1 helper behaviour reproduced as negative control (exposure looked up in mastered only)
+[PASS] R-04 exposure alone never satisfies requires_all (I-CMP←I1 and all registry edges) or an any-group (A5 [A1|A2], S3 [S1|R5], R3 [R1|C4]) -- []
+[PASS] R-04 K1 reachable with I2–I6 exposed only and no A*/S* concept mastered or exposed (state built from the registry closure; each concept mastered only after it unlocks) -- |mastered|=31, exposed=['I2', 'I3', 'I4', 'I5', 'I6']; without exposure reachable=False
+[PASS] R-04 03 §2.1 states the two-set unlock rule (all/any vs mastered; exposure vs exposed ∪ mastered)
+[PASS] R-04 05 §6.1 defines exposed_on (header, field table, example row width) and the mastered/exposed sets -- 20 columns; example row 20 fields; field table == header: True
+[PASS] M-07 unlocks column equals the derived unlocks -- []
+[PASS] M-07 no E concept hard-requires U/S; no U concept hard-requires S -- []
+[PASS] M-07 02 has a Pre line for every registry concept -- missing=set() extra=set()
+[PASS] M-07 every concept named in a 02 Pre line is an ancestor in the 03 registry -- []
+[PASS] M-07 02 any{...} groups == 03 requires_any_groups -- []
+[PASS] M-07 02 exposure{...} == 03 requires_exposure -- []
+[PASS] M-07 02 gate{...} (+ implicit 3→4 for Phases 4–11) == 03 requires_gate -- []
+[PASS] M-07 02 cards A5, S1, S2, S3, K1, I-CMP use typed Pre notation -- []
+[INFO] requires_all vs 02 Pre all-lists differ directly for 39 concepts (02 names ancestors or lab-baseline items; every 02 item is an 03 ancestor per the check above):
+[INFO]    P1: 03-only ['O3'] / 02-only []
+[INFO]    P2: 03-only ['O2'] / 02-only []
+[INFO]    P3: 03-only ['P1'] / 02-only []
+[INFO]    C1: 03-only ['P2'] / 02-only ['O2']
+[INFO]    C3: 03-only [] / 02-only ['P4']
+[INFO]    C4: 03-only [] / 02-only ['P5']
+[INFO]    C6: 03-only [] / 02-only ['C1', 'C2', 'C3', 'C4']
+[INFO]    M2: 03-only [] / 02-only ['P6']
+[INFO]    M3: 03-only [] / 02-only ['C5']
+[INFO]    I1: 03-only ['M5'] / 02-only ['C2']
+[INFO]    I2: 03-only [] / 02-only ['C1']
+[INFO]    I3: 03-only [] / 02-only ['P4']
+[INFO]    I4: 03-only [] / 02-only ['I1', 'M3']
+[INFO]    I5: 03-only [] / 02-only ['C3']
+[INFO]    I6: 03-only [] / 02-only ['M3']
+[INFO]    R1: 03-only [] / 02-only ['P4']
+[INFO]    R2: 03-only [] / 02-only ['C3']
+[INFO]    R3: 03-only ['M4'] / 02-only ['P4']
+[INFO]    R4: 03-only [] / 02-only ['P4']
+[INFO]    R5: 03-only ['R2'] / 02-only []
+[INFO]    Q1: 03-only ['R1'] / 02-only []
+[INFO]    Q2: 03-only [] / 02-only ['P4']
+[INFO]    X1: 03-only ['I1'] / 02-only ['C3']
+[INFO]    X3: 03-only ['I1'] / 02-only ['C5', 'P7']
+[INFO]    X2: 03-only [] / 02-only ['M3']
+[INFO]    V1: 03-only [] / 02-only ['M3']
+[INFO]    V2: 03-only [] / 02-only ['M3']
+[INFO]    V3: 03-only [] / 02-only ['M1']
+[INFO]    V4: 03-only [] / 02-only ['M3']
+[INFO]    D1: 03-only [] / 02-only ['C6']
+[INFO]    D2: 03-only [] / 02-only ['P1']
+[INFO]    D3: 03-only [] / 02-only ['M4']
+[INFO]    A1: 03-only ['D2'] / 02-only ['M5']
+[INFO]    A2: 03-only ['D4', 'Q1'] / 02-only ['V2']
+[INFO]    A4: 03-only ['V4'] / 02-only []
+[INFO]    A5: 03-only ['V3'] / 02-only ['D1']
+[INFO]    S1: 03-only ['R5'] / 02-only ['M5']
+[INFO]    S2: 03-only ['M2'] / 02-only ['C1']
+[INFO]    S3: 03-only ['Q2'] / 02-only []
+[INFO] 03 requires_all items NOT implied even transitively by 02's Pre lines (03 is stricter; gates excluded): P1 <- ['O3']; P2 <- ['O2']; P3 <- ['P1']; C1 <- ['P2']; I1 <- ['M5']; R5 <- ['R2']; X1 <- ['I1']; X3 <- ['I1']; A1 <- ['D2']; A2 <- ['D4', 'Q1']; A4 <- ['V4']; S1 <- ['R5']; S2 <- ['M2']; S3 <- ['Q2']
+
+== B-01 / R-01 approval gates (08 Part 7) and decision rows (08 Part 4) ==
+[PASS] B-01 every checklist item ID appears in exactly one approval gate section -- A: 24; B: 7; C: 5; total 36
+[PASS] B-01 the 08 Part 7 gate table lists exactly the items of each gate section (ranges expanded) -- {}
+[PASS] B-01 BACKBONE §3 approval-gate table assigns the same items to each gate as 08 Part 7 -- {}
+[PASS] B-01 Gate A holds only design-time items (no E-*, BL-*, MX-*, DEC-3) -- S-1, S-2, S-3, S-4, S-5, S-6, C-1, C-2, C-3, C-4, C-5, DEC-1a, DEC-1b, DEC-2, V-1, V-2, V-3, V-4, P-1, P-2, P-3, R-1, R-2, R-3
+[PASS] B-01 E-1…E-4, BL-1, DEC-1c, DEC-3 sit in Gate B; MX-1…MX-5 in Gate C
+[PASS] R-01 DEC-1a lists exactly D-03, D-04, D-05, D-10, D-14, D-16, D-19, D-20 -- ['D-03', 'D-04', 'D-05', 'D-10', 'D-14', 'D-16', 'D-19', 'D-20']
+[PASS] R-01 each DEC-1a decision's Part 4 row is marked Decided 2026-10-08 (D-14/16/19/20 '— Learner') -- undecided=[] not-learner=[]
+[PASS] R-01 D-06/D-07 rows read 'Confirmed 2026-10-08 — Coach'; DEC-1b covers D-06, D-07, D-17 -- []
+[PASS] R-01 DEC-1a and P-2 are ticked with the dated learner notes
+[PASS] R-01 08 Part 7 allows the decision-only preflight before Gate A; O2 implements DEC-1a, does not make it
+[PASS] R-01 no 'confirmed at the start of O2' / 'Decide at O2' wording left in 08, 02, BACKBONE -- {}
+[PASS] R-01 02 §4 and BACKBONE §3 say Gate A needs only design-time artifacts + preflight decisions
+
+== R-06 Corpus T/H timing ==
+[PASS] R-06 BACKBONE §3 Gate B row and 08 DEC-3 put T before Phase 3 and H before K1; no 'Corpus T/H chosen, frozen' left -- {'BACKBONE': 0, '08': 0}
+[PASS] R-06 round-1 spec copy: every 'Corpus T/H chosen, frozen' line carries '[corrected in round 2, R-06: …]' -- 1 line(s)
+
+BY FINDING: M-01 15/15; R-02 17/17; R2-01 2/2; R-05 8/8; M-02 19/19; M-03 2/2; M-04 9/9; M-05 9/9; R-07 5/5; M-06 3/3; R-03 11/11; R2-02 1/1; M-07 22/22; R-04 8/8; B-01 5/5; R-01 7/7; R-06 2/2
+SUMMARY: 145 passed, 0 failed, 145 checks

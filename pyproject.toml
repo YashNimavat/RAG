@@ -1,0 +1,22 @@
+[project]
+name = "rag-learning"
+version = "0.1.0"
+description = "Ask My Technical PDFs: a framework-free RAG learning project (see README.md)"
+requires-python = ">=3.12,<3.13"   # D-14: Python 3.12 (decided 2026-10-08)
+dependencies = [
+    "cohere>=7.2.0",
+    "groq>=1.7.0",
+    "numpy>=2.5.3",
+    "pandas>=3.0.6",
+    "pymupdf==1.26.7",
+    "python-dotenv>=1.2.4",
+    "rank-bm25>=0.2.2",
+    "sentence-transformers>=6.1.0",
+    "tiktoken>=0.14.0",
+]
+
+[dependency-groups]
+dev = [
+    "ipykernel>=7.4.0",
+    "pytest>=9.1.1",
+]

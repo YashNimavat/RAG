@@ -1,0 +1,3 @@
+TEXT length: 479
+LangChain size=40 overlap=40: 56 chunks; first 3 = ['word000 word001 word002 word003 word004', 'word001 word002 word003 word004 word005', 'word002 word003 word004 word005 word006']
+LlamaIndex size=40 overlap=40: 41 chunks; first 2 = ['word000 word001 word002 word003 word004 word005 word006 word007 word008 word009 word010 word011 word012 word013 word014 word015 word016 word017 word018 word019', 'word001 word002 word003 word004 word005 word006 word007 word008 word009 word010 word011 word012 word013 word014 word015 word016 word017 word018 word019 word020']

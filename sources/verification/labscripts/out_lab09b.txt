@@ -1,0 +1,7 @@
+23
+fixed_window_chunks(T, 10, 3) -> [(0, 10, 'abcdefghij'), (7, 17, 'hijklmnopq'), (14, 23, 'opqrstuvw')]
+fixed_window_chunks(T, 10, 0) -> [(0, 10, 'abcdefghij'), (10, 20, 'klmnopqrst'), (20, 23, 'uvw')]
+fixed_window_chunks(T, 8, 4) -> [(0, 8, 'abcdefgh'), (4, 12, 'efghijkl'), (8, 16, 'ijklmnop'), (12, 20, 'mnopqrst'), (16, 23, 'qrstuvw')]
+22
+recursive_chunks(W, 10, 4) -> [(0, 8, 'the cat '), (4, 12, 'cat sat '), (8, 15, 'sat on '), (12, 22, 'on the mat')]
+LangChain(10, 4)            -> ['the cat', 'cat sat', 'sat on', 'on the', 'the mat']

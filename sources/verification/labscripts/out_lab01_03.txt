@@ -1,0 +1,30 @@
+python 3.12.8 numpy 2.5.3
+
+=== Item 1: P(span of length F wholly inside >=1 chunk) ===
+S=1000 F=500 O=0: formula=0.501000  brute(interior,L=200000)=0.501000 (98697/197000)  exhaustive(all starts,L=20000)=0.513820 (10020/19501)
+S=1000 F=500 O=200: formula=0.626250  brute(interior,L=200000)=0.626250 (123246/196800)  exhaustive(all starts,L=20000)=0.632019 (12325/19501)
+S=1000 F=500 O=400: formula=0.835000  brute(interior,L=200000)=0.835000 (164328/196800)  exhaustive(all starts,L=20000)=0.837547 (16333/19501)
+Guarantee threshold check (P==1 iff F <= O+1), S=1000, O=200:
+  F=200: formula=1.000000 brute=1.000000
+  F=201: formula=1.000000 brute=1.000000
+  F=202: formula=0.998750 brute=0.998750
+  F=250: formula=0.938750 brute=0.938750
+
+=== Item 2: number of chunks ceil((L-O)/(S-O)) for L > S ===
+S=1000 O=200: checked L=1001..19999, mismatches=0
+S=300 O=60: checked L=301..5999, mismatches=0
+S=300 O=0: checked L=301..5999, mismatches=0
+S=500 O=100: checked L=501..9999, mismatches=0
+  L=1001 S=1000 O=200: impl=2 formula=2 stored_chars/L=1.200 (S/(S-O)=1.250)
+  L=1800 S=1000 O=200: impl=2 formula=2 stored_chars/L=1.111 (S/(S-O)=1.250)
+  L=1801 S=1000 O=200: impl=3 formula=3 stored_chars/L=1.222 (S/(S-O)=1.250)
+  L=5000 S=1000 O=200: impl=6 formula=6 stored_chars/L=1.200 (S/(S-O)=1.250)
+  L=73536 S=1000 O=200: impl=92 formula=92 stored_chars/L=1.247 (S/(S-O)=1.250)
+
+=== Item 3: dilution toy (chunk vector = mean of sentence vectors) ===
+competitor c=[0.6,0.8]: cos(q,c)=0.600
+n=0 off-topic: chunk=[1.0, 0.0] cos=1.000 1/sqrt(1+n^2)=1.000 beats_competitor=True
+n=1 off-topic: chunk=[0.5, 0.5] cos=0.707 1/sqrt(1+n^2)=0.707 beats_competitor=True
+n=2 off-topic: chunk=[0.3333, 0.6667] cos=0.447 1/sqrt(1+n^2)=0.447 beats_competitor=False
+n=3 off-topic: chunk=[0.25, 0.75] cos=0.316 1/sqrt(1+n^2)=0.316 beats_competitor=False
+n=4 off-topic: chunk=[0.2, 0.8] cos=0.243 1/sqrt(1+n^2)=0.243 beats_competitor=False

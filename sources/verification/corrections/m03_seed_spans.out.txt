@@ -1,0 +1,11 @@
+D-004 p.23 alt (was [1463,1566)): page 23 [1437,1566) words=19
+   'Direct Air Capture (DAC) DAC technology removes CO2 directly from the atmosphere, offering a way to achieve negative emissions.'
+D-007 p.10 (was [211,339)): page 10 [137,339) words=30
+   'The UNFCCC is an international treaty aimed at addressing climate change. It provides a framework for negotiating specific protocols and agreements, such as the Kyoto Protocol and the Paris Agreement.'
+D-007 p.29 (was [963,1078)): page 29 [963,1106) words=21
+   'The Conference of the Parties (COP) is the supreme decision-making body of the United Nations Framework Convention on Climate Change (UNFCCC).'
+pymupdf 1.26.7 pages 33 doc_chars 72593 doc_text_sha256 5106772efa77003b0d6c79bc1a429b8dacf244d9556f412bae1c4fe6bc7368c6
+ page 1: doc_start=0 len=2424 text_sha256=73533984cff86c8a0a20d852bb2fd0fce36f607d5842441977109c2c222fc029
+ page 2: doc_start=2425 len=2410 text_sha256=c6c14ed16a4d36979110e27802f47b851fde2f801161816d4910530190cf1ea9
+ page 3: doc_start=4836 len=2183 text_sha256=e74d6990381b8873386ef20642880b59988d630080fecc61b7b21936abe2cacb
+ page 23 doc_start 49209 | page 10 doc_start 20555 | page 29 doc_start 62565 | page 8 doc_start 16074

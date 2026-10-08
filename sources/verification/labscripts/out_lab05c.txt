@@ -1,0 +1,2 @@
+Windows order: ['customers-100.csv', 'nike_2023_annual_report.txt', 'q_a.json', 'q_a_smith.json', 'q_a_smith_short.json', 'Understanding_Climate_Change.pdf', 'wealth_retrieved_passages_from_original_memorag.csv']
+POSIX order:   ['Understanding_Climate_Change.pdf', 'customers-100.csv', 'nike_2023_annual_report.txt', 'q_a.json', 'q_a_smith.json', 'q_a_smith_short.json', 'wealth_retrieved_passages_from_original_memorag.csv']

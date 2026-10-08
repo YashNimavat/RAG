@@ -1,0 +1,28 @@
+len(PARA)=785; FACT span=[558,629) len=71
+QUERY: What happens to tokens past an embedding model's sequence limit?
+
+--- fixed_window_chunks(size=300, overlap=0): 3 chunks
+[0]   0-300 'A bi-encoder turns a passage into one vector in three steps. First, a WordPiece tokenizer splits the text into subword tokens and adds the special [CLS] and [SEP] markers. Second, a small transformer reads the token sequence and produces one contextual vector per token. Third, a pooling layer averag'
+[1] 300-600 'es those token vectors into a single fixed-size embedding, which is then scaled to unit length. Two passages are later compared by the cosine of their vectors. Because the model was trained on short inputs, its configuration caps the sequence at 256 tokens. Tokens beyond the cap are silently dropped'
+[2] 600-785 " before the transformer runs. A sentence placed at the end of a long chunk can therefore have no influence at all on the chunk's embedding, even though the chunk text still contains it."
+chunks wholly containing FACT: []
+
+--- fixed_window_chunks(size=300, overlap=60): 4 chunks
+[0]   0-300 'A bi-encoder turns a passage into one vector in three steps. First, a WordPiece tokenizer splits the text into subword tokens and adds the special [CLS] and [SEP] markers. Second, a small transformer reads the token sequence and produces one contextual vector per token. Third, a pooling layer averag'
+[1] 240-540 'e contextual vector per token. Third, a pooling layer averages those token vectors into a single fixed-size embedding, which is then scaled to unit length. Two passages are later compared by the cosine of their vectors. Because the model was trained on short inputs, its configuration caps the sequen'
+[2] 480-780 "s trained on short inputs, its configuration caps the sequence at 256 tokens. Tokens beyond the cap are silently dropped before the transformer runs. A sentence placed at the end of a long chunk can therefore have no influence at all on the chunk's embedding, even though the chunk text still contain"
+[3] 720-785 " chunk's embedding, even though the chunk text still contains it."
+chunks wholly containing FACT: [2]
+
+--- recursive_chunks(size=300, overlap=60) [our simplified version]: 4 chunks
+[0]   0-294 len=294 'A bi-encoder turns a passage into one vector in three steps. First, a WordPiece tokenizer splits the text into subword tokens and adds the special [CLS] and [SEP] markers. Second, a small transformer reads the token sequence and produces one contextual vector per token. Third, a pooling layer '
+[1] 238-534 len=296 'one contextual vector per token. Third, a pooling layer averages those token vectors into a single fixed-size embedding, which is then scaled to unit length. Two passages are later compared by the cosine of their vectors. Because the model was trained on short inputs, its configuration caps the '
+[2] 478-773 len=295 "was trained on short inputs, its configuration caps the sequence at 256 tokens. Tokens beyond the cap are silently dropped before the transformer runs. A sentence placed at the end of a long chunk can therefore have no influence at all on the chunk's embedding, even though the chunk text still "
+[3] 714-785 len=71 "on the chunk's embedding, even though the chunk text still contains it."
+chunks wholly containing FACT: [2]
+
+--- LangChain RecursiveCharacterTextSplitter(300, 60, len): 4 chunks
+[0]   0-293 len=293 overlap_prev=None contains_FACT=False 'A bi-encoder turns a passage into one vector in three steps. First, a WordPiece tokenizer splits the text into subword tokens and adds the special [CLS] and [SEP] markers. Second, a small transformer reads the token sequence and produces one contextual vector per token. Third, a pooling layer'
+[1] 238-533 len=295 overlap_prev=55 contains_FACT=False 'one contextual vector per token. Third, a pooling layer averages those token vectors into a single fixed-size embedding, which is then scaled to unit length. Two passages are later compared by the cosine of their vectors. Because the model was trained on short inputs, its configuration caps the'
+[2] 478-772 len=294 overlap_prev=55 contains_FACT=True "was trained on short inputs, its configuration caps the sequence at 256 tokens. Tokens beyond the cap are silently dropped before the transformer runs. A sentence placed at the end of a long chunk can therefore have no influence at all on the chunk's embedding, even though the chunk text still"
+[3] 714-785 len=71 overlap_prev=58 contains_FACT=False "on the chunk's embedding, even though the chunk text still contains it."

@@ -1,0 +1,9 @@
+{'llama-index-core': '0.14.25', 'llama-index-readers-file': '0.7.0'}
+SimpleDirectoryReader(data) -> documents: 39
+documents per file: {'customers-100.csv': 1, 'nike_2023_annual_report.txt': 1, 'q_a.json': 1, 'q_a_smith.json': 1, 'q_a_smith_short.json': 1, 'Understanding_Climate_Change.pdf': 33, 'wealth_retrieved_passages_from_original_memorag.csv': 1}
+documents[0:20] (file_name, page_label): [('customers-100.csv', None), ('nike_2023_annual_report.txt', None), ('q_a.json', None), ('q_a_smith.json', None), ('q_a_smith_short.json', None), ('Understanding_Climate_Change.pdf', '1'), ('Understanding_Climate_Change.pdf', '2'), ('Understanding_Climate_Change.pdf', '3'), ('Understanding_Climate_Change.pdf', '4'), ('Understanding_Climate_Change.pdf', '5'), ('Understanding_Climate_Change.pdf', '6'), ('Understanding_Climate_Change.pdf', '7'), ('Understanding_Climate_Change.pdf', '8'), ('Understanding_Climate_Change.pdf', '9'), ('Understanding_Climate_Change.pdf', '10'), ('Understanding_Climate_Change.pdf', '11'), ('Understanding_Climate_Change.pdf', '12'), ('Understanding_Climate_Change.pdf', '13'), ('Understanding_Climate_Change.pdf', '14'), ('Understanding_Climate_Change.pdf', '15')]
+DatasetGenerator import OK; warnings at import: []
+notebook path chunk_size=128 overlap=25: 1462 nodes; tokens max=99; chars min/max=51/604
+notebook path chunk_size=256 overlap=51: 610 nodes; tokens max=224; chars min/max=10/1299
+script path chunk_size=128: ValueError: Got a larger chunk overlap (200) than chunk size (128), should be smaller.
+script path chunk_size=256: OK, overlap=200, nodes=2123

@@ -1,0 +1,22 @@
+# D-16 (decided 2026-10-08): local git only. Never commit secrets, PDFs, caches or indexes.
+
+# secrets
+.env
+.env.*
+!.env.example
+
+# Python / tooling
+.venv/
+__pycache__/
+*.pyc
+.pytest_cache/
+.ipynb_checkpoints/
+
+# corpora and extracted text (licences unclear; kept local)
+*.pdf
+evaluation/snapshots/*/
+
+# caches and indexes (rebuildable)
+.cache/
+index/
+experiments/*/cache/
