@@ -1,0 +1,109 @@
+# C4 lab test, 2026-10-08 (re-run after the course-wide id alignment, params_hash 1ca9c5a3b548, and the row-alignment / embed_hash decisions). Runner: sources/verification/C4/c4_lab_runner.py (no solution code). Throwaway solutions kept OUTSIDE the workspace (scratchpad/c4/solution_*.py). Notebook sha256: 90e75b8569a93515e036d873bc2524a8a778973384f9d850761f2af1cac35428
+variant=good
+PASS cell 11: # CHECK Task 1 (do not edit)
+PASS cell 14: # CHECK Task 2a (do not edit): shape, order, scores
+PASS cell 15: # CHECK Task 2b (do not edit): the query side of the embedder
+PASS cell 16: # CHECK Task 2c (do not edit): ties go to the smaller chunk_id, whatever the row order
+PASS cell 21: # CHECK Task 3 (do not edit)
+PASS cell 24: # CHECK Task 4 (do not edit)
+PASS cell 29: # CHECK Task 5 (do not edit)
+PASS cell 34: # CHECK Task 6 (do not edit)
+PASS cell 39: # CHECK Task 7 (do not edit)
+PASS cell 45: # CHECK Task 9 (do not edit)
+10/10 CHECK cells passed
+variant=blank
+FAIL cell 11: # CHECK Task 1 (do not edit)  <- AssertionError: write both predictions first
+FAIL cell 14: # CHECK Task 2a (do not edit): shape, order, scores  <- NameError: name 'retrieve' is not defined | File "<cell 14>", line 2, in <module>
+FAIL cell 15: # CHECK Task 2b (do not edit): the query side of the embedder  <- NameError: name 'retrieve' is not defined | File "<cell 15>", line 14, in <module>
+FAIL cell 16: # CHECK Task 2c (do not edit): ties go to the smaller chunk_id, whatever the row order  <- NameError: name 'retrieve' is not defined | File "<cell 16>", line 6, in <module>
+FAIL cell 21: # CHECK Task 3 (do not edit)  <- AssertionError: write your prediction first
+FAIL cell 24: # CHECK Task 4 (do not edit)  <- NameError: name 'outranked' is not defined | File "<cell 24>", line 2, in <module>
+FAIL cell 29: # CHECK Task 5 (do not edit)  <- AssertionError: write your prediction first
+FAIL cell 34: # CHECK Task 6 (do not edit)  <- AssertionError: write both predictions first
+FAIL cell 39: # CHECK Task 7 (do not edit)  <- AssertionError: write both predictions first
+FAIL cell 45: # CHECK Task 9 (do not edit)  <- AssertionError: write 2-4 sentences (30+ words)
+0/10 CHECK cells passed
+variant=no_tie_rule
+PASS cell 11: # CHECK Task 1 (do not edit)
+PASS cell 14: # CHECK Task 2a (do not edit): shape, order, scores
+PASS cell 15: # CHECK Task 2b (do not edit): the query side of the embedder
+FAIL cell 16: # CHECK Task 2c (do not edit): ties go to the smaller chunk_id, whatever the row order  <- AssertionError: tie order [166, 69, 165, 68]: equal scores must go to the smaller chunk_id, not to the earlier row
+PASS cell 21: # CHECK Task 3 (do not edit)
+PASS cell 24: # CHECK Task 4 (do not edit)
+PASS cell 29: # CHECK Task 5 (do not edit)
+PASS cell 34: # CHECK Task 6 (do not edit)
+PASS cell 39: # CHECK Task 7 (do not edit)
+PASS cell 45: # CHECK Task 9 (do not edit)
+9/10 CHECK cells passed
+variant=tie_by_row
+PASS cell 11: # CHECK Task 1 (do not edit)
+PASS cell 14: # CHECK Task 2a (do not edit): shape, order, scores
+PASS cell 15: # CHECK Task 2b (do not edit): the query side of the embedder
+FAIL cell 16: # CHECK Task 2c (do not edit): ties go to the smaller chunk_id, whatever the row order  <- AssertionError: tie order [166, 69, 165, 68]: equal scores must go to the smaller chunk_id, not to the earlier row
+PASS cell 21: # CHECK Task 3 (do not edit)
+PASS cell 24: # CHECK Task 4 (do not edit)
+PASS cell 29: # CHECK Task 5 (do not edit)
+PASS cell 34: # CHECK Task 6 (do not edit)
+PASS cell 39: # CHECK Task 7 (do not edit)
+PASS cell 45: # CHECK Task 9 (do not edit)
+9/10 CHECK cells passed
+variant=ascending
+PASS cell 11: # CHECK Task 1 (do not edit)
+FAIL cell 14: # CHECK Task 2a (do not edit): shape, order, scores  <- AssertionError: scores must be non-increasing: best first
+PASS cell 15: # CHECK Task 2b (do not edit): the query side of the embedder
+FAIL cell 16: # CHECK Task 2c (do not edit): ties go to the smaller chunk_id, whatever the row order  <- AssertionError: tie order [119, 22, 163, 66]: equal scores must go to the smaller chunk_id, not to the earlier row
+FAIL cell 21: # CHECK Task 3 (do not edit)  <- AssertionError: first_rel is not right yet: check the ranking and rel()
+FAIL cell 24: # CHECK Task 4 (do not edit)  <- AssertionError: outranked: every answerable seed whose first relevant rank is > 1
+FAIL cell 29: # CHECK Task 5 (do not edit)  <- AssertionError: top1: the rank-1 score of each of the 10 seeds
+FAIL cell 34: # CHECK Task 6 (do not edit)  <- AssertionError: hit/ce counts are not right yet
+FAIL cell 39: # CHECK Task 7 (do not edit)  <- AssertionError: wrong = [Hit@4, CE@4] with the L3 query model on the L6 index
+PASS cell 45: # CHECK Task 9 (do not edit)
+3/10 CHECK cells passed
+variant=query_as_document
+PASS cell 11: # CHECK Task 1 (do not edit)
+PASS cell 14: # CHECK Task 2a (do not edit): shape, order, scores
+FAIL cell 15: # CHECK Task 2b (do not edit): the query side of the embedder  <- AssertionError: retrieve must call embed_query once and never embed_documents; calls were ['documents']
+PASS cell 16: # CHECK Task 2c (do not edit): ties go to the smaller chunk_id, whatever the row order
+PASS cell 21: # CHECK Task 3 (do not edit)
+PASS cell 24: # CHECK Task 4 (do not edit)
+PASS cell 29: # CHECK Task 5 (do not edit)
+PASS cell 34: # CHECK Task 6 (do not edit)
+PASS cell 39: # CHECK Task 7 (do not edit)
+PASS cell 45: # CHECK Task 9 (do not edit)
+9/10 CHECK cells passed
+variant=scores_dropped
+PASS cell 11: # CHECK Task 1 (do not edit)
+FAIL cell 14: # CHECK Task 2a (do not edit): shape, order, scores  <- AssertionError: each result needs exactly the keys ['char_end', 'char_start', 'chunk_id', 'doc_id', 'page', 'rank', 'score', 'text']
+PASS cell 15: # CHECK Task 2b (do not edit): the query side of the embedder
+FAIL cell 16: # CHECK Task 2c (do not edit): ties go to the smaller chunk_id, whatever the row order  <- KeyError: 'score' | File "<cell 16>", line 8, in <module>
+FAIL cell 21: # CHECK Task 3 (do not edit)  <- AssertionError: 8 rows per seed
+FAIL cell 24: # CHECK Task 4 (do not edit)  <- AssertionError: outranked: every answerable seed whose first relevant rank is > 1
+FAIL cell 29: # CHECK Task 5 (do not edit)  <- NameError: name 'top1' is not defined | File "<cell 29>", line 3, in <module>
+FAIL cell 34: # CHECK Task 6 (do not edit)  <- AssertionError: sweep needs k = 1, 2, 4, 8
+PASS cell 39: # CHECK Task 7 (do not edit)
+PASS cell 45: # CHECK Task 9 (do not edit)
+4/10 CHECK cells passed
+variant=score_float32
+PASS cell 11: # CHECK Task 1 (do not edit)
+FAIL cell 14: # CHECK Task 2a (do not edit): shape, order, scores  <- AssertionError: score must be a plain Python float (json-serialisable), and it must be there
+PASS cell 15: # CHECK Task 2b (do not edit): the query side of the embedder
+PASS cell 16: # CHECK Task 2c (do not edit): ties go to the smaller chunk_id, whatever the row order
+PASS cell 21: # CHECK Task 3 (do not edit)
+PASS cell 24: # CHECK Task 4 (do not edit)
+PASS cell 29: # CHECK Task 5 (do not edit)
+PASS cell 34: # CHECK Task 6 (do not edit)
+PASS cell 39: # CHECK Task 7 (do not edit)
+PASS cell 45: # CHECK Task 9 (do not edit)
+9/10 CHECK cells passed
+variant=similarity_matrix
+FAIL cell 11: # CHECK Task 1 (do not edit)  <- AssertionError: one score per chunk: expected shape (97,), got (97, 97). Not a chunk x chunk matrix (MC-002)
+PASS cell 14: # CHECK Task 2a (do not edit): shape, order, scores
+PASS cell 15: # CHECK Task 2b (do not edit): the query side of the embedder
+PASS cell 16: # CHECK Task 2c (do not edit): ties go to the smaller chunk_id, whatever the row order
+PASS cell 21: # CHECK Task 3 (do not edit)
+PASS cell 24: # CHECK Task 4 (do not edit)
+PASS cell 29: # CHECK Task 5 (do not edit)
+PASS cell 34: # CHECK Task 6 (do not edit)
+PASS cell 39: # CHECK Task 7 (do not edit)
+PASS cell 45: # CHECK Task 9 (do not edit)
+9/10 CHECK cells passed

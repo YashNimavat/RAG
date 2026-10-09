@@ -586,3 +586,43 @@ Please re-review **only** R-01 to R-07 (sections above) and the readiness items 
 - **Gates B and C remain ungranted.** Their items are produced by the O2/C6 labs and by measurement work.
 - **Gate A permits:** O1–O3, P1–P7 labs, and C1–C6 implementation (building v0).
 - **Still deferred:** the round-1 minor and nit backlog (m-01 to m-08, n-01, n-02), the trim proposal, and the offline coach kit.
+
+## Round 4: external-resources review, "do now" edits (2026-10-09)
+
+**What this is:** the record of six edits the learner approved on 2026-10-09 ("3: yes"), taken from [`EXTERNAL_RESOURCES_REVIEW_2026-10-09.md`](../sources/EXTERNAL_RESOURCES_REVIEW_2026-10-09.md) §3.
+**What this is not:** a Codex finding. Items marked (C) edit a reviewed plan file without changing any decision, so Codex sees them at the next review. No (D) item (a change to an agreed decision) was applied.
+
+| # | Change | Files | Type |
+|---|---|---|---|
+| 1 | P1 D.6 "Limits" and J5: Groq turns temperature 0 into 1e-8 and calls `seed` best-effort (Groq docs fetched 2026-10-09, P1_FACTS S-web). Why runs differ on Groq stays UNVERIFIED (RK-17). The top-p/top-k attribution to Source C is fixed. | `concepts/P1_llm_fundamentals.md`, `P1_FACTS.md` | lesson |
+| 2 | P1 M.1 card 14, "strawberry" (MC-001). Token counts from the new tokenizer-only script: 3 pieces with no space before the word, 1 after a space (P1_FACTS S11). | `p1_strawberry.py`, `out_p1_strawberry.txt`, P1 lesson | lesson |
+| 3 | 06 records the existing `reasoning_effort: low` decision: §2.4 config and cache-key params, §2.5 `llm` fields (`max_tokens`, `reasoning_effort`, `finish_reason`), §3.1 Generate row, §8.4 re-calibration trigger, §9.2 controls, plus a revision note. C5 D.3 now says Groq's **server** default (`medium`) applies when the field is omitted. | `06_…PLAN.md`, `concepts/C5_generation_citations.md` | (C) |
+| 4 | Two new `make_answer` flags: `length_stop` (finish_reason "length") and `unexpected_finish_reason` (any other value besides "stop", including missing). One FakeGroq test (C5 S5). C6's run report counts both flags. | C5 lesson, lab and `c5_measure.py`; C6 lesson and lab | lesson |
+| 5 | C6 Task 10 becomes an open-coding table (method source: AE Ch3, paraphrased): would a reader accept it, first problem in your own words, first failing stage, trace evidence; then group and name the notes. M.4 says "first open codes". | `labs/C6_v0_pipeline.ipynb` (cells c6-45, c6-51), C6 lesson H.1 and M.4 | lesson |
+| 6 | New coach-only transfer seed bank: 9 seeds (P1, P3, P4, P5, P6, C1, C4, C6, C7) plus 12 reserves, with the MIT notice. Numbers were re-checked by logged scripts. The P5 tie probe is **26 of 33** queries, not the review's unlogged "26 of 30"; the C7 'Chile' check gives 1 match vs 0 for 'chile'. Citation check: 172/172. | `sources/coach/transfer_seed_bank.md`, `sources/verification/coach/` | coach |
+| 7 | Sources registered: D = the AI Eval book, *Evals for AI Engineers* (Shankar & Husain, O'Reilly 2026; title confirmed by catalog search for ISBN 9798341660717), E = ai-system-design-guide @ ed955b2 (reference only), F = AI-Engineer-Interview-Questions @ e080df2. New 01 §8 (added at the end, so existing anchors stay valid); README Sources bullets; 08 D-29 status note. | `01_SOURCE_INVENTORY.md`, `README.md`, `08_…DECISIONS.md` (D-29 row only) | (C) |
+
+**Also on 2026-10-09 (learner decisions, outside this table):**
+- Both repos are pinned read-only under `upstream/`.
+- `AI Eval/` is git-ignored.
+- House writing style: `curriculum/WRITING_STYLE.md`, linked from CLAUDE.md.
+- Interview preparation is also a goal.
+
+**How it was checked.**
+- Five agents each edited a separate set of files.
+- An independent checker compared each set against pre-edit backups. Two sets needed fixes (the seed-bank grading wording and the AE title); both were fixed and re-checked.
+- The tutor then re-ran everything on the final files:
+
+```
+contracts_check.py      145 passed, 0 failed
+p1_sources.py           ALL PASS (output byte-identical to saved)
+p1_strawberry.py        output byte-identical to saved
+c5_sources.py           ALL PASS, 127 checks (2 added)
+c6_toy_traces.py        output byte-identical to saved
+c6_interface_checks.py  output byte-identical to saved
+notebooks               C5 and C6 parse as valid JSON
+upstream/ (3 repos)     0 changes, still at their pins
+AI Eval overlap         0 runs of 15+ words shared with the book, in every changed file
+```
+
+**Not applied (still proposals in the review):** §3a rows 3 (RK-17 sub-note), 6 (reasoning-token CHECK) and 8 (C7 Ext line); the §3b in-file additions; everything in §4–§7. Nothing is committed yet; the next commit needs the learner's OK.

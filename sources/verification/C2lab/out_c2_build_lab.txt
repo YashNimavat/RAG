@@ -1,0 +1,31 @@
+wrote labs/C2_chunking_lab.ipynb: 39 cells (17 markdown, 22 code; 9 CHECK, 7 learner, 5 prediction)
+fingerprints (name, expression evaluated on the reference, value):
+  t2_a01      2f63b3f925f499e9  _fp([_spans(fixed_window_chunks(T, 10, 3)), _spans(fixed_window_chunks(T, 8, 4))])
+  t2_counts   e8f28915561eb6ef  _fp([[len(fixed_window_chunks('x' * L, S, O)) for L in range(1, 5 * S + 1)] for S, O in [(10, 3), (8, 4), (300, 60), (7, 6), (5, 0)]])
+  t4_contain  4e38ecbfa1c6a65b  _fp([chunks_containing(fixed_window_chunks(PARA, 300, 0), *FACT_SPAN), chunks_containing(fixed_window_chunks(PARA, 300, 60), *FACT_SPAN), chunks_containing(fixed_window_chunks(T, 10, 3), 6, 9), chunks_containing(fixed_window_chunks(T, 10, 3), 8, 10)])
+  t4_formula  f7f5921faaabfecc  _fp([round(p_formula(S, O, F), 3) for S, O, F in [(1000, 0, 500), (1000, 200, 500), (1000, 400, 500), (1000, 200, 200), (1000, 200, 201), (1000, 200, 202), (1000, 200, 250), (300, 60, 71)]])
+  t4_brute    be663923c3c94f59  _fp([round(p_brute(20000, 1000, O, 500), 4) for O in (0, 200, 400)])
+  t5_pieces   adfc239e8ecda1ab  _fp(split_spans(W, 0, len(W), SEPARATORS, 10))
+  t5_long     2d65277e77e6bbe4  _fp(_spans(_limited(recursive_chunks, 'short ' + 'x' * 25 + ' tail', 10, 0)))
+  t5_w        41951b95c262de52  _fp(_spans(recursive_chunks(W, 10, 4)))
+  t5_para     b00e3a1585888285  _fp(_spans(recursive_chunks(PARA, 300, 60)))
+  t6_toy      daa87c5c21be3a1b  _fp([list(x) for x in chunk_pages(["abc def", "", "ghi jk"], 4, 1)])
+  t6_all      9d9ebc33b1c487e3  _fp([list(x) for x in chunk_pages(pages, 1000, 200)])
+  t7_ph       05434e71a00f90df  _fp(params_hash(PARAMS))
+  t7_records  a453b7b419d9134e  _fp(make_records(DOC_ID, SNAPSHOT_ID, pages, PARAMS))
+  t8_ao       3a64eef6bfe6cfd7  _fp(achieved_overlaps(make_records(DOC_ID, SNAPSHOT_ID, pages, PARAMS)))
+values behind the fingerprints (reference):
+  t2_a01     [[(0, 10), (7, 17), (14, 23)], [(0, 8), (4, 12), (8, 16), (12, 20), (16, 23)]]
+  t4_contain [[], [2]] + T(10,3) [6,9) [0], [8,10) [0, 1]
+  t4_formula [0.501, 0.626, 0.835, 1.0, 1.0, 0.999, 0.939, 0.958]
+  t4_brute   [0.5138, 0.632, 0.8375]
+  t5_pieces  [(0, 4), (4, 8), (8, 12), (12, 15), (15, 19), (19, 22)]
+  t5_long    [(0, 10), (10, 20), (20, 30), (30, 36)]
+  t5_w       [(0, 8), (4, 12), (8, 15), (12, 22)]
+  t5_para    [(0, 294), (238, 534), (478, 773), (714, 785)]
+  t6_toy     [(0, 4, 1), (4, 7, 1), (9, 13, 3), (13, 15, 3)]
+  t6_all     97 spans; first [(0, 949, 1), (767, 1763, 1), (1621, 2424, 1)]; last (71957, 72593, 33)
+  t7_ph      1ca9c5a3b548
+  t7_records 97 records (= out_c2_measure.txt M6)
+  t8_ao      64 values; min/median/max 109/177.0/200; first [182, 142, 199, 179]
+  save       chunks.jsonl sha256 d4108b8936093394c6eb50d4c22e8d4013d9a048fb38d5769281af4aadb3011b (122774 bytes)

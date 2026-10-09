@@ -1,0 +1,132 @@
+# C3 lab test, runner and throwaway solution kept outside the workspace (scratchpad/c3). Notebook sha256: b81a4a97b5f4785ba7cb2bb22b75b69b15f9767a3a1fe1d98b4d655122ac2337
+variant=good
+  PASS # CHECK Task 1 (do not edit)
+  PASS # CHECK Task 2 (do not edit)
+  PASS # CHECK Task 3 (do not edit)
+  PASS # CHECK Task 4 (do not edit)
+  PASS # CHECK Task 5 (do not edit)
+  PASS # CHECK Task 6 (do not edit)
+  PASS # CHECK Task 7 (do not edit)
+  SUMMARY 7/7 CHECK cells passed
+variant=blank
+  FAIL # CHECK Task 1 (do not edit) NameError: name 'params_hash' is not defined
+  FAIL chunks = make_chunks("climate", SNAP, pa NameError: name 'params_hash' is not defined
+  FAIL # CHECK Task 2 (do not edit) NameError: name 'embedding_cache_key' is not defined
+  FAIL # CHECK Task 3 (do not edit) NameError: name 'cached_embed' is not defined
+  FAIL V, emb_stats = cached_embed(texts, SPEC_ NameError: name 'cached_embed' is not defined
+  FAIL # CHECK Task 4 (do not edit) NameError: name 'embed_hash' is not defined
+  FAIL RUN = {"snapshot_id": SNAP, "chunker": C NameError: name 'MANIFEST' is not defined
+  FAIL # CHECK Task 5 (do not edit) NameError: name 'my_predictions_rebuild' is not defined
+  FAIL # CHECK Task 6 (do not edit) NameError: name 'load_index' is not defined
+  FAIL V_l, chunks_l, man_l = load_index(INDEX_ NameError: name 'load_index' is not defined
+  PASS # CHECK Task 7 (do not edit)
+  SUMMARY 1/7 CHECK cells passed
+variant=hash_ignores_scope
+  FAIL # CHECK Task 1 (do not edit) AssertionError: changing 'scope' must change the hash: your hash ignores it
+  PASS # CHECK Task 2 (do not edit)
+  PASS # CHECK Task 3 (do not edit)
+  PASS # CHECK Task 4 (do not edit)
+  FAIL # CHECK Task 5 (do not edit) AssertionError: not all 16 decisions are right yet (or the reasons are not in the order snapshot, chunker, embedding)
+  PASS # CHECK Task 6 (do not edit)
+  PASS # CHECK Task 7 (do not edit)
+  SUMMARY 5/7 CHECK cells passed
+variant=hash_unsorted_keys
+  FAIL # CHECK Task 1 (do not edit) AssertionError: the same config with its keys in another order must give the same hash (sort_keys)
+  PASS # CHECK Task 2 (do not edit)
+  PASS # CHECK Task 3 (do not edit)
+  PASS # CHECK Task 4 (do not edit)
+  PASS # CHECK Task 5 (do not edit)
+  PASS # CHECK Task 6 (do not edit)
+  PASS # CHECK Task 7 (do not edit)
+  SUMMARY 6/7 CHECK cells passed
+variant=builtin_hash
+  FAIL # CHECK Task 1 (do not edit) AssertionError: do not use Python's built-in hash(): it changes between processes (PYTHONHASHSEED)
+  PASS # CHECK Task 2 (do not edit)
+  PASS # CHECK Task 3 (do not edit)
+  PASS # CHECK Task 4 (do not edit)
+  PASS # CHECK Task 5 (do not edit)
+  PASS # CHECK Task 6 (do not edit)
+  PASS # CHECK Task 7 (do not edit)
+  SUMMARY 6/7 CHECK cells passed
+variant=key_without_input_type
+  PASS # CHECK Task 1 (do not edit)
+  FAIL # CHECK Task 2 (do not edit) AssertionError: changing 'input_type' must change the key
+  PASS # CHECK Task 3 (do not edit)
+  PASS # CHECK Task 4 (do not edit)
+  PASS # CHECK Task 5 (do not edit)
+  PASS # CHECK Task 6 (do not edit)
+  PASS # CHECK Task 7 (do not edit)
+  SUMMARY 6/7 CHECK cells passed
+variant=cache_keyed_on_text_only
+  PASS # CHECK Task 1 (do not edit)
+  PASS # CHECK Task 2 (do not edit)
+  FAIL # CHECK Task 3 (do not edit) AssertionError: switching to another model must re-embed every text, but only 0 were sent: is the model in your key?
+  PASS # CHECK Task 4 (do not edit)
+  PASS # CHECK Task 5 (do not edit)
+  PASS # CHECK Task 6 (do not edit)
+  PASS # CHECK Task 7 (do not edit)
+  SUMMARY 6/7 CHECK cells passed
+variant=unnormalised_vectors
+  PASS # CHECK Task 1 (do not edit)
+  PASS # CHECK Task 2 (do not edit)
+  FAIL # CHECK Task 3 (do not edit) AssertionError: rows of V must have length 1 (L3 does not normalise for you)
+  PASS # CHECK Task 4 (do not edit)
+  PASS # CHECK Task 5 (do not edit)
+  PASS # CHECK Task 6 (do not edit)
+  PASS # CHECK Task 7 (do not edit)
+  SUMMARY 6/7 CHECK cells passed
+variant=write_overwrites
+  PASS # CHECK Task 1 (do not edit)
+  PASS # CHECK Task 2 (do not edit)
+  PASS # CHECK Task 3 (do not edit)
+  FAIL # CHECK Task 4 (do not edit) AssertionError: writing a DIFFERENT index into an existing folder must raise (never overwrite in place)
+  PASS # CHECK Task 5 (do not edit)
+  FAIL # CHECK Task 6 (do not edit) ValueError: ['rebuild needed: embedding']
+  FAIL V_l, chunks_l, man_l = load_index(INDEX_ ValueError: ['rebuild needed: embedding']
+  PASS # CHECK Task 7 (do not edit)
+  SUMMARY 5/7 CHECK cells passed
+variant=rebuild_on_whole_embedding_dict
+  PASS # CHECK Task 1 (do not edit)
+  PASS # CHECK Task 2 (do not edit)
+  PASS # CHECK Task 3 (do not edit)
+  PASS # CHECK Task 4 (do not edit)
+  FAIL # CHECK Task 5 (do not edit) AssertionError: not all 16 decisions are right yet (or the reasons are not in the order snapshot, chunker, embedding)
+  PASS # CHECK Task 6 (do not edit)
+  PASS # CHECK Task 7 (do not edit)
+  SUMMARY 6/7 CHECK cells passed
+variant=rebuild_ignores_revision
+  PASS # CHECK Task 1 (do not edit)
+  PASS # CHECK Task 2 (do not edit)
+  PASS # CHECK Task 3 (do not edit)
+  PASS # CHECK Task 4 (do not edit)
+  FAIL # CHECK Task 5 (do not edit) AssertionError: not all 16 decisions are right yet (or the reasons are not in the order snapshot, chunker, embedding)
+  PASS # CHECK Task 6 (do not edit)
+  PASS # CHECK Task 7 (do not edit)
+  SUMMARY 6/7 CHECK cells passed
+variant=embed_hash_includes_dim
+  PASS # CHECK Task 1 (do not edit)
+  PASS # CHECK Task 2 (do not edit)
+  PASS # CHECK Task 3 (do not edit)
+  FAIL # CHECK Task 4 (do not edit) AssertionError: embed_hash must ignore the measured fields dim and max_seq_length
+  PASS # CHECK Task 5 (do not edit)
+  PASS # CHECK Task 6 (do not edit)
+  PASS # CHECK Task 7 (do not edit)
+  SUMMARY 6/7 CHECK cells passed
+variant=loader_without_checks
+  PASS # CHECK Task 1 (do not edit)
+  PASS # CHECK Task 2 (do not edit)
+  PASS # CHECK Task 3 (do not edit)
+  PASS # CHECK Task 4 (do not edit)
+  PASS # CHECK Task 5 (do not edit)
+  FAIL # CHECK Task 6 (do not edit) AssertionError: a chunks.jsonl that lost a line must be refused
+  PASS # CHECK Task 7 (do not edit)
+  SUMMARY 6/7 CHECK cells passed
+variant=loader_without_norm_check
+  PASS # CHECK Task 1 (do not edit)
+  PASS # CHECK Task 2 (do not edit)
+  PASS # CHECK Task 3 (do not edit)
+  PASS # CHECK Task 4 (do not edit)
+  PASS # CHECK Task 5 (do not edit)
+  FAIL # CHECK Task 6 (do not edit) AssertionError: vectors that are not unit length must be refused (even when the manifest hash was updated)
+  PASS # CHECK Task 7 (do not edit)
+  SUMMARY 6/7 CHECK cells passed

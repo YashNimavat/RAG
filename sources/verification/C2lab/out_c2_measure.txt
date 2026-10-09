@@ -1,0 +1,95 @@
+
+== M1 environment and Corpus D snapshot ==
+python 3.12.8 | pymupdf 1.26.7
+pages=33 len(doc_text)=72593 SNAPSHOT_ID=ea07572562ac
+[PASS] 33 pages, 72,593 characters (06 §5.3)
+[PASS] snapshot_id = ea07572562ac (06 §5.3 recipe)
+[PASS] page starts p1..p3 = 0, 2425, 4836; p8 16074, p10 20555, p23 49209, p29 62565 (06 §5.3)
+[PASS] 07 H.1 join_pages gives the same doc_text and starts
+empty pages: []; page lengths min/median/max = 636/2225/2494
+
+== M2 fixed windows (Task 1, Task 2; 07 D.2, C2-A-01, C2-A-02) ==
+fixed_window_chunks(T, 10, 3) = [(0, 10, 'abcdefghij'), (7, 17, 'hijklmnopq'), (14, 23, 'opqrstuvw')]
+fixed_window_chunks(T, 8, 4) = [(0, 8, 'abcdefgh'), (4, 12, 'efghijkl'), (8, 16, 'ijklmnop'), (12, 20, 'mnopqrst'), (16, 23, 'qrstuvw')]
+fixed_window_chunks(T, 10, 0) = [(0, 10, 'abcdefghij'), (10, 20, 'klmnopqrst'), (20, 23, 'uvw')]
+[PASS] C2-A-01 (10,3) matches 07 L.2
+[PASS] C2-A-01 (8,4) matches 07 L.2
+[PASS] C2-A-02 (10,0) matches 07 L.2
+[PASS] count = ceil((L-O)/(S-O)) (L>S), 1 (L<=S), and spans == 07 H.1, for L = 1..5S at 6 settings -- 0 mismatches
+doc_text 1000/200 fixed windows: 91 chunks; lengths min/median/max 593/1000/1000; last span (72000, 72593)
+[PASS] doc_text fixed 1000/200 = 91 chunks = ceil(72,393/800) (07 D.2 also 91 on PyPDFLoader's 72,523)
+fixed_window_chunks('abc', 10, 10): ValueError: need 0 <= overlap < size, got overlap=10, size=10
+fixed_window_chunks('abc', 10, 11): ValueError: need 0 <= overlap < size, got overlap=11, size=10
+fixed_window_chunks('abc', 10, -1): ValueError: need 0 <= overlap < size, got overlap=-1, size=10
+fixed_window_chunks('abc', 0, 0): ValueError: size must be > 0
+[PASS] empty text -> []
+[PASS] check_chunks passes on the fixed windows of doc_text
+
+== M3 boundary math (Task 4; 07 D.3 and Part F) ==
+PARA fixed 300/0 spans [(0, 300), (300, 600), (600, 785)] contain FACT: []
+PARA fixed 300/60 spans [(0, 300), (240, 540), (480, 780), (720, 785)] contain FACT: [2]
+[PASS] Part F: FACT [558,629); O=0 -> []; O=60 -> [2]; spans as 07 Part F
+p_formula: {'1000,0,500': 0.501, '1000,200,500': 0.626, '1000,400,500': 0.835, '1000,200,200': 1.0, '1000,200,201': 1.0, '1000,200,202': 0.999, '1000,200,250': 0.939, '300,60,71': 0.958, '300,0,71': 0.767}
+[PASS] p_formula (3 decimals) = 07 D.3 table (0.501, 0.626, 0.835; 1, 1, 0.999, 0.939) and Part F 0.958
+p_brute(L=20000, S=1000, F=500): {0: 0.5138, 200: 0.632, 400: 0.8375}
+[PASS] p_brute whole doc L=20,000 = 0.5138 / 0.6320 / 0.8375 (07 D.3 last column)
+p_brute(20000, 1000, 200, F) for F = 200, 201, 202: {200: 1.0, 201: 1.0, 202: 0.9987878175665438}
+[PASS] guarantee threshold at S=1000, O=200 is F = 201 = O + 1 (brute force: 1, 1, < 1)
+rounding guard: no fingerprinted value is within 1e-6 of its rounding boundary (formula 3 dp, brute force 4 dp)
+
+== M4 recursive splitter (Task 5; 07 D.4, H.1, C2-A-03, Part F step 3) ==
+split_spans(W, 0, 22, SEPARATORS, 10) = [(0, 4), (4, 8), (8, 12), (12, 15), (15, 19), (19, 22)]
+[PASS] C2-A-03 pieces
+recursive_chunks(W, 10, 4) = [(0, 8, 'the cat '), (4, 12, 'cat sat '), (8, 15, 'sat on '), (12, 22, 'on the mat')]
+[PASS] C2-A-03 result [(0,8),(4,12),(8,15),(12,22)]
+recursive_chunks(PARA, 300, 60) spans [(0, 294), (238, 534), (478, 773), (714, 785)]; FACT in [2]
+[PASS] Part F step 3: [0,294) [238,534) [478,773) [714,785); FACT in chunk 2
+recursive_chunks('short ' + 'x'*25 + ' tail', 10, 0) = [(0, 10, 'short xxxx'), (10, 20, 'xxxxxxxxxx'), (20, 30, 'xxxxxxxxxx'), (30, 36, 'x tail')]
+[PASS] long word falls back to single characters ('' separator) and matches 07 H.1
+STATIC+run: ''.find on a real text returns the start: 'abc'.find('', 1, 3) = 1 -> a split loop on '' never advances (why '' must mean 'single characters')
+recursive_chunks(doc_text, 1000, 200): 92 chunks; 41 span a page break
+[PASS] whole-document recursive 1000/200 = 92 chunks (07 H.1: 92 on PyPDFLoader text) and == 07 H.1 spans
+[PASS] 300 random (text, size, overlap): separators ['\n\n','\n',' ',''] give exactly 07 H.1's spans; check_chunks passes -- 0 differ
+
+== M5 per-page scope (Task 6; 07 D.8) ==
+chunk_pages(pages, 1000, 200): 97 chunks; lengths min/median/max 393/935/1000
+chunks per page: {1: 3, 2: 3, 3: 3, 4: 3, 5: 3, 6: 3, 7: 3, 8: 3, 9: 3, 10: 3, 11: 3, 12: 3, 13: 3, 14: 3, 15: 3, 16: 3, 17: 3, 18: 3, 19: 3, 20: 3, 21: 3, 22: 3, 23: 3, 24: 3, 25: 3, 26: 3, 27: 3, 28: 3, 29: 3, 30: 3, 31: 3, 32: 3, 33: 1}
+[PASS] per-page 1000/200 = 97 chunks (07 D.8: 97 with PyPDFLoader; now verified for PyMuPDF)
+[PASS] no per-page chunk crosses a page and every span round-trips to its page text
+[PASS] per-page spans == 07 H.3 chunk_document(scope=per_page) spans
+07 H.3 params_hash (its ChunkerConfig recipe) = 77bc4c45809b; first id climate:ea07572562ac:77bc4c45809b:00000
+07 D.8 PyPDFLoader per-page lengths were 391 / 933 / 999; PyMuPDF gives 393 / 935 / 1000
+C2-A-05 trap: page-relative offsets read against doc_text match on 3 of 97 chunks (page-1 chunks: 3)
+
+== M6 chunk records (Task 7; 06 §2.3, §3.1, §5.3) ==
+PARAMS canonical JSON: {"chunk_overlap": 200, "chunk_size": 1000, "name": "recursive_char", "scope": "per_page", "separators": ["\n\n", "\n", " ", ""], "unit": "chars"}
+params_hash = sha256(that, utf-8)[:12] = 1ca9c5a3b548
+06 §2.3 Chunk fields: ['doc_id', 'snapshot_id', 'chunk_id', 'seq', 'char_start', 'char_end', 'page_segments', 'text', 'text_sha256', 'chunker', 'params_hash', 'meta']; PageSegment fields: ['page', 'char_start', 'char_end']
+[PASS] record keys == 06 §2.3 Chunk fields, in order
+[PASS] page_segments dict keys == 06 §2.3 PageSegment fields
+[PASS] chunker == 06 §2.4 chunking.name 'recursive_char'
+[PASS] text == doc_text[char_start:char_end] for all 97
+[PASS] text_sha256 = sha256(text utf-8)
+[PASS] exactly one page segment per record; it converts back to the doc range (07 H.3 to_page_segments agrees)
+[PASS] chunk_id = doc_id:snapshot_id:params_hash:seq05d, seq 0..96
+[PASS] two calls give identical records (deterministic)
+[PASS] changing chunk_overlap changes params_hash and every chunk_id
+[PASS] records' (seq, spans, text) == 07 H.3 per_page DocChunks (only params_hash/chunker differ)
+params_hash under the candidate recipes (same sha256(json.dumps(..., sort_keys=True))[:12], different inputs):
+  77bc4c45809b  07 H.3 ChunkerConfig(name='recursive', 1000, 200) [3 separators, contracts_check]
+  12eafa2247a1  07 H.3 ChunkerConfig(name='recursive', 1000, 200, separators + '')
+  0ad9b961bc23  07 H.3 ChunkerConfig(name='recursive_char', 1000, 200, separators + '')
+  db1d77b74d1f  07 H.3 ChunkerConfig(name='fixed', 1000, 200)
+  1ca9c5a3b548  this lab: 06 §2.4 chunking block (chunk_size/chunk_overlap keys)
+[PASS] same recipe as 07 H.3 when fed 07's own config dict
+first record (text shortened): {"doc_id": "climate", "snapshot_id": "ea07572562ac", "chunk_id": "climate:ea07572562ac:1ca9c5a3b548:00000", "seq": 0, "char_start": 0, "char_end": 949, "page_segments": [{"page": 1, "char_start": 0, "char_end": 949}], "text": "Understanding Climate Change \nChapter 1:...", "text_sha256": "5fa92cb2db8f09148d46320497defdec81bfbe425e573949bc6fec1164407e07", "chunker": "recursive_char", "params_hash": "1ca9c5a3b548", "meta": {}}
+last chunk_id climate:ea07572562ac:1ca9c5a3b548:00096; last span [71957,72593) page 33
+chunks.jsonl: 97 lines, 122774 bytes, sha256 d4108b8936093394c6eb50d4c22e8d4013d9a048fb38d5769281af4aadb3011b
+_fp(records) = a453b7b419d9134e
+
+== M7 achieved overlap (Task 8; 07 D.4, H.2, L.6 Intermediate) ==
+64 same-page consecutive pairs; achieved overlap min/median/max = 109/177.0/200; exactly 200: 2; mean 166.5
+[PASS] all achieved overlaps in [0, 200]; pairs = 97 - 33 pages
+07 H.2 (LangChain, PyPDFLoader) first overlaps were 180, 140, 197, 177 (whitespace stripped); ours start [182, 142, 199, 179]
+
+== SUMMARY: ALL PASS

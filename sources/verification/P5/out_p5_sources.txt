@@ -1,0 +1,106 @@
+PASS repo HEAD 009adba2be1bef49780ef73b6dd3c18fd24b035b
+PASS helper_functions.py L4: from langchain_community.vectorstores import FAISS
+PASS helper_functions.py L48: def encode_pdf(path, chunk_size=1000, chunk_overlap=200):
+PASS helper_functions.py L73: embeddings = OpenAIEmbeddings()
+PASS helper_functions.py L74: vectorstore = FAISS.from_documents(cleaned_texts, embeddings)
+PASS all_rag_techniques/simple_rag.ipynb cell 10: FAISS.from_documents(cleaned_texts, embeddings)
+PASS all_rag_techniques/simple_rag.ipynb cell 10: chunk_size=1000
+PASS all_rag_techniques/simple_rag.ipynb cell 13: as_retriever(search_kwargs={"k": 2})
+PASS all_rag_techniques/simple_csv_rag.ipynb cell 12: faiss.IndexFlatL2(
+PASS all_rag_techniques/simple_csv_rag.ipynb cell 12: InMemoryDocstore()
+PASS all_rag_techniques/simple_csv_rag.ipynb cell 12: index_to_docstore_id={}
+PASS all_rag_techniques/simple_csv_rag.ipynb cell 16: retriever = vector_store.as_retriever()
+PASS all_rag_techniques/json_rag.ipynb cell 17: corpus_metadata.append({"original_index": i, "data": item})
+PASS all_rag_techniques/json_rag.ipynb cell 21: faiss.IndexFlatL2(embedding_dim)
+PASS all_rag_techniques/json_rag.ipynb cell 21: index.add(corpus_embeddings)
+PASS all_rag_techniques/json_rag.ipynb cell 23: NUM_NEIGHBORS = 5
+PASS all_rag_techniques/json_rag.ipynb cell 23: index.search(query_embedding, NUM_NEIGHBORS)
+PASS all_rag_techniques/dartboard.ipynb cell 9: documents=documents*5
+PASS all_rag_techniques/dartboard.ipynb cell 9: FAISS.from_documents(cleaned_texts, embeddings)
+PASS all_rag_techniques/dartboard.ipynb cell 13: index_to_docstore_id[idx]
+PASS all_rag_techniques/dartboard.ipynb cell 13: docstore.search(docstore_id)
+PASS all_rag_techniques/dartboard.ipynb cell 13: embed_documents([query])
+PASS all_rag_techniques/dartboard.ipynb cell 13: index.search(np.array(q_vec),k=k)
+PASS all_rag_techniques/dartboard.ipynb cell 23: index.search(
+PASS all_rag_techniques/dartboard.ipynb cell 23: k=num_results * oversampling_factor
+PASS all_rag_techniques/dartboard.ipynb cell 23: reconstruct_batch(candidate_indices[0])
+PASS all_rag_techniques/dartboard.ipynb cell 23: 1 - np.dot(candidate_vectors, candidate_vectors.T)
+PASS all_rag_techniques/multi_faceted_filtering.ipynb cell 12: similarity_search_with_relevance_scores(query, k=10)
+PASS all_rag_techniques/multi_faceted_filtering.ipynb cell 14: def apply_metadata_filter(
+PASS all_rag_techniques/multi_faceted_filtering.ipynb cell 14: apply_metadata_filter(results, {"country": "Chile"})
+INFO code cells that build faiss.IndexFlatL2 (8): ['all_rag_techniques/HyPE_Hypothetical_Prompt_Embeddings.ipynb cell 11', 'all_rag_techniques/context_enrichment_window_around_chunk_with_llamaindex.ipynb cell 9', 'all_rag_techniques/fusion_retrieval_with_llamaindex.ipynb cell 8', 'all_rag_techniques/json_rag.ipynb cell 21', 'all_rag_techniques/reranking_with_llamaindex.ipynb cell 10', 'all_rag_techniques/simple_csv_rag.ipynb cell 12', 'all_rag_techniques/simple_csv_rag_with_llamaindex.ipynb cell 8', 'all_rag_techniques/simple_rag_with_llamaindex.ipynb cell 9']
+PASS 8 notebook code cells build faiss.IndexFlatL2
+PASS no IndexFlatIP / HNSW / IVF / DistanceStrategy / normalize_L2 / hnswlib anywhere in the repo: none
+INFO k settings in code cells (26):
+     all_rag_techniques/HyPE_Hypothetical_Prompt_Embeddings.ipynb cell 17: k = 3
+     all_rag_techniques/choose_chunk_size.ipynb cell 10: k = 5
+     all_rag_techniques/context_enrichment_window_around_chunk.ipynb cell 17: k = 1
+     all_rag_techniques/context_enrichment_window_around_chunk.ipynb cell 27: k = 1
+     all_rag_techniques/context_enrichment_window_around_chunk_with_llamaindex.ipynb cell 18: k = 1
+     all_rag_techniques/context_enrichment_window_around_chunk_with_llamaindex.ipynb cell 22: k = 1
+     all_rag_techniques/document_augmentation.ipynb cell 10: k = 1
+     all_rag_techniques/explainable_retrieval.ipynb cell 6: k = 5
+     all_rag_techniques/fusion_retrieval_with_llamaindex.ipynb cell 15: k = 2
+     all_rag_techniques/fusion_retrieval_with_llamaindex.ipynb cell 17: k = 2
+     all_rag_techniques/graph_rag.ipynb cell 12: k = 5
+     all_rag_techniques/local_rag_huggingface_faiss.ipynb cell 18: k = TOP_K
+     all_rag_techniques/memorag.ipynb cell 43: k = 2
+     all_rag_techniques/memorag.ipynb cell 60: k = 2
+     all_rag_techniques/multi_model_rag_with_captioning.ipynb cell 15: k = 1
+     all_rag_techniques/proposition_chunking.ipynb cell 18: k = 4
+     all_rag_techniques/proposition_chunking.ipynb cell 22: k = 4
+     all_rag_techniques/reliable_rag.ipynb cell 6: k = 4
+     all_rag_techniques/reranking_with_llamaindex.ipynb cell 16: k = 10
+     all_rag_techniques/reranking_with_llamaindex.ipynb cell 19: k = 5
+     all_rag_techniques/reranking_with_llamaindex.ipynb cell 23: k = 10
+     all_rag_techniques/semantic_chunking.ipynb cell 16: k = 2
+     all_rag_techniques/simple_csv_rag_with_llamaindex.ipynb cell 15: k = 2
+     all_rag_techniques/simple_rag.ipynb cell 13: k = 2
+     all_rag_techniques/simple_rag_with_llamaindex.ipynb cell 16: k = 2
+     all_rag_techniques/simple_rag_with_llamaindex.ipynb cell 23: k = 2
+INFO distinct literal k values: ['1', '2', '3', '4', '5', '10']
+PASS Book chapter 1.pdf p.6/14: 'Store in a Vector Database'
+PASS Book chapter 1.pdf p.6/14: 'Facebook AI Similarity Search'
+PASS Book chapter 1.pdf p.6/14: 'even with millions of entries'
+PASS Book chapter 1.pdf p.7/14: 'Store all vectors in a vector store for fast similarity'
+PASS Book chapter 1.pdf p.8/14: 'exact same process'
+PASS Book chapter 1.pdf p.8/14: 'top 2 to 5 most similar chunks'
+PASS Book chapter 1.pdf p.9/14: 'three nearest chunks are highlighted'
+PASS Book chapter 1.pdf p.10/14: 'Search vector store for top-K nearest chunk vectors'
+PASS Book chapter 1.pdf p.13/14: 'one vector search'
+PASS Book Appendix.pdf p.15/23: 'Cosine Similarity A mathematical measure'
+PASS Book Appendix.pdf p.16/23: 'FAISS Facebook AI Similarity Search, a vector database'
+PASS Book Appendix.pdf p.21/23: 'Similarity Search The process of finding the stored vectors closest'
+PASS Book Appendix.pdf p.22/23: 'Top-K Retrieval The standard retrieval approach'
+PASS Book Appendix.pdf p.22/23: 'Vector Database / Vector Store A specialized database'
+PASS Book chapter 12.pdf p.8/14: 'bounded between -1 and 1'
+PASS Book chapter 13.pdf p.6/13: 'can be precomputed and stored'
+PASS Book chapter 15.pdf p.1/12: 'redundancy problem'
+PASS Book chapter 15.pdf p.1/12: 'essentially the same paragraph repeated'
+PASS Book chapter 11.pdf p.6/13: 'carries a pointer back to the parent chunk'
+PASS Book chapter 14.pdf p.7/13: 'filtering by section identifiers'
+PASS Book chapter 15.pdf p.10/12: 'Standard top-K is simpler and faster'
+PASS book never mentions HNSW / approximate nearest / IVF / argpartition / inverted file (other hits: {'exhaustive': ['chapter 14.pdf p.4']})
+INFO library versions in C:/Yash/New-Work/RAG/RAG_Techniques-main/venv/Lib/site-packages : ['faiss_cpu-1.13.2.dist-info', 'langchain_community-0.4.1.dist-info', 'langchain_core-1.3.0.dist-info']
+INFO sha256 langchain_community\vectorstores\faiss.py = 7f37a84e1b265f73f81b4d6df53882479bb3a081ce61220121a1701f4c4135eb
+INFO sha256 langchain_core\vectorstores\base.py = d95cac26808f967fbd6fc2ac209e958b1ac50b955cd5323a95dd9dab556c80ee
+PASS faiss.py __init__ L214: distance_strategy: DistanceStrategy = DistanceStrategy.EUCLIDEAN_DISTANCE
+PASS faiss.py __init__ L213: normalize_L2: bool = False
+PASS faiss.py __from L993: distance_strategy: DistanceStrategy = DistanceStrategy.EUCLIDEAN_DISTANCE
+PASS faiss.py __from (only for MAX_INNER_PRODUCT) L998: index = faiss.IndexFlatIP(len(embeddings[0]))
+PASS faiss.py __from L1000: # Default to L2, currently other metric types not initialized.
+PASS faiss.py __from L1001: index = faiss.IndexFlatL2(len(embeddings[0]))
+PASS faiss.py similarity_search_with_score_by_vector L390: k: int = 4,
+PASS faiss.py similarity_search_with_score_by_vector L392: fetch_k: int = 20,
+PASS faiss.py (post-filter) L417: scores, indices = self.index.search(vector, k if filter is None else fetch_k)
+PASS faiss.py L450: return docs[:k]
+PASS faiss.py _select_relevance_score_fn L1272: return self._euclidean_relevance_score_fn
+PASS langchain_core base.py similarity_search L362: self, query: str, k: int = 4, **kwargs: Any
+PASS faiss.py FAISS.similarity_search L626: k: int = 4,
+PASS langchain_core base.py VectorStoreRetriever._get_relevant_documents L1043: kwargs_ = self.search_kwargs | kwargs
+PASS langchain_core base.py VectorStoreRetriever._get_relevant_documents L1045: docs = self.vectorstore.similarity_search(query, **kwargs_)
+PASS langchain_core base.py VectorStoreRetriever L970: search_type: str = "similarity"
+PASS langchain_core base.py VectorStoreRetriever L973: search_kwargs: dict = Field(default_factory=dict)
+PASS langchain_core base.py _euclidean_relevance_score_fn L388: return 1.0 - distance / math.sqrt(2)
+PASS langchain_core base.py L385: # This function converts the Euclidean norm of normalized embeddings
+ALL PASS

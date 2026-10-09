@@ -1,0 +1,50 @@
+--- cell 2 [setup] import hashlib, json, os, re, tempfile, unicodedata
+    pymupdf 1.26.7 | snapshot folder: <scratchpad>/c1/snap_sol_empty | ready
+--- cell 4 [prediction/t1_pred] # PREDICTION
+--- cell 5 [learner/t1] # Your code here (blank-file first: write it yourself; no copying from
+--- cell 6 [CHECK] # CHECK Task 1 (do not edit)
+    ERROR AssertionError: fill the prediction cell first
+--- cell 8 [prediction/t2_pred] # PREDICTION
+--- cell 9 [learner/t2] # Your code here (blank-file first: write it yourself; no copying from
+--- cell 10 [CHECK] # CHECK Task 2 (do not edit)
+    ERROR AssertionError: fill the prediction cell first
+--- cell 12 [prediction/t3_pred] # PREDICTION
+--- cell 13 [learner/t3] # Your code here (blank-file first: write it yourself; no copying from
+--- cell 14 [CHECK] # CHECK Task 3 (do not edit)
+    ERROR AssertionError: fill the prediction cell first
+--- cell 17 [prediction/t4_pred] # PREDICTION
+--- cell 18 [learner/t4] # Your code here (blank-file first: write it yourself; no copying from
+--- cell 19 [CHECK] # CHECK Task 4 (do not edit)
+    ERROR AssertionError: fill the prediction cell first
+--- cell 21 [learner/t5] # Your code here (blank-file first: write it yourself; no copying from
+--- cell 22 [CHECK] # CHECK Task 5 (do not edit)
+    ERROR NameError: name 'doc_text' is not defined | File "<cell 22>", line 2, in <module>
+--- cell 24 [prediction/t6_pred] # PREDICTION
+--- cell 25 [learner/t6] # Your code here (blank-file first: write it yourself; no copying from
+--- cell 26 [CHECK] # CHECK Task 6 (do not edit)
+    ERROR AssertionError: fill the prediction cell first
+--- cell 29 [prediction/t7_pred] # PREDICTION
+--- cell 30 [learner/t7] # Your code here (blank-file first: write it yourself; no copying from
+--- cell 31 [CHECK] # CHECK Task 7 (do not edit)
+    ERROR AssertionError: fill the prediction cell first
+--- cell 33 [prediction/t8_pred] # PREDICTION
+--- cell 34 [learner/t8] # Your code here (blank-file first: write it yourself; no copying from
+--- cell 35 [CHECK] # CHECK Task 8 (do not edit)
+    ERROR AssertionError: fill the prediction cell first
+--- cell 37 [learner/t9] # Your code here (blank-file first: write it yourself; no copying from
+--- cell 38 [CHECK] # CHECK Task 9 (do not edit)
+    ERROR NameError: name 'book_obs' is not defined | File "<cell 38>", line 2, in <module>
+--- cell 41 [handoff] print("pages      :", type(pages).__name__, "of", type(pages[0]).__nam
+    ERROR NameError: name 'pages' is not defined | File "<cell 41>", line 1, in <module>
+
+=== CHECK summary
+FAIL cell 6: # CHECK Task 1 (do not edit) -> AssertionError: fill the prediction cell first
+FAIL cell 10: # CHECK Task 2 (do not edit) -> AssertionError: fill the prediction cell first
+FAIL cell 14: # CHECK Task 3 (do not edit) -> AssertionError: fill the prediction cell first
+FAIL cell 19: # CHECK Task 4 (do not edit) -> AssertionError: fill the prediction cell first
+FAIL cell 22: # CHECK Task 5 (do not edit) -> NameError: name 'doc_text' is not defined | File "<cell 22>", line 2, in <module>
+FAIL cell 26: # CHECK Task 6 (do not edit) -> AssertionError: fill the prediction cell first
+FAIL cell 31: # CHECK Task 7 (do not edit) -> AssertionError: fill the prediction cell first
+FAIL cell 35: # CHECK Task 8 (do not edit) -> AssertionError: fill the prediction cell first
+FAIL cell 38: # CHECK Task 9 (do not edit) -> NameError: name 'book_obs' is not defined | File "<cell 38>", line 2, in <module>
+0/9 CHECK cells pass

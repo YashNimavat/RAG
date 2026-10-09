@@ -1,0 +1,111 @@
+
+=== S1 environment, extraction and chunks with metadata
+python 3.12.8 | {'pymupdf': '1.26.7', 'numpy': '2.5.3', 'sentence-transformers': '6.1.0', 'torch': '2.14.1', 'transformers': '5.19.0'}
+platform Windows-11-10.0.26200-SP0 | cpu_count 16
+pdf sha256 1d58a0fac2435c2ce4129ff84906b93118d731e4a004e7a26f8ab8f749a92669
+pages=33 chars=72593 chunks=91 (size 1000, overlap 200, plain slices)
+chunk 0 metadata: {'chunk_id': 0, 'page': 1, 'page_end': 1, 'char_start': 0, 'char_end': 1000}
+last chunk metadata: {'chunk_id': 90, 'page': 33, 'page_end': 33, 'char_start': 72000, 'char_end': 72593}
+chunks that cross a page break: 40
+fingerprint of the page list [m['page'] for m in meta]: 62fa9c745825b2e2
+
+=== S2 embeddings (MiniLM, local, CPU)
+MiniLM cache snapshot: 1110a243fdf4706b3f48f1d95db1a4f5529b4d41
+modules: ['Transformer', 'Pooling', 'Normalize']
+normalize_embeddings=False: shape=(91, 384) dtype=float32 norm min/max = 1.000000/1.000000
+normalize_embeddings=True:  shape=(91, 384) dtype=float32 max|norm-1| = 1.19e-07
+index size: 91 x 384 x 4 bytes = 139,776 bytes
+queries: 2 demo questions (D-002, D-008), 33 page-head texts, 200 random unit vectors (seed 0)
+
+=== S3 one query, exact search (D-002)
+q.shape=(384,)  V.shape=(91, 384)  scores = V @ q -> shape (91,) (one score per chunk)
+an all-pairs chunk 'similarity matrix' V @ V.T would be 91x91 = 8,281 scores; one query needs 91
+rank 1: id=64 score=0.4623 page=23-24 chars=[51200,52200) text='e to \n1.5 degrees Celsius. Countries submit nationally deter'  <- top-4
+rank 2: id=26 score=0.4336 page=10-10 chars=[20800,21800) text='iating specific protocols and agreements, such as the Kyoto '  <- top-4
+rank 3: id=16 score=0.3751 page=6-6 chars=[12800,13800) text=' provide additional benefits, such as biodiversity conservat'  <- top-4
+rank 4: id=63 score=0.3366 page=23-23 chars=[50400,51400) text='uable products, such as synthetic fuels, chemicals, and \nbui'  <- top-4
+rank 5: id=25 score=0.3166 page=9-10 chars=[20000,21000) text='Agroforestry \nAgroforestry integrates trees and shrubs into '
+rank 6: id=79 score=0.3069 page=29-29 chars=[63200,64200) text='obust monitoring and enforcement \nmechanisms. This includes '
+top-4 ids = [64, 26, 16, 63]  fingerprint 2df9fe7b18fb4d83
+score gap rank4 - rank5 = 0.0200; score range over all chunks = -0.1433 .. 0.4623
+chunks that contain the whole D-002 evidence span (p.10 [438,537)): [26]
+D-008 top-4: id=78 p.28 0.2603, id=64 p.23 0.2489, id=54 p.20 0.2401, id=77 p.28 0.2089  fingerprint 414e6b21da46bb37
+chunks that contain the whole D-008 evidence span (p.24 [468,564)): [64]
+batch of 2 queries: Q @ V.T -> shape (2, 91) (queries x chunks), still not chunks x chunks
+
+=== S4 verify top_k (argpartition) against brute force (pure Python, float64, full sort)
+k= 1 page-head: top_k == brute force for 33/33 queries; full lexsort == brute force 33/33
+k= 1 random   : top_k == brute force for 200/200 queries; full lexsort == brute force 200/200
+k= 4 page-head: top_k == brute force for 33/33 queries; full lexsort == brute force 33/33
+k= 4 random   : top_k == brute force for 200/200 queries; full lexsort == brute force 200/200
+k=10 page-head: top_k == brute force for 33/33 queries; full lexsort == brute force 33/33
+k=10 random   : top_k == brute force for 200/200 queries; full lexsort == brute force 200/200
+page-head queries: gap between rank 4 and rank 5 min/median/max = 0.00170/0.01258/0.10103
+max |score float32 - score float64| over page-head queries = 1.00e-07
+BROKEN variant (argpartition only, no sort): equal to brute force (same order) for 33/33 page-head queries
+BROKEN variant (argsort ascending, forgot the minus): equal for 0/33
+synthetic N=10,000 (seed 3), 100 random queries, k=4: argpartition-only same ORDER 100/100, same SET 100/100; top_k same order 100/100
+synthetic N=10,000 (seed 3), 100 random queries, k=10: argpartition-only same ORDER 100/100, same SET 100/100; top_k same order 100/100
+synthetic N=10,000 (seed 3), 100 random queries, k=50: argpartition-only same ORDER 100/100, same SET 100/100; top_k same order 100/100
+np.argpartition docstring says 'The order of all elements in the partitions is undefined': True
+
+=== S5 ties
+toy scores: [0.699999988079071, 0.8999999761581421, 0.800000011920929, 0.800000011920929, 0.800000011920929, 0.10000000149011612]  k=2
+  np.argpartition(-toy, 1)[:2] -> [1, 2]
+  np.argsort(-toy)[:2] (default quicksort) -> [1, 2]
+  np.argsort(-toy, kind='stable')[:2] -> [1, 2]
+  top_k (ties by smaller id) -> [1, 2]  fingerprint 3a316d6d3226f84c
+  top_k k=4 -> [1, 2, 3, 4]  fingerprint d1be96124d992521
+  tied ids at the boundary for k=2: [2, 3, 4]
+duplicated index (5 copies of each of 91 chunks = 455 rows), query D-002:
+  top-10 rows -> (chunk, copy): [(64, 0), (64, 1), (64, 2), (64, 3), (64, 4), (26, 0), (26, 1), (26, 2), (26, 3), (26, 4)]
+  distinct chunks in top-4: 1; in top-10: 2
+  scores of the 5 copies of chunk 64: [0.462341845035553, 0.462341845035553, 0.462341845035553, 0.462341845035553, 0.462341845035553]  all bit-identical: True
+  argpartition(-s5, 3)[:4] rows -> [428, 337, 64, 246] (which copies is not specified)
+  top_k(s5, 4) rows -> [64, 155, 246, 337]; brute force -> [64, 155, 246, 337]
+
+=== S6 metadata alongside the vectors: results, filters, misalignment
+   {'rank': 1, 'score': 0.4623, 'chunk_id': 64, 'page': 23, 'page_end': 24, 'char_start': 51200, 'char_end': 52200}
+   {'rank': 2, 'score': 0.4336, 'chunk_id': 26, 'page': 10, 'page_end': 10, 'char_start': 20800, 'char_end': 21800}
+   {'rank': 3, 'score': 0.3751, 'chunk_id': 16, 'page': 6, 'page_end': 6, 'char_start': 12800, 'char_end': 13800}
+   {'rank': 4, 'score': 0.3366, 'chunk_id': 63, 'page': 23, 'page_end': 23, 'char_start': 50400, 'char_end': 51400}
+filter page >= 25 keeps 23/91 chunks
+35 real queries (2 demo + 33 page heads): pre-filter returned < 4 results for 0; post-filter (fetch_k=20) returned < 4 for 9, 0 results for 0
+post-filter result counts histogram: {1: 1, 2: 4, 3: 4, 4: 26}
+D-002 pre-filter: [79, 78, 77, 80]  post-filter: [79, 78, 77, 80]
+misaligned index (row 0 deleted from vectors only), D-002:
+   row 63: metadata says chunk 63 p.23, vector really is chunk 64 p.23
+   row 25: metadata says chunk 25 p.9, vector really is chunk 26 p.10
+   row 15: metadata says chunk 15 p.6, vector really is chunk 16 p.6
+   row 62: metadata says chunk 62 p.23, vector really is chunk 63 p.23
+guard: assert len(V) == len(meta) -> False
+
+=== S7 hidden defaults: the distance
+unit vectors: max |L2^2 - (2 - 2 cos)| = 1.31e-06
+unit vectors, 35 real queries: top-4 by dot == by cosine: 35; by -L2 == by cosine: 35
+TOY un-normalised chunk vectors (lengths x U(0.5,1.5), seed 1), 35 queries: top-4 by dot == by cosine for 0; by -L2 == by cosine for 1; by dot == by -L2 for 0
+  cosine ranking unchanged by the scaling: 35/35
+  D-002: cosine top-4 [64, 26, 16, 63]  dot top-4 [64, 26, 79, 63]  L2 top-4 [16, 85, 65, 26]
+  fingerprint of the count (dot == cosine): 5feceb66ffc86f38
+cos=0.8: L2=0.6325  L2^2=0.4000  1-L2/sqrt2=0.5528  1-L2^2/sqrt2=0.7172
+cos=0.5: L2=1.0000  L2^2=1.0000  1-L2/sqrt2=0.2929  1-L2^2/sqrt2=0.2929
+cos=0.2: L2=1.2649  L2^2=1.6000  1-L2/sqrt2=0.1056  1-L2^2/sqrt2=-0.1314
+
+=== S8 timing exact search (machine-specific; median of repeats)
+cpu: 11th Gen Intel(R) Core(TM) i7-11800H @ 2.30GHz | logical cpus: 16 | numpy BLAS: OpenBLAS (multi-threaded by default)
+real corpus N=91 d=384: median 14.4 us per query (5000 reps)
+real corpus, brute_force_top_k (Python sort) on the same scores: median 25.2 us (5000 reps)
+the whole book (25 PDFs): 374,245 chars -> 480 chunks of 1000/200
+synthetic N=    480 d= 384: memory      0.7 MB  median    0.024 ms per query (5000 reps)
+synthetic N=  1,000 d= 384: memory      1.5 MB  median    0.051 ms per query (5000 reps)
+synthetic N= 10,000 d= 384: memory     15.4 MB  median    0.187 ms per query (5000 reps)
+synthetic N=100,000 d= 384: memory    153.6 MB  median    6.092 ms per query (162 reps)
+   same index, k=8: median 6.074 ms (161 reps)  ratio k8/k4 = 1.00
+   batch of 100 queries (Q @ A.T, then top_k per row): 53.8 ms total = 0.538 ms per query (35 reps)
+synthetic N=200,000 d= 384: memory    307.2 MB  median   11.883 ms per query (83 reps)
+synthetic N=500,000 d= 384: memory    768.0 MB  median   32.189 ms per query (30 reps)
+   on the 500k score vector: full argsort 18.47 ms vs top_k (argpartition) 2.57 ms; the matrix-vector product alone 26.36 ms
+synthetic N=    480 d=1536: memory      2.9 MB  median    0.103 ms per query (5000 reps)
+synthetic N=100,000 d=1536: memory    614.4 MB  median   23.315 ms per query (43 reps)
+doubling N 100k -> 200k (d=384): time ratio 1.95
+DONE

@@ -1,0 +1,200 @@
+
+=== R repo pins
+PASS AIQ HEAD is e080df2  [e080df282aaf]
+PASS AIQ LICENSE is MIT with 'Copyright (c) 2026 Om'
+PASS AIQ commit and copyright line named in the bank
+PASS SDG HEAD is ed955b2  [ed955b27d942]
+PASS SDG LICENSE is MIT with 'Copyright (c) 2026 Om Bharatiya'
+PASS SDG commit and copyright line named in the bank
+
+=== Q verbatim quotes (bank -> pinned file)
+PASS S1 quote in AI-Engineer-Interview-Questions/14-company-interview-questions/harvey.md: 'When would you put a whole contract in the context window in'
+PASS S1 same quote present in the bank
+PASS S1 quote in AI-Engineer-Interview-Questions/14-company-interview-questions/harvey.md: 'Retrieval also gives you citations for free, since you know '
+PASS S1 same quote present in the bank
+PASS S2 quote in ai-system-design-guide/06-retrieval-systems/04-vector-databases.md: 'BM25 scores depend on corpus-wide IDF statistics. In a share'
+PASS S2 same quote present in the bank
+PASS S2 quote in ai-system-design-guide/06-retrieval-systems/04-vector-databases.md: 'Q: How do you handle multi-tenancy in a vector database?'
+PASS S2 same quote present in the bank
+PASS S3 quote in AI-Engineer-Interview-Questions/04-rag-and-retrieval/questions.md: 'Which distance metric should you use for embedding search - '
+PASS S3 same quote present in the bank
+PASS S3 quote in AI-Engineer-Interview-Questions/04-rag-and-retrieval/questions.md: 'Cosine scores are not calibrated, and many embedders are ani'
+PASS S3 same quote present in the bank
+PASS S4 quote in AI-Engineer-Interview-Questions/12-coding-challenges/08_semantic_search_rag.py: 'def search(self, query: str, k: int = 3) -> list[tuple[int, '
+PASS S4 same quote present in the bank
+PASS S5 quote in AI-Engineer-Interview-Questions/07-evaluation-and-observability/questions.md: 'Which retrieval metrics would you use - recall@k, MRR, nDCG '
+PASS S5 same quote present in the bank
+PASS S5 quote in AI-Engineer-Interview-Questions/07-evaluation-and-observability/questions.md: 'fraction of queries where a relevant chunk appears in the to'
+PASS S5 same quote present in the bank
+PASS S6 quote in AI-Engineer-Interview-Questions/04-rag-and-retrieval/questions.md: 'How would you detect that a parser silently corrupted docume'
+PASS S6 same quote present in the bank
+PASS S8 quote in AI-Engineer-Interview-Questions/04-rag-and-retrieval/questions.md: 'Walk me through every stage of a production RAG pipeline, fr'
+PASS S8 same quote present in the bank
+PASS S8 quote in AI-Engineer-Interview-Questions/04-rag-and-retrieval/questions.md: 'errors compound - 90% parsing quality × 90% retrieval recall'
+PASS S8 same quote present in the bank
+PASS S9 quote in AI-Engineer-Interview-Questions/11-ai-system-design/case-studies/07-text-to-sql-agent.md: "Build 'ask our data anything' for a company with a large war"
+PASS S9 same quote present in the bank
+PASS S9 quote in AI-Engineer-Interview-Questions/11-ai-system-design/case-studies/07-text-to-sql-agent.md: 'for low-cardinality columns (they prevent the classic `segme'
+PASS S9 same quote present in the bank
+PASS S9 quote in AI-Engineer-Interview-Questions/11-ai-system-design/case-studies/07-text-to-sql-agent.md: 'execution match can false-positive on degenerate results (tw'
+PASS S9 same quote present in the bank
+PASS AIQ GLOSSARY.md has the Recall@k entry the bank names
+PASS S5: AIQ 04-rag-and-retrieval/questions.md has '### 12. What does BM25 actually compute?'
+PASS C4 reserve: AIQ 04-rag-and-retrieval/questions.md has '### 48. Break down the latency and cost budget'
+PASS C4 reserve: AIQ 04-rag-and-retrieval/questions.md has '### 50. "Long-context models made RAG obsolete."'
+PASS S1: AIQ 14-company-interview-questions/harvey.md has '### 9. When would you put a whole contract'
+PASS P3 reserve: AIQ 04 Q12 follow-up names short ticket titles
+PASS P5 seed: search() sits at L93-L100
+PASS SDG 06-retrieval-systems/14-production-rag-at-scale.md has '## Multi-Tenant RAG Isolation'
+PASS SDG 01-foundations/02-tokenization-deep-dive.md has '### Pattern 2: Chunking at Token Boundaries'
+PASS SDG 00-interview-prep/01-question-bank.md has '### Q5: How would you evaluate a RAG system?'
+PASS SDG Q5 states the P@5 > 0.8 target
+PASS SDG 'The hybrid-search catch' is at line 731
+PASS SDG Pattern 2 loop sets start = end - overlap with no break
+
+=== B book pages (short phrases)
+PASS chapter 1 has 14 pages  [14]
+PASS chapter 1 p.12/14 contains 'Overkill when'
+PASS chapter 1 p.12/14 contains 'fit entirely in the model'
+PASS chapter 1 p.12/14 contains 'context window'
+PASS chapter 1 p.12/14 contains 'will miss most of the relevant'
+PASS chapter 22 has 19 pages  [19]
+PASS chapter 22 p.11/19 contains 'Distracting noise is semantically similar'
+PASS chapter 22 p.11/19 contains 'the most dangerous type'
+PASS chapter 22 p.11/19 contains 'fixes the total number of retrieved documents'
+PASS chapter 22 p.11/19 contains 'about fifty percent noise'
+PASS chapter 22 p.11/19 contains 'sharp collapse'
+PASS chapter 22 has 19 pages  [19]
+PASS chapter 22 p.12/19 contains 'collapses sharply past a critical'
+PASS Ch22 p.11/19 names no study ('et al.' absent)
+
+=== A AE section headings (AE text not printed)
+PASS AE Ch7 has 'Precision@k and Recall@k'
+PASS AE Ch7 that section ranks recall over precision for the first stage
+PASS AE Ch7 that section cites no study (no footnote link)
+PASS AE Ch7 has 'Normalized Discounted Cumulative Gain (NDCG@k)'
+PASS AE Ch7 IDCG re-sorts the same retrieved documents
+PASS AE Ch12 has 'Model Cascades'
+PASS AE Ch12 says the highest-probability token is output
+PASS AE Ch2 has 'Retrieval Fundamentals'
+
+=== C course anchors
+PASS S1 976 (P1 D.5): concepts/P1_llm_fundamentals.md
+PASS S1 P1 D.7: concepts/P1_llm_fundamentals.md
+PASS S1 Ch1 p.12/14 in P1 G.1: concepts/P1_llm_fundamentals.md
+PASS P1 reserve 12,840 (P1 D.3): concepts/P1_llm_fundamentals.md
+PASS P1 reserve 557 draws (P1 D.6): concepts/P1_llm_fundamentals.md
+PASS P1 reserve 0.879 (P1 D.6): concepts/P1_llm_fundamentals.md
+PASS P1 reserve T = 4 (P1_FACTS S7): sources/verification/P1/P1_FACTS.md
+PASS S1 71 (P1_FACTS §2): sources/verification/P1/P1_FACTS.md
+PASS S1 976 (P1_FACTS S9): sources/verification/P1/P1_FACTS.md
+PASS S1 P7 D.4: concepts/P7_grounded_prompting.md
+PASS S1 P7 D.6: concepts/P7_grounded_prompting.md
+PASS S1 C5 B.1: concepts/C5_generation_citations.md
+PASS S1 C5 D.5: concepts/C5_generation_citations.md
+PASS S1 C5 D.7: concepts/C5_generation_citations.md
+PASS S2 P3 D.1: concepts/P3_bm25.md
+PASS S2 P3 D.3 floor: concepts/P3_bm25.md
+PASS S2 P3 D.4: concepts/P3_bm25.md
+PASS P3 reserve (P3 D.4): concepts/P3_bm25.md
+PASS P3 reserve J2: concepts/P3_bm25.md
+PASS S2 P4 D.2: concepts/P4_embeddings_similarity.md
+PASS S2 C3 D.2: concepts/C3_embedding_indexing.md
+PASS S2 C3 D.4: concepts/C3_embedding_indexing.md
+PASS S3 P4 D.5: concepts/P4_embeddings_similarity.md
+PASS S3 P4 D.5: concepts/P4_embeddings_similarity.md
+PASS S3 C4 D.5: concepts/C4_dense_retrieval.md
+PASS S4 top_k tie-aware cut: sources/verification/P5/p5_measure.py
+PASS S4 top_k (-score, id): sources/verification/P5/p5_measure.py
+PASS S4 P5 D.3: concepts/P5_vector_search.md
+PASS S4 lab Task 5b: concepts/P5_vector_search.md
+PASS S4 P5 J2: concepts/P5_vector_search.md
+PASS S5 P6 Part F Q1: concepts/P6_ir_metrics.md
+PASS S5 P6 D.2: concepts/P6_ir_metrics.md
+PASS S5 P6 D.7: concepts/P6_ir_metrics.md
+PASS P6 reserve J2: concepts/P6_ir_metrics.md
+PASS P6 reserve D.4: concepts/P6_ir_metrics.md
+PASS S5 O1-Q04 scored 0: progress/session_log.md
+PASS S6 rule R1 (C1 D.5): concepts/C1_document_parsing.md
+PASS S6 R1 false positives: concepts/C1_document_parsing.md
+PASS S6 C1 D.4: concepts/C1_document_parsing.md
+PASS S6 C1-T-01 is about slide decks: concepts/C1_document_parsing.md
+PASS S7 C4 D.6: concepts/C4_dense_retrieval.md
+PASS S7 C4 D.4: concepts/C4_dense_retrieval.md
+PASS S7 C4-T-01: concepts/C4_dense_retrieval.md
+PASS S7 07 Part I: 07_SAMPLE_LESSON.md
+PASS S7 07 Part I equal budget: 07_SAMPLE_LESSON.md
+PASS C2 reserve fixed_window_chunks break: 07_SAMPLE_LESSON.md
+PASS C2 reserve C2-A-04: 07_SAMPLE_LESSON.md
+PASS S7 MC-005: progress/misconception_log.md
+PASS S7 closing rule: progress/misconception_log.md
+PASS S8 C6 D.5: concepts/C6_v0_pipeline.md
+PASS S8 06 §7.1: 06_RAG_PROJECT_AND_EVALUATION_PLAN.md
+PASS S9 02 C7 card: 02_RAG_MASTER_LEARNING_PLAN.md
+PASS S9 C7 card names the Chile question: 02_RAG_MASTER_LEARNING_PLAN.md
+PASS P6 reserve Source C #31: 01_SOURCE_INVENTORY.md
+PASS rules CR-13: 05_LEARNING_AND_RETENTION_SYSTEM.md
+PASS rules CR-16: 05_LEARNING_AND_RETENTION_SYSTEM.md
+PASS rules CR-02: 05_LEARNING_AND_RETENTION_SYSTEM.md
+PASS rules CR-04: 05_LEARNING_AND_RETENTION_SYSTEM.md
+PASS rules 05 §2.3: 05_LEARNING_AND_RETENTION_SYSTEM.md
+PASS rules 05 §2.3 step 1 Part A before teaching: 05_LEARNING_AND_RETENTION_SYSTEM.md
+PASS rules review §9 item 6: sources/EXTERNAL_RESOURCES_REVIEW_2026-10-09.md
+PASS S5 P6 D.2 Hit@k: concepts/P6_ir_metrics.md
+PASS S4 top_k sits at p5_measure.py L44-L54
+
+=== X CR-13 absence checks (case-insensitive)
+PASS S1: '40-page' absent from concepts/P1_llm_fundamentals.md
+PASS S1: '25,000' absent from concepts/P1_llm_fundamentals.md
+PASS S1: 'whole manual' absent from concepts/P1_llm_fundamentals.md
+PASS S1: 'long context' absent from concepts/P1_llm_fundamentals.md
+PASS S1: 'long-context' absent from concepts/P1_llm_fundamentals.md
+PASS S2: 'sixth' absent from concepts/P3_bm25.md
+PASS S2: 'add a pdf' absent from concepts/P3_bm25.md
+PASS S2: 'adding a document' absent from concepts/P3_bm25.md
+PASS S2: 'new document' absent from concepts/P3_bm25.md
+PASS S2: 'another pdf' absent from concepts/P3_bm25.md
+PASS S2: 'tenant' absent from concepts/P3_bm25.md
+PASS S5: 'share of queries' absent from concepts/P6_ir_metrics.md
+PASS S5: 'fraction of queries' absent from concepts/P6_ir_metrics.md
+PASS S5: 'a guide says' absent from concepts/P6_ir_metrics.md
+PASS S6: '300 pdf' absent from concepts/C1_document_parsing.md
+PASS S6: 'without reading' absent from concepts/C1_document_parsing.md
+PASS S6: 'at scale' absent from concepts/C1_document_parsing.md
+PASS S7: 'half noise' absent from concepts/C4_dense_retrieval.md
+PASS S7: 'fifty percent' absent from concepts/C4_dense_retrieval.md
+PASS S7: 'collapse' absent from concepts/C4_dense_retrieval.md
+PASS S7: 'missing evidence is worse' absent from concepts/C4_dense_retrieval.md
+PASS S8: '9 times in 10' absent from concepts/C6_v0_pipeline.md
+PASS S8: '0.729' absent from concepts/C6_v0_pipeline.md
+PASS S8: 'three stages' absent from concepts/C6_v0_pipeline.md
+PASS S8: 'compound' absent from concepts/C6_v0_pipeline.md
+PASS S9: no C7 lesson file exists yet
+
+=== W no 15-word run shared with AE or the book
+PASS bank shares no 15-word run with AE Ch2  [0 shared]
+PASS bank shares no 15-word run with AE Ch7  [0 shared]
+PASS bank shares no 15-word run with AE Ch12  [0 shared]
+PASS bank shares no 15-word run with book chapter 1  [0 shared]
+PASS bank shares no 15-word run with book chapter 22  [0 shared]
+
+=== S structure of the bank
+PASS 9 seeds S1-S9  [[('S1', 'P1'), ('S2', 'P3'), ('S3', 'P4'), ('S4', 'P5'), ('S5', 'P6'), ('S6', 'C1'), ('S7', 'C4'), ('S8', 'C6'), ('S9', 'C7')]]
+PASS seed concepts P1 P3 P4 P5 P6 C1 C4 C6 C7
+PASS 9 'used:' lines
+PASS each seed has a Use line
+PASS 8 repo-based seeds carry 'Source text (verbatim, MIT)'
+PASS S7 (AE-based) has no verbatim quote
+PASS rules contain **one question per turn**
+PASS rules contain **confidence (1–3) first**
+PASS rules contain **used once**
+PASS rules contain **Never write a seed into a lesson file.**
+PASS rules contain at most **2 new items per concept**
+PASS 12 reserve lines, each marked 'reserve: use only in place of a seed'  [12]
+PASS rules: Part A cite is review §9 item 6 + 05 §2.3, and CR-02/CR-04 sit on hiding the key
+PASS S5 key says 'guaranteed equal' and names the none-or-all case
+PASS S5 DERIVED: R = 1 -> Recall@k == Hit@k always; R > 1 -> equal iff h = 0 or h = R (k 1-10, R 1-7)
+PASS P6 nDCG reserve: 0–3 grade-scale claim marked UNVERIFIED
+PASS coach-only header
+
+RESULT: 182 PASS, 0 FAIL

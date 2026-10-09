@@ -1,0 +1,518 @@
+{
+ "label": "TOY data for labs/C6_v0_pipeline.ipynb: a made-up 5-page manual, a naive toy chunker (one chunk per line, lines cut at 60 chars, no overlap), toy k = 2, made-up scores and hand-written answers",
+ "doc_id": "toy",
+ "snapshot_id": "toysnap00001",
+ "pages": [
+  "Harbour Lighthouse Manual\nLamp care\nReplace the main lamp every 2,000 hours of use.\nClean the lens every week with a dry cloth.\n",
+  "Power\nThe backup gen-\nerator must be tested every 30 days.\nKeep the fuel log next to the generator.\n",
+  "Fuel\nThe two fuel tanks hold 400 litres in total and are refilled each May by the harbour office.\n",
+  "Safety\nThe foghorn sounds twice every 20 seconds in fog.\nVisitors may climb the tower only with a keeper.\n",
+  "Keepers\nEach keeper works a 12-hour shift.\nShift changes happen at 06:00 and 18:00.\n"
+ ],
+ "chunks": [
+  {
+   "chunk_id": "toy:toysnap00001:toyparams001:00000",
+   "doc_id": "toy",
+   "page": 1,
+   "char_start": 0,
+   "char_end": 25,
+   "text": "Harbour Lighthouse Manual"
+  },
+  {
+   "chunk_id": "toy:toysnap00001:toyparams001:00001",
+   "doc_id": "toy",
+   "page": 1,
+   "char_start": 26,
+   "char_end": 35,
+   "text": "Lamp care"
+  },
+  {
+   "chunk_id": "toy:toysnap00001:toyparams001:00002",
+   "doc_id": "toy",
+   "page": 1,
+   "char_start": 36,
+   "char_end": 83,
+   "text": "Replace the main lamp every 2,000 hours of use."
+  },
+  {
+   "chunk_id": "toy:toysnap00001:toyparams001:00003",
+   "doc_id": "toy",
+   "page": 1,
+   "char_start": 84,
+   "char_end": 127,
+   "text": "Clean the lens every week with a dry cloth."
+  },
+  {
+   "chunk_id": "toy:toysnap00001:toyparams001:00004",
+   "doc_id": "toy",
+   "page": 2,
+   "char_start": 129,
+   "char_end": 134,
+   "text": "Power"
+  },
+  {
+   "chunk_id": "toy:toysnap00001:toyparams001:00005",
+   "doc_id": "toy",
+   "page": 2,
+   "char_start": 135,
+   "char_end": 150,
+   "text": "The backup gen-"
+  },
+  {
+   "chunk_id": "toy:toysnap00001:toyparams001:00006",
+   "doc_id": "toy",
+   "page": 2,
+   "char_start": 151,
+   "char_end": 187,
+   "text": "erator must be tested every 30 days."
+  },
+  {
+   "chunk_id": "toy:toysnap00001:toyparams001:00007",
+   "doc_id": "toy",
+   "page": 2,
+   "char_start": 188,
+   "char_end": 228,
+   "text": "Keep the fuel log next to the generator."
+  },
+  {
+   "chunk_id": "toy:toysnap00001:toyparams001:00008",
+   "doc_id": "toy",
+   "page": 3,
+   "char_start": 230,
+   "char_end": 234,
+   "text": "Fuel"
+  },
+  {
+   "chunk_id": "toy:toysnap00001:toyparams001:00009",
+   "doc_id": "toy",
+   "page": 3,
+   "char_start": 235,
+   "char_end": 295,
+   "text": "The two fuel tanks hold 400 litres in total and are refilled"
+  },
+  {
+   "chunk_id": "toy:toysnap00001:toyparams001:00010",
+   "doc_id": "toy",
+   "page": 3,
+   "char_start": 295,
+   "char_end": 327,
+   "text": " each May by the harbour office."
+  },
+  {
+   "chunk_id": "toy:toysnap00001:toyparams001:00011",
+   "doc_id": "toy",
+   "page": 4,
+   "char_start": 329,
+   "char_end": 335,
+   "text": "Safety"
+  },
+  {
+   "chunk_id": "toy:toysnap00001:toyparams001:00012",
+   "doc_id": "toy",
+   "page": 4,
+   "char_start": 336,
+   "char_end": 385,
+   "text": "The foghorn sounds twice every 20 seconds in fog."
+  },
+  {
+   "chunk_id": "toy:toysnap00001:toyparams001:00013",
+   "doc_id": "toy",
+   "page": 4,
+   "char_start": 386,
+   "char_end": 434,
+   "text": "Visitors may climb the tower only with a keeper."
+  },
+  {
+   "chunk_id": "toy:toysnap00001:toyparams001:00014",
+   "doc_id": "toy",
+   "page": 5,
+   "char_start": 436,
+   "char_end": 443,
+   "text": "Keepers"
+  },
+  {
+   "chunk_id": "toy:toysnap00001:toyparams001:00015",
+   "doc_id": "toy",
+   "page": 5,
+   "char_start": 444,
+   "char_end": 478,
+   "text": "Each keeper works a 12-hour shift."
+  },
+  {
+   "chunk_id": "toy:toysnap00001:toyparams001:00016",
+   "doc_id": "toy",
+   "page": 5,
+   "char_start": 479,
+   "char_end": 519,
+   "text": "Shift changes happen at 06:00 and 18:00."
+  }
+ ],
+ "traces": [
+  {
+   "label": "TOY: made-up trace for the C6 lab; not a real run",
+   "qid": "TOY-1",
+   "snapshot_id": "toysnap00001",
+   "query": {
+    "original": "How often should the main lamp be replaced?"
+   },
+   "gold": {
+    "doc_id": "toy",
+    "page": 1,
+    "quote": "Replace the main lamp every 2,000 hours of use."
+   },
+   "candidates": {
+    "dense": [
+     {
+      "rank": 1,
+      "chunk_id": "toy:toysnap00001:toyparams001:00002",
+      "doc_id": "toy",
+      "page": 1,
+      "char_start": 36,
+      "char_end": 83,
+      "score": 0.71
+     },
+     {
+      "rank": 2,
+      "chunk_id": "toy:toysnap00001:toyparams001:00001",
+      "doc_id": "toy",
+      "page": 1,
+      "char_start": 26,
+      "char_end": 35,
+      "score": 0.64
+     }
+    ]
+   },
+   "context": {
+    "chunk_ids": [
+     "toy:toysnap00001:toyparams001:00002",
+     "toy:toysnap00001:toyparams001:00001"
+    ]
+   },
+   "answer": {
+    "text": "Replace the main lamp every 2,000 hours of use [toy:1].",
+    "abstained": false,
+    "citations": [
+     {
+      "marker": "[toy:1]",
+      "doc_id": "toy",
+      "page": 1,
+      "resolved_chunk_ids": [
+       "toy:toysnap00001:toyparams001:00002",
+       "toy:toysnap00001:toyparams001:00001"
+      ]
+     }
+    ]
+   }
+  },
+  {
+   "label": "TOY: made-up trace for the C6 lab; not a real run",
+   "qid": "TOY-2",
+   "snapshot_id": "toysnap00001",
+   "query": {
+    "original": "How often must the backup generator be tested?"
+   },
+   "gold": {
+    "doc_id": "toy",
+    "page": 2,
+    "quote": "The backup generator must be tested every 30 days."
+   },
+   "candidates": {
+    "dense": [
+     {
+      "rank": 1,
+      "chunk_id": "toy:toysnap00001:toyparams001:00007",
+      "doc_id": "toy",
+      "page": 2,
+      "char_start": 188,
+      "char_end": 228,
+      "score": 0.71
+     },
+     {
+      "rank": 2,
+      "chunk_id": "toy:toysnap00001:toyparams001:00005",
+      "doc_id": "toy",
+      "page": 2,
+      "char_start": 135,
+      "char_end": 150,
+      "score": 0.64
+     }
+    ]
+   },
+   "context": {
+    "chunk_ids": [
+     "toy:toysnap00001:toyparams001:00007",
+     "toy:toysnap00001:toyparams001:00005"
+    ]
+   },
+   "answer": {
+    "text": "I cannot answer this from the provided documents.",
+    "abstained": true,
+    "citations": []
+   }
+  },
+  {
+   "label": "TOY: made-up trace for the C6 lab; not a real run",
+   "qid": "TOY-3",
+   "snapshot_id": "toysnap00001",
+   "query": {
+    "original": "How much fuel do the tanks hold, and when are they refilled?"
+   },
+   "gold": {
+    "doc_id": "toy",
+    "page": 3,
+    "quote": "The two fuel tanks hold 400 litres in total and are refilled each May by the harbour office."
+   },
+   "candidates": {
+    "dense": [
+     {
+      "rank": 1,
+      "chunk_id": "toy:toysnap00001:toyparams001:00009",
+      "doc_id": "toy",
+      "page": 3,
+      "char_start": 235,
+      "char_end": 295,
+      "score": 0.71
+     },
+     {
+      "rank": 2,
+      "chunk_id": "toy:toysnap00001:toyparams001:00008",
+      "doc_id": "toy",
+      "page": 3,
+      "char_start": 230,
+      "char_end": 234,
+      "score": 0.64
+     }
+    ]
+   },
+   "context": {
+    "chunk_ids": [
+     "toy:toysnap00001:toyparams001:00009",
+     "toy:toysnap00001:toyparams001:00008"
+    ]
+   },
+   "answer": {
+    "text": "The two fuel tanks hold 400 litres in total [toy:3].",
+    "abstained": false,
+    "citations": [
+     {
+      "marker": "[toy:3]",
+      "doc_id": "toy",
+      "page": 3,
+      "resolved_chunk_ids": [
+       "toy:toysnap00001:toyparams001:00009",
+       "toy:toysnap00001:toyparams001:00008"
+      ]
+     }
+    ]
+   }
+  },
+  {
+   "label": "TOY: made-up trace for the C6 lab; not a real run",
+   "qid": "TOY-4",
+   "snapshot_id": "toysnap00001",
+   "query": {
+    "original": "How often does the foghorn sound in fog?"
+   },
+   "gold": {
+    "doc_id": "toy",
+    "page": 4,
+    "quote": "The foghorn sounds twice every 20 seconds in fog."
+   },
+   "candidates": {
+    "dense": [
+     {
+      "rank": 1,
+      "chunk_id": "toy:toysnap00001:toyparams001:00003",
+      "doc_id": "toy",
+      "page": 1,
+      "char_start": 84,
+      "char_end": 127,
+      "score": 0.71
+     },
+     {
+      "rank": 2,
+      "chunk_id": "toy:toysnap00001:toyparams001:00013",
+      "doc_id": "toy",
+      "page": 4,
+      "char_start": 386,
+      "char_end": 434,
+      "score": 0.64
+     }
+    ]
+   },
+   "context": {
+    "chunk_ids": [
+     "toy:toysnap00001:toyparams001:00003",
+     "toy:toysnap00001:toyparams001:00013"
+    ]
+   },
+   "answer": {
+    "text": "I cannot answer this from the provided documents.",
+    "abstained": true,
+    "citations": []
+   }
+  },
+  {
+   "label": "TOY: made-up trace for the C6 lab; not a real run",
+   "qid": "TOY-5",
+   "snapshot_id": "toysnap00001",
+   "query": {
+    "original": "When do shift changes happen?"
+   },
+   "gold": {
+    "doc_id": "toy",
+    "page": 5,
+    "quote": "Shift changes happen at 06:00 and 18:00."
+   },
+   "candidates": {
+    "dense": [
+     {
+      "rank": 1,
+      "chunk_id": "toy:toysnap00001:toyparams001:00016",
+      "doc_id": "toy",
+      "page": 5,
+      "char_start": 479,
+      "char_end": 519,
+      "score": 0.71
+     },
+     {
+      "rank": 2,
+      "chunk_id": "toy:toysnap00001:toyparams001:00015",
+      "doc_id": "toy",
+      "page": 5,
+      "char_start": 444,
+      "char_end": 478,
+      "score": 0.64
+     }
+    ]
+   },
+   "context": {
+    "chunk_ids": [
+     "toy:toysnap00001:toyparams001:00016",
+     "toy:toysnap00001:toyparams001:00015"
+    ]
+   },
+   "answer": {
+    "text": "Shift changes happen at 06:00 and 18:00 [toy:4].",
+    "abstained": false,
+    "citations": [
+     {
+      "marker": "[toy:4]",
+      "doc_id": "toy",
+      "page": 4,
+      "resolved_chunk_ids": []
+     }
+    ]
+   }
+  },
+  {
+   "label": "TOY: made-up trace for the C6 lab; not a real run",
+   "qid": "TOY-6",
+   "snapshot_id": "toysnap00001",
+   "query": {
+    "original": "How long is a keeper's shift?"
+   },
+   "gold": {
+    "doc_id": "toy",
+    "page": 5,
+    "quote": "Each keeper works a 12-hour shift."
+   },
+   "candidates": {
+    "dense": [
+     {
+      "rank": 1,
+      "chunk_id": "toy:toysnap00001:toyparams001:00015",
+      "doc_id": "toy",
+      "page": 5,
+      "char_start": 444,
+      "char_end": 478,
+      "score": 0.71
+     },
+     {
+      "rank": 2,
+      "chunk_id": "toy:toysnap00001:toyparams001:00014",
+      "doc_id": "toy",
+      "page": 5,
+      "char_start": 436,
+      "char_end": 443,
+      "score": 0.64
+     }
+    ]
+   },
+   "context": {
+    "chunk_ids": [
+     "toy:toysnap00001:toyparams001:00015",
+     "toy:toysnap00001:toyparams001:00014"
+    ]
+   },
+   "answer": {
+    "text": "Each keeper works an 8-hour shift [toy:5].",
+    "abstained": false,
+    "citations": [
+     {
+      "marker": "[toy:5]",
+      "doc_id": "toy",
+      "page": 5,
+      "resolved_chunk_ids": [
+       "toy:toysnap00001:toyparams001:00015",
+       "toy:toysnap00001:toyparams001:00014"
+      ]
+     }
+    ]
+   }
+  },
+  {
+   "label": "TOY: made-up trace for the C6 lab; not a real run",
+   "qid": "TOY-7",
+   "snapshot_id": "toysnap00001",
+   "query": {
+    "original": "How often should the lens be cleaned?"
+   },
+   "gold": {
+    "doc_id": "toy",
+    "page": 1,
+    "quote": "Clean the lens every week with a dry cloth."
+   },
+   "candidates": {
+    "dense": [
+     {
+      "rank": 1,
+      "chunk_id": "toy:toysnap00001:toyparams001:00012",
+      "doc_id": "toy",
+      "page": 4,
+      "char_start": 336,
+      "char_end": 385,
+      "score": 0.71
+     },
+     {
+      "rank": 2,
+      "chunk_id": "toy:toysnap00001:toyparams001:00015",
+      "doc_id": "toy",
+      "page": 5,
+      "char_start": 444,
+      "char_end": 478,
+      "score": 0.64
+     }
+    ]
+   },
+   "context": {
+    "chunk_ids": [
+     "toy:toysnap00001:toyparams001:00012",
+     "toy:toysnap00001:toyparams001:00015"
+    ]
+   },
+   "answer": {
+    "text": "Clean the lens every week with a dry cloth [toy:1].",
+    "abstained": false,
+    "citations": [
+     {
+      "marker": "[toy:1]",
+      "doc_id": "toy",
+      "page": 1,
+      "resolved_chunk_ids": []
+     }
+    ]
+   }
+  }
+ ]
+}

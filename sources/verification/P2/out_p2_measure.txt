@@ -1,0 +1,154 @@
+
+=== S1 environment and toy corpus
+python 3.12.8 | {'pymupdf': '1.26.7', 'numpy': '2.5.3', 'sentence-transformers': '6.1.0', 'transformers': '5.19.0', 'torch': '2.14.1', 'rank-bm25': '0.2.2'}
+toy corpus file sha256 a2bee6be44e4a170423ecf0fb83d0a4a70017f5e31e774bd6653d4be43198b5c
+docs=10 queries=5 listed qrels=13 pairs=50 (unlisted pairs are grade 0)
+fp(DOCS) 1edaacca3ff916da fp(QUERIES) acb0163a7a3906b8
+
+=== S2 tokenization (lowercase, runs of [a-z0-9]; no stemming, no stopword list)
+d01 15 tokens, 15 distinct: ['burning', 'coal', 'oil', 'and', 'gas', 'releases', 'carbon', 'dioxide', 'the', 'main', 'cause', 'of', 'recent', 'global', 'warming']
+d02 15 tokens, 15 distinct: ['what', 'is', 'the', 'main', 'cause', 'of', 'climate', 'change', 'students', 'often', 'ask', 'this', 'question', 'in', 'class']
+d03 13 tokens, 12 distinct: ['greenhouse', 'gases', 'trap', 'heat', 'in', 'the', 'atmosphere', 'like', 'a', 'blanket', 'around', 'the', 'earth']
+d04 12 tokens, 12 distinct: ['sea', 'levels', 'are', 'rising', 'because', 'warmer', 'ocean', 'water', 'expands', 'and', 'glaciers', 'melt']
+d05 12 tokens, 12 distinct: ['melting', 'ice', 'sheets', 'in', 'greenland', 'and', 'antarctica', 'add', 'water', 'to', 'the', 'oceans']
+d06 10 tokens, 10 distinct: ['forests', 'absorb', 'carbon', 'dioxide', 'from', 'the', 'air', 'as', 'trees', 'grow']
+d07 10 tokens, 10 distinct: ['solar', 'panels', 'and', 'wind', 'turbines', 'generate', 'electricity', 'without', 'burning', 'fuel']
+d08 11 tokens,  7 distinct: ['climate', 'change', 'news', 'climate', 'change', 'videos', 'climate', 'change', 'quiz', 'subscribe', 'now']
+d09 10 tokens, 10 distinct: ['cattle', 'and', 'rice', 'paddies', 'release', 'methane', 'a', 'powerful', 'greenhouse', 'gas']
+d10 11 tokens, 11 distinct: ['heat', 'waves', 'are', 'becoming', 'longer', 'and', 'more', 'frequent', 'in', 'many', 'regions']
+unit test tokenize('Sea-level RISE, 2019!') -> ['sea', 'level', 'rise', '2019']
+total tokens 119
+q1 tokens ['main', 'cause', 'of', 'climate', 'change']
+q2 tokens ['why', 'do', 'sea', 'levels', 'rise']
+q3 tokens ['renewable', 'energy']
+q4 tokens ['where', 'does', 'methane', 'come', 'from']
+q5 tokens ['is', 'extreme', 'heat', 'becoming', 'more', 'common']
+
+=== S3 inverted index over the 10 toy docs (term -> sorted doc ids)
+vocabulary size=88 total postings=114
+terms with df >= 2: [('and', 6), ('the', 5), ('in', 4), ('a', 2), ('are', 2), ('burning', 2), ('carbon', 2), ('cause', 2), ('change', 2), ('climate', 2), ('dioxide', 2), ('gas', 2), ('greenhouse', 2), ('heat', 2), ('main', 2), ('of', 2), ('water', 2)]
+df == 1 terms: 71
+postings['climate'] = ['d02', 'd08']
+postings['change'] = ['d02', 'd08']
+postings['of'] = ['d01', 'd02']
+postings['the'] = ['d01', 'd02', 'd03', 'd05', 'd06']
+postings['carbon'] = ['d01', 'd06']
+postings['heat'] = ['d03', 'd10']
+postings['methane'] = ['d09']
+postings['rise'] = []
+postings['rising'] = ['d04']
+postings['renewable'] = []
+postings['energy'] = []
+fp(index) a75adb6a2aa3ee3a
+cross-check: every postings list equals a full scan of the docs: OK
+
+=== S4 Boolean retrieval with the index
+q1 'main cause of climate change': AND=['d02'] OR=['d01', 'd02', 'd08'] postings touched=10 of 10 docs; terms not in index=[]
+q2 'why do sea levels rise': AND=[] OR=['d04'] postings touched=2 of 10 docs; terms not in index=['do', 'rise', 'why']
+q3 'renewable energy': AND=[] OR=[] postings touched=0 of 10 docs; terms not in index=['energy', 'renewable']
+q4 'where does methane come from': AND=[] OR=['d06', 'd09'] postings touched=2 of 10 docs; terms not in index=['come', 'does', 'where']
+q5 'is extreme heat becoming more common': AND=[] OR=['d02', 'd03', 'd10'] postings touched=5 of 10 docs; terms not in index=['common', 'extreme']
+search_and('', index) -> [] | search_or('photosynthesis', index) -> []
+fp(AND) 5375cb3802db14a1 fp(OR) 946fea0d80376ae5
+
+=== S5 overlap ranking (distinct query terms matched), from the index
+q1: [('d02', 5), ('d01', 3), ('d08', 2)]
+q2: [('d04', 2)]
+q3: []
+q4: [('d06', 1), ('d09', 1)]
+q5: [('d10', 3), ('d02', 1), ('d03', 1)]
+fp(LEX) 109e8ca0d7fce277
+
+=== S6 dense similarity: MiniLM cosine over all 10 docs (toy illustration)
+q1: d02 0.8402, d01 0.6342, d04 0.5139, d03 0.4904, d10 0.4318, d08 0.3992, d05 0.3927, d06 0.2736, d09 0.2469, d07 0.1341
+q2: d04 0.8316, d05 0.4038, d02 0.3881, d01 0.3635, d10 0.3280, d03 0.2009, d08 0.1779, d06 0.1534, d09 0.0757, d07 0.0075
+q3: d07 0.5804, d01 0.3598, d03 0.3167, d08 0.2756, d02 0.2744, d09 0.2721, d10 0.1964, d05 0.1838, d06 0.1442, d04 0.1367
+q4: d09 0.6326, d01 0.4290, d06 0.3877, d03 0.3868, d02 0.2493, d05 0.2268, d07 0.1579, d04 0.1571, d10 0.1322, d08 0.1200
+q5: d10 0.6342, d02 0.3226, d01 0.3178, d04 0.3018, d03 0.2975, d08 0.1891, d09 0.1554, d05 0.1468, d07 0.0977, d06 0.0473
+embedding dim 384 | norms ~1: True
+
+=== S7 reference qrels (guideline v1; grade >= 1 = relevant)
+q1: relevant=['d01', 'd03', 'd09'] grades={'d01': 2, 'd03': 1, 'd09': 1}
+q2: relevant=['d04', 'd05'] grades={'d04': 2, 'd05': 1}
+q3: relevant=['d07'] grades={'d07': 2}
+q4: relevant=['d09'] grades={'d09': 2}
+q5: relevant=['d10'] grades={'d10': 2}
+relevant pairs 8 of 50
+fp(binary reference hashes) c46167a0335a1135
+
+=== S8 set quality vs ranking quality
+system  query  k  retrieved                      rel_retrieved/retrieved  /relevant  precision recall first_rel_rank
+lexical q1     3  ['d02', 'd01', 'd08']          1/3  /3  0.333 0.333 2
+lexical q1     6  ['d02', 'd01', 'd08']          1/3  /3  0.333 0.333 2
+lexical q2     3  ['d04']                        1/1  /2  1.000 0.500 1
+lexical q2     6  ['d04']                        1/1  /2  1.000 0.500 1
+lexical q3     3  []                             0/0  /1  0.000 0.000 None
+lexical q3     6  []                             0/0  /1  0.000 0.000 None
+lexical q4     3  ['d06', 'd09']                 1/2  /1  0.500 1.000 2
+lexical q4     6  ['d06', 'd09']                 1/2  /1  0.500 1.000 2
+lexical q5     3  ['d10', 'd02', 'd03']          1/3  /1  0.333 1.000 1
+lexical q5     6  ['d10', 'd02', 'd03']          1/3  /1  0.333 1.000 1
+dense   q1     3  ['d02', 'd01', 'd04']          1/3  /3  0.333 0.333 2
+dense   q1     6  ['d02', 'd01', 'd04', 'd03', 'd10', 'd08'] 2/6  /3  0.333 0.667 2
+dense   q2     3  ['d04', 'd05', 'd02']          2/3  /2  0.667 1.000 1
+dense   q2     6  ['d04', 'd05', 'd02', 'd01', 'd10', 'd03'] 2/6  /2  0.333 1.000 1
+dense   q3     3  ['d07', 'd01', 'd03']          1/3  /1  0.333 1.000 1
+dense   q3     6  ['d07', 'd01', 'd03', 'd08', 'd02', 'd09'] 1/6  /1  0.167 1.000 1
+dense   q4     3  ['d09', 'd01', 'd06']          1/3  /1  0.333 1.000 1
+dense   q4     6  ['d09', 'd01', 'd06', 'd03', 'd02', 'd05'] 1/6  /1  0.167 1.000 1
+dense   q5     3  ['d10', 'd02', 'd01']          1/3  /1  0.333 1.000 1
+dense   q5     6  ['d10', 'd02', 'd01', 'd04', 'd03', 'd08'] 1/6  /1  0.167 1.000 1
+lexical mean set recall at k=3: 0.567  per query [0.333, 0.5, 0.0, 1.0, 1.0]
+lexical mean set recall at k=6: 0.567  per query [0.333, 0.5, 0.0, 1.0, 1.0]
+dense mean set recall at k=3: 0.867  per query [0.333, 1.0, 1.0, 1.0, 1.0]
+dense mean set recall at k=6: 0.933  per query [0.667, 1.0, 1.0, 1.0, 1.0]
+
+Hand-made toy runs for q1 (relevant = ['d01', 'd03', 'd09'])
+run A ['d02', 'd01', 'd08']: precision=0.3333 recall=0.3333 first_relevant_rank=2
+run B ['d01', 'd08', 'd02']: precision=0.3333 recall=0.3333 first_relevant_rank=1
+run C ['d01', 'd03', 'd09']: precision=1.0 recall=1.0 first_relevant_rank=1
+fp(TOYRUNS) 9d72704a91f3c210
+edge cases: precision([]) 0.0 | first_relevant_rank(['d02']) None
+CR-08 q1 lexical: candidates=3 recall@3=0.3333 recall@6=0.3333 | dense recall@3=0.3333 recall@6=0.6667
+fp(CR08 lexical [len, r3, r6]) f0320f3ce2231c5f
+
+=== S9 inverted index over the climate PDF windows (1,000 chars, overlap 200, as in P1)
+pdf sha256 1d58a0fac2435c2ce4129ff84906b93118d731e4a004e7a26f8ab8f749a92669
+chars=72593 windows=91 last window chars=593
+vocabulary size=1868 total postings=8107 total tokens=11807
+df['the'] = 80 of 91
+df['of'] = 74 of 91
+df['and'] = 91 of 91
+df['climate'] = 77 of 91
+df['change'] = 59 of 91
+df['carbon'] = 30 of 91
+df['greenhouse'] = 15 of 91
+df['methane'] = 5 of 91
+df['renewable'] = 30 of 91
+df['energy'] = 42 of 91
+df['rise'] = 4 of 91
+df['rising'] = 6 of 91
+10 highest-df terms: [('and', 91), ('to', 87), ('for', 80), ('the', 80), ('climate', 77), ('in', 76), ('of', 74), ('are', 67), ('can', 65), ('is', 65)]
+df == 1 terms: 745
+'methane emissions': OR candidates=34 AND=5 postings touched=39 (a full scan reads all 91 windows); OR equals the full scan: OK
+'main cause of climate change': OR candidates=90 AND=0 postings touched=213 (a full scan reads all 91 windows); OR equals the full scan: OK
+'renewable energy': OR candidates=42 AND=30 postings touched=72 (a full scan reads all 91 windows); OR equals the full scan: OK
+fp(PDFFACTS [windows, vocab, df_the, df_methane, OR('methane emissions')]) 552eae7370ad8bbe
+
+=== S10 rank_bm25.BM25Okapi internals (the library behind fusion_retrieval.ipynb cell 14)
+rank-bm25 0.2.2
+type(doc_freqs) list len 10 element type dict (one term-count dict per document)
+has an attribute mapping term -> documents: False
+get_scores loops over every document: True
+get_scores(q4) length 10 | docs with score != 0: ['d06', 'd09']
+
+=== S11 fingerprints used by labs/P2_ir_framing_lab.ipynb
+fp(tokenize per doc) 043587a6e439e8a1
+fp(index) a75adb6a2aa3ee3a | vocab 88
+fp(AND) 5375cb3802db14a1 | fp(OR) 946fea0d80376ae5
+fp(LEX) 109e8ca0d7fce277
+fp(TOYRUNS) 9d72704a91f3c210
+fp(CR08) f0320f3ce2231c5f
+fp(PDFFACTS) 552eae7370ad8bbe
+binary reference hashes (one per pair, 50):
+["0d4c5fe487a8d014", "0eb0d519e0df2383", "20b6aaa6be42b957", "2a9abccb8288f3f1", "2b65b639b747fa82", "2ccb17d986628ff9", "307a963384a324dd", "30c556854307a89f", "31332e1ad049da56", "4053e39d16e21a52", "40faffb92e074110", "44212b73e827e0df", "58712ffff51d861d", "6c5783472bd3b59f", "6c9f8efca70d6e68", "701933a4cbc6af20", "7226dd260299457e", "73fad87f1be647d8", "747ef26178936b81", "74bacbd54df9d70e", "7635ceb50e83ee0e", "772b0ea9e8b3dbbd", "7b3fda29c63795f4", "7b5dbf6617f05899", "7d128e1040166127", "7e87dfc0699d768e", "805273f7e0dfc441", "8887bacf4f70e50c", "924a75cbf316acd9", "9fe1851b5a9e6243", "ab7ac1b402b45aca", "b3a3b64ab565d363", "b96944d3f64cbb33", "bae07ca8bf08459b", "bd9ec4d0b5b1f251", "c2b61d0959a34745", "c34a90e7a1c278a8", "ca09e8da208ad0d0", "cab89c0e362d9e3b", "ccfe54af6eab0858", "cf4932d5affd7c89", "d22d115c8c579454", "d3281a51c56f4fe6", "d503723caadf90c3", "d55cb627f161b9b4", "d9fbce20ef0ad6c8", "dc3304e2a0b018c0", "f57a9cbc9c9c9290", "fa5437b7b5ba53c8", "fd32eaed9d3d1eb4"]

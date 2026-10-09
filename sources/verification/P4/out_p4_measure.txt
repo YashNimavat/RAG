@@ -1,0 +1,101 @@
+
+=== S1 environment, corpus, models
+python 3.12.8 | {'pymupdf': '1.26.7', 'transformers': '5.19.0', 'sentence-transformers': '6.1.0', 'torch': '2.14.1', 'numpy': '2.5.3', 'tokenizers': '0.23.2'}
+pdf sha256 1d58a0fac2435c2ce4129ff84906b93118d731e4a004e7a26f8ab8f749a92669
+pages=33 chars=72593 windows(1000/200, plain slices)=91 last_len=593
+sentence-transformers/all-MiniLM-L6-v2: snapshot=1110a243 modules=['Transformer', 'Pooling', 'Normalize'] max_seq_length=256 dim=384
+sentence-transformers/paraphrase-MiniLM-L3-v2: snapshot=4ca70771 modules=['Transformer', 'Pooling'] max_seq_length=128 dim=384
+cross-encoder/ms-marco-MiniLM-L-6-v2: snapshot=233902d2 max_seq_length=512 tokenizer.model_max_length=512 num_labels=1 activation=Identity
+
+=== S2 toy 3-d vectors (TOY ILLUSTRATION, hand-computable)
+q=[1.0, 2.0, 2.0] |q|=3.000
+d1=[2.0, 1.0, 2.0] |d1|=3.000  dot=8  cos=0.8889  L2=1.4142  L2^2=2
+d2=[0.0, 3.0, 4.0] |d2|=5.000  dot=14  cos=0.9333  L2=2.4495  L2^2=6
+d3=[2.0, 4.0, 4.0] |d3|=6.000  dot=18  cos=1.0000  L2=3.0000  L2^2=9
+ranking by dot (high first): ['d3', 'd2', 'd1']
+ranking by cosine (high first): ['d3', 'd2', 'd1']
+ranking by raw L2 (low first): ['d1', 'd2', 'd3']
+-- after L2-normalising q and every d:
+d1: unit=[0.6667, 0.3333, 0.6667] dot=0.8889 cos=0.8889 L2=0.4714 L2^2=0.2222 2-2cos=0.2222
+d2: unit=[0.0, 0.6, 0.8] dot=0.9333 cos=0.9333 L2=0.3651 L2^2=0.1333 2-2cos=0.1333
+d3: unit=[0.3333, 0.6667, 0.6667] dot=1.0000 cos=1.0000 L2=0.0000 L2^2=0.0000 2-2cos=0.0000
+ranking by L2 on unit vectors (low first): ['d3', 'd2', 'd1']
+-- CR-08: scale ONE vector by 2
+d1 -> 2*d1=[4.0, 2.0, 4.0]: dot 8 -> 16; cos 0.8889 -> 0.8889; L2 1.4142 -> 3.6056
+q -> 2*q=[2.0, 4.0, 4.0]: dots [16.0, 28.0, 36.0], cos [0.8889, 0.9333, 1.0], L2 [3.6056, 2.2361, 0.0]
+   ranking by raw L2 with 2*q (low first): ['d3', 'd2', 'd1']
+-- dartboard-style distance 1 - dot on NON-unit vectors: {'d1': -7.0, 'd2': -13.0, 'd3': -17.0}
+-- dartboard-style distance 1 - dot on unit vectors: {'d1': 0.1111, 'd2': 0.0667, 'd3': 0.0}
+
+=== S3 random vectors: cosine = dot after normalisation; L2 ranking = cosine ranking (TOY random data, seed 0)
+max |cos - dot(unit)| = 4.44e-16
+max |L2^2 - (2 - 2cos)| on unit vectors = 1.78e-15
+queries whose FULL ranking of 1000 docs is identical (cosine vs L2 on unit vectors): 100/100
+doc norms after scaling: min=9.3 max=41.5
+queries where cosine top-1 is unchanged by the scaling: 100/100
+queries where raw-L2 top-1 != cosine top-1: 94/100
+queries where raw-dot top-1 != cosine top-1: 68/100
+
+=== S4 vector norms of real models on the 91 climate windows
+L6 default (Transformer,Pooling,Normalize)   norm min=1.000000 max=1.000000 mean=1.0000
+L6 without Normalize                         norm min=2.008154 max=3.042501 mean=2.4093
+L3 default (no Normalize)                    norm min=2.255005 max=3.371165 mean=2.8615
+L6: max |default - normalize_embeddings=True| = 2.98e-08
+L6: max |default - unit(without Normalize)| = 2.98e-08
+L6 dtype=float32 shape=(91, 384)
+
+=== S5 cosine of sentence pairs (all-MiniLM-L6-v2)
+book-style pair              cos=0.5356  dot=0.5356  L2=0.9638  | 'greenhouse gas emissions' vs 'carbon dioxide in the atmosphere'
+book-style unrelated         cos=-0.0859  dot=-0.0859  L2=1.4737  | 'greenhouse gas emissions' vs 'a recipe for chocolate cake'
+paraphrase                   cos=0.6918  dot=0.6918  L2=0.7851  | 'Burning coal and oil releases gases that warm the planet.' vs 'Fossil fuel combustion emits greenhouse gases that heat the Earth.'
+unrelated                    cos=-0.0478  dot=-0.0478  L2=1.4476  | 'Burning coal and oil releases gases that warm the planet.' vs 'The museum opens at nine on Saturday mornings.'
+same words, opposite claim   cos=0.8436  dot=0.8436  L2=0.5594  | 'Global temperatures have risen since the late 19th century.' vs 'Global temperatures have not risen since the late 19th century.'
+
+=== S6 retrieval illustration: two seed questions x 91 windows (NOT an evaluation result)
+gold windows (contain the evidence phrase): {'D-002': [26], 'D-004': [22, 63]}
+-- D-002: 'In what year was the Paris Agreement adopted?'
+  shapes: query (384,), index (91, 384), scores (91,) (one score per window; an all-pairs matrix would be 91x91 = 8281)
+  L6 normalised : cosine top5=[64, 26, 16, 63, 25] gold rank=2 | L2 top5=[64, 26, 16, 63, 25] | max |L2^2-(2-2cos)|=4.77e-07 | top1 cos=0.4623
+  L6 raw (no Normalize): cosine top5=[64, 26, 16, 63, 25] | raw L2 top5=[64, 26, 16, 63, 65] gold rank=2 | raw dot top5=[64, 26, 16, 25, 63] gold rank=2
+  L3 (own index): cosine top5=[26, 64, 0, 33, 1] gold rank=1 | raw L2 top5=[26, 64, 1, 0, 17] gold rank=1 | raw dot top5=[26, 64, 0, 65, 55] gold rank=1
+  WRONG MODEL (query L3, docs L6, dims 384==384): cosine top5=[34, 47, 65, 86, 32] gold rank=19 | cos range -0.1099..0.1900 (right model: -0.1433..0.4623) | errors raised: none
+-- D-004: 'What does DAC stand for, and what does it do?'
+  shapes: query (384,), index (91, 384), scores (91,) (one score per window; an all-pairs matrix would be 91x91 = 8281)
+  L6 normalised : cosine top5=[63, 22, 79, 25, 26] gold rank=1 | L2 top5=[63, 22, 79, 25, 26] | max |L2^2-(2-2cos)|=4.77e-07 | top1 cos=0.4789
+  L6 raw (no Normalize): cosine top5=[63, 22, 79, 25, 26] | raw L2 top5=[63, 22, 79, 26, 25] gold rank=1 | raw dot top5=[63, 22, 79, 25, 26] gold rank=1
+  L3 (own index): cosine top5=[22, 63, 64, 76, 23] gold rank=1 | raw L2 top5=[22, 63, 64, 79, 26] gold rank=1 | raw dot top5=[22, 63, 76, 64, 23] gold rank=1
+  WRONG MODEL (query L3, docs L6, dims 384==384): cosine top5=[79, 63, 22, 65, 33] gold rank=2 | cos range -0.1067..0.1432 (right model: -0.0825..0.4789) | errors raised: none
+
+=== S7 truncation vs its question (04 P4 experiment; mechanism already in P1 D.4)
+passage tokens=400 prefix tokens=254 tail tokens=146; DAC phrase starts at text token 300; in prefix? False; in long_text? True
+cos(D-004 question, 400-token passage) = 0.019276
+cos(D-004 question, its 254-token prefix) = 0.019276
+cos(D-004 question, the tail tokens 255-400, embedded alone) = 0.284787
+
+=== S8 bi-encoder (L6) shortlist vs cross-encoder rerank (NOT an evaluation result)
+-- D-002: bi top10=[64, 26, 16, 63, 25, 79, 65, 78, 33, 17]
+   cross-encoder scores on the shortlist: min=-10.968 max=5.152 (raw logits, not bounded like cosine)
+   reranked top3=[26, 64, 63] | gold=[26] | bi rank of first gold=2 | CE-over-shortlist rank=1 | CE over all 91 top3=[26, 64, 63] rank of first gold=1
+   forward passes per query: bi-encoder 1 (query) + 0 (docs precomputed) ; cross-encoder rerank 10 ; cross-encoder over all 91
+   order check: CE(q, d)=-4.293 vs CE(d, q)=-6.722
+-- D-004: bi top10=[63, 22, 79, 25, 26, 67, 74, 85, 64, 32]
+   cross-encoder scores on the shortlist: min=-9.393 max=5.165 (raw logits, not bounded like cosine)
+   reranked top3=[63, 22, 79] | gold=[22, 63] | bi rank of first gold=1 | CE-over-shortlist rank=1 | CE over all 91 top3=[63, 22, 79] rank of first gold=1
+   forward passes per query: bi-encoder 1 (query) + 0 (docs precomputed) ; cross-encoder rerank 10 ; cross-encoder over all 91
+   order check: CE(q, d)=5.165 vs CE(d, q)=-7.080
+bi-encoder document encodes, done once at index time: 91
+cross-encoder has no stored vector per document: nothing can be precomputed for an unseen query
+
+=== S9 query/document asymmetry (single illustrations, not evaluations)
+gold window 26: cos(question, window)=0.4336  cos(statement-shaped text, window)=0.5135  cos(question, statement)=0.8069
+MiniLM (trained without prefixes): cos('query: '+q, q) = 0.9626
+MiniLM (trained without prefixes): cos('search_query: '+q, q) = 0.6965
+MiniLM (trained without prefixes): cos('Represent this sentence for searching relevant passages: '+q, q) = 0.6865
+rank of gold window with prefix 'query: ' = 2 (without prefix: 2)
+
+=== S10 graph_rag.ipynb cell 12 priority = 1 / score (TOY numbers)
+scores {'A': 0.2, 'B': 0.5, 'C': 0.9}; if score is a DISTANCE (lower = closer): min-heap pops ['C', 'B', 'A']; the closest node is A; explored 3 of 3
+scores {'A': 0.2, 'B': 0.5, 'C': 0.9}; if score is a SIMILARITY (higher = closer): min-heap pops ['C', 'B', 'A']; the closest node is C; explored 1 of 3
+score 0.0 (an exact duplicate under a distance) -> ZeroDivisionError: float division by zero
+
+DONE

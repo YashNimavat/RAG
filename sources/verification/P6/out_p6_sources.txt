@@ -1,0 +1,98 @@
+PASS repo HEAD 009adba2be1bef49780ef73b6dd3c18fd24b035b
+
+=== R1 repo-wide search (cell sources + text outputs of every notebook; every line of every .py)
+scanned 46 notebooks and 25 .py files
+  hit: all_rag_techniques/local_rag_huggingface_faiss.ipynb cell 30 source: 'hit rate'
+  matches only inside base64 image outputs (not text): ['all_rag_techniques/Agentic_RAG.ipynb', 'all_rag_techniques/graph_rag.ipynb', 'all_rag_techniques/multi_model_rag_with_colpali.ipynb']
+PASS the only rank-metric-like term in code or text is 'hit rate' in local_rag_huggingface_faiss.ipynb cell 30
+
+=== R2 cited cells (0-based) and lines
+PASS all_rag_techniques/local_rag_huggingface_faiss.ipynb cell 30: evaluate_rag(rag_chain, retriever)
+PASS all_rag_techniques/local_rag_huggingface_faiss.ipynb cell 30: except ImportError
+PASS all_rag_techniques/local_rag_huggingface_faiss.ipynb cell 30: expected_keywords
+PASS all_rag_techniques/local_rag_huggingface_faiss.ipynb cell 30: kw.lower() in answer
+PASS all_rag_techniques/local_rag_huggingface_faiss.ipynb cell 30: len(pair["expected_keywords"])
+PASS all_rag_techniques/local_rag_huggingface_faiss.ipynb cell 30: Keyword hit rate
+PASS evaluation/define_evaluation_metrics.ipynb cell 3: correctness_prompt = PromptTemplate(
+PASS evaluation/define_evaluation_metrics.ipynb cell 6: faithfulness_prompt = PromptTemplate(
+PASS evaluation/define_evaluation_metrics.ipynb cell 9: relevancy_score_prompt = PromptTemplate(
+PASS evaluation/define_evaluation_metrics.ipynb cell 9: 0.33 - Somewhat relevant
+PASS evaluation/define_evaluation_metrics.ipynb cell 9: Final Score: [Average of all scores]
+PASS evaluation/define_evaluation_metrics.ipynb cell 9: ratio_of_relevant_docs_chain = ratio_of_relevant_docs_prompt | llm
+PASS evaluation/define_evaluation_metrics.ipynb cell 10: def evaluate_ratio_of_relevant_docs(question, contexts)
+PASS evaluation/evaluation_deep_eval.ipynb cell 2: GEval(
+PASS evaluation/evaluation_deep_eval.ipynb cell 2: name="Correctness"
+PASS evaluation/evaluation_deep_eval.ipynb cell 4: FaithfulnessMetric(
+PASS evaluation/evaluation_deep_eval.ipynb cell 6: ContextualRelevancyMetric(
+PASS evaluation/end-2-end_rag_evaluation.ipynb cell 12: Is the answer complete?
+PASS evaluation/end-2-end_rag_evaluation.ipynb cell 12: COMPLETE = 1
+PASS evaluation/end-2-end_rag_evaluation.ipynb cell 19: from ragas.metrics import faithfulness
+PASS evaluation/end-2-end_rag_evaluation.ipynb cell 22: FACTUALITY_THRESHOLD
+PASS evaluation/end-2-end_rag_evaluation.ipynb cell 22: classification_report(
+PASS evaluation/evaluation_grouse.ipynb cell 4: GroundedQAEvaluator
+PASS evaluation/evaluation_grouse.ipynb cell 4: meta_evaluate_pipeline
+PASS evaluation/evaluation_grouse.ipynb cell 36: meta_evaluate_pipeline(
+PASS evaluation/open-rag-eval-example.ipynb cell 7: UMBRELA
+PASS evaluation/open-rag-eval-example.ipynb cell 7: NO_RELEVANCE = "0"
+PASS evaluation/open-rag-eval-example.ipynb cell 7: EXACT_ANSWER = "3"
+PASS evaluation/open-rag-eval-example.ipynb cell 8: umbrela_scores
+PASS all_rag_techniques/choose_chunk_size.ipynb cell 8: FaithfulnessEvaluator()
+PASS all_rag_techniques/choose_chunk_size.ipynb cell 8: RelevancyEvaluator()
+PASS all_rag_techniques/choose_chunk_size.ipynb cell 10: similarity_top_k=5
+PASS all_rag_techniques/choose_chunk_size.ipynb cell 10: average_faithfulness
+PASS all_rag_techniques/choose_chunk_size.ipynb cell 10: average_relevancy
+PASS all_rag_techniques/choose_chunk_size.ipynb cell 10: average_response_time
+PASS all_rag_techniques/HyPE_Hypothetical_Prompt_Embeddings.ipynb cell 0: improvement in retrieval precision
+PASS define_evaluation_metrics.ipynb: 'ratio_of_relevant_docs_prompt' appears once (used in cell 9, never defined)
+PASS evaluation/evalute_rag.py:L95: def evaluate_rag(retriever, num_questions: int = 5)
+PASS evaluation/evalute_rag.py:L117: Rate on a scale of 1-5
+PASS evaluation/evalute_rag.py:L134: Generate {num_questions} diverse test questions
+PASS evaluation/evalute_rag.py:L144: retriever.get_relevant_documents(question)
+PASS evaluation/evalute_rag.py:L145: "\n".join([doc.page_content for doc in context])
+PASS evaluation/evalute_rag.py:L160: def calculate_average_scores
+PASS evaluation/evalute_rag.py:L163: pass
+
+=== B1 book pages (short phrases, each < 15 words)
+PASS chapter 22.pdf has 19 pages (cite as p.4/19)
+PASS chapter 22.pdf p.4/19: Precision at K measures what fraction of the top-K
+PASS chapter 22.pdf p.4/19: precision at five is 0.6
+PASS chapter 22.pdf p.4/19: how much noise the retriever introduces
+PASS chapter 22.pdf has 19 pages (cite as p.5/19)
+PASS chapter 22.pdf p.5/19: all relevant documents in the knowledge base
+PASS chapter 22.pdf p.5/19: recall is 0.3
+PASS chapter 22.pdf p.5/19: context precision
+PASS chapter 22.pdf p.5/19: Ranking Quality: MRR, MAP, and NDCG
+PASS chapter 22.pdf has 19 pages (cite as p.6/19)
+PASS chapter 22.pdf p.6/19: Mean Reciprocal Rank (MRR)
+PASS chapter 22.pdf p.6/19: position three, the score is 0.33
+PASS chapter 22.pdf p.6/19: MRR is averaged across all test queries
+PASS chapter 22.pdf p.6/19: Mean Average Precision (MAP)
+PASS chapter 22.pdf p.6/19: logarithmic discount
+PASS chapter 22.pdf p.6/19: normalizes against the ideal ranking
+PASS chapter 22.pdf p.6/19: handles graded relevance
+PASS chapter 22.pdf p.6/19: ranges from zero to one
+PASS chapter 22.pdf has 19 pages (cite as p.7/19)
+PASS chapter 22.pdf p.7/19: Ranking quality depends on where relevant documents appear
+PASS chapter 22.pdf has 19 pages (cite as p.8/19)
+PASS chapter 22.pdf p.8/19: isolates generation quality from retrieval quality
+PASS chapter 22.pdf has 19 pages (cite as p.18/19)
+PASS chapter 22.pdf p.18/19: Ranking metrics like MRR, MAP, and NDCG
+PASS Appendix.pdf has 23 pages (cite as p.13/23)
+PASS Appendix.pdf p.13/23: Appendix B: Glossary
+PASS Appendix.pdf has 23 pages (cite as p.15/23)
+PASS Appendix.pdf p.15/23: Context Precision A retrieval metric that accounts for ranking order
+PASS Appendix.pdf has 23 pages (cite as p.18/23)
+PASS Appendix.pdf p.18/23: MAP (Mean Average Precision)
+PASS Appendix.pdf has 23 pages (cite as p.19/23)
+PASS Appendix.pdf p.19/23: MRR (Mean Reciprocal Rank)
+PASS Appendix.pdf p.19/23: NDCG (Normalized Discounted Cumulative Gain)
+PASS Appendix.pdf p.19/23: Precision at K A retrieval metric
+PASS Appendix.pdf has 23 pages (cite as p.20/23)
+PASS Appendix.pdf p.20/23: Recall at K A retrieval metric
+PASS book never contains hit rate / Hit@: none found
+PASS book never contains qrels: none found
+PASS book never contains log2 / log base: none found
+PASS book never contains 2^ gain: none found
+PASS book never contains DCG formula sign: none found
+
+ALL PASS

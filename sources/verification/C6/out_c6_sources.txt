@@ -1,0 +1,138 @@
+PASS repo HEAD 009adba2be1bef49780ef73b6dd3c18fd24b035b
+
+== simple_rag.ipynb (22 cells, 0-based)
+PASS simple_rag.ipynb has 22 cells
+PASS 11 code cells
+PASS cell 3 installs pypdf 5.6.0 AND PyMuPDF 1.26.1
+PASS cell 5 needs Colab userdata + OPENAI_API_KEY
+PASS cell 5 imports evaluate_rag
+PASS cell 10: def encode_pdf(path, chunk_size=1000, chunk_overlap=200):
+PASS cell 10: loader = PyPDFLoader(path)
+PASS cell 10: chunk_size=chunk_size, chunk_overlap=chunk_overlap, length_function=len
+PASS cell 10: texts = text_splitter.split_documents(documents)
+PASS cell 10: cleaned_texts = replace_t_with_space(texts)
+PASS cell 10: get_langchain_embedding_provider(EmbeddingProvider.OPENAI)
+PASS cell 10: FAISS.from_documents(cleaned_texts, embeddings)
+PASS cell 10 cleans AFTER splitting (same order as the book's sketch)
+PASS cell 10: no start index (no offsets); PyMuPDF installed but not used
+PASS cell 11 builds the store at 1000/200
+PASS cell 13 k=2
+PASS cell 15 retrieves and prints
+PASS cell 15 saved output: 2 contexts, no score, no page
+PASS cell 17 runs evaluate_rag (OpenAI only)
+PASS no code cell generates an answer (no LLM call outside evaluate_rag)
+
+== helper_functions.py lines
+PASS L18 replace_t_with_space; L30 replaces tabs only
+PASS L48 encode_pdf
+PASS L62 PyPDFLoader, L69 split, L70 clean after split
+PASS L73 OpenAIEmbeddings, L74 FAISS
+PASS L129 retrieve_context_per_question
+PASS L143 get_relevant_documents
+PASS L147 keeps page_content only: metadata and scores dropped
+PASS L208 show_context
+PASS L336-L362 get_langchain_embedding_provider also offers Cohere (unused by simple_rag)
+
+== all_rag_techniques_runnable_scripts/simple_rag.py
+PASS L18 class SimpleRAG
+PASS L23 n_retrieved=2 default
+PASS L36-L38 times the whole encode_pdf call and labels it 'Chunking'
+PASS L55-L57 retrieval timing
+PASS L61 prints the context; nothing is returned or logged
+
+== local_rag_huggingface_faiss.ipynb
+PASS no cell has a saved output (not executed at this commit)
+PASS cell 10: TOP_K=3, bge-base, zephyr
+PASS cell 12 PyPDFLoader
+PASS cell 14 normalized embeddings
+PASS cell 16 FAISS
+PASS cell 18 prints page metadata (no scores)
+PASS cell 20 remote HuggingFaceEndpoint
+PASS cell 22 context-only prompt
+PASS cell 24 [Page n] labels
+PASS cell 26 ask() keeps the text after the last 'Answer:'
+PASS cell 28 returns answer + sources
+PASS cell 30 calls evaluate_rag(rag_chain, retriever)
+PASS evalute_rag.py: signature (retriever, num_questions); calls retriever.get_relevant_documents (so cell 30 passes a chain as 'retriever', by reading; not run)
+
+== simple_rag_with_llamaindex.ipynb
+PASS cell 4: 200/50 tokens, global Settings.embed_model
+PASS cell 11 TextCleaner (tabs and ' \n')
+PASS cell 13: cleaner runs BEFORE the splitter
+PASS cell 16: VectorStoreIndex(nodes), k=2
+PASS cell 23 query engine
+
+== repo cell 15 saved contexts vs the C6 reference run (R-001)
+PASS our rank 1 for R-001 starts like the repo's saved Context 1 (first 120 chars, whitespace-normalised)
+PASS our rank 2 for R-001 starts like the repo's saved Context 2 (first 120 chars, whitespace-normalised)
+
+== book pages
+PASS page totals Ch1 14, App 23, Ch22 19, Intro 8
+PASS chapter 1.pdf p.1: 'The Problem'
+PASS chapter 1.pdf p.1: 'hallucination'
+PASS chapter 1.pdf p.1: 'answering from memory'
+PASS chapter 1.pdf p.2: 'The Core Idea'
+PASS chapter 1.pdf p.2: 'closed-book exam'
+PASS chapter 1.pdf p.3: 'How It Works'
+PASS chapter 1.pdf p.3: 'two phases'
+PASS chapter 1.pdf p.3: 'offline preparation phase'
+PASS chapter 1.pdf p.4: 'Step 1: Load the Document'
+PASS chapter 1.pdf p.4: 'page by page'
+PASS chapter 1.pdf p.4: 'Poor text extraction'
+PASS chapter 1.pdf p.4: 'Step 2: Split Into Chunks'
+PASS chapter 1.pdf p.4: 'about 1,000 characters'
+PASS chapter 1.pdf p.4: '200 characters of overlap'
+PASS chapter 1.pdf p.5: 'Step 3: Clean the Text'
+PASS chapter 1.pdf p.5: 'stray tab'
+PASS chapter 1.pdf p.5: 'Step 4: Create Embeddings'
+PASS chapter 1.pdf p.6: 'Step 5: Store in a Vector Database'
+PASS chapter 1.pdf p.6: 'FAISS'
+PASS chapter 1.pdf p.7: 'Algorithm Sketch: Document Preparation'
+PASS chapter 1.pdf p.7: 'Clean each chunk'
+PASS chapter 1.pdf p.7: 'Split text into chunks'
+PASS chapter 1.pdf p.8: 'Phase 2: Answering a Query'
+PASS chapter 1.pdf p.8: 'Step 6: Embed the Query'
+PASS chapter 1.pdf p.8: 'exact same process'
+PASS chapter 1.pdf p.8: 'Step 7: Find the Nearest Chunks'
+PASS chapter 1.pdf p.8: 'top 2 to 5'
+PASS chapter 1.pdf p.9: 'Step 8: Generate the Answer'
+PASS chapter 1.pdf p.9: 'grounded in the actual document content'
+PASS chapter 1.pdf p.10: 'Algorithm Sketch: Query Processing'
+PASS chapter 1.pdf p.10: 'top-K nearest chunk vectors'
+PASS chapter 1.pdf p.10: 'The Role of Chunk Size'
+PASS chapter 1.pdf p.10: '100 characters'
+PASS chapter 1.pdf p.11: '5,000 characters'
+PASS chapter 1.pdf p.11: 'Just right'
+PASS chapter 1.pdf p.11: 'Where Simple RAG Falls Short'
+PASS chapter 1.pdf p.12: 'scattered across multiple sections'
+PASS chapter 1.pdf p.12: 'not bugs'
+PASS chapter 1.pdf p.12: 'When to Use This'
+PASS chapter 1.pdf p.12: 'Overkill when'
+PASS chapter 1.pdf p.13: 'one embedding call'
+PASS chapter 1.pdf p.13: 'depends entirely on retrieval quality'
+PASS chapter 1.pdf p.13: 'Key Takeaways'
+PASS chapter 1.pdf p.14: 'foundation that all advanced techniques'
+PASS Appendix.pdf p.4: 'retrieves the wrong documents'
+PASS Appendix.pdf p.5: 'The final answer is wrong or made up'
+PASS Appendix.pdf p.5: 'cannot measure or improve it'
+PASS Appendix.pdf p.6: 'Layer 1: Foundation'
+PASS Appendix.pdf p.6: 'end to end'
+PASS Appendix.pdf p.6: 'Do not optimize prematurely'
+PASS Appendix.pdf p.7: 'most common mistake'
+PASS chapter 22.pdf p.8: 'isolates generation quality from retrieval quality'
+PASS chapter 22.pdf p.13: 'Component-Level Versus End-to-End Evaluation'
+PASS chapter 22.pdf p.13: 'tell you where to look'
+PASS chapter 22.pdf p.14: 'per-component breakdown'
+PASS intro.pdf p.7: 'read Chapter 1 first'
+PASS Ch1 (all 14 pages) never mentions 'trace'
+PASS Ch1 (all 14 pages) never mentions 'citation'
+PASS Ch1 (all 14 pages) never mentions 'cite'
+PASS Ch1 (all 14 pages) never mentions 'provenance'
+PASS Ch1 (all 14 pages) never mentions 'metadata'
+PASS Ch1 (all 14 pages) never mentions 'page number'
+PASS Ch1 (all 14 pages) never mentions 'score'
+PASS Ch1 (all 14 pages) never mentions 'offset'
+PASS Ch1 (all 14 pages) never mentions 'reproduc'
+PASS Ch1: split (Step 2) comes before clean (Step 3)
+
+ALL PASS

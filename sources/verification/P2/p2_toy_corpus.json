@@ -1,0 +1,43 @@
+{
+  "about": "P2 toy corpus (written for the P2 lesson, 2026-10-08). Made-up short documents in the climate domain; not taken from the book or the repo. Labels follow guideline v1 below. Pairs not listed in qrels have grade 0.",
+  "guideline_v1": {
+    "2": "sufficient: the document alone answers the query",
+    "1": "partial: the document gives part of the answer or a necessary piece of it",
+    "0": "not relevant: it does not help answer the query, even if it shares words or the topic",
+    "binary_rule": "relevant = grade >= 1"
+  },
+  "docs": {
+    "d01": "Burning coal, oil and gas releases carbon dioxide, the main cause of recent global warming.",
+    "d02": "What is the main cause of climate change? Students often ask this question in class.",
+    "d03": "Greenhouse gases trap heat in the atmosphere like a blanket around the Earth.",
+    "d04": "Sea levels are rising because warmer ocean water expands and glaciers melt.",
+    "d05": "Melting ice sheets in Greenland and Antarctica add water to the oceans.",
+    "d06": "Forests absorb carbon dioxide from the air as trees grow.",
+    "d07": "Solar panels and wind turbines generate electricity without burning fuel.",
+    "d08": "Climate change news, climate change videos, climate change quiz: subscribe now!",
+    "d09": "Cattle and rice paddies release methane, a powerful greenhouse gas.",
+    "d10": "Heat waves are becoming longer and more frequent in many regions."
+  },
+  "queries": {
+    "q1": "main cause of climate change",
+    "q2": "why do sea levels rise",
+    "q3": "renewable energy",
+    "q4": "where does methane come from",
+    "q5": "is extreme heat becoming more common"
+  },
+  "qrels": [
+    {"qid": "q1", "did": "d01", "grade": 2, "why": "names the main cause: burning fossil fuels releases carbon dioxide"},
+    {"qid": "q1", "did": "d03", "grade": 1, "why": "explains the mechanism (greenhouse gases trap heat) but not what emits them"},
+    {"qid": "q1", "did": "d09", "grade": 1, "why": "one source of a greenhouse gas: part of the cause, not the main one"},
+    {"qid": "q1", "did": "d02", "grade": 0, "why": "repeats the question word for word but gives no answer"},
+    {"qid": "q1", "did": "d08", "grade": 0, "why": "keyword-stuffed footer: the topic words without any content"},
+    {"qid": "q1", "did": "d06", "grade": 0, "why": "a carbon sink, not a cause"},
+    {"qid": "q2", "did": "d04", "grade": 2, "why": "gives the reasons: warm water expands and glaciers melt"},
+    {"qid": "q2", "did": "d05", "grade": 1, "why": "one reason: melting ice sheets add water"},
+    {"qid": "q3", "did": "d07", "grade": 2, "why": "solar and wind are renewable energy, although no query word appears"},
+    {"qid": "q4", "did": "d09", "grade": 2, "why": "names the sources: cattle and rice paddies"},
+    {"qid": "q4", "did": "d06", "grade": 0, "why": "shares only the word 'from'"},
+    {"qid": "q5", "did": "d10", "grade": 2, "why": "heat waves are becoming more frequent: answers yes"},
+    {"qid": "q5", "did": "d03", "grade": 0, "why": "about trapping heat in general, not about extreme heat events"}
+  ]
+}

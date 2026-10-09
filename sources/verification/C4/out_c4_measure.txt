@@ -1,0 +1,244 @@
+
+=== S1 environment, snapshot, v0 index (the C3 stand-in)
+python 3.12.8 | {'pymupdf': '1.26.7', 'numpy': '2.5.3', 'sentence-transformers': '6.1.0', 'torch': '2.14.1', 'transformers': '5.19.0', 'tiktoken': '0.14.0'}
+pdf sha256 1d58a0fac2435c2ce4129ff84906b93118d731e4a004e7a26f8ab8f749a92669
+pages=33 doc chars=72593 snapshot_id=ea07572562ac (06 §5.3 states ea07572562ac: True)
+spans: 07 ChunkerConfig(name='recursive', size=1000, overlap=200, unit='chars', scope='per_page', separators=('\n\n', '\n', ' ')) (07 params_hash 77bc4c45809b) -> 97 chunks
+course params_hash over the 06 §2.4 chunking block = 1ca9c5a3b548 (expected 1ca9c5a3b548: True)
+chunks.jsonl bytes 122,774 sha256 d4108b8936093394c6eb50d4c22e8d4013d9a048fb38d5769281af4aadb3011b (C2 lab saved file: d4108b8936093394c6eb50d4c22e8d4013d9a048fb38d5769281af4aadb3011b; equal: True)
+chunk 0: {'doc_id': 'climate', 'snapshot_id': 'ea07572562ac', 'chunk_id': 'climate:ea07572562ac:1ca9c5a3b548:00000', 'seq': 0, 'char_start': 0, 'char_end': 949, 'page_segments': [{'page': 1, 'char_start': 0, 'char_end': 949}], 'text_sha256': '5fa92cb2db8f09148d46320497defdec81bfbe425e573949bc6fec1164407e07', 'chunker': 'recursive_char', 'params_hash': '1ca9c5a3b548', 'meta': {}}
+all per_page chunks have exactly one page segment: True
+chunk_id string order == seq order (zero-padded seq): True
+chunk length chars min/median/max = 393/935/1000
+MiniLM snapshot: 1110a243fdf4706b3f48f1d95db1a4f5529b4d41
+V shape=(97, 384) dtype=float32 max|norm-1|=1.19e-07 bytes=148,992
+embed_hash = c398eeba043f; index folder index/ea07572562ac/1ca9c5a3b548/c398eeba043f/
+index round trip (c4_index_qj1lzh2l): vectors.npy (97, 384) float32, chunks.jsonl 97 rows, identical: True
+seeds: 10 (8 answerable): ['D-001', 'D-002', 'D-003', 'D-004', 'D-005', 'D-006', 'D-007', 'D-008', 'D-009', 'D-010']
+
+=== S2 the P5 setup reproduced (plain 1000/200 windows across pages, 91 chunks)
+P5 setup: 91 chunks; D-002 top-6: [(64, 23, 0.4623), (26, 10, 0.4336), (16, 6, 0.3751), (63, 23, 0.3366), (25, 9, 0.3166), (79, 29, 0.3069)]
+P5 setup D-002 top-4 ids = [64, 26, 16, 63] (P5 S3 found [64, 26, 16, 63])
+P5 setup: rank of first relevant chunk for D-002 = 2 | first complete = 2
+
+=== S3 one query on the v0 index (D-002): shapes, top-8, the result records
+q shape (384,), V shape (97, 384), scores = V @ q shape (97,)
+rank 1: seq= 69 p.24 score=0.4606 rel=0 'Paris Agreement' in text=False text='Kyoto Protocol \nThe Kyoto Protocol, adopted in 1997, set binding emiss'
+rank 2: seq= 68 p.23 score=0.4513 rel=0 'Paris Agreement' in text=True text='negative emissions. The captured CO2 can be stored or used in various '
+rank 3: seq= 27 p.10 score=0.4386 rel=1 'Paris Agreement' in text=True text='Chapter 6: Global and Local Climate Action \nInternational Collaboratio'
+rank 4: seq= 17 p. 6 score=0.4385 rel=0 'Paris Agreement' in text=True text='a long time. These projects can help sequester carbon and provide new '
+rank 5: seq= 84 p.29 score=0.3387 rel=0 'Paris Agreement' in text=False text='coordination across government agencies, stakeholder engagement, and r'
+rank 6: seq= 85 p.29 score=0.3114 rel=0 'Paris Agreement' in text=False text='trust and achieving policy objectives. \nInternational Climate Negotiat'
+rank 7: seq= 70 p.24 score=0.2567 rel=0 'Paris Agreement' in text=True text='support sustainable agriculture and biodiversity. The deal also aims t'
+rank 8: seq= 35 p.12 score=0.2448 rel=0 'Paris Agreement' in text=False text='for comprehensive climate action. Policies must be flexible and respon'
+top-4 seq: [69, 68, 27, 17] fingerprint of seqs 80fb41abe7fc49f9
+top-4 chunk_id fingerprint 78ebfed94d0021da
+rank-1 result record (text cut): {"rank": 1, "chunk_id": "climate:ea07572562ac:1ca9c5a3b548:00069", "doc_id": "climate", "page": 24, "char_start": 51414, "char_end": 52396, "score": 0.4606130123138428, "text": "Kyoto Protocol \nThe Kyoto Protocol, adop..."}
+result keys: ['rank', 'chunk_id', 'doc_id', 'page', 'char_start', 'char_end', 'score', 'text']
+D-002 score gaps rank1-2 0.00931, rank2-3 0.01269, rank3-4 0.00008, rank4-5 0.09978
+score range over all 97 chunks: -0.1536 .. 0.4606; median 0.0289
+all 10 seed questions at once: Q @ V.T shape (10, 97) (queries x chunks)
+
+=== S4 the 10 seeds on the v0 index: score tables, gaps, first evidence, distractors
+
+D-001 (exact-term) 'According to the document, by how much have global temperatures risen since the late 19th century?'
+  top1=0.4929 top2=0.4706 top4=0.4608 top5=0.3714 gap1-2=0.0223 gap4-5=0.0894 median=0.1751 within0.05oftop=4
+  relevant chunks in index (any_overlap): 1 seqs=[7] pages=[3]
+  first relevant rank=3 (score 0.4692); first rank with CE=1: 3 (score 0.4692)
+    r1 seq=  1 p. 1 0.4929 rel=0 key(1.2 degrees)=False
+    r2 seq=  0 p. 1 0.4706 rel=0 key(1.2 degrees)=False
+    r3 seq=  7 p. 3 0.4692 rel=1 key(1.2 degrees)=True
+    r4 seq=  8 p. 3 0.4608 rel=0 key(1.2 degrees)=False
+    r5 seq=  9 p. 4 0.3714 rel=0 key(1.2 degrees)=False
+    r6 seq= 68 p.23 0.3691 rel=0 key(1.2 degrees)=False
+    r7 seq=  2 p. 1 0.3528 rel=0 key(1.2 degrees)=False
+    r8 seq= 42 p.15 0.3256 rel=0 key(1.2 degrees)=False
+  outranking the first relevant chunk (seq 7, p.3):
+    r1 seq=1 p.1 score=0.4929 margin over relevant=+0.0237 cos(distractor, relevant chunk)=0.5899 key term present=False
+    r2 seq=0 p.1 score=0.4706 margin over relevant=+0.0014 cos(distractor, relevant chunk)=0.5652 key term present=False
+
+D-002 (factual-single-span) 'In what year was the Paris Agreement adopted?'
+  top1=0.4606 top2=0.4513 top4=0.4385 top5=0.3387 gap1-2=0.0093 gap4-5=0.0998 median=0.0289 within0.05oftop=4
+  relevant chunks in index (any_overlap): 1 seqs=[27] pages=[10]
+  first relevant rank=3 (score 0.4386); first rank with CE=1: 3 (score 0.4386)
+    r1 seq= 69 p.24 0.4606 rel=0 key(Paris Agreement)=False
+    r2 seq= 68 p.23 0.4513 rel=0 key(Paris Agreement)=True
+    r3 seq= 27 p.10 0.4386 rel=1 key(Paris Agreement)=True
+    r4 seq= 17 p. 6 0.4385 rel=0 key(Paris Agreement)=True
+    r5 seq= 84 p.29 0.3387 rel=0 key(Paris Agreement)=False
+    r6 seq= 85 p.29 0.3114 rel=0 key(Paris Agreement)=False
+    r7 seq= 70 p.24 0.2567 rel=0 key(Paris Agreement)=True
+    r8 seq= 35 p.12 0.2448 rel=0 key(Paris Agreement)=False
+  outranking the first relevant chunk (seq 27, p.10):
+    r1 seq=69 p.24 score=0.4606 margin over relevant=+0.0220 cos(distractor, relevant chunk)=0.7184 key term present=False
+    r2 seq=68 p.23 score=0.4513 margin over relevant=+0.0127 cos(distractor, relevant chunk)=0.7802 key term present=True
+
+D-003 (factual-single-span) "According to the document, what is essential regarding countries' nationally determined contributions (NDCs) for meeting the Paris Agreement's goals?"
+  top1=0.6497 top2=0.6320 top4=0.4791 top5=0.4654 gap1-2=0.0177 gap4-5=0.0137 median=0.1835 within0.05oftop=2
+  relevant chunks in index (any_overlap): 1 seqs=[68] pages=[23]
+  first relevant rank=1 (score 0.6497); first rank with CE=1: 1 (score 0.6497)
+    r1 seq= 68 p.23 0.6497 rel=1 key(NDC)=True
+    r2 seq= 27 p.10 0.6320 rel=0 key(NDC)=True
+    r3 seq= 17 p. 6 0.5351 rel=0 key(NDC)=False
+    r4 seq= 69 p.24 0.4791 rel=0 key(NDC)=False
+    r5 seq= 85 p.29 0.4654 rel=0 key(NDC)=False
+    r6 seq= 70 p.24 0.4494 rel=0 key(NDC)=False
+    r7 seq= 84 p.29 0.4477 rel=0 key(NDC)=False
+    r8 seq= 71 p.24 0.4065 rel=0 key(NDC)=False
+
+D-004 (exact-term) 'What does DAC stand for, and what does it do?'
+  top1=0.4210 top2=0.4035 top4=0.2136 top5=0.2016 gap1-2=0.0175 gap4-5=0.0120 median=0.0492 within0.05oftop=2
+  relevant chunks in index (any_overlap): 3 seqs=[23, 67, 68] pages=[8, 23, 23]
+  first relevant rank=1 (score 0.4210); first rank with CE=1: 1 (score 0.4210)
+    r1 seq= 67 p.23 0.4210 rel=1 key(DAC)=True
+    r2 seq= 23 p. 8 0.4035 rel=1 key(DAC)=True
+    r3 seq= 68 p.23 0.3604 rel=1 key(DAC)=True
+    r4 seq= 27 p.10 0.2136 rel=0 key(DAC)=False
+    r5 seq= 85 p.29 0.2016 rel=0 key(DAC)=False
+    r6 seq= 84 p.29 0.1686 rel=0 key(DAC)=False
+    r7 seq= 71 p.24 0.1319 rel=0 key(DAC)=False
+    r8 seq= 72 p.25 0.1259 rel=0 key(DAC)=False
+
+D-005 (multi-span) 'How does the document contrast coal and natural gas in terms of carbon intensity?'
+  top1=0.4272 top2=0.3581 top4=0.3192 top5=0.3128 gap1-2=0.0692 gap4-5=0.0065 median=0.1332 within0.05oftop=1
+  relevant chunks in index (any_overlap): 2 seqs=[3, 4] pages=[2, 2]
+  first relevant rank=1 (score 0.4272); first rank with CE=1: 1 (score 0.4272)
+    r1 seq=  3 p. 2 0.4272 rel=1 key(carbon-intensive)=True
+    r2 seq=  4 p. 2 0.3581 rel=1 key(carbon-intensive)=True
+    r3 seq=  2 p. 1 0.3521 rel=0 key(carbon-intensive)=False
+    r4 seq=  5 p. 2 0.3192 rel=0 key(carbon-intensive)=False
+    r5 seq= 67 p.23 0.3128 rel=0 key(carbon-intensive)=False
+    r6 seq= 88 p.30 0.2834 rel=0 key(carbon-intensive)=False
+    r7 seq= 84 p.29 0.2513 rel=0 key(carbon-intensive)=False
+    r8 seq=  1 p. 1 0.2454 rel=0 key(carbon-intensive)=False
+
+D-006 (vocabulary-mismatch) 'What are the advantages of putting solar panels on lakes or reservoirs?'
+  top1=0.5331 top2=0.5004 top4=0.4696 top5=0.4458 gap1-2=0.0327 gap4-5=0.0237 median=0.2216 within0.05oftop=2
+  relevant chunks in index (any_overlap): 1 seqs=[21] pages=[8]
+  first relevant rank=1 (score 0.5331); first rank with CE=1: 1 (score 0.5331)
+    r1 seq= 21 p. 8 0.5331 rel=1 key(solar)=True
+    r2 seq= 64 p.22 0.5004 rel=0 key(solar)=True
+    r3 seq= 14 p. 5 0.4772 rel=0 key(solar)=False
+    r4 seq= 13 p. 5 0.4696 rel=0 key(solar)=True
+    r5 seq= 22 p. 8 0.4458 rel=0 key(solar)=True
+    r6 seq= 39 p.14 0.3904 rel=0 key(solar)=False
+    r7 seq= 74 p.25 0.3826 rel=0 key(solar)=False
+    r8 seq= 11 p. 4 0.3589 rel=0 key(solar)=False
+
+D-007 (multi-hop) 'What is the supreme decision-making body of the convention that provides the framework for negotiating the Kyoto Protocol and the Paris Agreement?'
+  top1=0.7094 top2=0.6105 top4=0.5902 top5=0.5849 gap1-2=0.0989 gap4-5=0.0053 median=0.2202 within0.05oftop=1
+  relevant chunks in index (any_overlap): 2 seqs=[27, 85] pages=[10, 29]
+  first relevant rank=2 (score 0.6105); first rank with CE=1: 3 (score 0.5954)
+    r1 seq= 69 p.24 0.7094 rel=0 key(UNFCCC)=False
+    r2 seq= 27 p.10 0.6105 rel=1 key(UNFCCC)=True
+    r3 seq= 85 p.29 0.5954 rel=1 key(UNFCCC)=True
+    r4 seq= 84 p.29 0.5902 rel=0 key(UNFCCC)=False
+    r5 seq= 17 p. 6 0.5849 rel=0 key(UNFCCC)=False
+    r6 seq= 68 p.23 0.5251 rel=0 key(UNFCCC)=False
+    r7 seq= 70 p.24 0.4861 rel=0 key(UNFCCC)=False
+    r8 seq= 35 p.12 0.4549 rel=0 key(UNFCCC)=False
+  outranking the first relevant chunk (seq 27, p.10):
+    r1 seq=69 p.24 score=0.7094 margin over relevant=+0.0989 cos(distractor, relevant chunk)=0.7184 key term present=False
+
+D-008 (exact-term) 'What does the Kigali Amendment target?'
+  top1=0.2598 top2=0.2535 top4=0.2041 top5=0.2035 gap1-2=0.0063 gap4-5=0.0006 median=0.0963 within0.05oftop=3
+  relevant chunks in index (any_overlap): 1 seqs=[69] pages=[24]
+  first relevant rank=2 (score 0.2535); first rank with CE=1: 2 (score 0.2535)
+    r1 seq= 28 p.10 0.2598 rel=0 key(Kigali)=False
+    r2 seq= 69 p.24 0.2535 rel=1 key(Kigali)=True
+    r3 seq= 58 p.20 0.2478 rel=0 key(Kigali)=False
+    r4 seq= 12 p. 5 0.2041 rel=0 key(Kigali)=False
+    r5 seq= 83 p.28 0.2035 rel=0 key(Kigali)=False
+    r6 seq= 56 p.19 0.1986 rel=0 key(Kigali)=False
+    r7 seq= 59 p.20 0.1894 rel=0 key(Kigali)=False
+    r8 seq= 84 p.29 0.1871 rel=0 key(Kigali)=False
+  outranking the first relevant chunk (seq 69, p.24):
+    r1 seq=28 p.10 score=0.2598 margin over relevant=+0.0063 cos(distractor, relevant chunk)=0.5133 key term present=False
+
+D-009 (unanswerable) 'In what year was the IPCC established?'
+  top1=0.3099 top2=0.2798 top4=0.2571 top5=0.2421 gap1-2=0.0301 gap4-5=0.0150 median=0.0662 within0.05oftop=3
+    r1 seq= 85 p.29 0.3099 rel=- key(IPCC)=False
+    r2 seq= 27 p.10 0.2798 rel=- key(IPCC)=False
+    r3 seq= 69 p.24 0.2738 rel=- key(IPCC)=False
+    r4 seq= 84 p.29 0.2571 rel=- key(IPCC)=False
+    r5 seq= 35 p.12 0.2421 rel=- key(IPCC)=False
+    r6 seq= 34 p.12 0.2359 rel=- key(IPCC)=False
+    r7 seq=  1 p. 1 0.2308 rel=- key(IPCC)=True
+    r8 seq= 68 p.23 0.2165 rel=- key(IPCC)=False
+
+D-010 (unanswerable) 'What share of global greenhouse gas emissions comes from aviation?'
+  top1=0.5196 top2=0.4340 top4=0.4043 top5=0.4030 gap1-2=0.0855 gap4-5=0.0013 median=0.2500 within0.05oftop=1
+    r1 seq=  2 p. 1 0.5196 rel=- key(emissions)=False
+    r2 seq=  1 p. 1 0.4340 rel=- key(emissions)=False
+    r3 seq=  5 p. 2 0.4061 rel=- key(emissions)=True
+    r4 seq= 85 p.29 0.4043 rel=- key(emissions)=False
+    r5 seq= 70 p.24 0.4030 rel=- key(emissions)=True
+    r6 seq= 84 p.29 0.3943 rel=- key(emissions)=True
+    r7 seq= 69 p.24 0.3933 rel=- key(emissions)=True
+    r8 seq= 63 p.22 0.3871 rel=- key(emissions)=False
+
+summary (v0 index, MiniLM): qid, first relevant rank, first CE rank, top1 score, gap1-2, gap4-5
+   ['D-001', 3, 3, 0.4929, 0.0223, 0.0894]
+   ['D-002', 3, 3, 0.4606, 0.0093, 0.0998]
+   ['D-003', 1, 1, 0.6497, 0.0177, 0.0137]
+   ['D-004', 1, 1, 0.421, 0.0175, 0.012]
+   ['D-005', 1, 1, 0.4272, 0.0692, 0.0065]
+   ['D-006', 1, 1, 0.5331, 0.0327, 0.0237]
+   ['D-007', 2, 3, 0.7094, 0.0989, 0.0053]
+   ['D-008', 2, 2, 0.2598, 0.0063, 0.0006]
+   ['D-009', None, None, 0.3099, 0.0301, 0.015]
+   ['D-010', None, None, 0.5196, 0.0855, 0.0013]
+fingerprint of [qid, first_rel] for D-001..D-008: f1ddc4851486fb35
+top-1 score, answerable (8): min 0.2598 median 0.4767 max 0.7094; unanswerable D-009, D-010: [0.3099, 0.5196]
+answerable items whose top-1 score is below the HIGHER unanswerable top-1: 5/8; below the LOWER one: 1/8
+adjacent gaps inside the top-8 over 10 seeds (70 gaps): min 0.00008 median 0.01556 max 0.14681; gaps < 0.01: 28
+
+=== S5 ties: real duplicates in the v0 index, chunk_id ordering
+exact duplicate chunk texts in the v0 index: 0 groups
+exact score ties among all 97 scores, summed over the 10 seeds: 0
+duplicated (x2) and shuffled index, D-002 top-4 seqs: [69, 166, 68, 165] scores [0.460613, 0.460613, 0.451299, 0.451299]
+  no tie rule (stable argsort of -score, i.e. row order): seqs [166, 69, 165, 68]
+  argpartition only: seqs [166, 69, 68, 165]
+TOY: unpadded ids sorted as strings: ['c:10', 'c:2', 'c:9'] | padded: ['c:00002', 'c:00009', 'c:00010']
+
+=== S6 k sweep on the 8 answerable seeds (TOY ILLUSTRATION: 8 draft items, not an evaluation)
+tokenizer o200k_harmony (the Groq gpt-oss family, P1); chunk tokens min/median/max 68/162/192
+  v0 k=1: Hit@k 4/8  CE@k 4/8  Group-Recall@k 0.500  P@k 0.500  mean context tokens (10 seeds) 173.7  CE=0: ['D-001', 'D-002', 'D-007', 'D-008']
+  v0 k=2: Hit@k 6/8  CE@k 5/8  Group-Recall@k 0.688  P@k 0.500  mean context tokens (10 seeds) 345.8  CE=0: ['D-001', 'D-002', 'D-007']
+  v0 k=4: Hit@k 8/8  CE@k 8/8  Group-Recall@k 1.000  P@k 0.375  mean context tokens (10 seeds) 679.0  CE=0: []
+  v0 k=8: Hit@k 8/8  CE@k 8/8  Group-Recall@k 1.000  P@k 0.188  mean context tokens (10 seeds) 1284.2  CE=0: []
+  fingerprint [k, hit, ce] for k=1,2,4,8: 0409d62d163b3871
+  fingerprint of rounded mean tokens: cb8110488fb78f13
+  k 1 -> 2: tokens x1.99
+  k 2 -> 4: tokens x1.96
+  k 4 -> 8: tokens x1.89
+  per-item first CE rank (v0): {'D-001': 3, 'D-002': 3, 'D-003': 1, 'D-004': 1, 'D-005': 1, 'D-006': 1, 'D-007': 3, 'D-008': 2}
+  P5-windows k=1: Hit@k 3/8  CE@k 3/8  Group-Recall@k 0.375  P@k 0.375  mean context tokens (10 seeds) 189.4  CE=0: ['D-001', 'D-002', 'D-003', 'D-007', 'D-008']
+  P5-windows k=2: Hit@k 7/8  CE@k 6/8  Group-Recall@k 0.812  P@k 0.562  mean context tokens (10 seeds) 383.1  CE=0: ['D-001', 'D-007']
+  P5-windows k=4: Hit@k 8/8  CE@k 7/8  Group-Recall@k 0.938  P@k 0.406  mean context tokens (10 seeds) 752.5  CE=0: ['D-007']
+  P5-windows k=8: Hit@k 8/8  CE@k 8/8  Group-Recall@k 1.000  P@k 0.234  mean context tokens (10 seeds) 1475.0  CE=0: []
+
+=== S7 the query-embedding step (MC-002): same model, query side, scale
+MiniLM encode(question) without normalize: norm 1.000000 (the model ends with Normalize)
+MiniLM is symmetric: embedding the question 'as a document' (same encode call) -> max|diff| 1.15e-07
+OTHER model snapshot: 4ca70771034acceecb2e72475f72050fcdde4ddc
+wrong query model sentence-transformers/paraphrase-MiniLM-L3-v2: query shape (384,) == index dim 384: True; V @ q raises no error: shape (97,)
+  wrong query model, k=4: Hit@4 3/8, CE@4 3/8 (right model: Hit@4 8/8, CE@4 8/8)
+  D-002 top-4 with the wrong query model: seqs [51, 68, 96, 92] pages [18, 23, 33, 31] scores [0.1858, 0.1807, 0.1692, 0.1628]
+  D-002 top-1 score: right model 0.4606 | wrong model 0.1858
+query scaled x3 (not normalised): same ids True; rank-1 score 1.3818 vs 0.4606
+
+=== S8 broken retrieval variants on the 8 answerable seeds (k=4)
+ascending sort: Hit@4 0/8, CE@4 0/8; D-002 'top-4' scores [-0.1536, -0.1149, -0.0855, -0.0837]
+scores dropped (ids only, as retrieve_context_per_question does): the D-002 list would read [69, 68, 27, 17] with no way to see the margin 0.0220 between rank 1 and the evidence
+
+=== S9 lab fingerprints (CHECK cells)
+D-002 top-4 chunk_ids fp: 78ebfed94d0021da
+D-002 top-4 scores rounded 4 fp: 077126a12d9a4750
+first_rel per answerable seed fp: a8aa456e76ccea3b
+first_ce per answerable seed fp: 179e0af8b77aa72a
+sweep hit/ce fp: 84011ffed49b16a9
+sweep mean tokens rounded fp: f3407b9eb252ba2f
+wrong-model hit/ce fp: 28e7165fc1adc5b4
+dup+shuffle top-4 seqs fp: 65b8cbacc1598a5b
+unanswerable top-1 scores rounded 2: [0.31, 0.52] answerable min rounded 2: 0.26

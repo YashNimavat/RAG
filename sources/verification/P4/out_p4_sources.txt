@@ -1,0 +1,79 @@
+PASS repo HEAD 009adba2be1bef49780ef73b6dd3c18fd24b035b
+PASS all_rag_techniques/dartboard.ipynb cell 23: embed_documents([query])
+PASS all_rag_techniques/dartboard.ipynb cell 23: index.search(
+PASS all_rag_techniques/dartboard.ipynb cell 23: reconstruct_batch(
+PASS all_rag_techniques/dartboard.ipynb cell 23: 1 - np.dot(candidate_vectors, candidate_vectors.T)
+PASS all_rag_techniques/dartboard.ipynb cell 23: 1 - np.dot(query_embedding, candidate_vectors.T)
+PASS all_rag_techniques/dartboard.ipynb cell 23: Using 1 - cosine_similarity as distance metric
+PASS all_rag_techniques/json_rag.ipynb cell 19: MODEL_NAME = 'all-MiniLM-L6-v2'
+PASS all_rag_techniques/json_rag.ipynb cell 19: SentenceTransformer(MODEL_NAME)
+PASS all_rag_techniques/json_rag.ipynb cell 19: model.encode(corpus_texts, convert_to_numpy=True
+PASS all_rag_techniques/json_rag.ipynb cell 21: faiss.IndexFlatL2(embedding_dim)
+PASS all_rag_techniques/json_rag.ipynb cell 21: index.add(corpus_embeddings)
+PASS all_rag_techniques/json_rag.ipynb cell 22: exact same loaded Sentence Transformer model
+PASS all_rag_techniques/json_rag.ipynb cell 22: lower is better
+PASS all_rag_techniques/json_rag.ipynb cell 23: model.encode([query_text], convert_to_numpy=True)
+PASS all_rag_techniques/json_rag.ipynb cell 23: index.search(query_embedding, NUM_NEIGHBORS)
+PASS all_rag_techniques/json_rag.ipynb cell 23: Distance: {distance:.4f}
+PASS all_rag_techniques/local_rag_huggingface_faiss.ipynb cell 10: EMBEDDING_MODEL = "BAAI/bge-base-en-v1.5"
+PASS all_rag_techniques/local_rag_huggingface_faiss.ipynb cell 13: normalize_embeddings=True
+PASS all_rag_techniques/local_rag_huggingface_faiss.ipynb cell 13: cosine similarity
+PASS all_rag_techniques/local_rag_huggingface_faiss.ipynb cell 14: encode_kwargs={"normalize_embeddings": True}
+PASS all_rag_techniques/local_rag_huggingface_faiss.ipynb cell 14: Required for cosine similarity
+PASS all_rag_techniques/local_rag_huggingface_faiss.ipynb cell 14: embed_query("What causes climate change?")
+PASS all_rag_techniques/local_rag_huggingface_faiss.ipynb cell 16: FAISS.from_documents(
+PASS all_rag_techniques/local_rag_huggingface_faiss.ipynb cell 16: embedding=embeddings
+PASS all_rag_techniques/graph_rag.ipynb cell 12: similarity_search_with_score(doc.page_content, k=1)
+PASS all_rag_techniques/graph_rag.ipynb cell 12: priority = 1 / similarity_score
+PASS all_rag_techniques/graph_rag.ipynb cell 12: heapq.heappush(priority_queue
+PASS all_rag_techniques/reranking.ipynb cell 27: CrossEncoder('cross-encoder/ms-marco-MiniLM-L-6-v2')
+PASS all_rag_techniques/reranking.ipynb cell 27: pairs = [[query, doc.page_content] for doc in initial_docs]
+PASS all_rag_techniques/reranking.ipynb cell 27: self.cross_encoder.predict(pairs)
+PASS all_rag_techniques/reranking.ipynb cell 27: reverse=True
+PASS all_rag_techniques/reranking.ipynb cell 29: k=10
+PASS all_rag_techniques/reranking.ipynb cell 29: rerank_top_k=5
+PASS all_rag_techniques/simple_csv_rag.ipynb cell 12: faiss.IndexFlatL2(
+PASS local_rag_huggingface_faiss.ipynb cell 16: no distance_strategy passed (LangChain default used)
+PASS helper_functions.py L48 def encode_pdf; L73 OpenAIEmbeddings(); L74 FAISS.from_documents (no metric argument)
+INFO repo code matches for /IndexFlatL2/: 9: ['all_rag_techniques/context_enrichment_window_around_chunk_with_llamaindex.ipynb c9', 'all_rag_techniques/fusion_retrieval_with_llamaindex.ipynb c8', 'all_rag_techniques/HyPE_Hypothetical_Prompt_Embeddings.ipynb c11', 'all_rag_techniques/json_rag.ipynb c21', 'all_rag_techniques/reranking_with_llamaindex.ipynb c10', 'all_rag_techniques/simple_csv_rag.ipynb c12', 'all_rag_techniques/simple_csv_rag_with_llamaindex.ipynb c8', 'all_rag_techniques/simple_rag_with_llamaindex.ipynb c9', 'all_rag_techniques_runnable_scripts/HyPE_Hypothetical_Prompt_Embeddings.py:L99']
+INFO repo code matches for /IndexFlatIP|METRIC_INNER_PRODUCT/: 0: []
+INFO repo code matches for /distance_strategy|DistanceStrategy/: 0: []
+INFO repo code matches for /normalize_embeddings|normalize_L2/: 1: ['all_rag_techniques/local_rag_huggingface_faiss.ipynb c14']
+INFO repo code matches for /input_type/: 0: []
+INFO repo code matches for /CrossEncoder\(/: 2: ['all_rag_techniques/reranking.ipynb c27', 'all_rag_techniques_runnable_scripts/reranking.py:L119']
+PASS repo: no inner-product FAISS index anywhere
+PASS repo: no LangChain distance_strategy override anywhere
+PASS repo: no embedding input_type anywhere
+PASS chapter 1.pdf p.5/14: 'GPS coordinates for meaning'
+PASS chapter 1.pdf p.5/14: 'close together in mathematical space'
+PASS chapter 1.pdf p.6/14: 'carbon dioxide in the atmosphere'
+PASS chapter 1.pdf p.6/14: 'Meaning Space'
+PASS chapter 1.pdf p.8/14: 'exact same process applied to the document'
+PASS chapter 12.pdf p.8/14: 'cosine similarity, bounded between -1 and 1'
+PASS chapter 13.pdf p.6/13: 'bi-encoders versus cross-encoders'
+PASS chapter 13.pdf p.6/13: 'typically using cosine similarity'
+PASS chapter 13.pdf p.6/13: 'cannot precompute anything'
+PASS chapter 13.pdf p.7/13: 'Bi-Encoder'
+PASS chapter 13.pdf p.9/13: 'Cross-encoder reranking'
+PASS chapter 6.pdf p.1/14: 'This is the asymmetry problem'
+PASS chapter 6.pdf p.2/14: 'question-shaped embedding'
+PASS chapter 11.pdf p.1/13: 'query-document asymmetry problem'
+PASS Appendix.pdf p.13/23: 'Asymmetry Problem'
+PASS Appendix.pdf p.13/23: 'Bi-Encoder'
+PASS Appendix.pdf p.15/23: 'Cosine Similarity'
+PASS Appendix.pdf p.15/23: '(Chapters 1, 12, 13, 15)'
+PASS Appendix.pdf p.15/23: 'Cross-Encoder'
+PASS Appendix.pdf p.16/23: 'GPS coordinates of meaning'
+INFO book pages matching /cosine/: ['Appendix.pdf p.14/23', 'Appendix.pdf p.15/23', 'chapter 12.pdf p.8/14', 'chapter 13.pdf p.6/13', 'chapter 15.pdf p.8/12', 'chapter 19.pdf p.4/10', 'chapter 20.pdf p.1/11', 'chapter 20.pdf p.4/11', 'chapter 21.pdf p.2/13']
+INFO book pages matching /dot product/: []
+INFO book pages matching /euclidean/: []
+INFO book pages matching /\bL2\b/: []
+INFO book pages matching /unit (length|vector)/: []
+INFO book pages matching /input.type/: []
+INFO book pages matching /prefix/: []
+INFO book pages matching /truncat/: []
+INFO book pages matching /max(imum)? sequence/: []
+PASS book: Ch1 never says 'cosine' although the glossary (App p.15/23) lists Chapter 1 for it (DV-B4)
+PASS book: no 'dot product', 'Euclidean', 'L2', 'unit length/vector', 'input type', 'truncat', 'max sequence' anywhere
+
+ALL PASS

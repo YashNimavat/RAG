@@ -1,0 +1,121 @@
+=== 1. throwaway solution
+  [cell 2 output] 33 pages | D-002 top-4 (rank, page, score): [(1, 24, 0.4606), (2, 23, 0.4513), (3, 10, 0.4386), (4, 6, 0.4385)]
+    D-009 top-4 pages: [29, 10, 24, 29]
+  [cell 6 output] Task 1 OK. tokens_k4 = 802; you predicted 0
+    Sources:
+    [1] (climate:24)
+    Kyoto Protocol 
+    The Kyoto Protocol, adopted in 1997, set binding emission reduction targets for developed 
+    countries. It was the first major international treaty to address climate change. The protocol 
+    laid the groundwork for subsequent agreements, highlighting the importa
+  [cell 10 output] Task 2 OK
+  [cell 13 output] Task 3 OK
+  [cell 17 output] Task 4 OK. [climate:29] resolves to 2 chunk ids; you predicted 2
+    Is the 1988 answer supported by the sources? The subset check says: True
+  [cell 21 output] T01 good                     subset_ok=True  abstained=False flags=[]
+    T02 fabricated page          subset_ok=False abstained=False flags=['cited_not_retrieved']
+    T03 wrong doc id             subset_ok=False abstained=False flags=['cited_not_retrieved']
+    T04 case differs             subset_ok=False abstained=False flags=['cited_not_retrieved']
+    T05 no citation              subset_ok=True  abstained=False flags=['no_citation']
+    T06 one of two uncited       subset_ok=True  abstained=False flags=['uncited_sentence']
+    T07 block number             subset_ok=False abstained=False flags=['malformed_tag', 'no_citation']
+    T08 space inside             subset_ok=False abstained=False flags=['malformed_tag', 'no_citation']
+    T09 header copy ()           subset_ok=False abstained=False flags=['malformed_tag', 'no_citation']
+    T10 two in one []            subset_ok=False abstained=False flags=['malformed_tag', 'no_citation']
+    T11 after full stop          subset_ok=True  abstained=False flags=[]
+    T12 two valid tags           subset_ok=True  abstained=False flags=[]
+    T13 exact abstention         subset_ok=True  abstained=True  flags=[]
+    T14 abstention variant       subset_ok=True  abstained=True  flags=[]
+    T15 paraphrased refusal      subset_ok=True  abstained=False flags=['no_citation']
+    T16 abstention + tag         subset_ok=True  abstained=False flags=['abstention_inside_answer']
+    T17 empty                    subset_ok=True  abstained=False fl
+  [cell 24 output] Task 6 OK
+    {
+     "text": "The Paris Agreement was adopted in 2015 [climate:10].",
+     "abstained": false,
+     "citations": [
+      {
+       "marker": "[climate:10]",
+       "doc_id": "climate",
+       "page": 10,
+       "resolved_chunk_ids": [
+        "climate:ea07572562ac:1ca9c5a3b548:00027"
+       ]
+      }
+     ],
+     "invalid_citations": [],
+     "malformed_markers": [],
+     "unused_chunk_ids": [
+      "climate:ea07572562ac:1ca9c5a3b548:00069",
+      "climate:ea07572562ac:1ca9c5a3b548:00068",
+      "climate:ea07572562ac:1ca9c5a3b548:00017"
+     ],
+     "uncited_sentences": 0,
+     "citation_subset_ok": true,
+     "flags": [],
+     "output_tokens": 60,
+     "reasoning_tokens": 40
+    }
+  [cell 27 output] Task 7 OK
+  [cell 32 output] k 4 -> 8: 802 -> 1442 tokens (x1.80); you predicted 0
+    unused chunks for T01: 3 of 4 -> 7 of 8; you predicted 0
+    Task 8 OK
+  [cell 35 output] Task 9 skipped (RUN_GROQ = False).
+CHECK Task 1: PASS
+CHECK Task 2: PASS
+CHECK Task 3: PASS
+CHECK Task 4: PASS
+CHECK Task 5: PASS
+CHECK Task 6: PASS
+CHECK Task 7: PASS
+CHECK Task 8: PASS
+solution: all 8 CHECK cells pass: True
+
+=== 2. blank notebook (no learner code, predictions left as None)
+CHECK Task 1: FAIL AssertionError: write your prediction first
+CHECK Task 2: FAIL NameError: name 'call_llm' is not defined
+CHECK Task 3: FAIL NameError: name 'parse_citations' is not defined
+CHECK Task 4: FAIL AssertionError: write your prediction first
+CHECK Task 5: FAIL NameError: name 'make_answer' is not defined
+CHECK Task 6: FAIL NameError: name 'make_record' is not defined
+CHECK Task 7: FAIL AssertionError: each kind must be one of ['both', 'generation', 'none', 'retrieval']
+CHECK Task 8: FAIL AssertionError: write both predictions first
+blank: every CHECK fails: True
+
+=== 3. broken variants (each must fail its intended CHECK)
+OK  T1 list order, no rank sort                        -> CHECK 1: FAIL AssertionError: sort by the 'rank' field: a shuffled list must give the same context | also fails [2, 6]
+OK  T1 no blank line between blocks                    -> CHECK 1: FAIL AssertionError: structure is right but a separator differs: one empty line between blocks
+OK  T1 block number cited header '[i] doc:page'        -> CHECK 1: FAIL AssertionError: headers must be '[i] (doc_id:page)' on their own line, numbered 1..4 in RANK or | also fails [2, 6, 8]
+OK  T1 tokens counted on user only                     -> CHECK 1: FAIL AssertionError: tokens_k4 = 695: count n_tok(system) + n_tok(user) | also fails [6]
+OK  T2 hardcoded model                                 -> CHECK 2: FAIL AssertionError: use the model_id argument; never hardcode a model
+OK  T2 no assert on empty                              -> CHECK 2: FAIL RuntimeError: no AssertionError for reply {'content': ''}: an empty answer must never pass sile
+OK  T2 assert without finish_reason                    -> CHECK 2: FAIL AssertionError: the assert message must include finish_reason
+OK  T2 default temperature 0.7                         -> CHECK 2: FAIL AssertionError: defaults: 0.0, 512, 'low' | also fails [6]
+OK  T2 reasoning_effort not sent                       -> CHECK 2: FAIL AssertionError: keyword arguments sent: ['max_tokens', 'messages', 'model', 'temperature'] | also fails [6]
+OK  T2 crashes on details None                         -> CHECK 2: FAIL AttributeError: 'NoneType' object has no attribute 'reasoning_tokens'
+OK  T3 lenient: spaces allowed                         -> CHECK 3: FAIL AssertionError: a space inside the tag makes it malformed | also fails [5]
+OK  T3 page as str                                     -> CHECK 3: FAIL AssertionError: one valid tag; page is an int | also fails [4, 5, 6, 8]
+OK  T3 malformed not reported                          -> CHECK 3: FAIL AssertionError: a block number is not a citation: report it as malformed | also fails [5, 6]
+OK  T3 duplicates kept                                 -> CHECK 3: FAIL AssertionError: distinct tags in order of FIRST appearance (the repeated [climate:10] is listed
+OK  T3 () look-alike ignored                           -> CHECK 3: FAIL AssertionError: a copied header '(doc:page)' is malformed | also fails [5]
+OK  T4 silent drop (graph_rag_local_attribution style) -> CHECK 4: FAIL AssertionError: page 12 was never retrieved: report it (do not drop it silently) | also fails [5, 6]
+OK  T4 only first same-page chunk                      -> CHECK 4: FAIL AssertionError: a page citation resolves to EVERY retrieved chunk on that page, in rank order | also fails [5]
+OK  T4 unused in list order                            -> CHECK 4: FAIL AssertionError: unused ids in RANK order, whatever the list order
+OK  T5 abstention case-sensitive                       -> CHECK 5: FAIL AssertionError: 
+OK  T5 paraphrased refusal counted                     -> CHECK 5: FAIL AssertionError: only the fixed sentence counts
+OK  T5 no_citation flag missing                        -> CHECK 5: FAIL AssertionError: a fact with no citation must be flagged
+OK  T5 subset_ok ignores malformed                     -> CHECK 5: FAIL AssertionError: one field differs from the reference for at least one toy answer; compare each  | also fails [6]
+OK  T5 flags unsorted                                  -> CHECK 5: FAIL AssertionError: flags are sorted
+OK  T5 naive sentence split                            -> CHECK 5: FAIL AssertionError: use split_sentences: a tag after the full stop belongs to that sentence
+OK  T6 errors ignored by failing_qids                  -> CHECK 6: FAIL AssertionError: failing_qids gave ['T02', 'T07']
+OK  T6 model id hardcoded in record                    -> CHECK 6: FAIL AssertionError: llm part differs: {'provider': 'groq', 'model_id': 'openai/gpt-oss-20b-x', 'tem
+OK  T6 prompt sha of user only                         -> CHECK 6: FAIL AssertionError: prompt.sha256: hash the messages as the task says
+OK  T7 J-style swap: c called retrieval                -> CHECK 7: FAIL AssertionError: at least one kind is wrong. Ask: was the evidence in the top-4? Then: is the an
+OK  T7 b called a failure                              -> CHECK 7: FAIL AssertionError: at least one kind is wrong. Ask: was the evidence in the top-4? Then: is the an
+OK  T7 e said caught by subset check                   -> CHECK 7: FAIL AssertionError: at least one 'caught_by' is wrong. Run make_answer on the toy answer and look a
+OK  T5 cut-off answer not flagged                      -> CHECK 6: FAIL AssertionError: finish_reason 'length' means the reply hit the max_tokens cap: flag it 'length_
+OK  T5 'length' also flagged unexpected                -> CHECK 6: FAIL AssertionError: 'length' is an expected finish_reason: flag only 'length_stop'
+OK  T6 finish_reason not passed to make_answer         -> CHECK 6: FAIL AssertionError: finish_reason 'length' means the reply hit the max_tokens cap: flag it 'length_
+OK  T8 unused counted at k=4                           -> CHECK 8: FAIL AssertionError: unused_k8 = 3 is not right yet
+broken variants caught: 34/34
+LAB TEST PASS

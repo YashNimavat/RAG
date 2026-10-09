@@ -1,0 +1,60 @@
+### B1_stride_off_by_one: intended Task 2 -> FAILS as intended
+    FAIL Task 2: AssertionError: the spans for T are not right yet: check where each window starts and where you stop
+    FAIL Task 4: AssertionError: p_brute is not right yet: count p = 0 .. L - F, and divide by the number of positions (L - F + 1)
+    passed: Task 1, Task 3, Task 5, Task 6, Task 7, Task 8, save
+### B2_overlap_in_pieces_not_chars: intended Task 5 -> FAILS as intended
+    FAIL Task 5: AssertionError: recursive_chunks(PARA, 300, 60) is not right yet (07 Part F, step 3)
+    FAIL Task 6: AssertionError: the per-page spans are not right yet
+    FAIL Task 7: AssertionError: the records differ from the v0 reference somewhere
+    FAIL Task 8: AssertionError: some overlap is above 200: the budget is in characters
+    FAIL save: AssertionError: the file differs from the v0 reference: do not hand it to C3
+    passed: Task 1, Task 2, Task 3, Task 4
+### B3_chunk_crosses_page: intended Task 6 -> FAILS as intended
+    FAIL Task 6: AssertionError: 46 chunks run past the end of their page, e.g. (1621, 2611, 1): per-page scope means no chunk crosses a page
+    FAIL Task 7: AssertionError: climate:ea07572562ac:1ca9c5a3b548:00002: the page segment must be page-relative and convert back to [char_start, char_end) inside its page
+    FAIL Task 8: AssertionError: achieved_overlaps is not right yet: only pairs on the same page, previous char_end minus next char_start
+    FAIL save: AssertionError: the file differs from the v0 reference: do not hand it to C3
+    passed: Task 1, Task 2, Task 3, Task 4, Task 5
+### B4_ids_uuid: intended Task 7 -> FAILS as intended
+    FAIL Task 7: AssertionError: ids must not use uuid, random, the clock, hash() or id()
+    FAIL save: AssertionError: the file differs from the v0 reference: do not hand it to C3
+    passed: Task 1, Task 2, Task 3, Task 4, Task 5, Task 6, Task 8
+### B5_params_hash_builtin_hash: intended Task 7 -> FAILS as intended
+    FAIL Task 7: AssertionError: params_hash is not right yet: sha256 of json.dumps(params, sort_keys=True), first 12 hex
+    FAIL save: AssertionError: the file differs from the v0 reference: do not hand it to C3
+    passed: Task 1, Task 2, Task 3, Task 4, Task 5, Task 6, Task 8
+### B6_page_relative_offsets_C2-A-05: intended Task 6 -> FAILS as intended
+    FAIL Task 6: AssertionError: 94 chunks start before their own page, e.g. (0, 932, 2): page-relative offsets? Add the page's start offset (C2-A-05)
+    FAIL Task 7: AssertionError: the records differ from the v0 reference somewhere
+    FAIL save: AssertionError: the file differs from the v0 reference: do not hand it to C3
+    passed: Task 1, Task 2, Task 3, Task 4, Task 5, Task 8
+### B7_weak_check_chunks: intended Task 3 -> FAILS as intended
+    FAIL Task 3: AssertionError: check_chunks did not catch: ['empty list', 'first chunk does not start at 0', 'last chunk does not reach the end', 'a chunk longer than size', '
+    passed: Task 1, Task 2, Task 4, Task 5, Task 6, Task 7, Task 8, save
+### B8_no_validation_no_stop_C2-A-04: intended Task 2 -> FAILS as intended
+    FAIL Task 2: TimeoutError: stopped after 300,000 steps: probably an infinite loop | File "<cell 2>", line 70, in _tr
+    passed: Task 1, Task 3, Task 4, Task 5, Task 6, Task 7, Task 8, save
+### B9_find_loop_on_empty_separator: intended Task 5 -> FAILS as intended
+    FAIL Task 5: TimeoutError: stopped after 300,000 steps: probably an infinite loop | File "<cell 2>", line 70, in _tr
+    passed: Task 1, Task 2, Task 3, Task 4, Task 6, Task 7, Task 8, save
+### B10_strip_whitespace: intended Task 5 -> FAILS as intended
+    FAIL Task 5: AssertionError: offsets wrong for chunk 0
+    passed: Task 1, Task 2, Task 3, Task 4, Task 6, Task 7, Task 8, save
+### B11_record_offsets_page_relative: intended Task 7 -> FAILS as intended
+    FAIL Task 7: AssertionError: text must equal doc_text[char_start:char_end]
+    FAIL save: AssertionError: the file differs from the v0 reference: do not hand it to C3
+    passed: Task 1, Task 2, Task 3, Task 4, Task 5, Task 6, Task 8
+
+=== summary
+OK  B1_stride_off_by_one                 intended Task 2  failed: Task 2, Task 4  (passed 7)
+OK  B2_overlap_in_pieces_not_chars       intended Task 5  failed: Task 5, Task 6, Task 7, Task 8, save  (passed 4)
+OK  B3_chunk_crosses_page                intended Task 6  failed: Task 6, Task 7, Task 8, save  (passed 5)
+OK  B4_ids_uuid                          intended Task 7  failed: Task 7, save  (passed 7)
+OK  B5_params_hash_builtin_hash          intended Task 7  failed: Task 7, save  (passed 7)
+OK  B6_page_relative_offsets_C2-A-05     intended Task 6  failed: Task 6, Task 7, save  (passed 6)
+OK  B7_weak_check_chunks                 intended Task 3  failed: Task 3  (passed 8)
+OK  B8_no_validation_no_stop_C2-A-04     intended Task 2  failed: Task 2  (passed 8)
+OK  B9_find_loop_on_empty_separator      intended Task 5  failed: Task 5  (passed 8)
+OK  B10_strip_whitespace                 intended Task 5  failed: Task 5  (passed 8)
+OK  B11_record_offsets_page_relative     intended Task 7  failed: Task 7, save  (passed 7)
+11/11 variants fail their intended CHECK

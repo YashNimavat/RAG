@@ -1,0 +1,47 @@
+PASS repo HEAD 009adba2be1bef49780ef73b6dd3c18fd24b035b
+PASS all_rag_techniques/proposition_chunking.ipynb cell 9: from_tiktoken_encoder(
+PASS all_rag_techniques/proposition_chunking.ipynb cell 9: chunk_size=200, chunk_overlap=50
+PASS all_rag_techniques/reliable_rag.ipynb cell 6: from_tiktoken_encoder(
+PASS all_rag_techniques/reliable_rag.ipynb cell 6: chunk_size=500, chunk_overlap=0
+PASS all_rag_techniques/contextual_chunk_headers.ipynb cell 11: MAX_CONTENT_TOKENS = 4000
+PASS all_rag_techniques/contextual_chunk_headers.ipynb cell 11: tiktoken.encoding_for_model('gpt-3.5-turbo')
+PASS all_rag_techniques/contextual_chunk_headers.ipynb cell 11: MODEL_NAME = "gpt-4o-mini"
+PASS all_rag_techniques/contextual_chunk_headers.ipynb cell 11: max_tokens=MAX_CONTENT_TOKENS
+PASS all_rag_techniques/contextual_chunk_headers.ipynb cell 11: temperature=0.2
+PASS all_rag_techniques/contextual_chunk_headers.ipynb cell 11: tokens[:max_tokens]
+PASS all_rag_techniques/contextual_chunk_headers.ipynb cell 11: num_words=3000
+PASS all_rag_techniques/simple_rag_with_llamaindex.ipynb cell 4: langchain uses length of the string
+PASS all_rag_techniques/simple_rag_with_llamaindex.ipynb cell 4: llamaindex uses length of the tokens
+PASS all_rag_techniques/simple_rag_with_llamaindex.ipynb cell 4: CHUNK_SIZE = 200
+PASS all_rag_techniques/simple_rag_with_llamaindex.ipynb cell 4: CHUNK_OVERLAP = 50
+PASS all_rag_techniques/simple_rag_with_llamaindex.ipynb cell 13: SentenceSplitter(chunk_size=CHUNK_SIZE, chunk_overlap=CHUNK_OVERLAP)
+PASS all_rag_techniques/document_augmentation.ipynb cell 4: DOCUMENT_MAX_TOKENS = 4000
+PASS all_rag_techniques/document_augmentation.ipynb cell 4: FRAGMENT_MAX_TOKENS = 128
+PASS all_rag_techniques/document_augmentation.ipynb cell 4: Llama 3.1 8B 128k
+PASS all_rag_techniques/document_augmentation.ipynb cell 6: re.findall(r'\b\w+\b', document)
+PASS all_rag_techniques/document_augmentation.ipynb cell 6: in terms of the number of tokens
+PASS all_rag_techniques/document_augmentation.ipynb cell 6: ChatOpenAI(model="gpt-4o-mini", temperature=0)
+PASS all_rag_techniques/simple_rag.ipynb cell 10: chunk_size=1000
+PASS all_rag_techniques/simple_rag.ipynb cell 10: length_function=len
+PASS all_rag_techniques/choose_chunk_size.ipynb cell 8: OpenAI(temperature=0, model="gpt-4o")
+PASS all_rag_techniques/choose_chunk_size.ipynb cell 8: FaithfulnessEvaluator()
+PASS all_rag_techniques/reliable_rag.ipynb cell 14: ChatGroq(model="llama-3.1-8b-instant", temperature=0)
+PASS all_rag_techniques/reliable_rag.ipynb cell 14: You are a grader
+PASS evaluation/define_evaluation_metrics.ipynb cell 1: ChatOpenAI(temperature=0, model_name="gpt-4o", max_tokens=4000)
+PASS all_rag_techniques/graph_rag.ipynb cell 12: get_openai_callback() as cb
+PASS all_rag_techniques/graph_rag.ipynb cell 12: cb.prompt_tokens
+PASS all_rag_techniques/graph_rag.ipynb cell 12: cb.completion_tokens
+PASS all_rag_techniques/graph_rag.ipynb cell 12: cb.total_cost
+PASS graph_rag.ipynb cell 12: max_context_length is set once and never read in that cell
+PASS Ch chapter 1.pdf p.12/14: 'context window'
+PASS Ch chapter 2.pdf p.9/11: 'charged per token'
+PASS Ch chapter 4.pdf p.5/15: 'exceeding its context window'
+PASS Ch chapter 9.pdf p.9/14: 'context window'
+PASS Ch chapter 10.pdf p.12/13: 'every token counts'
+PASS Ch chapter 22.pdf p.8/19: 'different random seeds'
+PASS Ch chapter 22.pdf p.14/19: 'input tokens from the context plus output tokens'
+PASS Ch chapter 22.pdf p.18/19: 'token costs'
+PASS book: 'tokeniz' occurs only at ['chapter 12.pdf p.6/14', 'chapter 12.pdf p.10/14'] (BM25 splitting a query/chunk into words; no subword tokenizer)
+INFO book: 'temperature' occurrences = 13 on ['chapter 10.pdf p.1', 'chapter 10.pdf p.10', 'chapter 10.pdf p.4', 'chapter 10.pdf p.9', 'chapter 5.pdf p.4', 'chapter 6.pdf p.5', 'chapter 6.pdf p.7', 'chapter 9.pdf p.1'] (read by hand: all are about Earth's climate, none about sampling)
+
+ALL PASS

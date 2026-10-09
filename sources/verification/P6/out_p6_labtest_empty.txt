@@ -1,0 +1,44 @@
+--- cell 2 [given] import hashlib, json
+    Q1 Which gases trap heat in the atmosphere? | qrels {'c3': 2, 'c7': 1, 'c9': 1}
+       ranking ['c5', 'c3', 'c8', 'c7', 'c1', 'c2', 'c9', 'c4', 'c6', 'c10']
+    Q2 What does the Paris Agreement aim for? | qrels {'c4': 2}
+       ranking ['c4', 'c2', 'c1', 'c3', 'c5', 'c6', 'c7', 'c8', 'c9', 'c10']
+    Q3 How does cutting forests add CO2 to the air? | qrels {'c6': 2, 'c10': 1}
+       ranking ['c1', 'c8', 'c2', 'c10', 'c6', 'c3', 'c4', 'c5', 'c7', 'c9']
+--- cell 4 [prediction/T1] hand = {"P@5": None, "R@5": None, "Hit@1": None, "Hit@5": None, "RR@5"
+--- cell 5 [CHECK] # CHECK Task 1 (do not edit)
+    ERROR AssertionError: every value must be a number between 0 and 1
+--- cell 7 [learner/T2] # Your code here (blank-file first: write it yourself; no copying from
+--- cell 8 [CHECK] # CHECK Task 2 (do not edit)
+    ERROR NameError: name 'precision_at_k' is not defined | File "<cell 8>", line 3, in <module>
+--- cell 10 [prediction/T3] my_prediction_mrr10 = None   # your number, BEFORE you write the funct
+--- cell 11 [learner/T3b] # Your code here (blank-file first: write it yourself; no copying from
+--- cell 12 [CHECK] # CHECK Task 3 (do not edit)
+    ERROR AssertionError: write your prediction first
+--- cell 14 [learner/T4] # Your code here (blank-file first: write it yourself; no copying from
+--- cell 15 [CHECK] # CHECK Task 4 (do not edit)
+    ERROR NameError: name 'ndcg_at_k' is not defined | File "<cell 15>", line 3, in <module>
+--- cell 17 [learner/T5] # Your code here (blank-file first: write it yourself; no copying from
+--- cell 18 [CHECK] # CHECK Task 5 (do not edit)
+    ERROR AssertionError: write at least 6 test functions; found 0
+--- cell 20 [prediction/T6] hand_corrected = {}          # e.g. {"nDCG@5": 0.56}; leave empty if T
+--- cell 21 [CHECK] # CHECK Task 6 (do not edit)
+    ERROR NameError: name 'precision_at_k' is not defined | File "<cell 21>", line 3, in <module>
+--- cell 23 [learner/T7] my_qrels = {}
+--- cell 24 [CHECK] # CHECK Task 7 (do not edit)
+    ERROR AssertionError: use exactly 5 chunks per ranking
+--- cell 26 [prediction/T8] my_direction = {"P": None, "R": None, "Hit": None, "RR": None, "nDCG":
+--- cell 27 [learner/T8b] # Your code here (blank-file first: write it yourself; no copying from
+--- cell 28 [CHECK] # CHECK Task 8 (do not edit)
+    ERROR AssertionError: use "up", "down" or "same"
+
+=== CHECK summary
+FAIL cell 5: # CHECK Task 1 (do not edit)  <- AssertionError: every value must be a number between 0 and 1
+FAIL cell 8: # CHECK Task 2 (do not edit)  <- NameError: name 'precision_at_k' is not defined | File "<cell 8>", line 3, in <module>
+FAIL cell 12: # CHECK Task 3 (do not edit)  <- AssertionError: write your prediction first
+FAIL cell 15: # CHECK Task 4 (do not edit)  <- NameError: name 'ndcg_at_k' is not defined | File "<cell 15>", line 3, in <module>
+FAIL cell 18: # CHECK Task 5 (do not edit)  <- AssertionError: write at least 6 test functions; found 0
+FAIL cell 21: # CHECK Task 6 (do not edit)  <- NameError: name 'precision_at_k' is not defined | File "<cell 21>", line 3, in <module>
+FAIL cell 24: # CHECK Task 7 (do not edit)  <- AssertionError: use exactly 5 chunks per ranking
+FAIL cell 28: # CHECK Task 8 (do not edit)  <- AssertionError: use "up", "down" or "same"
+0/8 CHECK cells passed

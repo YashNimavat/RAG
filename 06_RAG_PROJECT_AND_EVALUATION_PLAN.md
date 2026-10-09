@@ -286,10 +286,11 @@ generation:
   model_id: "${GROQ_MODEL_ID}"                # set in .env; check https://console.groq.com/docs/models  [N] never hardcode
   temperature: 0.0
   max_tokens: 512
+  reasoning_effort: low                       # gpt-oss: low | medium | high; always sent (omitted = Groq's server default, medium)
   prompt_template: prompts/answer_v1.txt
   prompt_version: answer_v1
 cache:
-  llm: .cache/llm                             # keyed by sha256(model_id|messages|params)
+  llm: .cache/llm                             # keyed by sha256(model_id|messages|params); params = temperature, max_tokens, reasoning_effort
   embeddings: .cache/emb  # keyed by sha256(provider|model_id|revision|input_type|preproc_version|text)
 eval:
   dataset: evaluation/datasets/D_eval_v1.0.jsonl
@@ -307,6 +308,21 @@ eval:
 ```
 
 > Revised 2026-10-08 (Codex M-01, M-02, M-04, M-05, M-06; learner decisions D-03, D-04, D-10): the config records the snapshot and `cleaning: none`; Cohere embed is the default with a pinned local fallback; the embedding cache key includes provider, input type, preprocessing version and text; the ambiguous `relevance_rule` is replaced by one `scoring` block; `snapshot_id` and `split` are comparison keys; the Cohere judge runs only in the final batch. See [corrections log](reviews/CORRECTIONS_LOG_2026-10-08.md#m-02), [M-01](reviews/CORRECTIONS_LOG_2026-10-08.md#m-01), [M-04](reviews/CORRECTIONS_LOG_2026-10-08.md#m-04), [M-05](reviews/CORRECTIONS_LOG_2026-10-08.md#m-05), [M-06](reviews/CORRECTIONS_LOG_2026-10-08.md#m-06), [learner decisions](reviews/CORRECTIONS_LOG_2026-10-08.md#learner-decisions).
+
+> Revised 2026-10-09 (external-resources review §3a row 4): records C5's existing decision. `reasoning_effort: low` is now in the generation block and in the LLM cache key's params; the §2.5 `llm` object gains `max_tokens`, `reasoning_effort` and `finish_reason` (as C5 IA-6); §3.1 Generate, the §9.2 generator control and the §8.4 re-calibration triggers name the reasoning setting. Why: if the field is omitted, Groq's server applies its documented default `medium` (Groq API reference, read 2026-10-09; not measured), and §9.2 would still pass the run. See [review report](sources/EXTERNAL_RESOURCES_REVIEW_2026-10-09.md#3a-changes).
+
+**Interface decisions (2026-10-08, Phase 2 lesson batch).** These were fixed when the C1–C6 lessons were written, so that every lab's output feeds the next lab:
+
+| Item | Decision | Corpus D v0 value |
+|---|---|---|
+| `params_hash` | `sha256(json.dumps(chunking_block, sort_keys=True).encode("utf-8")).hexdigest()[:12]`. `chunking_block` is the `chunking:` mapping above, exactly as written, with these key names (not 07 H.3's `size`/`overlap`/`recursive`). | `1ca9c5a3b548` |
+| `chunk_id` | `f"{doc_id}:{snapshot_id}:{params_hash}:{seq:05d}"` (§2.3) | `climate:ea07572562ac:1ca9c5a3b548:00000` … `00096` (97 chunks) |
+| `embed_hash` | 12 hex of the sha256 of `json.dumps({provider, model_id, revision, input_type, normalize, preproc_version}, sort_keys=True)`; recorded in `manifest.json` | depends on the embedder |
+| Index folder | `index/<snapshot_id>/<params_hash>/<embed_hash>/`, so two embedders never share a folder | — |
+| Row alignment | `vectors.npy` row i ↔ line i of `chunks.jsonl`. `seq` restarts per document, so no code assumes `seq == i` | — |
+| `.env` name | `COHERE_EMBED_MODEL_ID` (the older `COHERE_EMBED_MODEL` is kept with the same value) | — |
+
+Lessons: [C2 lab](sources/verification/C2lab/C2LAB_FACTS.md), [C3](concepts/C3_embedding_indexing.md) Part H.4, [C4](concepts/C4_dense_retrieval.md), [C6](concepts/C6_v0_pipeline.md).
 
 ### 2.5 Trace record schema (one JSON object per query, appended to `results.jsonl`)
 
@@ -358,7 +374,8 @@ The example shows the **shape** only. All numbers are placeholders, not results.
   },
   "latency_ms": {"query_transform": 0, "embed_query": 0, "dense": 0, "bm25": 0, "fusion": 0, "rerank": 0, "context": 0, "llm": 0, "total": 0},
   "cost_usd_estimate": {"llm": 0.0, "judge": 0.0, "price_table_version": "<date checked>"},
-  "llm": {"provider": "groq", "model_id": "<...>", "cache_hit": false, "temperature": 0.0},
+  "llm": {"provider": "groq", "model_id": "<...>", "cache_hit": false, "temperature": 0.0,
+          "max_tokens": 512, "reasoning_effort": "low", "finish_reason": "stop"},
   "errors": []
 }
 ```
@@ -373,6 +390,7 @@ Fields marked by role:
 | `fused.ranks_by_source` | [N] from v2 | Explains *why* a chunk was promoted. |
 | `context.context_tokens`, `truncated_chunks` | [N] | Equal-budget comparisons and truncation audits. |
 | `prompt.sha256` | [N] | Detects silent prompt drift between runs. |
+| `llm.max_tokens`, `llm.reasoning_effort`, `llm.finish_reason` | [N] | Both settings change the answer. `finish_reason` "length" marks an answer cut at the cap, which otherwise looks like a citation failure (C5 D.6). |
 | full prompt text | [P] | Store only for failing items or in debug mode; it is large. |
 | `latency_ms` per stage | [N] | p50/p95 per stage (§7.4). |
 | `cost_usd_estimate` | [N] | Price table version must be recorded; prices change. |
@@ -392,7 +410,7 @@ v0 is deliberately simple. Its job is to be **correct, traceable and measurable*
 | Embed | Default **Cohere embed** (learner decision D-03), model id from `.env` (`COHERE_EMBED_MODEL_ID`), `input_type` = `search_document` for chunks and `search_query` for questions, normalized; cached by content (§2.4). **Fallback:** local `sentence-transformers/all-MiniLM-L6-v2` (offline runs, second-model comparison); `BAAI/bge-small-en-v1.5` is another local option. | Model [P] (learner decision); input type and normalization [N] | See §3.2 for limits; Cohere input types: Source C #52. |
 | Index | `vectors.npy` (float32, n×d), `chunks.jsonl`, `manifest.json`. | [N] manifest | §2.2. |
 | Retrieve | Exact cosine: `scores = V @ q` with V and q L2-normalized; `argpartition` then sort; **k = 4**. Ties broken by `chunk_id` for determinism. | Exact search [P] at this scale; deterministic ties [N] | Repo `simple_rag.ipynb` cell 13 uses `k=2`; BACKBONE fixes k=4 for v0. A corpus of ~100–1,000 chunks needs no ANN index. |
-| Generate | Groq chat model (learner decision D-04), id from `.env` (`GROQ_MODEL_ID`), `temperature=0`, `max_tokens=512`, prompt below. | Provider [P]; temperature 0 [N] for repeatability | Groq deprecates models (environment inventory, risk 4), so the id is configuration, never code. |
+| Generate | Groq chat model (learner decision D-04), id from `.env` (`GROQ_MODEL_ID`), `temperature=0`, `max_tokens=512`, `reasoning_effort="low"`, prompt below. | Provider [P]; temperature 0 [N] for repeatability | Groq deprecates models (environment inventory, risk 4), so the id is configuration, never code. |
 | Log | Full trace record (§2.5) for every query. | [N] | D1 starts at v0, not v6. |
 
 > Revised 2026-10-08 (Codex M-01; learner decisions D-03, D-04): Load now freezes a snapshot with no cleaning (the tab replacement became an optional, recorded cleaning step); Embed names Cohere embed as default with a local fallback; Generate records the Groq decision. See [corrections log](reviews/CORRECTIONS_LOG_2026-10-08.md#m-01) and [learner decisions](reviews/CORRECTIONS_LOG_2026-10-08.md#learner-decisions).
@@ -1184,7 +1202,7 @@ Return JSON: {"claims": [{"claim": str, "reason": str, "label": "SUPPORTED" | "N
   - **Decision rule (Assumption: provisional operating preference).** A judge is certified for a metric only if, on the untouched validation set, the **lower 95% bound** of failure-class recall is **≥ 0.70** and the **lower 95% bound** of κ is **≥ 0.40**. Otherwise human scoring continues for that metric. The previous point targets (κ ≥ 0.6, failure recall ≥ 0.8) are still reported, as **aspirational** targets, not as the pass rule.
 - **Challenge set.** If natural outputs contain too few failures, add a labelled challenge set (fabricated claims, swapped citations, contradictions), kept separate from natural outputs; report both.
 - **Disjoint sets.** Rubric-tuning units and validation units never overlap. Codex labels a fixed calibration sample as an independent labeller; its labels are reported separately and never counted as human.
-- Re-calibrate whenever the judge model, the judge prompt or the generator family changes. Store calibration results in `evaluation/judge_calibration/<judge_name>.md`.
+- Re-calibrate whenever the judge model, the judge prompt, or the generator family or its reasoning setting (`reasoning_effort`) changes. Store calibration results in `evaluation/judge_calibration/<judge_name>.md`.
 - Upstream contrast: only `evaluation_grouse.ipynb` and `end-2-end_rag_evaluation.ipynb` meta-evaluate their judges against labels, and neither on this corpus (eval inventory).
 - **Unanswerables:** 40 answerable + 6 unanswerable is a learning minimum for Gate 3→4. No abstention-threshold claim until ≥ 15 unanswerable items exist with ≥ 5 in dev (Assumption/[P]); 6/6 correct still has an exact two-sided 95% lower bound of about 0.54.
 
@@ -1260,7 +1278,7 @@ experiments/
 - [ ] Exactly one variable differs from the champion config (show the config diff).
 - [ ] Embedding model id **and revision** are pinned; same device class, or a test that CPU and GPU embeddings agree within tolerance.
 - [ ] Same k; **plus** an equal-context-token-budget comparison when the change alters chunk size or context size.
-- [ ] Generator model id, temperature 0, max_tokens, prompt version are identical (unless the prompt is the variable).
+- [ ] Generator model id, temperature 0, max_tokens, reasoning_effort (always sent; never left to the server default), prompt version are identical (unless the prompt is the variable).
 - [ ] No judge ran per experiment (D-10); generation evidence is deterministic metrics plus human reading/labels. (Final batch only: judge model id and prompt version identical across versions; certification on file, §8.4.)
 - [ ] Seeds are fixed (sampling, bootstrap, any random split).
 - [ ] Caches are keyed by content: embedding key = `sha256(provider|model_id|revision|input_type|preproc_version|text)`; no chunk/artifact ID or config hash is used as a cache key.

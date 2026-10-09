@@ -58,6 +58,11 @@ A connected, implementation-focused system for learning RAG. You understand each
   - Cite as `Ch4 p.3/15`, meaning PDF page 3 of the 15-page `chapter 4.pdf`. The book has no printed page numbers.
   - The edition cannot be verified ([01 §2.1](01_SOURCE_INVENTORY.md#21-identity-and-provenance)).
 - **Repo:** `https://github.com/NirDiamant/RAG_Techniques`, cloned to `C:\Yash\New-Work\Book RAG\upstream\RAG_Techniques` at commit `009adba2be1bef49780ef73b6dd3c18fd24b035b` (41 technique notebooks + 5 evaluation notebooks). Custom **non-commercial** licence.
+- **AI Eval book (Source D, added 2026-10-09):** *Evals for AI Engineers* (Shreya Shankar and Hamel Husain, O'Reilly, 2026; this copy is an early-release export), a local study copy in `rag_learning\AI Eval\`, git-ignored.
+  - Copyrighted: own words only, never 15 or more consecutive words. Cite as `AE Ch3, 'section'`.
+  - Method source for Phase 3 (M1–M5) and the final judge batch ([01 §8.1](01_SOURCE_INVENTORY.md#81-source-d--the-ai-eval-book-ae); [review](sources/EXTERNAL_RESOURCES_REVIEW_2026-10-09.md)).
+- **ai-system-design-guide (Source E, added 2026-10-09):** cloned read-only to `C:\Yash\New-Work\Book RAG\upstream\ai-system-design-guide` at commit `ed955b2`, MIT. Reference only; never cited as evidence ([01 §8.2](01_SOURCE_INVENTORY.md#82-source-e--ai-system-design-guide-sdg); [review](sources/EXTERNAL_RESOURCES_REVIEW_2026-10-09.md)).
+- **AI-Engineer-Interview-Questions (Source F, added 2026-10-09):** cloned read-only to `C:\Yash\New-Work\Book RAG\upstream\AI-Engineer-Interview-Questions` at commit `e080df2`, MIT. Practice questions, fresh transfer scenarios and two tested coding challenges. A repo answer is shown only after your attempt, with the MIT notice ([01 §8.3](01_SOURCE_INVENTORY.md#83-source-f--ai-engineer-interview-questions-aiq); [review](sources/EXTERNAL_RESOURCES_REVIEW_2026-10-09.md)).
 - **Prior materials:** `C:\Yash\New-Work\Book RAG\prior_work\RAG book step by step\learning_guides\` is **retired**: 19 of 22 guides are mis-numbered against the real book ([01 §5](01_SOURCE_INVENTORY.md#5-prior-learner-materials)). Your executed `my way\` notebooks and VAI labs feed the O1 diagnostic.
 
 ## Ground rules this system enforces

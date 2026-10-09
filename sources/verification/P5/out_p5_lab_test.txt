@@ -1,0 +1,86 @@
+# P5 lab test, 2026-10-08. Runner and throwaway solution kept outside the workspace (scratchpad/p5_lab_test). Notebook sha256: 6cc8c82260a51240ea0335e34f4a5a8e7393bb08b98b18694574f79006c0286f
+variant=good
+  PASS # CHECK Task 1 (do not edit) 
+  PASS # CHECK Task 2 (do not edit) 
+  PASS # CHECK Task 3 (do not edit) 
+  PASS # CHECK Task 4 (do not edit) 
+  PASS # CHECK Task 5 (do not edit) 
+  PASS # CHECK Task 5b (do not edit) 
+  PASS # CHECK Task 6 (do not edit) 
+  PASS # CHECK Task 7 (do not edit) 
+  PASS # CHECK Task 8 (do not edit) 
+  PASS # CHECK Task 9 (do not edit) 
+  SUMMARY 10/10 CHECK cells passed
+variant=blank
+  FAIL # CHECK Task 1 (do not edit) NameError: name 'chunks' is not defined
+  FAIL # CHECK Task 2 (do not edit) NameError: name 'V' is not defined
+  FAIL # CHECK Task 3 (do not edit) NameError: name 'brute_force_top_k' is not defined
+  FAIL # CHECK Task 4 (do not edit) NameError: name 'top_k' is not defined
+  FAIL # CHECK Task 5 (do not edit) NameError: name 'q' is not defined
+  FAIL # CHECK Task 5b (do not edit) NameError: name 'V5' is not defined
+  FAIL # CHECK Task 6 (do not edit) NameError: name 'X' is not defined
+  FAIL # CHECK Task 7 (do not edit) NameError: name 'U' is not defined
+  FAIL # CHECK Task 8 (do not edit) NameError: name 'mb_200k' is not defined
+  PASS # CHECK Task 9 (do not edit) 
+  SUMMARY 1/10 CHECK cells passed
+variant=no_tie_rule
+  PASS # CHECK Task 1 (do not edit) 
+  PASS # CHECK Task 2 (do not edit) 
+  PASS # CHECK Task 3 (do not edit) 
+  FAIL # CHECK Task 4 (do not edit) AssertionError: trial 0: top_k=[10, 14, 8] but brute force=[8, 10, 14] for k=3, scores=[0.30000001192092896, 0.800000011920929, 0.699999988079071, 0.4000000059604645, 0.30000001192092896, 0.6000000238418579, 0.2000000029
+  PASS # CHECK Task 5 (do not edit) 
+  FAIL # CHECK Task 5b (do not edit) AssertionError: rows5 = [428, 337, 64, 246]: equal scores must go to the smaller row number
+  PASS # CHECK Task 6 (do not edit) 
+  PASS # CHECK Task 7 (do not edit) 
+  PASS # CHECK Task 8 (do not edit) 
+  PASS # CHECK Task 9 (do not edit) 
+  SUMMARY 8/10 CHECK cells passed
+variant=similarity_matrix
+  PASS # CHECK Task 1 (do not edit) 
+  PASS # CHECK Task 2 (do not edit) 
+  PASS # CHECK Task 3 (do not edit) 
+  PASS # CHECK Task 4 (do not edit) 
+  FAIL # CHECK Task 5 (do not edit) AssertionError: q must be one vector of shape (384,), got (1, 384)
+  FAIL  ValueError: matmul: Input operand 1 has a mismatch in its core dimension 0, with gufunc signature (n?,k),(k,m?)->(n?,m?) (size 1 is different from 384)
+  FAIL # CHECK Task 5b (do not edit) NameError: name 'rows5' is not defined
+  PASS # CHECK Task 6 (do not edit) 
+  PASS # CHECK Task 7 (do not edit) 
+  PASS # CHECK Task 8 (do not edit) 
+  PASS # CHECK Task 9 (do not edit) 
+  SUMMARY 8/11 CHECK cells passed
+variant=ascending
+  PASS # CHECK Task 1 (do not edit) 
+  PASS # CHECK Task 2 (do not edit) 
+  PASS # CHECK Task 3 (do not edit) 
+  FAIL # CHECK Task 4 (do not edit) AssertionError: toy k=2 gives [5, 0]
+  FAIL # CHECK Task 5 (do not edit) AssertionError: top-4 ids [21, 61, 20, 36] are not right yet: same model, normalised, scores = V @ q?
+  FAIL # CHECK Task 5b (do not edit) AssertionError: rows5 = [21, 112, 294, 385]: equal scores must go to the smaller row number
+  FAIL # CHECK Task 6 (do not edit) AssertionError: pre-filter ids for D-002 are not right yet (return a list of int)
+  FAIL # CHECK Task 7 (do not edit) AssertionError: m_dot_eq_cos = 2 is not right yet
+  PASS # CHECK Task 8 (do not edit) 
+  PASS # CHECK Task 9 (do not edit) 
+  SUMMARY 5/10 CHECK cells passed
+variant=postfilter_wrong
+  PASS # CHECK Task 1 (do not edit) 
+  PASS # CHECK Task 2 (do not edit) 
+  PASS # CHECK Task 3 (do not edit) 
+  PASS # CHECK Task 4 (do not edit) 
+  PASS # CHECK Task 5 (do not edit) 
+  PASS # CHECK Task 5b (do not edit) 
+  FAIL # CHECK Task 6 (do not edit) AssertionError: n_post_short = 35 is not right yet (fetch_k=20, then filter, then first k)
+  PASS # CHECK Task 7 (do not edit) 
+  PASS # CHECK Task 8 (do not edit) 
+  PASS # CHECK Task 9 (do not edit) 
+  SUMMARY 9/10 CHECK cells passed
+variant=no_normalise_query
+  PASS # CHECK Task 1 (do not edit) 
+  PASS # CHECK Task 2 (do not edit) 
+  PASS # CHECK Task 3 (do not edit) 
+  PASS # CHECK Task 4 (do not edit) 
+  FAIL # CHECK Task 5 (do not edit) AssertionError: q must be normalised like the chunks
+  PASS # CHECK Task 5b (do not edit) 
+  PASS # CHECK Task 6 (do not edit) 
+  PASS # CHECK Task 7 (do not edit) 
+  PASS # CHECK Task 8 (do not edit) 
+  PASS # CHECK Task 9 (do not edit) 
+  SUMMARY 9/10 CHECK cells passed

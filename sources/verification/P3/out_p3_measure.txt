@@ -1,0 +1,158 @@
+
+=== S1 environment and corpus
+python 3.12.8 | {'rank-bm25': '0.2.2', 'numpy': '2.5.3', 'pymupdf': '1.26.7', 'scikit-learn': '1.9.1'}
+pdf sha256 1d58a0fac2435c2ce4129ff84906b93118d731e4a004e7a26f8ab8f749a92669
+pages=33 chars=72593
+
+=== S2 rank_bm25 BM25Okapi: defaults and formulas (read from the installed source)
+file: \rank_bm25.py
+signature: (self, corpus, tokenizer=None, k1=1.5, b=0.75, epsilon=0.25)
+  source contains 'idf = math.log(self.corpus_size - freq + 0.5) - math.log(freq + 0.5)': True
+  source contains 'if idf < 0:': True
+  source contains 'eps = self.epsilon * self.average_idf': True
+  source contains 'self.average_idf = idf_sum / len(self.idf)': True
+  source contains '(q_freq * (self.k1 + 1) /': True
+  source contains '(q_freq + self.k1 * (1 - self.b + self.b * doc_len / self.avgdl)))': True
+  source contains 'for q in query:': True
+  source contains '(self.idf.get(q) or 0)': True
+  doc_len = len(document) (tokens, duplicates counted): True
+  avgdl = total tokens / number of docs: True
+  tokenizer= argument uses multiprocessing Pool: True
+
+=== S3 TOY corpus (made up for P3; the BPA story follows Ch12 p.1/14)
+d0 len=11 ['bpa', 'regulation', '2019', 'the', 'eu', 'limits', 'bpa', 'in', 'food', 'contact', 'plastics']
+d1 len=10 ['climate', 'policy', 'and', 'plastics', 'a', 'review', 'of', 'chemical', 'safety', 'regulation']
+d2 len=13 ['the', '2019', 'bpa', 'ban', 'covers', 'baby', 'bottles', 'bpa', 'bps', 'and', 'bpf', 'are', 'bisphenols']
+d3 len=11 ['climate', 'change', 'raises', 'sea', 'levels', 'and', 'flood', 'risks', 'for', 'coastal', 'cities']
+d4 len=10 ['greenhouse', 'gas', 'emissions', 'and', 'climate', 'targets', 'under', 'the', 'paris', 'agreement']
+d5 len= 5 ['plastics', 'manufacturing', 'adds', 'climate', 'emissions']
+N=6 total tokens=60 avgdl=10.0
+vocabulary=44 average_idf (all terms, before floor)=1.089767 eps=0.25*average_idf=0.272442
+  term 'bpa'        n=2 raw idf=ln((6-2+0.5)/(2+0.5))=+0.587787 -> rank_bm25 idf=0.587787
+  term 'regulation' n=2 raw idf=ln((6-2+0.5)/(2+0.5))=+0.587787 -> rank_bm25 idf=0.587787
+  term '2019'       n=2 raw idf=ln((6-2+0.5)/(2+0.5))=+0.587787 -> rank_bm25 idf=0.587787
+  term 'eu'         n=1 raw idf=ln((6-1+0.5)/(1+0.5))=+1.299283 -> rank_bm25 idf=1.299283
+  term 'plastics'   n=3 raw idf=ln((6-3+0.5)/(3+0.5))=+0.000000 -> rank_bm25 idf=0.000000
+  term 'the'        n=3 raw idf=ln((6-3+0.5)/(3+0.5))=+0.000000 -> rank_bm25 idf=0.000000
+  term 'climate'    n=4 raw idf=ln((6-4+0.5)/(4+0.5))=-0.587787 -> rank_bm25 idf=0.272442
+  term 'and'        n=4 raw idf=ln((6-4+0.5)/(4+0.5))=-0.587787 -> rank_bm25 idf=0.272442
+  term 'emissions'  n=2 raw idf=ln((6-2+0.5)/(2+0.5))=+0.587787 -> rank_bm25 idf=0.587787
+
+=== S4 hand computation: term 'bpa' in d0 (k1=1.5, b=0.75)
+N=6 n=2 f=2 dl=11 avgdl=10.0
+idf = ln((6-2+0.5)/(2+0.5)) = ln(4.5/2.5) = 0.587787
+K = k1*(1-b+b*dl/avgdl) = 1.5*(0.25+0.75*11/10) = 1.612500
+tf part = f*(k1+1)/(f+K) = 2*2.5/(2+1.6125) = 1.384083
+score = 0.813546; rank_bm25 = 0.813546; |diff| = 0.0e+00
+query ['bpa', 'regulation', '2019']: rank_bm25 scores per doc = [1.938496, 0.587787, 1.28372, 0.0, 0.0, 0.0]
+  NumPy reference scores per doc     = [1.938496, 0.587787, 1.28372, 0.0, 0.0, 0.0]  max|diff|=0.0e+00
+  d0 contribution of 'bpa': 0.813546
+  d0 contribution of 'regulation': 0.562475
+  d0 contribution of '2019': 0.562475
+  term 'bpa' in d2 (f=2, dl=13): score=0.765846
+  term '2019' in d2 (f=1, dl=13): score=0.517874
+  term 'eu' in d0 (f=1, dl=11): score=1.243333
+  term 'regulation' in d1 (f=1, dl=10): score=0.587787
+  term 'emissions' in d5 (f=1, dl=5): score=0.758434
+  term 'emissions' in d4 (f=1, dl=10): score=0.587787
+
+=== S5 tf saturation and length normalisation (tf part only; multiply by idf for the score)
+tf part at dl = avgdl, k1=1.5, b=0.75: {0: 0.0, 1: 1.0, 2: 1.4286, 3: 1.6667, 5: 1.9231, 10: 2.1739, 100: 2.4631, 1000: 2.4963}
+limit tf -> infinity = k1 + 1 = 2.5
+tf part, f=1, by dl/avgdl (b=0.75): {0.5: 1.2903, 1.0: 1.0, 2.0: 0.6897, 4.0: 0.4255}
+tf part, f=1, dl=2*avgdl, by b: {0.0: 1.0, 0.375: 0.8163, 0.75: 0.6897, 1.0: 0.625}
+tf part, f=1, dl=0.5*avgdl, by b: {0.0: 1.0, 0.375: 1.1268, 0.75: 1.2903, 1.0: 1.4286}
+tf part at dl=avgdl by k1, for f=1,2,5: {0.0: [1.0, 1.0, 1.0], 0.75: [1.0, 1.2727, 1.5217], 1.5: [1.0, 1.4286, 1.9231], 3.0: [1.0, 1.6, 2.5]}
+CR-08 k1 1.5 -> 3.0, f=2, dl=avgdl: 1.4286 -> 1.6
+CR-08 b 0.75 -> 0.375, f=1, dl=2*avgdl: 0.6897 -> 0.8163
+  rank_bm25, x in 1 of 3 docs, f=   1, dl=avgdl: score=0.510826  score/idf=1.000000
+  rank_bm25, x in 1 of 3 docs, f=  10, dl=avgdl: score=1.110490  score/idf=2.173913
+  rank_bm25, x in 1 of 3 docs, f= 100, dl=avgdl: score=1.258191  score/idf=2.463054
+  rank_bm25, x in 1 of 3 docs, f=1000, dl=avgdl: score=1.275151  score/idf=2.496256
+  rank_bm25, x once in a 20-token doc and once in a 5-token doc (avgdl=14.1667), b=0.75: long=0.495899 short=0.829243
+  rank_bm25, x once in a 20-token doc and once in a 5-token doc (avgdl=14.1667), b=0.0: long=0.587787 short=0.587787
+
+=== S6 IDF quirks of rank_bm25 0.2.2 (toy corpora)
+toy: 'plastics' n=3 of 6 -> idf 0.000000; 'climate' n=4 of 6 -> idf 0.272442 (the floor)
+  scores for 'plastics' = [0.0, 0.0, 0.0, 0.0, 0.0, 0.0]
+  scores for 'climate'  = [0.0, 0.272442, 0.0, 0.26071, 0.272442, 0.351538]
+two-document corpus, query ['bpa']: idf=0.000000 scores=[0.0, 0.0]
+three docs ['a','b','c'],['a','b'],['a','b']: raw idf a=b=-1.945910, c=0.510826; average_idf=-1.126998; eps=-0.281750; idf['a'] after floor=-0.281750; scores for ['a']=[-0.249652, -0.301106, -0.301106]
+repeated query term: score('bpa')=0.813546, score('bpa bpa')=1.627091
+out-of-vocabulary term 'ipcc': scores=[0.0, 0.0, 0.0, 0.0, 0.0, 0.0]
+k1=0 (binary tf in theory), query ['bpa']: scores=[0.5877866649021191, nan, 0.5877866649021191, nan, nan, nan] (0/0 for docs without the term); numpy warnings=1
+
+=== S7 TF-IDF (textbook tf x ln(N/n)) next to the BM25 tf part, term 'bpa' (n=2 of 6), dl = avgdl
+  f= 1: tf-idf=1.0986   BM25=0.5878
+  f= 2: tf-idf=2.1972   BM25=0.8397
+  f= 4: tf-idf=4.3944   BM25=1.0687
+  f= 8: tf-idf=8.7889   BM25=1.2374
+  f=16: tf-idf=17.5778   BM25=1.3435
+sklearn TfidfVectorizer defaults: {'lowercase': True, 'token_pattern': '(?u)\\b\\w\\w+\\b', 'smooth_idf': True, 'sublinear_tf': False, 'norm': 'l2'}
+  sklearn analyzer on 'Limit warming to 1.5 degrees; CO2, BPA (IPCC) & a 2019 ban.': ['limit', 'warming', 'to', 'degrees', 'co2', 'bpa', 'ipcc', '2019', 'ban']
+  tok_norm on the same: ['limit', 'warming', 'to', '1.5', 'degrees', 'co2', 'bpa', 'ipcc', 'a', '2019', 'ban']
+  tok_split on the same: ['Limit', 'warming', 'to', '1.5', 'degrees;', 'CO2,', 'BPA', '(IPCC)', '&', 'a', '2019', 'ban.']
+  tok_word (lower+\w+) on the same: ['limit', 'warming', 'to', '1', '5', 'degrees', 'co2', 'bpa', 'ipcc', 'a', '2019', 'ban']
+  identifiers under split     : ['Upgrade', 'to', 'v2.10.3', 'if', 'you', 'see', 'ERR_CONN_RESET.']
+  identifiers under lower+\w+ : ['upgrade', 'to', 'v2', '10', '3', 'if', 'you', 'see', 'err_conn_reset']
+  identifiers under norm      : ['upgrade', 'to', 'v2.10.3', 'if', 'you', 'see', 'err', 'conn', 'reset']
+  identifiers under sklearn   : ['upgrade', 'to', 'v2', '10', 'if', 'you', 'see', 'err_conn_reset']
+  sklearn idf_['bpa']=1.847298; ln((1+6)/(1+2))+1=1.847298
+
+=== S8 the same toy query under split() and tok_norm
+split tokens of d0: ['BPA', 'regulation', '(2019):', 'the', 'EU', 'limits', 'BPA', 'in', 'food-contact', 'plastics.']
+split tokens of d2: ['The', '2019', 'BPA', 'ban', 'covers', 'baby', 'bottles;', 'BPA,', 'BPS', 'and', 'BPF', 'are', 'bisphenols.']
+  split  query=['BPA', 'regulation', '2019'] scores=[2.1246, 0.0, 1.6482, 0.0, 0.0, 0.0]
+  norm   query=['bpa', 'regulation', '2019'] scores=[1.9385, 0.5878, 1.2837, 0.0, 0.0, 0.0]
+  split, lower-case query 'bpa regulation 2019': scores=[1.2894, 0.0, 1.1348, 0.0, 0.0, 0.0]
+
+=== S9 climate PDF, plain 1000/200 character windows (as in P1), five tokenizers
+windows=91
+  whole-document vocabulary under split          : 2630 distinct tokens
+  whole-document vocabulary under lower+split    : 2276 distinct tokens
+  whole-document vocabulary under lower+\w+      : 1767 distinct tokens
+  whole-document vocabulary under norm           : 1769 distinct tokens
+  whole-document vocabulary under norm+fold(toy) : 1617 distinct tokens
+  split() variants of 'emissions': {'emissions.': 20, 'emissions,': 7, 'emissions': 22, 'Emissions': 1}
+  split() tokens containing 'IPCC': {'(IPCC)': 1} | containing 'BECCS': {'(BECCS),': 1} | containing 'CH4': {'(CH4),': 1}
+  toy fold: 'beccs'-> becc 'emissions'-> emission 'gases'-> gase 'this'-> thi 'ccs'-> ccs
+query 'IPCC': target string 'IPCC' occurs in windows [1]
+    split           q=['IPCC']                                   windows>0= 0 best target rank=None target score=0.0000 top score=0.0000
+    lower+split     q=['ipcc']                                   windows>0= 0 best target rank=None target score=0.0000 top score=0.0000
+    lower+\w+       q=['ipcc']                                   windows>0= 1 best target rank=1 target score=3.8939 top score=3.8939
+    norm            q=['ipcc']                                   windows>0= 1 best target rank=1 target score=3.8928 top score=3.8928
+    norm+fold(toy)  q=['ipcc']                                   windows>0= 1 best target rank=1 target score=3.8928 top score=3.8928
+query 'What does BECCS stand for?': target string 'BECCS' occurs in windows [82, 83]
+    split           q=['What', 'does', 'BECCS', 'stand', 'for?'] windows>0= 0 best target rank=None target score=0.0000 top score=0.0000
+    lower+split     q=['what', 'does', 'beccs', 'stand', 'for?'] windows>0= 0 best target rank=None target score=0.0000 top score=0.0000
+    lower+\w+       q=['what', 'does', 'beccs', 'stand', 'for']  windows>0=80 best target rank=1 target score=5.0626 top score=5.0626
+    norm            q=['what', 'does', 'beccs', 'stand', 'for']  windows>0=80 best target rank=1 target score=5.0623 top score=5.0623
+    norm+fold(toy)  q=['what', 'doe', 'becc', 'stand', 'for']    windows>0=80 best target rank=1 target score=5.0445 top score=5.0445
+query 'methane CH4': target string 'CH4' occurs in windows [2]
+    split           q=['methane', 'CH4']                         windows>0= 3 best target rank=3 target score=2.9463 top score=5.3177
+    lower+split     q=['methane', 'ch4']                         windows>0= 3 best target rank=3 target score=2.9463 top score=5.7593
+    lower+\w+       q=['methane', 'ch4']                         windows>0= 5 best target rank=1 target score=6.2832 top score=6.2832
+    norm            q=['methane', 'ch4']                         windows>0= 5 best target rank=1 target score=6.2813 top score=6.2813
+    norm+fold(toy)  q=['methane', 'ch4']                         windows>0= 5 best target rank=1 target score=6.2813 top score=6.2813
+query 'Kyoto Protocol 1997': target string '1997' occurs in windows [64]
+    split           q=['Kyoto', 'Protocol', '1997']              windows>0= 5 best target rank=1 target score=7.7297 top score=7.7297
+    lower+split     q=['kyoto', 'protocol', '1997']              windows>0= 5 best target rank=1 target score=8.8164 top score=8.8164
+    lower+\w+       q=['kyoto', 'protocol', '1997']              windows>0= 5 best target rank=1 target score=13.2441 top score=13.2441
+    norm            q=['kyoto', 'protocol', '1997']              windows>0= 5 best target rank=1 target score=13.2706 top score=13.2706
+    norm+fold(toy)  q=['kyoto', 'protocol', '1997']              windows>0= 5 best target rank=1 target score=13.2706 top score=13.2706
+query 'limit warming to 1.5 degrees': target string '1.5' occurs in windows [26, 63, 64]
+    split           q=['limit', 'warming', 'to', '1.5', 'degrees'] windows>0=87 best target rank=1 target score=15.3151 top score=15.3151
+    lower+split     q=['limit', 'warming', 'to', '1.5', 'degrees'] windows>0=87 best target rank=1 target score=15.2968 top score=15.2968
+    lower+\w+       q=['limit', 'warming', 'to', '1', '5', 'degrees'] windows>0=87 best target rank=1 target score=17.5771 top score=17.5771
+    norm            q=['limit', 'warming', 'to', '1.5', 'degrees'] windows>0=87 best target rank=1 target score=15.2079 top score=15.2079
+    norm+fold(toy)  q=['limit', 'warming', 'to', '1.5', 'degree'] windows>0=87 best target rank=1 target score=15.1879 top score=15.1879
+  under lower+\w+, windows containing token '1': 5 | token '5': 4 | of 91
+  IPCC under split(): all scores zero = True; repo-style np.argsort(scores)[::-1][:5] = [90, 89, 88, 87, 86] (k chunks returned anyway)
+  min-max without epsilon: NaN count=91 of 91; with +1e-8 (notebook cell 17): all zero=True
+
+=== S10 NumPy reference vs rank_bm25 on the 91 windows; negative-idf terms
+max |NumPy - rank_bm25| over 7 queries x 2 tokenizers x 91 windows = 1.1e-13
+norm tokenizer: vocabulary=1870 avgdl=129.67 average_idf=3.352948 eps=0.838237
+terms in more than half of the 91 windows (raw idf < 0, floored to eps): 18: [('and', 91), ('to', 87), ('the', 80), ('for', 80), ('climate', 77), ('in', 76), ('of', 74), ('are', 67), ('is', 65), ('can', 65), ('change', 59), ('these', 53), ('as', 52), ('a', 51), ('this', 50), ('sustainable', 50), ('such', 49), ('action', 49)]
+idf of 'climate' (n=77) = 0.838237; idf of 'ipcc' (n=1) = 4.099885; idf of 'emissions' (n=34) = 0.510826
+DONE

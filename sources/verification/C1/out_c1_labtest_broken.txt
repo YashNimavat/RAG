@@ -1,0 +1,108 @@
+##### b1_zero_based_pages
+=== CHECK summary
+FAIL cell 6: # CHECK Task 1 (do not edit) -> AssertionError: page numbers must be 1, 2, 3, ... (1-based, in order)
+PASS cell 10: # CHECK Task 2 (do not edit)
+PASS cell 14: # CHECK Task 3 (do not edit)
+PASS cell 19: # CHECK Task 4 (do not edit)
+PASS cell 22: # CHECK Task 5 (do not edit)
+PASS cell 26: # CHECK Task 6 (do not edit)
+PASS cell 31: # CHECK Task 7 (do not edit)
+PASS cell 35: # CHECK Task 8 (do not edit)
+PASS cell 38: # CHECK Task 9 (do not edit)
+8/9 CHECK cells pass
+##### b2_no_join_offset
+=== CHECK summary
+PASS cell 6: # CHECK Task 1 (do not edit)
+FAIL cell 10: # CHECK Task 2 (do not edit) -> AssertionError: a slice does not give back its page
+PASS cell 14: # CHECK Task 3 (do not edit)
+FAIL cell 19: # CHECK Task 4 (do not edit) -> ValueError: page 2 start | File "<cell 18>", line 28, in validate_snapshot
+FAIL cell 22: # CHECK Task 5 (do not edit) -> AssertionError: page_of is not right yet: [[1, 0], [1, 2423], [2, 0], [2, 1], [8, 7], [33, 667]]. Which page owns offset 2424 (the join after page 1)?
+PASS cell 26: # CHECK Task 6 (do not edit)
+PASS cell 31: # CHECK Task 7 (do not edit)
+PASS cell 35: # CHECK Task 8 (do not edit)
+PASS cell 38: # CHECK Task 9 (do not edit)
+6/9 CHECK cells pass
+##### b3_real_newline_in_recipe
+=== CHECK summary
+PASS cell 6: # CHECK Task 1 (do not edit)
+PASS cell 10: # CHECK Task 2 (do not edit)
+FAIL cell 14: # CHECK Task 3 (do not edit) -> AssertionError: sid is not the 06 §5.3 value yet. Is page_join a literal backslash + n? Is options json.dumps(..., sort_keys=True)?
+PASS cell 19: # CHECK Task 4 (do not edit)
+PASS cell 22: # CHECK Task 5 (do not edit)
+PASS cell 26: # CHECK Task 6 (do not edit)
+PASS cell 31: # CHECK Task 7 (do not edit)
+PASS cell 35: # CHECK Task 8 (do not edit)
+PASS cell 38: # CHECK Task 9 (do not edit)
+8/9 CHECK cells pass
+##### b4_plain_open_on_windows
+=== CHECK summary
+PASS cell 6: # CHECK Task 1 (do not edit)
+PASS cell 10: # CHECK Task 2 (do not edit)
+PASS cell 14: # CHECK Task 3 (do not edit)
+FAIL cell 19: # CHECK Task 4 (do not edit) -> AssertionError: the file's bytes do not hash to doc_text_sha256 (73727 bytes on disk vs 72595). Hint: newline=
+PASS cell 22: # CHECK Task 5 (do not edit)
+PASS cell 26: # CHECK Task 6 (do not edit)
+PASS cell 31: # CHECK Task 7 (do not edit)
+PASS cell 35: # CHECK Task 8 (do not edit)
+PASS cell 38: # CHECK Task 9 (do not edit)
+8/9 CHECK cells pass
+##### b5_validate_only_doc_hash
+=== CHECK summary
+PASS cell 6: # CHECK Task 1 (do not edit)
+PASS cell 10: # CHECK Task 2 (do not edit)
+PASS cell 14: # CHECK Task 3 (do not edit)
+FAIL cell 19: # CHECK Task 4 (do not edit) -> AssertionError: validate_snapshot accepted a page table with page 2 shifted by +1: it must fail closed
+PASS cell 22: # CHECK Task 5 (do not edit)
+PASS cell 26: # CHECK Task 6 (do not edit)
+PASS cell 31: # CHECK Task 7 (do not edit)
+PASS cell 35: # CHECK Task 8 (do not edit)
+PASS cell 38: # CHECK Task 9 (do not edit)
+8/9 CHECK cells pass
+##### b6_join_char_to_next_page
+=== CHECK summary
+PASS cell 6: # CHECK Task 1 (do not edit)
+PASS cell 10: # CHECK Task 2 (do not edit)
+PASS cell 14: # CHECK Task 3 (do not edit)
+PASS cell 19: # CHECK Task 4 (do not edit)
+FAIL cell 22: # CHECK Task 5 (do not edit) -> AssertionError: page_of is not right yet: [[1, 0], [1, 2423], [2, -1], [2, 0], [8, 0], [33, 635]]. Which page owns offset 2424 (the join after page 1)?
+PASS cell 26: # CHECK Task 6 (do not edit)
+PASS cell 31: # CHECK Task 7 (do not edit)
+PASS cell 35: # CHECK Task 8 (do not edit)
+PASS cell 38: # CHECK Task 9 (do not edit)
+8/9 CHECK cells pass
+##### b7_lines_by_split
+=== CHECK summary
+PASS cell 6: # CHECK Task 1 (do not edit)
+PASS cell 10: # CHECK Task 2 (do not edit)
+PASS cell 14: # CHECK Task 3 (do not edit)
+PASS cell 19: # CHECK Task 4 (do not edit)
+PASS cell 22: # CHECK Task 5 (do not edit)
+FAIL cell 26: # CHECK Task 6 (do not edit) -> AssertionError: some count is not right yet: {'empty_pages': [], 'ligatures': 0, 'tabs': 0, 'double_newlines': 0, 'lines': 1133, 'lines_ending_space': 1093}
+PASS cell 31: # CHECK Task 7 (do not edit)
+PASS cell 35: # CHECK Task 8 (do not edit)
+PASS cell 38: # CHECK Task 9 (do not edit)
+8/9 CHECK cells pass
+##### b8_columns_by_sort
+=== CHECK summary
+PASS cell 6: # CHECK Task 1 (do not edit)
+PASS cell 10: # CHECK Task 2 (do not edit)
+PASS cell 14: # CHECK Task 3 (do not edit)
+PASS cell 19: # CHECK Task 4 (do not edit)
+PASS cell 22: # CHECK Task 5 (do not edit)
+PASS cell 26: # CHECK Task 6 (do not edit)
+FAIL cell 31: # CHECK Task 7 (do not edit) -> AssertionError: extract_columns: left half (full height) then right half, plain get_text(clip=...)
+FAIL cell 35: # CHECK Task 8 (do not edit) -> AssertionError: zoo_edits are not right yet: compare each rule with the spec (R2 deletes only '-\n')
+PASS cell 38: # CHECK Task 9 (do not edit)
+7/9 CHECK cells pass
+##### b9_naive_dehyphenation
+=== CHECK summary
+PASS cell 6: # CHECK Task 1 (do not edit)
+PASS cell 10: # CHECK Task 2 (do not edit)
+PASS cell 14: # CHECK Task 3 (do not edit)
+PASS cell 19: # CHECK Task 4 (do not edit)
+PASS cell 22: # CHECK Task 5 (do not edit)
+PASS cell 26: # CHECK Task 6 (do not edit)
+PASS cell 31: # CHECK Task 7 (do not edit)
+FAIL cell 35: # CHECK Task 8 (do not edit) -> AssertionError: plan_edits on Corpus D is not right yet
+PASS cell 38: # CHECK Task 9 (do not edit)
+8/9 CHECK cells pass

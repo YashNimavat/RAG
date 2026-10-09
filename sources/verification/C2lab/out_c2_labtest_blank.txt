@@ -1,0 +1,45 @@
+--- cell 2 [given] import hashlib, json, math, re
+    33 pages, 72,593 characters; PyMuPDF 1.26.7; snapshot ea07572562ac
+    len(PARA) = 785, FACT_SPAN = (558, 629)
+--- cell 4 [prediction/T1] my_spans_10_3 = []          # e.g. [(0, 10), ...]
+--- cell 5 [CHECK] # CHECK Task 1 (do not edit)
+    ERROR AssertionError: write each span as (start, end) with two ints
+--- cell 7 [learner/T2] # Your code here (Task 2). Blank-file first: write it yourself; no cop
+--- cell 8 [CHECK] # CHECK Task 2 (do not edit)
+    ERROR NameError: name 'fixed_window_chunks' is not defined | File "<cell 8>", line 5, in <module>
+--- cell 10 [learner/T3] # Your code here (Task 3). Blank-file first: write it yourself; no cop
+--- cell 11 [CHECK] # CHECK Task 3 (do not edit)
+    ERROR NameError: name 'Chunk' is not defined | File "<cell 11>", line 3, in <module>
+--- cell 13 [prediction/T4p] my_fact_chunks_o0 = None        # a list of chunk ids, e.g. [1]
+--- cell 15 [learner/T4] # Your code here (Task 4). Blank-file first: write it yourself; no cop
+--- cell 16 [CHECK] # CHECK Task 4 (do not edit)
+    ERROR AssertionError: fill all four predictions first
+--- cell 18 [prediction/T5p] my_w_spans = []             # e.g. [(0, 8), ...]
+--- cell 20 [learner/T5] # Your code here (Task 5). Blank-file first: write it yourself; no cop
+--- cell 21 [CHECK] # CHECK Task 5 (do not edit)
+    ERROR AssertionError: fill your prediction and confidence first
+--- cell 23 [prediction/T6p] my_guess_per_page_count = None   # an int
+--- cell 25 [learner/T6] # Your code here (Task 6). Blank-file first: write it yourself; no cop
+--- cell 26 [CHECK] # CHECK Task 6 (do not edit)
+    ERROR AssertionError: write your prediction first
+--- cell 28 [learner/T7] # Your code here (Task 7). Blank-file first: write it yourself; no cop
+--- cell 29 [CHECK] # CHECK Task 7 (do not edit)
+    ERROR NameError: name 'params_hash' is not defined | File "<cell 29>", line 4, in <module>
+--- cell 31 [prediction/T8p] my_guess_all_200 = None   # True or False
+--- cell 33 [learner/T8] # Your code here (Task 8). Blank-file first: write it yourself; no cop
+--- cell 34 [CHECK] # CHECK Task 8 (do not edit)
+    ERROR AssertionError: write your prediction first
+--- cell 36 [CHECK] # CHECK save (do not edit)
+    ERROR NameError: name 'make_records' is not defined | File "<cell 36>", line 5, in <module>
+
+=== CHECK summary
+FAIL cell 5: # CHECK Task 1 (do not edit)  <- AssertionError: write each span as (start, end) with two ints
+FAIL cell 8: # CHECK Task 2 (do not edit)  <- NameError: name 'fixed_window_chunks' is not defined | File "<cell 8>", line 5, in <module>
+FAIL cell 11: # CHECK Task 3 (do not edit)  <- NameError: name 'Chunk' is not defined | File "<cell 11>", line 3, in <module>
+FAIL cell 16: # CHECK Task 4 (do not edit)  <- AssertionError: fill all four predictions first
+FAIL cell 21: # CHECK Task 5 (do not edit)  <- AssertionError: fill your prediction and confidence first
+FAIL cell 26: # CHECK Task 6 (do not edit)  <- AssertionError: write your prediction first
+FAIL cell 29: # CHECK Task 7 (do not edit)  <- NameError: name 'params_hash' is not defined | File "<cell 29>", line 4, in <module>
+FAIL cell 34: # CHECK Task 8 (do not edit)  <- AssertionError: write your prediction first
+FAIL cell 36: # CHECK save (do not edit)  <- NameError: name 'make_records' is not defined | File "<cell 36>", line 5, in <module>
+0/9 CHECK cells passed

@@ -1,0 +1,97 @@
+PASS repo HEAD 009adba2be1bef49780ef73b6dd3c18fd24b035b
+PASS helper_functions.py:L1: from langchain_community.document_loaders import PyPDFLoader
+PASS helper_functions.py:L10: import fitz
+PASS helper_functions.py:L18: def replace_t_with_space(list_of_documents):
+PASS helper_functions.py:L30: doc.page_content = doc.page_content.replace('\t', ' ')
+PASS helper_functions.py:L31: return list_of_documents
+PASS helper_functions.py:L48: def encode_pdf(path, chunk_size=1000, chunk_overlap=200):
+PASS helper_functions.py:L62: loader = PyPDFLoader(path)
+PASS helper_functions.py:L63: documents = loader.load()
+PASS helper_functions.py:L69: texts = text_splitter.split_documents(documents)
+PASS helper_functions.py:L70: cleaned_texts = replace_t_with_space(texts)
+PASS helper_functions.py:L76: return vectorstore
+PASS helper_functions.py:L223: def read_pdf_to_string(path):
+PASS helper_functions.py:L237: doc = fitz.open(path)
+PASS helper_functions.py:L238: content = ""
+PASS helper_functions.py:L244: content += page.get_text()
+PASS helper_functions.py:L245: return content
+PASS all_rag_techniques/simple_rag.ipynb cell 10: loader = PyPDFLoader(path)
+PASS all_rag_techniques/simple_rag.ipynb cell 10: text_splitter.split_documents(documents)
+PASS all_rag_techniques/simple_rag.ipynb cell 10: cleaned_texts = replace_t_with_space(texts)
+PASS all_rag_techniques/multi_model_rag_with_captioning.ipynb cell 8: text_data = []
+PASS all_rag_techniques/multi_model_rag_with_captioning.ipynb cell 8: img_data = []
+PASS all_rag_techniques/multi_model_rag_with_captioning.ipynb cell 9: fitz.open('attention_is_all_you_need.pdf')
+PASS all_rag_techniques/multi_model_rag_with_captioning.ipynb cell 9: text = page.get_text().strip()
+PASS all_rag_techniques/multi_model_rag_with_captioning.ipynb cell 9: "name": page_number+1
+PASS all_rag_techniques/multi_model_rag_with_captioning.ipynb cell 9: page.get_images(full=True)
+PASS all_rag_techniques/multi_model_rag_with_captioning.ipynb cell 9: extract_image(xref)
+PASS multi_model_rag_with_captioning.ipynb cell 8 only initialises two lists (no extraction)
+PASS attention_is_all_you_need.pdf is NOT in the pinned repo (the notebook downloads it)
+INFO repo code matches for /PyPDFLoader/: 23: ['all_rag_techniques/dartboard.ipynb c9', 'all_rag_techniques/fusion_retrieval.ipynb c10', 'all_rag_techniques/graph_rag.ipynb c20', 'all_rag_techniques/hierarchical_indices.ipynb c11', 'all_rag_techniques/HyPE_Hypothetical_Prompt_Embeddings.ipynb c13', 'all_rag_techniques/light_rag.ipynb c8', 'all_rag_techniques/light_rag.ipynb c10', 'all_rag_techniques/local_rag_huggingface_faiss.ipynb c8', 'all_rag_techniques/local_rag_huggingface_faiss.ipynb c12', 'all_rag_techniques/memorag.ipynb c32', 'all_rag_techniques/memorag.ipynb c55', 'all_rag_techniques/raptor.ipynb c27', 'all_rag_techniques/simple_rag.ipynb c5', 'all_rag_techniques/simple_rag.ipynb c10', 'helper_functions.py:L1', 'helper_functions.py:L62', 'all_rag_techniques_runnable_scripts/fusion_retrieval.py:L32', 'all_rag_techniques_runnable_scripts/graph_rag.py:L805', 'all_rag_techniques_runnable_scripts/hierarchical_indices.py:L28', 'all_rag_techniques_runnable_scripts/HyPE_Hypothetical_Prompt_Embeddings.py:L123', 'all_rag_techniques_runnable_scripts/light_rag.py:L16', 'all_rag_techniques_runnable_scripts/light_rag.py:L142', 'all_rag_techniques_runnable_scripts/raptor.py:L223']
+INFO repo code matches for /read_pdf_to_string/: 8: ['all_rag_techniques/context_enrichment_window_around_chunk.ipynb c11', 'all_rag_techniques/document_augmentation.ipynb c13', 'all_rag_techniques/retrieval_with_feedback_loop.ipynb c10', 'all_rag_techniques/semantic_chunking.ipynb c10', 'helper_functions.py:L223', 'all_rag_techniques_runnable_scripts/document_augmentation.py:L164', 'all_rag_techniques_runnable_scripts/retrieval_with_feedback_loop.py:L108', 'all_rag_techniques_runnable_scripts/semantic_chunking.py:L38']
+INFO repo code matches for /SimpleDirectoryReader/: 14: ['all_rag_techniques/choose_chunk_size.ipynb c2', 'all_rag_techniques/choose_chunk_size.ipynb c4', 'all_rag_techniques/context_enrichment_window_around_chunk_with_llamaindex.ipynb c4', 'all_rag_techniques/context_enrichment_window_around_chunk_with_llamaindex.ipynb c7', 'all_rag_techniques/fusion_retrieval_with_llamaindex.ipynb c3', 'all_rag_techniques/fusion_retrieval_with_llamaindex.ipynb c6', 'all_rag_techniques/reranking_with_llamaindex.ipynb c5', 'all_rag_techniques/reranking_with_llamaindex.ipynb c8', 'all_rag_techniques/simple_csv_rag_with_llamaindex.ipynb c3', 'all_rag_techniques/simple_csv_rag_with_llamaindex.ipynb c10', 'all_rag_techniques/simple_rag_with_llamaindex.ipynb c4', 'all_rag_techniques/simple_rag_with_llamaindex.ipynb c7', 'all_rag_techniques_runnable_scripts/choose_chunk_size.py:L6', 'all_rag_techniques_runnable_scripts/choose_chunk_size.py:L90']
+INFO repo code matches for /fitz\.open/: 2: ['all_rag_techniques/multi_model_rag_with_captioning.ipynb c9', 'helper_functions.py:L237']
+INFO repo code matches for /get_text\(/: 2: ['all_rag_techniques/multi_model_rag_with_captioning.ipynb c9', 'helper_functions.py:L244']
+INFO repo code matches for /replace_t_with_space/: 9: ['all_rag_techniques/dartboard.ipynb c9', 'all_rag_techniques/fusion_retrieval.ipynb c10', 'all_rag_techniques/HyPE_Hypothetical_Prompt_Embeddings.ipynb c13', 'all_rag_techniques/simple_rag.ipynb c5', 'all_rag_techniques/simple_rag.ipynb c10', 'helper_functions.py:L18', 'helper_functions.py:L70', 'all_rag_techniques_runnable_scripts/fusion_retrieval.py:L38', 'all_rag_techniques_runnable_scripts/HyPE_Hypothetical_Prompt_Embeddings.py:L131']
+PASS repo code: no de-hyphenation anywhere (/(?i)hyphen/)
+PASS repo code: no ligature / Unicode normalisation anywhere (/(?i)ligature|unicodedata|NFKC/)
+PASS repo code: no header/footer removal anywhere (/(?i)footer|running header/)
+PASS repo code: no PyMuPDF table detection anywhere (/find_tables/)
+PASS chapter 1.pdf p.4/14: 'Step 1: Load the Document' (5 words)
+PASS    phrase under 15 words (5)
+PASS chapter 1.pdf p.4/14: 'PDF is parsed page by page' (6 words)
+PASS    phrase under 15 words (6)
+PASS chapter 1.pdf p.4/14: 'Poor text extraction leads to poor retrieval downstream' (8 words)
+PASS    phrase under 15 words (8)
+PASS chapter 1.pdf p.4/14: 'librarian transcribing a book onto index cards' (7 words)
+PASS    phrase under 15 words (7)
+PASS chapter 1.pdf p.4/14: 'Step 2: Split Into Chunks' (5 words)
+PASS    phrase under 15 words (5)
+PASS chapter 1.pdf p.5/14: 'Step 3: Clean the Text' (5 words)
+PASS    phrase under 15 words (5)
+PASS chapter 1.pdf p.5/14: 'stray tab characters, extra whitespace, broken line endings' (8 words)
+PASS    phrase under 15 words (8)
+PASS chapter 1.pdf p.5/14: 'Dirty text leads to noisy embeddings' (6 words)
+PASS    phrase under 15 words (6)
+PASS chapter 1.pdf p.7/14: 'Load document and extract raw text' (6 words)
+PASS    phrase under 15 words (6)
+PASS chapter 1.pdf p.7/14: 'Clean each chunk (remove formatting artifacts)' (6 words)
+PASS    phrase under 15 words (6)
+PASS chapter 1.pdf p.2/14: 'Without RAG, a robot answers from memory' (7 words)
+PASS    phrase under 15 words (7)
+PASS chapter 1.pdf p.13/14: 'Factor Impact Latency Low: one embedding call' (7 words)
+PASS    phrase under 15 words (7)
+PASS chapter 2.pdf p.4/11: 'Unlike a PDF, where you get one continuous stream of text' (11 words)
+PASS    phrase under 15 words (11)
+PASS chapter 3.pdf p.1/14: 'page footer stuffed with navigation links' (6 words)
+PASS    phrase under 15 words (6)
+PASS chapter 14.pdf p.5/13: 'is tagged with page 3' (5 words)
+PASS    phrase under 15 words (5)
+PASS chapter 16.pdf p.1/11: 'Standard RAG extracts text from documents and ignores everything else' (10 words)
+PASS    phrase under 15 words (10)
+PASS chapter 16.pdf p.4/11: 'Step 1: Extract Text and Images Separately' (7 words)
+PASS    phrase under 15 words (7)
+PASS chapter 16.pdf p.4/11: 'tagged with metadata noting which page it came from' (9 words)
+PASS    phrase under 15 words (9)
+PASS chapter 16.pdf p.5/11: 'dual extraction of content types' (5 words)
+PASS    phrase under 15 words (5)
+PASS chapter 16.pdf p.10/11: 'Tables are already extracted as structured text by the PDF parser' (11 words)
+PASS    phrase under 15 words (11)
+PASS Ch1 p.7/14 sketch: split (2) before clean (3)
+INFO book pages matching /(?i)hyphen/: []
+PASS book: no mention of hyphenation
+INFO book pages matching /(?i)ligature/: []
+PASS book: no mention of ligatures
+INFO book pages matching /\bOCR\b/: []
+PASS book: no mention of OCR
+INFO book pages matching /(?i)two-column|multi-column|reading order/: []
+PASS book: no mention of two-column / reading order
+INFO book pages matching /(?i)PyMuPDF|pypdf|fitz/: []
+PASS book: no mention of a named PDF library
+INFO book pages matching /(?i)scanned/: []
+PASS book: no mention of scanned pages
+INFO book pages matching /(?i)snapshot/: []
+PASS book: no mention of a text snapshot
+INFO book pages with 'header'/'footer': ['Appendix.pdf p.2', 'Appendix.pdf p.4', 'Appendix.pdf p.8', 'Appendix.pdf p.9', 'Appendix.pdf p.10', 'Appendix.pdf p.15', 'chapter 10.pdf p.13', 'chapter 16.pdf p.5', 'chapter 3.pdf p.1', 'chapter 7.pdf p.1', 'chapter 7.pdf p.3', 'chapter 7.pdf p.4', 'chapter 7.pdf p.5', 'chapter 7.pdf p.7', 'chapter 7.pdf p.8', 'chapter 7.pdf p.9', 'chapter 7.pdf p.10', 'chapter 7.pdf p.11', 'chapter 8.pdf p.1', 'chapter 8.pdf p.7', 'chapter 8.pdf p.8', 'chapter 8.pdf p.11', 'chapter 9.pdf p.11', 'index.pdf p.2', 'index.pdf p.3', 'intro.pdf p.5']
+
+ALL PASS

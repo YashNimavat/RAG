@@ -128,3 +128,102 @@ All items: type R/A/T/X as shown, not scheduled, hint level H0, unassisted. "Con
 - **Due reviews 2026-10-09:** M2, M3, R1, M5, O3 (5 concepts, short recall).
 - **Before P1:** E-1 commit (learner OK) → clean-clone `uv sync` + smoke test → E-4 kernel check. Then Gate 0→1 can be re-checked.
 - **Next concept:** P1 (tokens), once Gate 0→1 is passed.
+
+### Addendum (same session): E-1 and the clean-clone check
+- **E-1 PASS.** With the learner's OK, the first local commit `42cc4c8` was made: 87 files, including `uv.lock`; no `.env`, PDFs or snapshot text. Nothing was pushed.
+- **Gate 0→1 box 2 PASS.** `git clone` into an empty scratch folder → `uv sync --locked` (Python 3.12.8, torch 2.14.1+cpu, pymupdf 1.26.7) → `labs/O2_smoke_test.py` **4/4 PASS** inside the clone ([report](O2_smoke_test_2026-10-08_clean_clone.json)).
+  - `.env` was copied into the clone for the API calls, and the clone was deleted afterwards. API calls: Cohere 1 embed (+1 list), Groq 1 chat (+1 list).
+- **Gate 0→1:** boxes 1–3 are all ticked. **Still open before the P1 lab:** E-4 (the learner runs `labs/O2_kernel_check.ipynb` in VS Code).
+- The edits after the commit (this addendum, 08 E-1, the clean-clone report) are **not committed**. The next commit needs the learner's OK.
+- **E-4 PASS.** The learner ran `labs/O2_kernel_check.ipynb` in VS Code on the project `.venv` kernel and pasted the output: Python 3.12.8, torch 2.14.1+cpu, pymupdf 1.26.7, numpy 2.5.3, sentence-transformers 6.1.0, "E-4 OK". A harmless TqdmWarning appeared (ipywidgets missing). **E-1…E-4 are all ticked, so the environment part of Gate B is done.**
+- **Protocol deviation (learner request):** the learner asked to start P1 today ("I'm free"). 05 §2.4 allows at most one new E concept per day, and O3 (E, ~25 min, no lab) was already taught today. Proceeding at the learner's explicit request, logged here. Tomorrow's reviews stay on 2026-10-09: a same-day review would be same-session recall and would not count.
+
+## Session 2026-10-08 #3 (continued): P1 started (concept, day 1 of 2)
+- **Concept(s):** P1. Started at the learner's request; this is the logged deviation above.
+- **Lesson:** [concepts/P1_llm_fundamentals.md](../concepts/P1_llm_fundamentals.md), drafted this session by a helper with verified numbers ([P1_FACTS](../sources/verification/P1/P1_FACTS.md)); `p1_sources.py` re-run: ALL PASS. Lab scaffold: [labs/P1_tokens_lab.ipynb](../labs/P1_tokens_lab.ipynb).
+
+### Items (Part A = routing only; teaching items = same-session, count toward L1 only)
+| item_id | Type | Conf. | Hint max | Score | Rationale |
+|---|---|---|---|---|---|
+| P1-A1 | R (Part A) | 3 | H0 | 3 | "Small piece of text; the **tokenizer** decides." Corrects the O1 "embeddings decide" (MC-001 check 1 of 2). No mention of IDs or subword pieces. |
+| P1-A2 | R (Part A) | 3 | H0 | 3 | "~250 tokens at ~4 chars/token." In range (measured 157–217 on the corpus). Corrects O1's "1,000 tokens". |
+| P1-A3 | R (Part A) | 3 | H0 | 2 | "Rest is ignored **or** a second embedding is created": the hedge includes a wrong option. |
+| P1-A4 | R (Part A) | 3 | H0 | 2 | "Most tokens the LLM processes at a time; generated and added tokens fill it." Input parts and reasoning tokens not named. |
+| P1-A5 | R (Part A) | 3 | H0 | 3 | Higher T = more randomness, low-probability tokens get picked; judge at 0 for the same verdict each time. No logits/T mechanism. |
+| P1-A6 | R (Part A) | 2 | H0 | 1 | "Tokens × number of documents × 100": no input/output split, no price per 1M, no price-sheet lookup. Routed: D.7 and Part F taught slowly. |
+| P1-B1 | R | 1 → 2 | H1 | 2 | Empty answer at max_tokens=12. Try 1 wrong (tokens = characters; "full answer or nothing"). Try 2: reasoning used the budget ✓, but called the reasoning tokens "input" ✗. |
+| P1-B1b | R (restate) | 3 | H2 | 1 → restate | Said "max_tokens limits input" ✗ (reasoning = output ✓). Corrected with the evidence (the 78-token input was accepted). Try 2 restated correctly ("output; stops when reached"). Restatement: not counted for mastery. **Candidate MC: max_tokens confused with the input/context limit** (not opened; re-check in L). |
+| P1-D1 | A (prediction) | 3 | H0 | 3 | Predicted 10 cl100k tokens for the 67-char sentence (measured 12); reasoning: rare words split, common words whole. |
+| P1-D2 | A (prediction) | 2 | H0 | 3 | Truncation cosine "1, because it's the same" (measured 1.000000). Said the question was unclear; re-explained. |
+| P1-D3 | A | 3 | H0 | 3 | The fact past token 254 can't help the chunk be **found**: discarded. Question re-asked as a concrete story. |
+| P1-D4 | A (CR-08 k×2) | 3 | H1 | 2 → 3 | Try 1: "yes, doubles" while saying rules and question are fixed (contradiction). After H1: 107 + 1,684 + 20 = 1,811 (measured 1,818, ×1.86). Cap 3. |
+| P1-F1 | A | 3 | H0 | 3 | 100 queries with placeholder prices: 97,600 → $0.00976; 51,200 → $0.01024; total $0.02. Correct; no self-check, so not 4. |
+| P1-D5 | A (CR-08 T×2) | 3 | H0 | 2 | "Goes down": direction ✓, no mechanism. |
+| P1-D5b | R | 3 | H1 | 3 | Higher T gives low-probability tokens more chance, so the top token's share falls (chances more equal). Template given = H1. |
+
+**Calibration:** among the confidence-3 answers, B1b try 1, D4 try 1 and D5 were ≤ 2. The pattern continues but is improving: A1, A2, A5, D1, D3 and F1 were confidence 3 and scored 3.
+
+### Not done today (day 2 of the split, per 05 §2.4)
+- Part H **lab** (`labs/P1_tokens_lab.ipynb`, Tasks 1–8; Task 8 needs today's Groq price lookup), then Part L assessment (R + A + T, including the max_tokens re-check), Part M scheduling, and the log.
+- Day 2 opens with a short closed-book re-run of Part A on day-1 content (05 §2.4). That doubles as delayed-recall evidence.
+
+### Tracker changes
+- P1.status: not_started → **exposed** (L1). Evidence: log:2026-10-08#P1-A1…P1-D5b (Part A and teaching items; Part L not yet run, so recorded as exposure in progress). next_review: set at Part M on day 2.
+
+### Learner decisions recorded this session
+- **Goal stated by the learner:** read the book and remember its concepts. The gates and checklists were designed by Claude and Codex, not chosen by the learner.
+- **Lessons written ahead to use the usage windows:** Batch 1 = P2–P7 lessons + labs, drafted by 6 parallel helpers (Opus) on 2026-10-08, within Gate A. If usage spikes, switch to the lighter plan: shorter book-first lessons, Sonnet helpers, one fresh session per study day.
+- Each new lesson has a **"Read in the book"** box: the pages to read after Part A.
+- Syllabus map saved offline: [RAG_ROUTE_MAP.html](../RAG_ROUTE_MAP.html) (the online copy was deleted at the learner's request).
+
+### Next session (start a **new** Claude Code session; this one is very long)
+1. **Due reviews 2026-10-09:** M2, M3, R1, M5, O3.
+2. **P1 day 2:** short Part A re-run (closed book) → lab Tasks 1–8 → Part L → Part M → log.
+3. Check Batch 1 lessons (P2–P7) if not yet checked; the helper reports are summarised below when they arrive.
+
+### Correction (same day, CR-12)
+- In P1-D4 the tutor told the learner "with 8 real chunks we **measured** 1,818". That was wrong: 1,818 is P1 S10's **estimate** (976 + 842). The measured value with the real next four windows is **1,799 (×1.84)** (P7 S2, `sources/verification/P7/P7_FACTS.md`). The learner's 1,811 and the conclusion (not ×2) stand. The P1 lesson's coach note is corrected. Tell the learner at the start of P1 day 2.
+- **Batch 1 status:** P2, P3, P4 and P7 are done and spot-checked; each `p*_sources.py` reports ALL PASS. P5 and P6 are pending.
+- **Batch 1 complete (2026-10-08):** P2, P3, P4, P5, P6 and P7 lessons + labs + verification folders are written. Each `p*_sources.py` was re-run by the tutor: ALL PASS. P6 unit tests: 23 passed. Cross-check: P4 S6 and P5 both give the D-002 top-4 as [64, 26, 16, 63].
+  - The helpers flagged what 04 gets wrong for each concept (recorded in each lesson's Part G / Verification log; 04 itself is not edited).
+  - Do not open a lesson file before its Part A: each one contains its own answers.
+  - Nothing committed yet; the next commit needs the learner's OK.
+
+## Session 2026-10-08 #4: P1 lab (Part H), same evening
+- **Concept(s):** P1 (lab only). **Tutor:** Claude (claude-opus-5-5). Started 21:00 IST.
+- **Protocol deviation 2 (learner choice):** the date is still 2026-10-08. Given three options (stop / lab tonight / read book pages), the learner chose the **lab tonight**. 05 §2.4 puts the lab on day 2, after the Part A re-run. The **Part A re-run, Part L and Part M stay on the next calendar day**, so the delayed-recall evidence stays valid. The reviews due 2026-10-09 are not touched tonight.
+- CR-12 correction (P1-D4: measured 1,799, not 1,818) told to the learner at the start of this session.
+- **Batch 2 complete (2026-10-08):** C1, C3, C4, C5 and C6 lessons + labs, and the missing C2 lab (lesson = 07), are written. Re-run by the tutor: C1/C3/C5/C6 `*_sources.py` ALL PASS; C4 49/49 (needs the old venv site-packages as its 3rd argument); acceptance suite 145/145 after the 06 edit.
+  - **Interface decisions** fixed during the batch and recorded in 06 §2.4: the `params_hash` recipe (`1ca9c5a3b548`), the `chunk_id` format (97 chunks), `embed_hash` (MiniLM-L6 `c398eeba043f`), the index folder `index/<snapshot_id>/<params_hash>/<embed_hash>/`, rows aligned by line (not `seq`), and `.env` `COHERE_EMBED_MODEL_ID` added (same value). C2 lab, C3, C4, C5 and C6 all produce a byte-identical `chunks.jsonl` (sha256 `d4108b89…`).
+  - `.gitignore`: added `labs/*_out/` (lab outputs hold extracted text).
+  - **v0 facts (MiniLM, Corpus D):** D-002 top-4 by seq = [69, 68, 27, 17], gold p.10 at rank 3 (0.4386 vs 0.4385 at rank 4). All 8 answerable draft seeds have CE@4 = 1. Unanswerable D-010 scores 0.5196, higher than 5 of the 8 answerable ones.
+  - **Open points (not blocking):**
+    1. 07 H.1's splitter hangs if given the `""` separator on a long whitespace-free run. The C2 lab handles it; 07 is not edited.
+    2. The prompt-hash recipe is adopted from C5 (not in 06).
+    3. `config.json` instead of 06's `config.yaml`.
+    4. `latency_ms.embed_query` may be null.
+    5. `embed_hash` includes the query `input_type`: a query-only change gives a new folder (no re-embedding).
+    6. **Corpus T files not chosen (DEC-3)**, so the C6 lab's Corpus T step is pending.
+  - 04 corrections were reported by every helper (in each lesson's Part G / Verification log). 04 itself is not edited.
+
+## Session 2026-10-09 #1: external resources (no tutoring)
+- **Tutor:** Claude (claude-opus-5-5). No study items were asked, so nothing is scored or scheduled.
+- **What the learner asked:** check the `AI Eval` folder and two GitHub repos (ombharatiya/ai-system-design-guide, ombharatiya/AI-Engineer-Interview-Questions) and say what is worth including, and how.
+- **Result:** [`sources/EXTERNAL_RESOURCES_REVIEW_2026-10-09.md`](../sources/EXTERNAL_RESOURCES_REVIEW_2026-10-09.md).
+  - The AI Eval book (*Evals for AI Engineers*): include partly, as the method source for Phase 3.
+  - The interview repo: include partly, for practice questions and two coding challenges.
+  - The system-design guide: reference only.
+- **Learner decisions:**
+  1. Study use only. Books are paraphrased with pointers and kept out of git. The MIT repos may be quoted exactly with the notice: repo text first, then our plain-English version, and a repo answer only after the learner's attempt.
+  2. Interview preparation is also a goal.
+  3. Pin both repos under `upstream/` (done: ed955b2, e080df2).
+  4. Apply the six "do now" edits (done; see the [corrections log, round 4](../reviews/CORRECTIONS_LOG_2026-10-08.md)).
+  5. Write explanations in the style of the learner's three example documents ([`curriculum/WRITING_STYLE.md`](../curriculum/WRITING_STYLE.md)).
+- **Checks:** acceptance suite 145/145. The P1, C5 and C6 checks all pass.
+- **Not committed.** The next commit needs the learner's OK.
+
+### Next session (start a **new** Claude Code session)
+1. **Due reviews 2026-10-09:** M2, M3, R1, M5, O3 (short recall).
+2. **P1 day 2:** closed-book Part A re-run → lab Tasks 1–8 → Part L → Part M → log.
+   - The P1 lesson changed today (D.6 and J5 temperature-0 wording; new card 14).
+   - The P1 seed in `sources/coach/transfer_seed_bank.md` is the scored CR-13 Transfer item for Part L.

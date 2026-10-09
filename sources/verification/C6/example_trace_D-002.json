@@ -1,0 +1,110 @@
+{
+  "trace_version": "1.0",
+  "run_id": "E000_v0_baseline_reference",
+  "qid": "D-002",
+  "timestamp_utc": "2026-10-08T16:17:17Z",
+  "config_hash": "sha256:261575c63ccbc904dbd69539021b6fe23dd7f627f9b2b941678db461d9852809",
+  "index_manifest_hash": "sha256:84931e43cca963c098b24eb3e3fa46611a1b1e3a9f9e908d42850e48a9a536cb",
+  "snapshot_id": "ea07572562ac",
+  "query": {
+    "original": "In what year was the Paris Agreement adopted?",
+    "transformed": [
+      {
+        "method": "none",
+        "text": "In what year was the Paris Agreement adopted?"
+      }
+    ]
+  },
+  "candidates": {
+    "dense": [
+      {
+        "rank": 1,
+        "chunk_id": "climate:ea07572562ac:1ca9c5a3b548:00069",
+        "doc_id": "climate",
+        "page": 24,
+        "char_start": 51414,
+        "char_end": 52396,
+        "score": 0.460612952709198
+      },
+      {
+        "rank": 2,
+        "chunk_id": "climate:ea07572562ac:1ca9c5a3b548:00068",
+        "doc_id": "climate",
+        "page": 23,
+        "char_start": 50756,
+        "char_end": 51413,
+        "score": 0.45129895210266113
+      },
+      {
+        "rank": 3,
+        "chunk_id": "climate:ea07572562ac:1ca9c5a3b548:00027",
+        "doc_id": "climate",
+        "page": 10,
+        "char_start": 20555,
+        "char_end": 21506,
+        "score": 0.43860745429992676
+      },
+      {
+        "rank": 4,
+        "chunk_id": "climate:ea07572562ac:1ca9c5a3b548:00017",
+        "doc_id": "climate",
+        "page": 6,
+        "char_start": 13112,
+        "char_end": 13935,
+        "score": 0.4385269284248352
+      }
+    ]
+  },
+  "context": {
+    "chunk_ids": [
+      "climate:ea07572562ac:1ca9c5a3b548:00069",
+      "climate:ea07572562ac:1ca9c5a3b548:00068",
+      "climate:ea07572562ac:1ca9c5a3b548:00027",
+      "climate:ea07572562ac:1ca9c5a3b548:00017"
+    ],
+    "context_tokens": 644,
+    "tokenizer": "o200k_harmony",
+    "truncated_chunks": 0
+  },
+  "prompt": {
+    "template_version": "answer_v1",
+    "sha256": "820b2956c6ec6f35366243d06e0f3645a41094ea9daa15e0d04a945a79c1f0dd",
+    "input_tokens": 802
+  },
+  "answer": {
+    "text": "The Paris Agreement was adopted in 2015 [climate:10].",
+    "abstained": false,
+    "citations": [
+      {
+        "marker": "[climate:10]",
+        "doc_id": "climate",
+        "page": 10,
+        "resolved_chunk_ids": [
+          "climate:ea07572562ac:1ca9c5a3b548:00027"
+        ]
+      }
+    ],
+    "output_tokens": null
+  },
+  "latency_ms": {
+    "embed_query": 97.681,
+    "dense": 0.164,
+    "context": 0.158,
+    "llm": null,
+    "total": 101.916
+  },
+  "cost_usd_estimate": {
+    "llm": null,
+    "judge": null,
+    "price_table_version": null
+  },
+  "llm": {
+    "provider": "toy",
+    "model_id": "handwritten-toy-v1",
+    "cache_hit": false,
+    "temperature": null
+  },
+  "errors": [
+    "TOY: answer.text is hand-written for the lesson, not a model output"
+  ]
+}

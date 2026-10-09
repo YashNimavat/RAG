@@ -1,0 +1,13 @@
+PASS same index path: index/ea07572562ac/1ca9c5a3b548/c398eeba043f
+PASS params_hash identical: 1ca9c5a3b548
+PASS chunk_id lists identical (97 ids)
+PASS vectors.npy byte-identical (sha256 883bc50dd318e978)
+PASS chunks.jsonl byte-identical (sha256 d4108b8936093394)
+PASS manifest.json byte-identical (sha256 84931e43cca963c0)
+PASS config.json byte-identical
+PASS snapshot_manifest.json byte-identical
+PASS 10 trace records each
+PASS trace records identical after removing timestamp_utc and latency_ms
+PASS retrieval part (candidates: ids, offsets, scores) identical
+INFO results.jsonl byte-identical WITHOUT removing volatile fields: False (expected False: timestamps and latencies differ)
+ALL PASS

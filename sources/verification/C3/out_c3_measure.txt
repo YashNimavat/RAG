@@ -1,0 +1,115 @@
+
+=== S1 environment, snapshot and chunk records
+python 3.12.8 | {'pymupdf': '1.26.7', 'numpy': '2.5.3', 'sentence-transformers': '6.1.0', 'torch': '2.14.1', 'transformers': '5.19.0'}
+platform Windows-11-10.0.26200-SP0 | cpu_count 16
+pdf sha256 1d58a0fac2435c2ce4129ff84906b93118d731e4a004e7a26f8ab8f749a92669 bytes 206372
+pages=33 doc chars=72593 doc_text_sha256=5106772efa77003b0d6c79bc1a429b8dacf244d9556f412bae1c4fe6bc7368c6
+snapshot_id (06 §5.3 recipe executed from the document) = ea07572562ac  (06 states ea07572562ac: MATCH)
+empty pages: [] | page lengths min/max: 636 2494
+chunker config = 06 §2.4 chunking block: {"name": "recursive_char", "unit": "chars", "chunk_size": 1000, "chunk_overlap": 200, "separators": ["\n\n", "\n", " ", ""], "scope": "per_page"}
+params_hash (sha256 of json.dumps(cfg, sort_keys=True), first 12 hex) = 1ca9c5a3b548
+lab given chunker, per_page recursive_char 1000/200: 97 chunks; chunks.jsonl 122774 bytes, sha256 d4108b8936093394c6eb50d4c22e8d4013d9a048fb38d5769281af4aadb3011b; equals the C2 lab's v0 output (C2LAB_FACTS): True
+same spans/text/text_sha256/page_segments as 07 H.3 chunk_document(recursive, 1000/200): 97/97 (07's own ids use params_hash 77bc4c45809b: 07 field names, not the course recipe)
+multi-segment chunks: 0 | text == doc_text[char_start:char_end]: 97 / 97
+chunk lengths min/max: 393 1000 | chunks per page fingerprint 3ba01569bfefbbd6
+first chunk_id: climate:ea07572562ac:1ca9c5a3b548:00000 | last: climate:ea07572562ac:1ca9c5a3b548:00096
+duplicate chunk texts: 0
+first record (text cut to 40 chars): {"doc_id": "climate", "snapshot_id": "ea07572562ac", "chunk_id": "climate:ea07572562ac:1ca9c5a3b548:00000", "seq": 0, "char_start": 0, "char_end": 949, "page_segments": [{"page": 1, "char_start": 0, "char_end": 949}], "text": "Understanding Climate Change \nChapter 1:…", "text_sha256": "5fa92cb2db8f09148d46320497defdec81bfbe425e573949bc6fec1164407e07", "chunker": "recursive_char", "params_hash": "1ca9c5a3b548", "meta": {}}
+
+=== S2 params_hash: determinism and sensitivity
+rebuild with the same inputs: same params_hash True | same chunk ids 97 / 97
+two fresh processes (PYTHONHASHSEED=1, 2): sha256 recipe 1ca9c5a3b548 1ca9c5a3b548 | builtin hash() 336746104007807113 -60972490259279895 -> equal: False
+  name recursive_char->recursive params_hash 7956ad9351cd  differs: True
+  chunk_size 1000->500         params_hash 6d5b4c1a8c7c  differs: True
+  chunk_size 1000->1001        params_hash 12a950fc2efb  differs: True
+  chunk_overlap 200->100       params_hash 747bbb59942a  differs: True
+  unit chars->tokens           params_hash 91848adfb6c0  differs: True
+  scope per_page->cross_page   params_hash 5f815e69a7e0  differs: True
+  separators drop ""           params_hash 83249e317e08  differs: True
+distinct hashes over the 8 configs: 8
+same config, keys in reverse order: sort_keys=True True | without sort_keys False (3ca84ee566b2 vs 99af0d35e01b)
+chunk_size as string '1000' vs int 1000: hashes equal? False
+BROKEN hash (chunk_size+chunk_overlap only): per_page 97 chunks, cross_page 92 chunks, same hash True; 92 chunk ids shared, 89 of them name different text
+correct hash: shared ids per_page vs cross_page: 0
+
+=== S3 embedding cache key
+key('hello|world', L6 spec) = b10f3fc4459980f0… | equals 07 H.3 embedding_cache_key: True
+  change provider        -> key differs: True
+  change model_id        -> key differs: True
+  change revision        -> key differs: True
+  change input_type      -> key differs: True
+  change preproc_version -> key differs: True
+  change text by one char -> key differs: True
+  '|' in a meta field: ValueError (fields are unambiguous; text is last so it may contain '|')
+  without that guard, ('a','b|c',...) and ('a|b','c',...) give the same key: True
+
+=== S4 embeddings, cache hits/misses, edits, model switch
+L6 modules ['Transformer', 'Pooling', 'Normalize'] max_seq_length 256 | L3 modules ['Transformer', 'Pooling'] max_seq_length 128
+build 1: {'hits': 0, 'misses': 97} texts sent to model 97 in 1 call(s); V (97, 384) float32
+build 2 (same texts): {'hits': 97, 'misses': 0} texts sent to model 0; V identical: True
+cache files: 97 | bytes per cached vector file: 1664
+L6 raw norms min/max 1.000000/1.000000; stored V max|norm-1| 1.19e-07
+EDIT page 10 (+9 chars at page offset 100): new snapshot_id 09d2abdba8b6; chunks 97 (page 10 had 3); chunk ids unchanged 0/97; cache {'hits': 96, 'misses': 1}; texts sent 1
+same edit, cross_page windows: 92 -> 92 chunks; cache {'hits': 91, 'misses': 1}
+same-length edit (1 char replaced) cross_page: cache {'hits': 91, 'misses': 1}
+same edit, FIXED 1000/200 windows across pages (07 'fixed', contrast only): 91 -> 91 chunks; cache {'hits': 25, 'misses': 66}
+switch to L3 with the full key: {'hits': 0, 'misses': 97}; texts sent 97
+BROKEN text-only key, switch to L3: hits 97/97; served vectors == L6 vectors: True; shape (97, 384) (L3 dim is also 384: no error)
+D-002 evidence span doc [20993,21092) lies whole in chunk rows [27] ([27]); rank with correct index [3]; rank with stale L6 vectors + L3 query [16]
+two encodes, batch 64: bit-identical True; batch 64 vs batch 1: bit-identical False, rows bit-identical 0/97, max abs diff 1.34e-07
+
+=== S5 normalisation at index time (L3 has no Normalize module)
+L3 raw norms min/max 2.3636/3.4741; after cached_embed max|norm-1| 1.19e-07
+L3 index stored UNnormalised vs normalised, 34 queries (33 page heads + D-002): top-4 identical 7/34, top-1 identical 34/34
+D-002 top-4 rows: unnormalised [69, 27, 68, 17] normalised [69, 68, 17, 27]
+
+=== S6 the three index files
+index dir: index/<snapshot_id>/<params_hash>/<embed_hash>/ = index/ea07572562ac/1ca9c5a3b548/c398eeba043f/
+embed_hash L6 c398eeba043f | L3 ae47e2c1e13f | dim changed only True | query input_type changed f9a0a305cd54 | normalize False 49162ab49b54
+L6 and L3 indexes side by side under one params_hash: ['ae47e2c1e13f', 'c398eeba043f'] | L6 files unchanged: True
+overwrite guard: writing the L3 index into the L6 folder raises FileExistsError
+file sizes (bytes): {'chunks.jsonl': 122774, 'manifest.json': 1526, 'vectors.npy': 149120} | vectors.npy = 128-byte header + n*d*4 = 149120
+chunks.jsonl mean bytes per line: 1265.7
+manifest.json sha256 (a trace's index_manifest_hash): eeda621f95d3926a6e1cbb23f5cb83e6059c1879bffe954f335af3a08a3cb907
+manifest.json (hashes cut): {"snapshot_id": "ea07572562ac", "docs": [{"doc_id": "climate", "pdf_sha256": "1d58a0fac243…", "doc_text_sha256": "5106772efa77…"}], "parser": {"backend": "pymupdf", "version": "1.26.7"}, "chunker": {"name": "recursive_char", "unit": "chars", "chunk_size": 1000, "chunk_overlap": 200, "separators": ["\n\n", "\n", " ", ""], "scope": "per_page"}, "params_hash": "1ca9c5a3b548", "embedding": {"provider": "sentence_transformers", "model_id": "sentence-transformers/all-MiniLM-L6-v2", "revision": "1110a243fdf4706b3f48f1d95db1a4f5529b4d41", "input_type": {"documents": "none", "queries": "none"}, "preproc_version": "none", "normalize": true, "dim": 384, "max_seq_length": 256}, "embed_hash": "c398eeba043f", "library_versions": {"numpy": "2.5.3", "sentence-transformers": "6.1.0", "torch": "2.14.1"}, "created_utc": "2026-10-08T00:00:00Z", "files": {"vectors.npy": {"sha256": "b8ac06997cd3…", "shape": [97, 384], "dtype": "float32"}, "chunks.jsonl": {"sha256": "d4108b893609…", "lines": 97}}}
+round trip: vectors equal True | chunks equal True | text == doc_text slice 97 / 97
+C4-side smoke test, D-002 top-5 (line in chunks.jsonl, page, score): [(69, 24, 0.4606), (68, 23, 0.4513), (27, 10, 0.4386), (17, 6, 0.4385), (84, 29, 0.3387)]
+rebuild from the cache into a new dir: vectors.npy identical True | chunks.jsonl identical True | manifest.json identical True | cache {'hits': 97, 'misses': 0}
+Cohere embed-v4.0 (1,536 dims, O2 report): vectors.npy would be 128 + n*1536*4 = 596096 bytes (derived)
+repo cell-13 pattern on the same PDF (400/200, metadata={'index', 'text': whole document}): 363 chunks x 72561 chars = 26,339,643 metadata chars (our chunks.jsonl: 122,774 bytes for 97 chunks)
+
+=== S7 the manifest gate and the rebuild decision
+  nothing changed                      -> reuse the index
+  k 4 -> 8                             -> reuse the index
+  LLM model changed                    -> reuse the index
+  prompt answer_v1 -> v2               -> reuse the index
+  reranker added                       -> reuse the index
+  query input_type changed             -> reuse the index
+  chunk size 1000 -> 2000              -> ['chunker']
+  overlap 200 -> 100                   -> ['chunker']
+  scope per_page -> cross_page         -> ['chunker']
+  PDF text changed (new snapshot)      -> ['snapshot']
+  embedding model L6 -> L3             -> ['embedding']
+  same model, new revision             -> ['embedding']
+  document input_type changed          -> ['embedding']
+  preprocessing (tabs->spaces) added   -> ['embedding']
+  normalize true -> false              -> ['embedding']
+  new snapshot AND new model           -> ['snapshot', 'embedding']
+scenario results fingerprint: d4de412a44e2aff8
+  load_index [chunks.jsonl lost its first line]: refused -> ['chunks.jsonl sha256 differs from the manifest', '97 vectors but 96 chunk lines']
+  load_index [config asks for 2000/400]: refused -> ['rebuild needed: chunker']
+  load_index [config asks for L3]: refused -> ['rebuild needed: embedding']
+'exists -> load' pattern after changing the config to 500/100: loads 97 chunks built at 1000/200 (500/100 would give 201); no error. Manifest gate: ['chunker']
+
+=== S8 CR-08 probe: chunk size doubles (1000/200 -> 2000/400), and the token ceiling
+1000/200: 97 chunks, model tokens max 182, > 256: 0
+2000/400: 65 chunks, params_hash e1b698244452, chunk ids shared with 1000/200: 0; model tokens max 365, > 256: 32; cache after the 1000/200 build: {'hits': 12, 'misses': 53}
+pages <= 1000 chars (one identical chunk under both configs): 1
+2000/400 chunks whose text equals a 1000/200 chunk: 12 (whole pages: 1; other: 11); pages > 2000 chars: 32; longest page 2494
+vectors.npy at 2000/400: 99968 bytes (derived from n*d*4 + 128)
+
+=== S9 timings (machine-specific)
+cpu: 11th Gen Intel(R) Core(TM) i7-11800H @ 2.30GHz
+embed 97 chunks, empty cache (median of 3): 6.31 s; all hits: 92.0 ms; load_index with all checks: 11.1 ms
+
+DONE

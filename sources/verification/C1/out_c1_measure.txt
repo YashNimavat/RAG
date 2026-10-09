@@ -1,0 +1,146 @@
+
+=== S1 Environment and inputs
+python 3.12.8 | pymupdf 1.26.7 | fitz.VersionBind == '1.26.7': True
+climate sha256 1d58a0fac2435c2ce4129ff84906b93118d731e4a004e7a26f8ab8f749a92669 bytes 206372 pages 33
+book chapter 1.pdf sha256 2036e581edb94c14 pages 14
+
+=== S2 Corpus D: pages, doc_text, page_table, snapshot_id (06 §5.3)
+Page[0]: climate 1 'Understanding Climate Change' pymupdf 1.26.7
+n pages 33 | first/last page number 1 33
+page lengths [2424, 2410, 2183, 2269, 2255, 2389, 2137, 2225, 2254, 2077, 2116, 2216, 2215, 2252, 2217, 2125, 2144, 2035, 2494, 2257, 2298, 2195, 2204, 2266, 2167, 2388, 2087, 2238, 2468, 2309, 2166, 2445, 636]
+sum of page lengths 72561 | min 636 (page 33 ) | max 2494
+len(doc_text) 72593 = sum + 32 joins: True
+doc_text_sha256 5106772efa77003b0d6c79bc1a429b8dacf244d9556f412bae1c4fe6bc7368c6
+row {'page': 1, 'doc_char_start': 0, 'doc_char_end': 2424, 'text_sha256': '73533984cff86c8a0a20d852bb2fd0fce36f607d5842441977109c2c222fc029'}
+row {'page': 2, 'doc_char_start': 2425, 'doc_char_end': 4835, 'text_sha256': 'c6c14ed16a4d36979110e27802f47b851fde2f801161816d4910530190cf1ea9'}
+row {'page': 3, 'doc_char_start': 4836, 'doc_char_end': 7019, 'text_sha256': 'e74d6990381b8873386ef20642880b59988d630080fecc61b7b21936abe2cacb'}
+page 8 doc_char_start 16074 end 18299
+page 10 doc_char_start 20555 end 22632
+page 23 doc_char_start 49209 end 51413
+page 29 doc_char_start 62565 end 65033
+page 33 doc_char_start 71957 end 72593
+round trip doc_text[s:e] == page text on all pages: True
+every page ends with '\n': True
+'\n\n' in doc_text: 32 | of them at page joins: 32
+parser block {'backend': 'pymupdf', 'version': '1.26.7', 'call': 'page.get_text()', 'options': {}}
+snapshot_id ea07572562ac | equals 06 §5.3 published ea07572562ac: True
+
+=== S3 What changes the snapshot_id (same recipe, one input changed at a time)
+version 1.28.2, same text  -> 4b7e61b9e418
+cleaning 'tabs_v1', same text (no tabs, so text unchanged) -> 6164dfc95324
+options {'sort': True}, same text -> f1e46e7c3c68
+one extra space at the end of page 1 -> a79df757e413
+page_join read as a REAL newline -> 5ad6acfd28ec
+replace_t_with_space changes the text: False | tabs in Corpus D: 0
+
+=== S4 Same PDF, other extraction calls (Corpus D)
+Consider using the pymupdf_layout package for a greatly improved page layout analysis.
+get_text('text') identical to get_text() on 33 of 33 pages
+get_text(sort=True) differs on 33 pages; equal after whitespace collapse on 33 of 33
+distinct text-block x0 values [72] | images 0 | find_tables 0
+read_pdf_to_string length 72561 | our doc_text 72593
+page 2 starts at 2424 (read_pdf_to_string) vs 2425 (doc_text); page 33: 71925 vs 71957
+sum of page.get_text().strip() lengths 72491 | chars removed by strip 70
+
+=== S5 Corpus D artifact inventory (raw text)
+pages 33
+empty_pages []
+hyphen_breaks 7
+ligatures 0
+soft_hyphens 0
+tabs 0
+double_newlines 0
+lines 1100
+lines_ending_space 1093
+non_ascii {'—': 1}
+  hyphen break p.8 'cost-\ncompetitive'
+  hyphen break p.11 'well-\nbeing'
+  hyphen break p.12 'Public-\nprivate'
+  hyphen break p.19 'well-\nbeing'
+  hyphen break p.29 'market-\nbased'
+  hyphen break p.29 'climate-\nfriendly'
+  hyphen break p.31 'decision-\nmaking'
+repeated-line threshold 17 | lines over it {}
+line keys on >= 3 pages: {}
+page breaks (32) where page N does not end in . ! ? : " ) ': 24 [1, 2, 3, 4, 5, 6, 7, 8, 10, 11, 12, 14, 15, 16, 17, 18, 20, 21, 22, 24, 27, 28, 30, 31]
+  ...and page N+1 starts lowercase (mid-sentence cut): 8 ['12->13', '14->15', '15->16', '16->17', '21->22', '22->23', '24->25', '28->29']
+  naive join p.8: 'costcompetitive'; joined word attested elsewhere: False; hyphenated form elsewhere: True
+  naive join p.11: 'wellbeing'; joined word attested elsewhere: False; hyphenated form elsewhere: True
+  naive join p.12: 'Publicprivate'; joined word attested elsewhere: False; hyphenated form elsewhere: True
+  naive join p.19: 'wellbeing'; joined word attested elsewhere: False; hyphenated form elsewhere: True
+  naive join p.29: 'marketbased'; joined word attested elsewhere: False; hyphenated form elsewhere: True
+  naive join p.29: 'climatefriendly'; joined word attested elsewhere: False; hyphenated form elsewhere: True
+  naive join p.31: 'decisionmaking'; joined word attested elsewhere: False; hyphenated form elsewhere: True
+
+=== S6 Paris Agreement offsets and page lookup (doc offsets -> page)
+first 'Paris Agreement' doc offset 13420 -> (page, page offset) (6, 1874)
+pages containing 'Paris Agreement' [6, 10, 23, 24] | occurrences 8
+offset 2424 (the join after page 1) -> (1, 2424) | offset 2425 -> (2, 0)
+offset 0 -> (1, 0) | last offset 72592 -> (33, 635)
+
+=== S7 Writing the snapshot text on Windows: newline translation
+os.linesep '\r\n' | newlines in doc_text 1132 | utf-8 bytes of doc_text 72595
+default open(): bytes 73727 | file sha256 == doc_text_sha256: False
+newline='\n':   bytes 72595 | file sha256 == doc_text_sha256: True
+reading the default file back in text mode gives doc_text: True
+reading it with newline='' gives doc_text: False
+manifest validates: True | manifest snapshot_id ea07572562ac
+shifted page 2 rejected: climate p.2: start != previous end + len(page_join)
+
+=== S8 Book chapter 1 as a parsing specimen (not a corpus): figures, a table, list bullets
+chars per page [1406, 679, 710, 1269, 1108, 1125, 890, 1251, 908, 858, 1047, 1410, 1288, 233]
+images per page [0, 1, 1, 0, 1, 1, 1, 0, 1, 1, 1, 0, 0, 0]
+bullet characters '•' in chapter 1 text 0 | non-breaking spaces 0
+p.2: image rect [77, 72, 535, 376] | text blocks intersecting the image 0
+p.13: find_tables() default (ruling lines) 0 | strategy='text' 1
+p.13 strategy='text' table shape 45 x 9 | first non-empty cells ['Fac', 'tor', 'Impact']
+p.13 first 6 lines of get_text() ['Factor', 'Impact', 'Latency', 'Low: one embedding call + one vector search', '+ one LLM call', 'Complexity']
+intro.pdf: 8 pages; repeated-line threshold 4; flagged {'OceanofPDF.com': 4}
+index.pdf: 6 pages; repeated-line threshold 3; flagged {'#. How It Works': 6, '#. Key Takeaways': 6, '#. The Core Idea': 6, '#. The Problem': 6, '#. When to Use This': 6}
+
+=== S9 Synthetic artifact zoo (TOY ILLUSTRATION; c1_zoo.py)
+pages 5 | chars per page [273, 74, 0, 0, 101] | images per page [0, 0, 0, 1, 0]
+p.1 default get_text() lines ['ACME Technical Report', 'Page 1', 'Parsing comes before chunking:', 'Two-column pages are common', 'a bad parse cannot be fixed', 'in research papers, and the', 'by any later extrac-', 'reading order must follow', 'tion or retrieval step.', 'each column top to bottom.', 'The ﬁrst ﬂag: check every ﬁle.', '']
+p.1 body lines in true reading order: False | order got ['L1', 'R1', 'L2', 'R2', 'L3', 'R3', 'L4', 'R4']
+p.1 sort=True first body line ['Parsing comes before chunking:                   Two-column pages are common']
+p.1 extract_columns body lines in true order: True
+p.1 TEXT_DEHYPHENATE on the default order: ['by any later extracreading order must follow']
+p.1 TEXT_DEHYPHENATE with column clips: ['by any later extraction or retrieval step.']
+p.1 ligature line 'The ﬁrst ﬂag: check every ﬁle.' | ligature chars 3 | 'file' in it: False | after NFKC: True
+p.1 without TEXT_PRESERVE_LIGATURES: ligature chars 0
+p.2 get_text() lines ['ACME Technical Report', 'Page 2', 'Model', 'Max tokens', 'MiniLM-L6', '256', 'bge-small', '512', '']
+p.2 find_tables() 1 [['Model', 'Max tokens'], ['MiniLM-L6', '256'], ['bge-small', '512']]
+p.3 text '' images 0 | p.4 text '' images 1
+TEXTFLAGS_TEXT default includes PRESERVE_LIGATURES: True | DEHYPHENATE: False
+zoo artifact counts: {'pages': 5, 'empty_pages': [3, 4], 'hyphen_breaks': 1, 'ligatures': 3, 'soft_hyphens': 0, 'tabs': 0, 'double_newlines': 0, 'lines': 23, 'lines_ending_space': 0, 'non_ascii': {'ﬁ': 2, 'ﬂ': 1}}
+zoo repeated-line threshold 3 | flagged {'ACME Technical Report': 3, 'Page #': 3}
+
+=== S10 Logged cleaning rules R1-R3 (none applied in v0)
+   {'page': 1, 'rule': 'R1_header_footer', 'start': 0, 'end': 22, 'before': 'ACME Technical Report\n', 'after': '', 'context': 'ACME Technical Report\nPage 1\nParsi'}
+   {'page': 1, 'rule': 'R1_header_footer', 'start': 22, 'end': 29, 'before': 'Page 1\n', 'after': '', 'context': 'ical Report\nPage 1\nParsing come'}
+   {'page': 1, 'rule': 'R2_dehyphenate', 'start': 107, 'end': 109, 'before': '-\n', 'after': '', 'context': 'later extrac-\ntion or retr'}
+   {'page': 1, 'rule': 'R3_ligature', 'start': 137, 'end': 138, 'before': 'ﬁ', 'after': 'fi', 'context': 'l step.\nThe ﬁrst ﬂag: che'}
+   {'page': 1, 'rule': 'R3_ligature', 'start': 142, 'end': 143, 'before': 'ﬂ', 'after': 'fl', 'context': 'p.\nThe ﬁrst ﬂag: check ev'}
+   {'page': 1, 'rule': 'R3_ligature', 'start': 159, 'end': 160, 'before': 'ﬁ', 'after': 'fi', 'context': 'check every ﬁle.\nTwo-colu'}
+   {'page': 2, 'rule': 'R1_header_footer', 'start': 0, 'end': 22, 'before': 'ACME Technical Report\n', 'after': '', 'context': 'ACME Technical Report\nPage 2\nModel'}
+   {'page': 2, 'rule': 'R1_header_footer', 'start': 22, 'end': 29, 'before': 'Page 2\n', 'after': '', 'context': 'ical Report\nPage 2\nModel\nMax to'}
+   {'page': 5, 'rule': 'R1_header_footer', 'start': 0, 'end': 22, 'before': 'ACME Technical Report\n', 'after': '', 'context': 'ACME Technical Report\nPage 5\nPage '}
+   {'page': 5, 'rule': 'R1_header_footer', 'start': 22, 'end': 29, 'before': 'Page 5\n', 'after': '', 'context': 'ical Report\nPage 5\nPage five ch'}
+zoo edits by rule {'R1_header_footer': 6, 'R2_dehyphenate': 1, 'R3_ligature': 3} | raw chars removed 92 | chars inserted 6
+zoo p.1 cleaned lines ['Parsing comes before chunking:', 'a bad parse cannot be fixed', 'by any later extraction or retrieval step.', 'The first flag: check every file.', 'Two-column pages are common', 'in research papers, and the', 'reading order must follow', 'each column top to bottom.', '']
+zoo p.1 cleaned 'extraction' at 72 -> raw page offsets 101 .. 112 | raw text there 'extrac-\ntion'
+provenance round trip (undo(apply(edits)) == raw) on every zoo page: True
+Corpus D: edits the same rules would make 0 {}
+Corpus D: a naive '-\n' join rule would change 7 places
+
+=== S12 Part F worked example (TOY ILLUSTRATION)
+toy doc_text 'Ice melts.\n\nSeas rise.\n\nAct now.\n' len 33
+toy rows [(1, 0, 11), (2, 12, 23), (3, 24, 33)]
+toy page_of 10 -> (1, 10)
+toy page_of 11 -> (1, 11)
+toy page_of 12 -> (2, 0)
+toy page_of 17 -> (2, 5)
+toy page_of 30 -> (3, 6)
+toy page 1 doubled: page 2 start 23 | len 44 | ids differ: True
+toy R2 edits [(1, 'R2_dehyphenate', 12, 14, '-\n')]
+toy cleaned 'later extraction\n' | src [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 14, 15, 16, 17, 18]

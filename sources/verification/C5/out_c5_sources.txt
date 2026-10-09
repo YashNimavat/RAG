@@ -1,0 +1,130 @@
+PASS repo HEAD 009adba2be1bef49780ef73b6dd3c18fd24b035b
+PASS all_rag_techniques/simple_rag.ipynb cell 13 is a code cell
+PASS all_rag_techniques/simple_rag.ipynb cell 13: search_kwargs={"k": 2}
+PASS all_rag_techniques/simple_rag.ipynb cell 15 is a code cell
+PASS all_rag_techniques/simple_rag.ipynb cell 15: retrieve_context_per_question(test_query, chunks_query_retriever)
+PASS all_rag_techniques/simple_rag.ipynb cell 15: show_context(context)
+PASS all_rag_techniques/simple_rag.ipynb cell 17 is a code cell
+PASS all_rag_techniques/simple_rag.ipynb cell 17: evaluate_rag(chunks_query_retriever)
+PASS all_rag_techniques/local_rag_huggingface_faiss.ipynb cell 22 is a code cell
+PASS all_rag_techniques/local_rag_huggingface_faiss.ipynb cell 22: using ONLY the context provided below
+PASS all_rag_techniques/local_rag_huggingface_faiss.ipynb cell 24 is a code cell
+PASS all_rag_techniques/local_rag_huggingface_faiss.ipynb cell 24: [Page {doc.metadata.get('page', '?')}]
+PASS all_rag_techniques/local_rag_huggingface_faiss.ipynb cell 24: "\n\n".join(
+PASS all_rag_techniques/local_rag_huggingface_faiss.ipynb cell 26 is a code cell
+PASS all_rag_techniques/local_rag_huggingface_faiss.ipynb cell 26: raw.strip().split("Answer:")[-1].strip()
+PASS all_rag_techniques/local_rag_huggingface_faiss.ipynb cell 26: What is the GDP of India in 2024?
+PASS all_rag_techniques/local_rag_huggingface_faiss.ipynb cell 28 is a code cell
+PASS all_rag_techniques/local_rag_huggingface_faiss.ipynb cell 28: RunnableParallel(
+PASS all_rag_techniques/local_rag_huggingface_faiss.ipynb cell 28: answer=rag_chain,
+PASS all_rag_techniques/local_rag_huggingface_faiss.ipynb cell 28: sources=retriever,
+PASS all_rag_techniques/local_rag_huggingface_faiss.ipynb cell 28: print("Sources used:")
+PASS all_rag_techniques/crag.ipynb cell 20 is a code cell
+PASS all_rag_techniques/crag.ipynb cell 20: def generate_response(query: str, knowledge: str, sources: List[Tuple[str, str]]) -> str:
+PASS all_rag_techniques/crag.ipynb cell 20: Include the sources with their links (if available) at the end of your answer
+PASS all_rag_techniques/crag.ipynb cell 20: return [doc.page_content for doc in docs]
+PASS all_rag_techniques/crag.ipynb cell 22 is a code cell
+PASS all_rag_techniques/crag.ipynb cell 22: sources.append(("Retrieved document", ""))
+PASS all_rag_techniques/crag.ipynb cell 22: response = generate_response(query, final_knowledge, sources)
+PASS all_rag_techniques/reliable_rag.ipynb cell 18 is a code cell
+PASS all_rag_techniques/reliable_rag.ipynb cell 18: Answer the question based upon your knowledge.
+PASS all_rag_techniques/reliable_rag.ipynb cell 18: ChatGroq(model="llama-3.1-8b-instant", temperature=0)
+PASS all_rag_techniques/reliable_rag.ipynb cell 22 is a code cell
+PASS all_rag_techniques/reliable_rag.ipynb cell 22: PydanticOutputParser(pydantic_object=HighlightDocuments)
+PASS all_rag_techniques/reliable_rag.ipynb cell 22: ChatGroq(model="mixtral-8x7b-32768", temperature=0)
+PASS all_rag_techniques/reliable_rag.ipynb cell 22: Each segment is an exact match to a part of the document
+PASS all_rag_techniques/reliable_rag.ipynb cell 22: If you didn't used the specific document don't mention it.
+PASS all_rag_techniques/reliable_rag.ipynb cell 23 is a code cell
+PASS all_rag_techniques/reliable_rag.ipynb cell 23: for id, title, source, segment in zip(lookup_response.id
+PASS all_rag_techniques/graph_rag_local_attribution.ipynb cell 9 is a code cell
+PASS all_rag_techniques/graph_rag_local_attribution.ipynb cell 9: CRITICAL: Cite your sources using [N] notation for each claim.
+PASS all_rag_techniques/graph_rag_local_attribution.ipynb cell 9: citation_refs = re.findall(r'\[(\d+)\]', answer_text)
+PASS all_rag_techniques/graph_rag_local_attribution.ipynb cell 9: for ref in set(citation_refs):
+PASS all_rag_techniques/graph_rag_local_attribution.ipynb cell 9: if key in source_map:
+PASS all_rag_techniques/graph_rag_local_attribution.ipynb cell 9: confidence=0.9,
+PASS all_rag_techniques/graph_rag_local_attribution.ipynb cell 19 is a code cell
+PASS all_rag_techniques/graph_rag_local_attribution.ipynb cell 19: print(f"\n📚 Citations: {len(result.citations)} sources verified")
+PASS all_rag_techniques/local_rag_huggingface_faiss.ipynb cell 26: no saved output (behaviour not shown)
+PASS all_rag_techniques/local_rag_huggingface_faiss.ipynb cell 28: no saved output (behaviour not shown)
+PASS all_rag_techniques/graph_rag_local_attribution.ipynb cell 9: no saved output (behaviour not shown)
+PASS all_rag_techniques/graph_rag_local_attribution.ipynb cell 17: no saved output (behaviour not shown)
+PASS all_rag_techniques/graph_rag_local_attribution.ipynb cell 19: no saved output (behaviour not shown)
+PASS reliable_rag cell 23 saved output lists 'ID: doc3'
+PASS local_rag cell 22 prompt ends with an 'Answer:' cue
+PASS local_rag cell 22 prompt never asks for citations
+PASS graph_rag_local_attribution cell 9: unknown [N] silently dropped (no else)
+PASS graph_rag_local_attribution cell 0: runs on Ollama
+PASS simple_rag.ipynb: no code cell builds or invokes a chat model
+PASS simple_rag.ipynb has 22 cells
+PASS reliable_rag.ipynb: no code checks a highlighted segment is really in a document
+PASS helper_functions.py L162 def
+PASS helper_functions.py L162-L205: no citation or source handling
+code that runs re.findall on a '[' pattern: [('all_rag_techniques/graph_rag_local_attribution.ipynb', 9)]
+PASS only graph_rag_local_attribution cell 9 parses [..] tags (repo-wide)
+PASS evaluation/evaluation_grouse.ipynb cell 30: citation rubric for a judge
+PASS chapter 1.pdf has 14 pages
+PASS phrase under 15 words: 'Step 8: Generate the Answer'
+PASS chapter 1.pdf p.9/14: 'Step 8: Generate the Answer'
+PASS chapter 1.pdf has 14 pages
+PASS phrase under 15 words: 'not in its training memory'
+PASS chapter 1.pdf p.9/14: 'not in its training memory'
+PASS chapter 1.pdf has 14 pages
+PASS phrase under 15 words: 'Pass question + retrieved chunks to the language model'
+PASS chapter 1.pdf p.10/14: 'Pass question + retrieved chunks to the language model'
+PASS chapter 3.pdf has 14 pages
+PASS phrase under 15 words: 'Even with perfect context'
+PASS chapter 3.pdf p.6/14: 'Even with perfect context'
+PASS chapter 3.pdf has 14 pages
+PASS phrase under 15 words: 'Is this answer faithful to the chunks?'
+PASS chapter 3.pdf p.6/14: 'Is this answer faithful to the chunks?'
+PASS chapter 3.pdf has 14 pages
+PASS phrase under 15 words: 'Step 5: Highlight Source Segments'
+PASS chapter 3.pdf p.8/14: 'Step 5: Highlight Source Segments'
+PASS chapter 3.pdf has 14 pages
+PASS phrase under 15 words: 'verbatim excerpts from the source documents'
+PASS chapter 3.pdf p.8/14: 'verbatim excerpts from the source documents'
+PASS chapter 3.pdf has 14 pages
+PASS phrase under 15 words: 'adding footnotes to a research paper'
+PASS chapter 3.pdf p.8/14: 'adding footnotes to a research paper'
+PASS chapter 3.pdf has 14 pages
+PASS phrase under 15 words: 'Return segments with document IDs and source references'
+PASS chapter 3.pdf p.9/14: 'Return segments with document IDs and source references'
+PASS chapter 3.pdf has 14 pages
+PASS phrase under 15 words: 'is better than a confident wrong answer'
+PASS chapter 3.pdf p.11/14: 'is better than a confident wrong answer'
+PASS chapter 19.pdf has 10 pages
+PASS phrase under 15 words: 'attribution works after generation'
+PASS chapter 19.pdf p.8/10: 'attribution works after generation'
+PASS chapter 19.pdf has 10 pages
+PASS phrase under 15 words: 'explains why each document was retrieved'
+PASS chapter 19.pdf p.8/10: 'explains why each document was retrieved'
+PASS chapter 22.pdf has 19 pages
+PASS phrase under 15 words: 'Measuring Faithfulness'
+PASS chapter 22.pdf p.7/19: 'Measuring Faithfulness'
+PASS chapter 22.pdf has 19 pages
+PASS phrase under 15 words: 'This metric isolates generation quality from retrieval quality.'
+PASS chapter 22.pdf p.8/19: 'This metric isolates generation quality from retrieval quality.'
+PASS chapter 22.pdf has 19 pages
+PASS phrase under 15 words: 'the problem is in the language model or the prompt'
+PASS chapter 22.pdf p.8/19: 'the problem is in the language model or the prompt'
+PASS Appendix.pdf has 23 pages
+PASS phrase under 15 words: 'requiring each claim to cite its source'
+PASS Appendix.pdf p.5/23: 'requiring each claim to cite its source'
+PASS Appendix.pdf has 23 pages
+PASS phrase under 15 words: 'footnote-style citations'
+PASS Appendix.pdf p.21/23: 'footnote-style citations'
+pages with "don't know": [('chapter 3.pdf', 11)]
+PASS "I don't know" appears only at Ch3 p.11/14
+PASS book: no 'abstain'/'abstention' anywhere
+PASS book: no inline [doc:page]-style citation format anywhere
+PASS Ch19 never says 'cite' (Appendix p.5/23 says Ch19 requires claims to cite)
+PASS groq SDK version 1.7.0
+PASS create() accepts model, messages, temperature, max_tokens, max_completion_tokens, reasoning_effort
+PASS docstring: max_tokens deprecated in favour of max_completion_tokens
+PASS docstring: gpt-oss reasoning_effort low/medium/high, default medium
+PASS Choice fields: finish_reason, index, logprobs, message
+PASS finish_reason Literal includes 'length'
+PASS usage.completion_tokens_details.reasoning_tokens exists (Optional)
+PASS create(): reasoning_effort defaults to the SDK's Omit sentinel (field not sent; the server applies its default)
+PASS Choice.finish_reason Literal values: stop, length, tool_calls, function_call
+ALL PASS

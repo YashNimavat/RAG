@@ -1,0 +1,45 @@
+PASS # CHECK Task 1 (do not edit)
+     Task 1 OK: ['climate', 'change', 'news', 'climate', 'change', 'videos', 'climate', 'change', 'quiz', 'subscribe', 'now']
+PASS # CHECK Task 2 (do not edit)
+     Task 2 OK. Vocabulary: 88 terms (you predicted 95).
+     postings for 'climate': ['d02', 'd08'] | 'the': ['d01', 'd02', 'd03', 'd05', 'd06'] | 'methane': ['d09']
+PASS # CHECK Task 3 (do not edit)
+     q1 'main cause of climate change'             AND=['d02']  OR=['d01', 'd02', 'd08']
+     q2 'why do sea levels rise'                   AND=[]  OR=['d04']
+     q3 'renewable energy'                         AND=[]  OR=[]
+     q4 'where does methane come from'             AND=[]  OR=['d06', 'd09']
+     q5 'is extreme heat becoming more common'     AND=[]  OR=['d02', 'd03', 'd10']
+     Task 3 OK. You predicted AND(q1) = ['d01', 'd02']
+PASS # CHECK Task 4 (do not edit)
+     q1 [('d02', 5), ('d01', 3), ('d08', 2)]
+     q2 [('d04', 2)]
+     q3 []
+     q4 [('d06', 1), ('d09', 1)]
+     q5 [('d10', 3), ('d02', 1), ('d03', 1)]
+     Task 4 OK
+PASS # CHECK Task 5 (do not edit). It checks the format, then compares your binary labels with the reference.
+     Task 5 OK (format). Binary agreement with the reference labels: 49 / 50 pairs.
+     Pairs where you differ (discuss each with the tutor; a disagreement is not automatically your error): ['q1:d09']
+PASS # CHECK Task 6 (do not edit)
+     A ['d02', 'd01', 'd08'] precision, recall, first relevant rank = [0.3333, 0.3333, 2]
+     B ['d01', 'd08', 'd02'] precision, recall, first relevant rank = [0.3333, 0.3333, 1]
+     C ['d01', 'd03', 'd09'] precision, recall, first relevant rank = [1.0, 1.0, 1]
+     Task 6 OK. You predicted: same precision, different rank
+PASS # CHECK Task 7 (do not edit)
+     Task 7 OK. Candidates=3, recall@3=0.3333, recall@6=0.3333; you predicted 'up'.
+PASS # CHECK Task 8 (do not edit)
+     Task 8 OK. 1868 terms; 'the' in 80 of 91 windows (you predicted 91); 'methane' in 5; OR('methane emissions') returns 34 windows.
+     OR('main cause of climate change') returns 90 windows.
+
+good: 8/8 CHECK cells passed
+
+FAIL # CHECK Task 1 (do not edit)  -> AssertionError: got ['Sea-level', 'RISE,', '2019!']
+FAIL # CHECK Task 2 (do not edit)  -> AssertionError: each postings list must be sorted, with no duplicates
+FAIL # CHECK Task 3 (do not edit)  -> AssertionError: search_and is not right yet: {'q1': ['d01', 'd02', 'd08'], 'q2': ['d04'], 'q3': [], 'q4': ['d06'], 'q5': ['d02', 'd03', 'd10']}
+FAIL # CHECK Task 4 (do not edit)  -> AssertionError: the ranking is not right yet: {'q1': [('d01', 1), ('d02', 1), ('d08', 1)], 'q2': [('d04', 1)], 'q3': [], 'q4': [('d06', 1)], 'q5': [('d02', 1), ('d03', 1), ('d10', 1)]}
+FAIL # CHECK Task 5 (do not edit). It checks the format, then compares your binary labels with the reference.  -> AssertionError: each justification needs 5 words or more
+FAIL # CHECK Task 6 (do not edit)  -> AssertionError: precision = relevant retrieved / number retrieved
+FAIL # CHECK Task 7 (do not edit)  -> AssertionError: cr08 is not right yet: [3, 0.3333, 0.6667]
+FAIL # CHECK Task 8 (do not edit)  -> AssertionError: pdf_facts is not right yet: [91, 2743, 44, 7, 21]
+
+broken: 0/8 CHECK cells passed

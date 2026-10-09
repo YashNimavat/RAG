@@ -1,0 +1,119 @@
+PASS repo HEAD 009adba2be1bef49780ef73b6dd3c18fd24b035b
+PASS all_rag_techniques/simple_csv_rag.ipynb cell 16 is a code cell
+PASS all_rag_techniques/simple_csv_rag.ipynb cell 16: Use the following pieces of retrieved context
+PASS all_rag_techniques/simple_csv_rag.ipynb cell 16: If you don't know the answer, say that you 
+PASS all_rag_techniques/simple_csv_rag.ipynb cell 16: "{context}"
+PASS all_rag_techniques/simple_csv_rag.ipynb cell 16: create_stuff_documents_chain(llm, prompt)
+PASS all_rag_techniques/simple_csv_rag.ipynb cell 16: vector_store.as_retriever()
+PASS all_rag_techniques/local_rag_huggingface_faiss.ipynb cell 18 is a code cell
+PASS all_rag_techniques/local_rag_huggingface_faiss.ipynb cell 18: search_kwargs={"k": TOP_K}
+PASS all_rag_techniques/local_rag_huggingface_faiss.ipynb cell 20 is a code cell
+PASS all_rag_techniques/local_rag_huggingface_faiss.ipynb cell 20: max_new_tokens=256
+PASS all_rag_techniques/local_rag_huggingface_faiss.ipynb cell 20: temperature=0.1
+PASS all_rag_techniques/local_rag_huggingface_faiss.ipynb cell 22 is a code cell
+PASS all_rag_techniques/local_rag_huggingface_faiss.ipynb cell 22: using ONLY the context provided below
+PASS all_rag_techniques/local_rag_huggingface_faiss.ipynb cell 22: If the answer is not contained in the context, respond with:
+PASS all_rag_techniques/local_rag_huggingface_faiss.ipynb cell 22: Do not use any prior knowledge or make assumptions.
+PASS all_rag_techniques/local_rag_huggingface_faiss.ipynb cell 24 is a code cell
+PASS all_rag_techniques/local_rag_huggingface_faiss.ipynb cell 24: [Page {doc.metadata.get('page', '?')}]
+PASS all_rag_techniques/local_rag_huggingface_faiss.ipynb cell 24: def format_docs(docs):
+PASS all_rag_techniques/local_rag_huggingface_faiss.ipynb cell 26 is a code cell
+PASS all_rag_techniques/local_rag_huggingface_faiss.ipynb cell 26: What is the GDP of India in 2024?
+PASS all_rag_techniques/local_rag_huggingface_faiss.ipynb cell 26: Out-of-scope
+PASS all_rag_techniques/local_rag_huggingface_faiss.ipynb cell 12 is a code cell
+PASS all_rag_techniques/local_rag_huggingface_faiss.ipynb cell 12: PyPDFLoader(path)
+PASS all_rag_techniques/reliable_rag.ipynb cell 18 is a code cell
+PASS all_rag_techniques/reliable_rag.ipynb cell 18: Answer the question based upon your knowledge.
+PASS all_rag_techniques/reliable_rag.ipynb cell 18: <docs>{documents}</docs>
+PASS all_rag_techniques/reliable_rag.ipynb cell 18: ChatGroq(model="llama-3.1-8b-instant", temperature=0)
+PASS all_rag_techniques/reliable_rag.ipynb cell 18: Source:{doc.metadata['source']}
+PASS all_rag_techniques/reliable_rag.ipynb cell 20 is a code cell
+PASS all_rag_techniques/reliable_rag.ipynb cell 20: You are a grader assessing whether an LLM generation is grounded
+PASS all_rag_techniques/multi_model_rag_with_captioning.ipynb cell 12 is a code cell
+PASS all_rag_techniques/multi_model_rag_with_captioning.ipynb cell 12: You are an assistant tasked with summarizing tables, images and text for retrieval.
+PASS all_rag_techniques/multi_model_rag_with_captioning.ipynb cell 14 is a code cell
+PASS all_rag_techniques/multi_model_rag_with_captioning.ipynb cell 14: metadata={"name": text['name']}
+PASS all_rag_techniques/multi_model_rag_with_captioning.ipynb cell 14: chunk_size=400, chunk_overlap=50
+PASS all_rag_techniques/multi_model_rag_with_captioning.ipynb cell 15 is a code cell
+PASS all_rag_techniques/multi_model_rag_with_captioning.ipynb cell 15: search_kwargs={'k': 1}
+PASS all_rag_techniques/multi_model_rag_with_captioning.ipynb cell 17 is a code cell
+PASS all_rag_techniques/multi_model_rag_with_captioning.ipynb cell 17: query = "What is the BLEU score of the Transformer (base model)?"
+PASS all_rag_techniques/multi_model_rag_with_captioning.ipynb cell 20 is a code cell
+PASS all_rag_techniques/multi_model_rag_with_captioning.ipynb cell 20: Answer the question based upon your knowledge.
+PASS all_rag_techniques/multi_model_rag_with_captioning.ipynb cell 20: ChatCohere(model="command-r-plus", temperature=0)
+PASS all_rag_techniques/multi_model_rag_with_captioning.ipynb cell 20: "documents":docs[0].page_content
+PASS captioning cell 20 saved output states a BLEU number (27.3)
+PASS captioning cell 17: no saved output (retrieved chunk not saved)
+PASS captioning cell 18: no saved output (retrieved chunk not saved)
+PASS captioning notebook has 22 cells (0-21)
+PASS helper_functions.py L162 def create_question_answer_from_context_chain
+PASS helper_functions.py L205 ends answer_question_from_context
+PASS helper L162-L205: 'based ONLY on the provided context'
+PASS only helper_functions.py calls/defines them with '(' : ['helper_functions.py']
+PASS evaluation/evalute_rag.py imports the chain but never calls it
+PASS chapter 1.pdf has 14 pages
+PASS phrase under 15 words: 'It is answering from memory'
+PASS chapter 1.pdf p.1/14: 'It is answering from memory'
+PASS chapter 1.pdf has 14 pages
+PASS phrase under 15 words: 'stuff entire documents into the prompt'
+PASS chapter 1.pdf p.3/14: 'stuff entire documents into the prompt'
+PASS chapter 1.pdf has 14 pages
+PASS phrase under 15 words: 'Step 8: Generate the Answer'
+PASS chapter 1.pdf p.9/14: 'Step 8: Generate the Answer'
+PASS chapter 1.pdf has 14 pages
+PASS phrase under 15 words: 'not in its training memory'
+PASS chapter 1.pdf p.9/14: 'not in its training memory'
+PASS chapter 1.pdf has 14 pages
+PASS phrase under 15 words: 'Pass question + retrieved chunks to the language model'
+PASS chapter 1.pdf p.10/14: 'Pass question + retrieved chunks to the language model'
+PASS chapter 3.pdf has 14 pages
+PASS phrase under 15 words: 'Step 3: Generate an Answer'
+PASS chapter 3.pdf p.5/14: 'Step 3: Generate an Answer'
+PASS chapter 3.pdf has 14 pages
+PASS phrase under 15 words: 'removes noise that would otherwise distract'
+PASS chapter 3.pdf p.5/14: 'removes noise that would otherwise distract'
+PASS chapter 3.pdf has 14 pages
+PASS phrase under 15 words: 'identical to the generation step in simple RAG'
+PASS chapter 3.pdf p.6/14: 'identical to the generation step in simple RAG'
+PASS chapter 3.pdf has 14 pages
+PASS phrase under 15 words: 'Even with perfect context'
+PASS chapter 3.pdf p.6/14: 'Even with perfect context'
+PASS chapter 3.pdf has 14 pages
+PASS phrase under 15 words: 'adding footnotes to a research paper'
+PASS chapter 3.pdf p.8/14: 'adding footnotes to a research paper'
+PASS chapter 3.pdf has 14 pages
+PASS phrase under 15 words: 'is better than a confident wrong answer'
+PASS chapter 3.pdf p.11/14: 'is better than a confident wrong answer'
+PASS chapter 16.pdf has 11 pages
+PASS phrase under 15 words: 'The captioning prompt should instruct the model'
+PASS chapter 16.pdf p.6/11: 'The captioning prompt should instruct the model'
+PASS chapter 16.pdf has 11 pages
+PASS phrase under 15 words: 'It runs once during preparation, not at query time'
+PASS chapter 16.pdf p.6/11: 'It runs once during preparation, not at query time'
+PASS chapter 16.pdf has 11 pages
+PASS phrase under 15 words: 'At query time, nothing changes.'
+PASS chapter 16.pdf p.8/11: 'At query time, nothing changes.'
+PASS chapter 16.pdf has 11 pages
+PASS phrase under 15 words: 'What is the BLEU score of the base model?'
+PASS chapter 16.pdf p.8/11: 'What is the BLEU score of the base model?'
+PASS chapter 22.pdf has 19 pages
+PASS phrase under 15 words: 'give more weight to documents that appear first'
+PASS chapter 22.pdf p.5/19: 'give more weight to documents that appear first'
+PASS chapter 22.pdf has 19 pages
+PASS phrase under 15 words: 'the problem is in the language model or the prompt'
+PASS chapter 22.pdf p.8/19: 'the problem is in the language model or the prompt'
+PASS chapter 22.pdf has 19 pages
+PASS phrase under 15 words: 'Prompt injection attacks attempt to override'
+PASS chapter 22.pdf p.16/19: 'Prompt injection attacks attempt to override'
+PASS Appendix.pdf has 23 pages
+PASS phrase under 15 words: 'give more weight to documents appearing first'
+PASS Appendix.pdf p.15/23: 'give more weight to documents appearing first'
+PASS Appendix.pdf has 23 pages
+PASS phrase under 15 words: 'A grounded answer can be traced back'
+PASS Appendix.pdf p.17/23: 'A grounded answer can be traced back'
+PASS book: no 'lost in the middle' anywhere
+PASS book: no 'Liu' anywhere
+pages with 'appear(s/ing) first': [('Appendix.pdf', 15), ('chapter 22.pdf', 5)]
+PASS the first-position claim appears only at Ch22 p.5/19 and Appendix p.15/23
+pages mentioning cite/citation: [('Appendix.pdf', 5), ('Appendix.pdf', 9), ('Appendix.pdf', 21), ('chapter 12.pdf', 1), ('chapter 12.pdf', 10), ('chapter 12.pdf', 12), ('chapter 3.pdf', 8), ('chapter 3.pdf', 9), ('chapter 3.pdf', 10)]
+ALL PASS

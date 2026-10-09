@@ -1,0 +1,108 @@
+
+=== S1 environment, load, snapshot (06 sec. 5.3)
+versions: {"numpy": "2.5.3", "pymupdf": "1.26.7", "python": "3.12.8", "sentence-transformers": "6.1.0", "tiktoken": "0.14.0", "torch": "2.14.1+cpu"}
+pdf sha256 1d58a0fac2435c2ce4129ff84906b93118d731e4a004e7a26f8ab8f749a92669  bytes 206372
+pages 33  doc_text chars 72593  doc_text_sha256 5106772efa77003b0d6c79bc1a429b8dacf244d9556f412bae1c4fe6bc7368c6
+snapshot_id ea07572562ac  (06 sec. 5.3 states ea07572562ac: MATCH)
+page 10 starts at doc offset 20555 (06 sec. 5.3 states 20,555)
+tab characters in doc_text: 0  (upstream replace_t_with_space would change 0 chars)
+load latency_ms 254.814
+
+=== S2 chunk (spans from the 07 H.1 + H.3 code as written; ids from the course params_hash)
+07 H.1 code sha256 389551b7aae03d98  07 H.3 code sha256 d381cfa528d1ec1c
+07 ChunkerConfig used for the spans: {"name": "recursive", "overlap": 200, "scope": "per_page", "separators": ["\n\n", "\n", " "], "size": 1000, "unit": "chars"} -> 07 params_hash() 77bc4c45809b
+CHUNKING (06 sec. 2.4 block, hashed): {"chunk_overlap": 200, "chunk_size": 1000, "name": "recursive_char", "scope": "per_page", "separators": ["\n\n", "\n", " ", ""], "unit": "chars"}
+params_hash 1ca9c5a3b548  (course decision value 1ca9c5a3b548: MATCH)
+chunks 97  length min/median/max 393/935/1000
+chunks per page min/max 1/3; pages with 3+ chunks 32
+invariants: text==doc_text[a:b] True; one page_segment each True; text_sha256 True; 0<len<=1000 True
+first chunk_id climate:ea07572562ac:1ca9c5a3b548:00000
+last  chunk_id climate:ea07572562ac:1ca9c5a3b548:00096
+fingerprint of the chunk_id list afdaa756486c15d4
+chunk latency_ms 11.153
+
+=== S3 embed (LOCAL MiniLM fallback; Cohere default not called)
+model sentence-transformers/all-MiniLM-L6-v2  cache snapshots ['1110a243fdf4706b3f48f1d95db1a4f5529b4d41', 'c9745ed1d9f207416be6d2e6f8de32d1f16199bf']  max_seq_length 256  dim 384
+V shape (97, 384) dtype float32  max|norm-1| 1.19e-07
+MiniLM tokens per chunk (with [CLS]/[SEP]) min/median/max 59/149/182; chunks over 256: 0
+embedding cache key of chunk 0: 314dfac7c46017f0...  distinct keys 97 for 97 chunks
+model load latency_ms 2161.92  embed 97 chunks latency_ms 6184.403
+
+=== S4 index files (vectors.npy, chunks.jsonl, manifest.json)
+chunks.jsonl sha256 d4108b8936093394c6eb50d4c22e8d4013d9a048fb38d5769281af4aadb3011b; C2 lab chunks.jsonl (C2LAB_FACTS) d4108b8936093394...: IDENTICAL
+vectors.npy      149,120 bytes  sha256 883bc50dd318e978
+chunks.jsonl     122,774 bytes  sha256 d4108b8936093394
+manifest.json      1,297 bytes  sha256 84931e43cca963c0
+embedding block hashed for embed_hash: {"input_type": {"documents": "none", "queries": "none"}, "model_id": "sentence-transformers/all-MiniLM-L6-v2", "normalize": true, "preproc_version": "none", "provider": "sentence_transformers", "revision": "1110a243fdf4706b3f48f1d95db1a4f5529b4d41"}
+index dir: index/ea07572562ac/1ca9c5a3b548/c398eeba043f/
+index_manifest_hash sha256:84931e43cca963c0...
+
+=== S5 retrieve (k=4, exact cosine, ties by chunk_id), prompt, trace
+D-001: top-4 = p.1#1(0.4929), p.1#0(0.4706), p.3#7(0.4692), p.3#8(0.4608); gap rank4-rank5 0.0894; CE@4 1
+    gold g1/g1a p.3 doc[5925,6039) quote_ok=True first rank wholly containing=3 first rank overlapping=3
+    prompt input_tokens 865  context_tokens 696  truncated 0
+D-002: top-4 = p.24#69(0.4606), p.23#68(0.4513), p.10#27(0.4386), p.6#17(0.4385); gap rank4-rank5 0.0998; CE@4 1
+    gold g1/g1a p.10 doc[20993,21092) quote_ok=True first rank wholly containing=3 first rank overlapping=3
+    prompt input_tokens 802  context_tokens 644  truncated 0
+D-003: top-4 = p.23#68(0.6497), p.10#27(0.6320), p.6#17(0.5351), p.24#69(0.4791); gap rank4-rank5 0.0137; CE@4 1
+    gold g1/g1a p.23 doc[51326,51411) quote_ok=True first rank wholly containing=1 first rank overlapping=1
+    prompt input_tokens 820  context_tokens 644  truncated 0
+D-004: top-4 = p.23#67(0.4210), p.8#23(0.4035), p.23#68(0.3604), p.10#27(0.2136); gap rank4-rank5 0.0120; CE@4 1
+    gold g1/g1a p.8 doc[17994,18081) quote_ok=True first rank wholly containing=2 first rank overlapping=2
+    gold g1/g1b p.23 doc[50646,50775) quote_ok=True first rank wholly containing=1 first rank overlapping=1
+    prompt input_tokens 771  context_tokens 610  truncated 0
+D-005: top-4 = p.2#3(0.4272), p.2#4(0.3581), p.1#2(0.3521), p.2#5(0.3192); gap rank4-rank5 0.0065; CE@4 1
+    gold g1/g1a p.2 doc[2425,2470) quote_ok=True first rank wholly containing=1 first rank overlapping=1
+    gold g2/g2a p.2 doc[3171,3261) quote_ok=True first rank wholly containing=1 first rank overlapping=1
+    prompt input_tokens 894  context_tokens 730  truncated 0
+D-006: top-4 = p.8#21(0.5331), p.22#64(0.5004), p.5#14(0.4772), p.5#13(0.4696); gap rank4-rank5 0.0237; CE@4 1
+    gold g1/g1a p.8 doc[16438,16558) quote_ok=True first rank wholly containing=1 first rank overlapping=1
+    gold g2/g2a p.8 doc[16582,16689) quote_ok=True first rank wholly containing=1 first rank overlapping=1
+    prompt input_tokens 804  context_tokens 642  truncated 0
+D-007: top-4 = p.24#69(0.7094), p.10#27(0.6105), p.29#85(0.5954), p.29#84(0.5902); gap rank4-rank5 0.0053; CE@4 1
+    gold g1/g1a p.10 doc[20692,20894) quote_ok=True first rank wholly containing=2 first rank overlapping=2
+    gold g2/g2a p.29 doc[63528,63671) quote_ok=True first rank wholly containing=3 first rank overlapping=3
+    prompt input_tokens 873  context_tokens 700  truncated 0
+D-008: top-4 = p.10#28(0.2598), p.24#69(0.2535), p.20#58(0.2478), p.5#12(0.2041); gap rank4-rank5 0.0006; CE@4 1
+    gold g1/g1a p.24 doc[51882,51978) quote_ok=True first rank wholly containing=2 first rank overlapping=2
+    prompt input_tokens 858  context_tokens 702  truncated 0
+D-009: top-4 = p.29#85(0.3099), p.10#27(0.2798), p.24#69(0.2738), p.29#84(0.2571); gap rank4-rank5 0.0150; CE@4 None
+    prompt input_tokens 858  context_tokens 700  truncated 0
+R-001: top-4 = p.1#2(0.6505), p.1#1(0.6319), p.1#0(0.5921), p.3#7(0.5799); gap rank4-rank5 0.0101; CE@4 None
+    prompt input_tokens 896  context_tokens 738  truncated 0
+
+TOY trace D-002: answer (hand-written) 'The Paris Agreement was adopted in 2015 [climate:10].'
+    citations [{"marker": "[climate:10]", "doc_id": "climate", "page": 10, "resolved_chunk_ids": ["climate:ea07572562ac:1ca9c5a3b548:00027"]}]
+
+trace records 10; bytes per record min/median/max 2029/2110/2267; results.jsonl 21,301 bytes
+embed_query latency_ms (this run) [53.135, 97.681, 78.015, 154.989, 170.868, 154.371, 57.257, 112.642, 43.467, 114.467]
+dense latency_ms (this run) [0.403, 0.164, 0.328, 0.291, 0.319, 0.383, 0.294, 0.325, 0.28, 0.336]
+
+=== S6 one query through every artifact (D-002)
+rank 1: chunk_id climate:ea07572562ac:1ca9c5a3b548:00069  row 69  page 24 page-rel [0,982) -> doc [51414,52396) == chunk doc [51414,52396) True
+        vector row 69: first 3 dims [-0.0242, 0.095, 0.0339] norm 1.000000; score stored 0.460613 recomputed 0.460613
+        text starts 'Kyoto Protocol \nThe Kyoto Protocol, adopted in 1997, set bin'
+rank 2: chunk_id climate:ea07572562ac:1ca9c5a3b548:00068  row 68  page 23 page-rel [1547,2204) -> doc [50756,51413) == chunk doc [50756,51413) True
+        vector row 68: first 3 dims [-0.048, 0.0729, 0.0049] norm 1.000000; score stored 0.451299 recomputed 0.451299
+        text starts 'negative emissions. The captured CO2 can be stored or used i'
+rank 3: chunk_id climate:ea07572562ac:1ca9c5a3b548:00027  row 27  page 10 page-rel [0,951) -> doc [20555,21506) == chunk doc [20555,21506) True
+        vector row 27: first 3 dims [-0.0068, 0.0188, 0.0137] norm 1.000000; score stored 0.438607 recomputed 0.438607
+        text starts 'Chapter 6: Global and Local Climate Action \nInternational Co'
+rank 4: chunk_id climate:ea07572562ac:1ca9c5a3b548:00017  row 17  page 6 page-rel [1566,2389) -> doc [13112,13935) == chunk doc [13112,13935) True
+        vector row 17: first 3 dims [0.0256, 0.0833, 0.1088] norm 1.000000; score stored 0.438527 recomputed 0.438527
+        text starts 'a long time. These projects can help sequester carbon and pr'
+query vector first 3 dims [0.0394, 0.0445, 0.0222] norm 1.000000
+gold D-002: [{'group': 'g1', 'alt': 'g1a', 'page': 10, 'doc': [20993, 21092], 'quote_matches_text': True, 'first_rank_containing': 3, 'first_rank_overlapping': 3}]
+
+=== S7 what changes params_hash (course recipe over the 06 block; 07 ChunkerConfig.params_hash for contrast)
+06 block (v0, course decision)                                 params_hash 1ca9c5a3b548
+06 block, chunk_overlap 100                                    params_hash 747bbb59942a
+06 block, scope cross_page                                     params_hash 5f815e69a7e0
+07 ChunkerConfig recursive 1000/200 (07 defaults)              params_hash 77bc4c45809b
+overlap 200 -> 100                                             params_hash 7c9e3fb7458f
+size 1000 -> 2000, overlap 400                                 params_hash a0b1e3bcea5d
+scope cross_page                                               params_hash 239c7c76db01
+06 YAML spelling: name recursive_char + separators with ''     params_hash 0ad9b961bc23
+cross_page scope: 92 chunks, 41 span two pages
+
+stage latency_ms (this run): load 254.814 | chunk 11.153 | model load 2161.92 | embed 6184.403 | whole script 42415.279

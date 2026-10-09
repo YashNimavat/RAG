@@ -1,0 +1,65 @@
+--- cell 2 [given] import hashlib, json
+    Q1 Which gases trap heat in the atmosphere? | qrels {'c3': 2, 'c7': 1, 'c9': 1}
+       ranking ['c5', 'c3', 'c8', 'c7', 'c1', 'c2', 'c9', 'c4', 'c6', 'c10']
+    Q2 What does the Paris Agreement aim for? | qrels {'c4': 2}
+       ranking ['c4', 'c2', 'c1', 'c3', 'c5', 'c6', 'c7', 'c8', 'c9', 'c10']
+    Q3 How does cutting forests add CO2 to the air? | qrels {'c6': 2, 'c10': 1}
+       ranking ['c1', 'c8', 'c2', 'c10', 'c6', 'c3', 'c4', 'c5', 'c7', 'c9']
+--- cell 4 [prediction/T1] hand = {"P@5": 0.4, "R@5": 0.667, "Hit@1": 0, "Hit@5": 1, "RR@5": 0.5,
+--- cell 5 [CHECK] # CHECK Task 1 (do not edit)
+    Task 1 recorded. These are graded in Task 6 against your own code, not here.
+--- cell 7 [learner/T2] def _check(ranking, k):
+--- cell 8 [CHECK] # CHECK Task 2 (do not edit)
+    Task 2 OK
+--- cell 10 [prediction/T3] my_prediction_mrr10 = 0.6
+--- cell 11 [learner/T3b] def reciprocal_rank(ranking, qrels, k):
+--- cell 12 [CHECK] # CHECK Task 3 (do not edit)
+    Task 3 OK. MRR@10 = 0.5833; you predicted 0.6
+--- cell 14 [learner/T4] import math
+--- cell 15 [CHECK] # CHECK Task 4 (do not edit)
+    Cross-check: your linear-gain nDCG equals sklearn.metrics.ndcg_score on Q1-Q3, k = 1, 3, 5, 10
+    Task 4 OK
+--- cell 17 [learner/T5] def test_hand_values_q1():
+--- cell 18 [CHECK] # CHECK Task 5 (do not edit)
+    caught   precision divides by the number of chunks returned, not by k
+    caught   recall ignores partial (grade 1) chunks
+    caught   hit looks at one chunk too few
+    caught   reciprocal rank ignores the cut-off k
+    caught   nDCG builds IDCG from the retrieved chunks only
+    caught   nDCG uses linear gain instead of 2^g - 1
+    Task 5 OK: 6 tests, all pass; they catch 6 of 6 broken versions
+--- cell 20 [prediction/T6] hand_corrected = {}
+--- cell 21 [CHECK] # CHECK Task 6 (do not edit)
+    P@5     hand    0.4  code 0.4000  match
+    R@5     hand  0.667  code 0.6667  match
+    Hit@1   hand      0  code 0.0000  match
+    Hit@5   hand      1  code 1.0000  match
+    RR@5    hand    0.5  code 0.5000  match
+    nDCG@5  hand  0.562  code 0.5625  match
+    First try: 6 of 6 hand values matched your code (log this number).
+    Task 6 OK: hand values equal code values
+--- cell 23 [learner/T7] my_qrels = {"x1": 2, "x2": 2, "x3": 1}
+--- cell 24 [CHECK] # CHECK Task 7 (do not edit)
+    A: RR 1.0000  nDCG@5 0.1854
+    B: RR 0.5000  nDCG@5 0.6291
+    Task 7 OK. Read your explanation to the tutor.
+--- cell 26 [prediction/T8] my_direction = {"P": "down", "R": "up", "Hit": "same", "RR": "same", "
+--- cell 27 [learner/T8b] _r1, _q1 = RANKINGS["Q1"], QRELS["Q1"]
+--- cell 28 [CHECK] # CHECK Task 8 (do not edit)
+    P     predicted down  actual down
+    R     predicted up    actual up
+    Hit   predicted same  actual same
+    RR    predicted same  actual same
+    nDCG  predicted down  actual up
+    Task 8 OK. Your predictions were right on 4 of 5 (log this number).
+
+=== CHECK summary
+PASS cell 5: # CHECK Task 1 (do not edit)
+PASS cell 8: # CHECK Task 2 (do not edit)
+PASS cell 12: # CHECK Task 3 (do not edit)
+PASS cell 15: # CHECK Task 4 (do not edit)
+PASS cell 18: # CHECK Task 5 (do not edit)
+PASS cell 21: # CHECK Task 6 (do not edit)
+PASS cell 24: # CHECK Task 7 (do not edit)
+PASS cell 28: # CHECK Task 8 (do not edit)
+8/8 CHECK cells passed

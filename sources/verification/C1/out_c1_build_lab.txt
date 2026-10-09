@@ -1,0 +1,22 @@
+t1_lengths: b2aee2f144d78306  <- [2424, 2410, 2183, 2269, 2255, 2389, 2137, 2225, 2254, 2077, 2116, 2216, 2215, 2252, 2217, 2125, 2144, 2035, 2494, 2257, 2298, 2195, 2204, 2266, 2167, 2388, 2087, 2238, 2468, 2309, 2166, 2445, 636]
+t2_len: b3a90a6e1e17104b  <- 72593
+t2_rows: 3142634c0e4e06a8  <- [{"page": 1, "doc_char_start": 0, "doc_char_end": 2424, "text_sha256": "73533984cff86c8a0a20d852bb2fd0fce36f607d5842441977109c2c222fc029"}, {"page": 2, "doc_char_start": 2425, "doc_char_end": 4835, "text_sha256": "c6c14ed16a4d36979110e27802f47b851fde2f801161816d4910530190cf1ea9"}, {"page": 3, "doc_c
+t3_sid: 7e681e4a5012ca59  <- "ea07572562ac"
+t3_sid_1282: ce1948f958b90905  <- "4b7e61b9e418"
+t3_sid_tabs: eab4643a827491ac  <- "6164dfc95324"
+t4_pdf: 3bf65abc92c1f427  <- ["1d58a0fac2435c2ce4129ff84906b93118d731e4a004e7a26f8ab8f749a92669", 206372]
+t5_offsets: 718b2430f71084f0  <- [[1, 0], [1, 2423], [1, 2424], [2, 0], [8, 0], [33, 635]]
+t5_paris: b10ac9a73363481c  <- [[6, 1874], [6, 10, 23, 24]]
+t6_counts: 78b0370b2f60b6ab  <- {"empty_pages": [], "ligatures": 0, "tabs": 0, "double_newlines": 0, "lines": 1100, "lines_ending_space": 1093}
+t6_breaks: eded03f80e87719a  <- [[8, "cost-\ncompetitive"], [11, "well-\nbeing"], [12, "Public-\nprivate"], [19, "well-\nbeing"], [29, "market-\nbased"], [29, "climate-\nfriendly"], [31, "decision-\nmaking"]]
+t6_repeated: 960329243dde697d  <- [17, {}]
+t7_default_p1: 98f249bd90aed81b  <- ["ACME Technical Report", "Page 1", "Parsing comes before chunking:", "Two-column pages are common", "a bad parse cannot be fixed", "in research papers, and the", "by any later extrac-", "reading order must follow", "tion or retrieval step.", "each column top to bottom.", "The ﬁrst ﬂag: check every 
+t7_columns_p1: edbd2f4ad8b1b110  <- "ACME Technical Report\nPage 1\nParsing comes before chunking:\na bad parse cannot be fixed\nby any later extrac-\ntion or retrieval step.\nThe ﬁrst ﬂag: check every ﬁle.\nTwo-column pages are common\nin research papers, and the\nreading order must follow\neach column top to bottom.\n"
+Consider using the pymupdf_layout package for a greatly improved page layout analysis.
+t7_tables: 258f794e4d5d8820  <- [0, 1, 0, 0, 0]
+t7_kinds: ed8fa3bfa5db7bff  <- ["text", "text", "empty", "image_only", "text"]
+t7_lig: 4e07408562bedb8b  <- 3
+t8_edits: da5d0c477903b863  <- [[1, "R1_header_footer", 0, 22, "ACME Technical Report\n", ""], [1, "R1_header_footer", 22, 29, "Page 1\n", ""], [1, "R2_dehyphenate", 107, 109, "-\n", ""], [1, "R3_ligature", 137, 138, "ﬁ", "fi"], [1, "R3_ligature", 142, 143, "ﬂ", "fl"], [1, "R3_ligature", 159, 160, "ﬁ", "fi"], [2, "R1_header_foote
+t8_climate: 9256b3c60b4c2079  <- [0, 7]
+t9_book: 3743df1303f54c6c  <- [1, 0, 0, 1]
+wrote labs/C1_parsing_lab.ipynb: 43 cells

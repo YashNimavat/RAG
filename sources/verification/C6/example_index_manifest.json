@@ -1,0 +1,50 @@
+{
+  "chunker": {
+    "chunk_overlap": 200,
+    "chunk_size": 1000,
+    "name": "recursive_char",
+    "scope": "per_page",
+    "separators": [
+      "\n\n",
+      "\n",
+      " ",
+      ""
+    ],
+    "unit": "chars"
+  },
+  "chunks_jsonl_sha256": "d4108b8936093394c6eb50d4c22e8d4013d9a048fb38d5769281af4aadb3011b",
+  "cleaning": "none",
+  "corpus": "D",
+  "embed_hash": "c398eeba043f",
+  "embedding": {
+    "dim": 384,
+    "input_type": {
+      "documents": "none",
+      "queries": "none"
+    },
+    "max_seq_length": 256,
+    "model_id": "sentence-transformers/all-MiniLM-L6-v2",
+    "normalize": true,
+    "preproc_version": "none",
+    "provider": "sentence_transformers",
+    "revision": "1110a243fdf4706b3f48f1d95db1a4f5529b4d41"
+  },
+  "index_version": "v0",
+  "library_versions": {
+    "numpy": "2.5.3",
+    "pymupdf": "1.26.7",
+    "sentence-transformers": "6.1.0",
+    "torch": "2.14.1+cpu"
+  },
+  "n_chunks": 97,
+  "params_hash": "1ca9c5a3b548",
+  "parser": {
+    "backend": "pymupdf",
+    "call": "page.get_text()",
+    "options": {},
+    "version": "1.26.7"
+  },
+  "snapshot_id": "ea07572562ac",
+  "snapshot_manifest_sha256": "6e656021ae2a0f4ee0bf2669db198878aee7687d0c4960988f19378bfb0ed228",
+  "vectors_npy_sha256": "883bc50dd318e978e2efa787ad8d18a16140b8cd9ceb5644dc1ddcdc9ee50ecf"
+}

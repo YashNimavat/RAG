@@ -1,0 +1,387 @@
+# C6 lab test, 2026-10-09 (round 4 re-run: Task 10 open-coding table; the given Task 10 printer now shows finish_reason and flags per trace and counts length_stop / unexpected_finish_reason over the run). Runner (test_nb.py), throwaway solution (solution.py; its make_answer now sets the two C5 finish_reason flags), one-command stand-in (v0_cli.py) and real-kernel runner kept OUTSIDE the workspace (scratchpad/c6_r4/c6lab). Outputs written to a scratch OUT_ROOT via C6_LAB_OUT_ROOT, never into rag_learning/. No Groq or Cohere call.
+# Notebook sha256 27fd703032ef7635b71b1eb600372681a014c95ce42f76617e198e9f9402b182 (labs/C6_v0_pipeline.ipynb as tested; previous 2026-10-08 run: dc53edecfeace71a20cba21a7c42bd594be8920915780e6c0a650d41e5ff9434)
+# Harness: exec of every code cell in order in one namespace; CHECK cells recorded PASS/FAIL. 'CELLERR' = a non-CHECK cell raised (expected in 'blank': the given Task 10 printer needs TRACES). 'PRINT' = the Task 10 printer's flag lines (per-trace lines only when finish_reason is not 'stop', plus the run count and any mismatch line).
+# Round-4 variants: finish_length_and_none = the fake client returns finish_reason 'length' for D-001 and None for D-009 (all CHECKs must pass; printer must count 1 and 1); finish_flags_missing_in_make_answer = the same, with a make_answer that never sets the two flags (printer must name D-001 and D-009 as mismatches).
+variant=good
+  PASS # CHECK Task 1 (do not edit) 
+  PASS # CHECK Task 2 (do not edit) 
+  PASS # CHECK Task 3 (do not edit) 
+  PASS # CHECK Task 4 (do not edit) 
+  PASS # CHECK Task 5 (do not edit) 
+  PASS # CHECK Task 6 (do not edit) 
+  PASS # CHECK Task 7 (do not edit) 
+  PASS # CHECK Task 7b (do not edit) 
+  PASS # CHECK Task 8 (do not edit) 
+  PASS # CHECK Task 9a (do not edit) 
+  PASS # CHECK Task 9b (do not edit) 
+  PRINT Task 10 printer Run flags over 10 traces: length_stop 0 | unexpected_finish_reason 0
+  PASS # CHECK Task 11 (do not edit) 
+  SUMMARY 12/12 CHECK cells passed  PRINTER AS EXPECTED: yes
+variant=blank
+  FAIL # CHECK Task 1 (do not edit) AssertionError: use every string of STEP_BANK exactly once
+  FAIL # CHECK Task 2 (do not edit) NameError: name 'pages' is not defined
+  FAIL # CHECK Task 3 (do not edit) AssertionError: write your prediction first
+  FAIL # CHECK Task 4 (do not edit) AssertionError: write your prediction first
+  FAIL # CHECK Task 5 (do not edit) AssertionError: write your prediction first
+  FAIL # CHECK Task 6 (do not edit) NameError: name 'messages' is not defined
+  FAIL # CHECK Task 7 (do not edit) AssertionError: write your prediction first
+  FAIL # CHECK Task 7b (do not edit) NameError: name 'load_pages' is not defined
+  FAIL # CHECK Task 8 (do not edit) NameError: name 'TRACES' is not defined
+  FAIL # CHECK Task 9a (do not edit) AssertionError: every label must be one of ['chunk', 'generate:abstain', 'generate:citation', 'generate:grounding', 'ok', 'parse', 'retrieve']
+  FAIL # CHECK Task 9b (do not edit) NameError: name 'first_failing_stage' is not defined
+  CELLERR for t in TRACES: NameError: name 'TRACES' is not defined
+  FAIL # CHECK Task 11 (do not edit) AssertionError: set V0_COMMAND and V0_RESULTS
+  SUMMARY 0/12 CHECK cells passed 
+variant=order_query_before_index  (must fail: CHECK Task 1)
+  FAIL # CHECK Task 1 (do not edit) AssertionError: the question is embedded at query time, after the index exists
+  PASS # CHECK Task 2 (do not edit) 
+  PASS # CHECK Task 3 (do not edit) 
+  PASS # CHECK Task 4 (do not edit) 
+  PASS # CHECK Task 5 (do not edit) 
+  PASS # CHECK Task 6 (do not edit) 
+  PASS # CHECK Task 7 (do not edit) 
+  PASS # CHECK Task 7b (do not edit) 
+  PASS # CHECK Task 8 (do not edit) 
+  PASS # CHECK Task 9a (do not edit) 
+  PASS # CHECK Task 9b (do not edit) 
+  PRINT Task 10 printer Run flags over 10 traces: length_stop 0 | unexpected_finish_reason 0
+  FAIL # CHECK Task 11 (do not edit) AssertionError: set V0_COMMAND and V0_RESULTS
+  SUMMARY 10/12 CHECK cells passed INTENDED CHECK FAILED: yes
+variant=cleaned_pages  (must fail: CHECK Task 2)
+  PASS # CHECK Task 1 (do not edit) 
+  FAIL # CHECK Task 2 (do not edit) AssertionError: v0 does no cleaning: each text must be exactly page.get_text()
+  PASS # CHECK Task 3 (do not edit) 
+  PASS # CHECK Task 4 (do not edit) 
+  PASS # CHECK Task 5 (do not edit) 
+  PASS # CHECK Task 6 (do not edit) 
+  PASS # CHECK Task 7 (do not edit) 
+  PASS # CHECK Task 7b (do not edit) 
+  PASS # CHECK Task 8 (do not edit) 
+  PASS # CHECK Task 9a (do not edit) 
+  PASS # CHECK Task 9b (do not edit) 
+  PRINT Task 10 printer Run flags over 10 traces: length_stop 0 | unexpected_finish_reason 0
+  FAIL # CHECK Task 11 (do not edit) AssertionError: set V0_COMMAND and V0_RESULTS
+  SUMMARY 10/12 CHECK cells passed INTENDED CHECK FAILED: yes
+variant=snapshot_real_newline  (must fail: CHECK Task 2)
+  PASS # CHECK Task 1 (do not edit) 
+  FAIL # CHECK Task 2 (do not edit) AssertionError: snapshot_id 5ad6acfd28ec != ea07572562ac: check the 06 §5.3 formula (page_join is a literal backslash-n)
+  PASS # CHECK Task 3 (do not edit) 
+  PASS # CHECK Task 4 (do not edit) 
+  PASS # CHECK Task 5 (do not edit) 
+  PASS # CHECK Task 6 (do not edit) 
+  PASS # CHECK Task 7 (do not edit) 
+  PASS # CHECK Task 7b (do not edit) 
+  PASS # CHECK Task 8 (do not edit) 
+  PASS # CHECK Task 9a (do not edit) 
+  PASS # CHECK Task 9b (do not edit) 
+  PRINT Task 10 printer Run flags over 10 traces: length_stop 0 | unexpected_finish_reason 0
+  FAIL # CHECK Task 11 (do not edit) AssertionError: set V0_COMMAND and V0_RESULTS
+  SUMMARY 10/12 CHECK cells passed INTENDED CHECK FAILED: yes
+variant=params_hash_unsorted  (must fail: CHECK Task 3)
+  PASS # CHECK Task 1 (do not edit) 
+  PASS # CHECK Task 2 (do not edit) 
+  FAIL # CHECK Task 3 (do not edit) AssertionError: params_hash(PARAMS) = 3ca84ee566b2; the course value is 1ca9c5a3b548 (sha256 of json.dumps(PARAMS, sort_keys=True))
+  PASS # CHECK Task 4 (do not edit) 
+  PASS # CHECK Task 5 (do not edit) 
+  PASS # CHECK Task 6 (do not edit) 
+  PASS # CHECK Task 7 (do not edit) 
+  PASS # CHECK Task 7b (do not edit) 
+  PASS # CHECK Task 8 (do not edit) 
+  PASS # CHECK Task 9a (do not edit) 
+  PASS # CHECK Task 9b (do not edit) 
+  PRINT Task 10 printer Run flags over 10 traces: length_stop 0 | unexpected_finish_reason 0
+  FAIL # CHECK Task 11 (do not edit) AssertionError: set V0_COMMAND and V0_RESULTS
+  SUMMARY 10/12 CHECK cells passed INTENDED CHECK FAILED: yes
+variant=page_relative_char_start  (must fail: CHECK Task 3)
+  PASS # CHECK Task 1 (do not edit) 
+  PASS # CHECK Task 2 (do not edit) 
+  FAIL # CHECK Task 3 (do not edit) AssertionError: chunk 3: doc_text[char_start:char_end] != text (offsets are DOCUMENT offsets)
+  PASS # CHECK Task 4 (do not edit) 
+  FAIL # CHECK Task 5 (do not edit) AssertionError: rank 1: doc_text[char_start:char_end] must equal its text
+  PASS # CHECK Task 6 (do not edit) 
+  FAIL # CHECK Task 7 (do not edit) AssertionError: candidate offsets must reproduce the chunk text
+  PASS # CHECK Task 7b (do not edit) 
+  FAIL # CHECK Task 8 (do not edit) AssertionError: page segment -> document offsets must give [char_start, char_end)
+  PASS # CHECK Task 9a (do not edit) 
+  PASS # CHECK Task 9b (do not edit) 
+  PRINT Task 10 printer Run flags over 10 traces: length_stop 0 | unexpected_finish_reason 0
+  FAIL # CHECK Task 11 (do not edit) AssertionError: set V0_COMMAND and V0_RESULTS
+  SUMMARY 7/12 CHECK cells passed INTENDED CHECK FAILED: yes
+variant=chunk_id_unpadded  (must fail: CHECK Task 3)
+  PASS # CHECK Task 1 (do not edit) 
+  PASS # CHECK Task 2 (do not edit) 
+  FAIL # CHECK Task 3 (do not edit) AssertionError: chunk 0: chunk_id must be doc_id:snapshot_id:params_hash:seq
+  PASS # CHECK Task 4 (do not edit) 
+  PASS # CHECK Task 5 (do not edit) 
+  PASS # CHECK Task 6 (do not edit) 
+  PASS # CHECK Task 7 (do not edit) 
+  PASS # CHECK Task 7b (do not edit) 
+  PASS # CHECK Task 8 (do not edit) 
+  PASS # CHECK Task 9a (do not edit) 
+  PASS # CHECK Task 9b (do not edit) 
+  PRINT Task 10 printer Run flags over 10 traces: length_stop 0 | unexpected_finish_reason 0
+  FAIL # CHECK Task 11 (do not edit) AssertionError: set V0_COMMAND and V0_RESULTS
+  SUMMARY 10/12 CHECK cells passed INTENDED CHECK FAILED: yes
+variant=load_index_never_refuses  (must fail: CHECK Task 4)
+  PASS # CHECK Task 1 (do not edit) 
+  PASS # CHECK Task 2 (do not edit) 
+  PASS # CHECK Task 3 (do not edit) 
+  FAIL # CHECK Task 4 (do not edit) AssertionError: load_index accepted a run config with another chunker; it must raise ValueError
+  PASS # CHECK Task 5 (do not edit) 
+  PASS # CHECK Task 6 (do not edit) 
+  PASS # CHECK Task 7 (do not edit) 
+  PASS # CHECK Task 7b (do not edit) 
+  PASS # CHECK Task 8 (do not edit) 
+  PASS # CHECK Task 9a (do not edit) 
+  PASS # CHECK Task 9b (do not edit) 
+  PRINT Task 10 printer Run flags over 10 traces: length_stop 0 | unexpected_finish_reason 0
+  FAIL # CHECK Task 11 (do not edit) AssertionError: set V0_COMMAND and V0_RESULTS
+  SUMMARY 10/12 CHECK cells passed INTENDED CHECK FAILED: yes
+variant=not_normalised  (must fail: CHECK Task 4)
+  PASS # CHECK Task 1 (do not edit) 
+  PASS # CHECK Task 2 (do not edit) 
+  PASS # CHECK Task 3 (do not edit) 
+  FAIL # CHECK Task 4 (do not edit) AssertionError: rows of V must be L2-normalised
+  PASS # CHECK Task 5 (do not edit) 
+  PASS # CHECK Task 6 (do not edit) 
+  PASS # CHECK Task 7 (do not edit) 
+  FAIL # CHECK Task 7b (do not edit) AssertionError: vectors.npy is not byte-identical after a rebuild
+  PASS # CHECK Task 8 (do not edit) 
+  PASS # CHECK Task 9a (do not edit) 
+  PASS # CHECK Task 9b (do not edit) 
+  PRINT Task 10 printer Run flags over 10 traces: length_stop 0 | unexpected_finish_reason 0
+  FAIL # CHECK Task 11 (do not edit) AssertionError: set V0_COMMAND and V0_RESULTS
+  SUMMARY 9/12 CHECK cells passed INTENDED CHECK FAILED: yes
+variant=embed_hash_unsorted  (must fail: CHECK Task 4)
+  PASS # CHECK Task 1 (do not edit) 
+  PASS # CHECK Task 2 (do not edit) 
+  PASS # CHECK Task 3 (do not edit) 
+  FAIL # CHECK Task 4 (do not edit) AssertionError: embed_hash: 12 hex of sha256(json.dumps(<the six embedding fields>, sort_keys=True)) (06 §2.4)
+  PASS # CHECK Task 5 (do not edit) 
+  PASS # CHECK Task 6 (do not edit) 
+  PASS # CHECK Task 7 (do not edit) 
+  FAIL # CHECK Task 7b (do not edit) NameError: name '_m' is not defined
+  PASS # CHECK Task 8 (do not edit) 
+  PASS # CHECK Task 9a (do not edit) 
+  PASS # CHECK Task 9b (do not edit) 
+  PRINT Task 10 printer Run flags over 10 traces: length_stop 0 | unexpected_finish_reason 0
+  FAIL # CHECK Task 11 (do not edit) AssertionError: set V0_COMMAND and V0_RESULTS
+  SUMMARY 9/12 CHECK cells passed INTENDED CHECK FAILED: yes
+variant=index_dir_without_embed_hash  (must fail: CHECK Task 4)
+  PASS # CHECK Task 1 (do not edit) 
+  PASS # CHECK Task 2 (do not edit) 
+  PASS # CHECK Task 3 (do not edit) 
+  FAIL # CHECK Task 4 (do not edit) AssertionError: INDEX_DIR = OUT_ROOT / 'index' / SID / params_hash(PARAMS) / embed_hash(...)
+  PASS # CHECK Task 5 (do not edit) 
+  PASS # CHECK Task 6 (do not edit) 
+  PASS # CHECK Task 7 (do not edit) 
+  FAIL # CHECK Task 7b (do not edit) NameError: name '_m' is not defined
+  PASS # CHECK Task 8 (do not edit) 
+  PASS # CHECK Task 9a (do not edit) 
+  PASS # CHECK Task 9b (do not edit) 
+  PRINT Task 10 printer Run flags over 10 traces: length_stop 0 | unexpected_finish_reason 0
+  FAIL # CHECK Task 11 (do not edit) AssertionError: set V0_COMMAND and V0_RESULTS
+  SUMMARY 9/12 CHECK cells passed INTENDED CHECK FAILED: yes
+variant=no_tie_rule  (must fail: CHECK Task 5)
+  PASS # CHECK Task 1 (do not edit) 
+  PASS # CHECK Task 2 (do not edit) 
+  PASS # CHECK Task 3 (do not edit) 
+  PASS # CHECK Task 4 (do not edit) 
+  FAIL # CHECK Task 5 (do not edit) AssertionError: tie rule: equal scores sorted by chunk_id; got ['toy:b', 'toy:a', 'toy:d']
+  PASS # CHECK Task 6 (do not edit) 
+  PASS # CHECK Task 7 (do not edit) 
+  PASS # CHECK Task 7b (do not edit) 
+  PASS # CHECK Task 8 (do not edit) 
+  PASS # CHECK Task 9a (do not edit) 
+  PASS # CHECK Task 9b (do not edit) 
+  PRINT Task 10 printer Run flags over 10 traces: length_stop 0 | unexpected_finish_reason 0
+  FAIL # CHECK Task 11 (do not edit) AssertionError: set V0_COMMAND and V0_RESULTS
+  SUMMARY 10/12 CHECK cells passed INTENDED CHECK FAILED: yes
+variant=prompt_sha_unsorted  (must fail: CHECK Task 6)
+  PASS # CHECK Task 1 (do not edit) 
+  PASS # CHECK Task 2 (do not edit) 
+  PASS # CHECK Task 3 (do not edit) 
+  PASS # CHECK Task 4 (do not edit) 
+  PASS # CHECK Task 5 (do not edit) 
+  FAIL # CHECK Task 6 (do not edit) AssertionError: prompt.sha256 (C5 recipe)
+  FAIL # CHECK Task 7 (do not edit) AssertionError: D-001: prompt.sha256
+  PASS # CHECK Task 7b (do not edit) 
+  PASS # CHECK Task 8 (do not edit) 
+  PASS # CHECK Task 9a (do not edit) 
+  PASS # CHECK Task 9b (do not edit) 
+  PRINT Task 10 printer Run flags over 10 traces: length_stop 0 | unexpected_finish_reason 0
+  FAIL # CHECK Task 11 (do not edit) AssertionError: set V0_COMMAND and V0_RESULTS
+  SUMMARY 9/12 CHECK cells passed INTENDED CHECK FAILED: yes
+variant=fake_labelled_groq  (must fail: CHECK Task 7)
+  PASS # CHECK Task 1 (do not edit) 
+  PASS # CHECK Task 2 (do not edit) 
+  PASS # CHECK Task 3 (do not edit) 
+  PASS # CHECK Task 4 (do not edit) 
+  PASS # CHECK Task 5 (do not edit) 
+  PASS # CHECK Task 6 (do not edit) 
+  FAIL # CHECK Task 7 (do not edit) AssertionError: a fake answer must be labelled fake
+  PASS # CHECK Task 7b (do not edit) 
+  PASS # CHECK Task 8 (do not edit) 
+  PASS # CHECK Task 9a (do not edit) 
+  PASS # CHECK Task 9b (do not edit) 
+  PRINT Task 10 printer Run flags over 10 traces: length_stop 0 | unexpected_finish_reason 0
+  FAIL # CHECK Task 11 (do not edit) AssertionError: set V0_COMMAND and V0_RESULTS
+  SUMMARY 10/12 CHECK cells passed INTENDED CHECK FAILED: yes
+variant=candidates_keep_text  (must fail: CHECK Task 7)
+  PASS # CHECK Task 1 (do not edit) 
+  PASS # CHECK Task 2 (do not edit) 
+  PASS # CHECK Task 3 (do not edit) 
+  PASS # CHECK Task 4 (do not edit) 
+  PASS # CHECK Task 5 (do not edit) 
+  PASS # CHECK Task 6 (do not edit) 
+  FAIL # CHECK Task 7 (do not edit) AssertionError: candidates: ranks 1..k, no chunk text
+  PASS # CHECK Task 7b (do not edit) 
+  PASS # CHECK Task 8 (do not edit) 
+  PASS # CHECK Task 9a (do not edit) 
+  PASS # CHECK Task 9b (do not edit) 
+  PRINT Task 10 printer Run flags over 10 traces: length_stop 0 | unexpected_finish_reason 0
+  FAIL # CHECK Task 11 (do not edit) AssertionError: set V0_COMMAND and V0_RESULTS
+  SUMMARY 10/12 CHECK cells passed INTENDED CHECK FAILED: yes
+variant=config_hash_not_file_bytes  (must fail: CHECK Task 7)
+  PASS # CHECK Task 1 (do not edit) 
+  PASS # CHECK Task 2 (do not edit) 
+  PASS # CHECK Task 3 (do not edit) 
+  PASS # CHECK Task 4 (do not edit) 
+  PASS # CHECK Task 5 (do not edit) 
+  PASS # CHECK Task 6 (do not edit) 
+  FAIL # CHECK Task 7 (do not edit) AssertionError: config_hash = 'sha256:' + sha256(config.json bytes)
+  PASS # CHECK Task 7b (do not edit) 
+  PASS # CHECK Task 8 (do not edit) 
+  PASS # CHECK Task 9a (do not edit) 
+  PASS # CHECK Task 9b (do not edit) 
+  PRINT Task 10 printer Run flags over 10 traces: length_stop 0 | unexpected_finish_reason 0
+  FAIL # CHECK Task 11 (do not edit) AssertionError: set V0_COMMAND and V0_RESULTS
+  SUMMARY 10/12 CHECK cells passed INTENDED CHECK FAILED: yes
+variant=nondeterministic_manifest  (must fail: CHECK Task 7b)
+  PASS # CHECK Task 1 (do not edit) 
+  PASS # CHECK Task 2 (do not edit) 
+  PASS # CHECK Task 3 (do not edit) 
+  PASS # CHECK Task 4 (do not edit) 
+  PASS # CHECK Task 5 (do not edit) 
+  PASS # CHECK Task 6 (do not edit) 
+  PASS # CHECK Task 7 (do not edit) 
+  FAIL # CHECK Task 7b (do not edit) AssertionError: manifest.json differs after a rebuild (other than created_utc)
+  PASS # CHECK Task 8 (do not edit) 
+  PASS # CHECK Task 9a (do not edit) 
+  PASS # CHECK Task 9b (do not edit) 
+  PRINT Task 10 printer Run flags over 10 traces: length_stop 0 | unexpected_finish_reason 0
+  FAIL # CHECK Task 11 (do not edit) AssertionError: set V0_COMMAND and V0_RESULTS
+  SUMMARY 10/12 CHECK cells passed INTENDED CHECK FAILED: yes
+variant=walk_page_offsets_as_doc  (must fail: CHECK Task 8)
+  PASS # CHECK Task 1 (do not edit) 
+  PASS # CHECK Task 2 (do not edit) 
+  PASS # CHECK Task 3 (do not edit) 
+  PASS # CHECK Task 4 (do not edit) 
+  PASS # CHECK Task 5 (do not edit) 
+  PASS # CHECK Task 6 (do not edit) 
+  PASS # CHECK Task 7 (do not edit) 
+  PASS # CHECK Task 7b (do not edit) 
+  FAIL # CHECK Task 8 (do not edit) AssertionError: page segment -> document offsets must give [char_start, char_end)
+  PASS # CHECK Task 9a (do not edit) 
+  PASS # CHECK Task 9b (do not edit) 
+  PRINT Task 10 printer Run flags over 10 traces: length_stop 0 | unexpected_finish_reason 0
+  FAIL # CHECK Task 11 (do not edit) AssertionError: set V0_COMMAND and V0_RESULTS
+  SUMMARY 10/12 CHECK cells passed INTENDED CHECK FAILED: yes
+variant=labels_toy7_citation  (must fail: CHECK Task 9a)
+  PASS # CHECK Task 1 (do not edit) 
+  PASS # CHECK Task 2 (do not edit) 
+  PASS # CHECK Task 3 (do not edit) 
+  PASS # CHECK Task 4 (do not edit) 
+  PASS # CHECK Task 5 (do not edit) 
+  PASS # CHECK Task 6 (do not edit) 
+  PASS # CHECK Task 7 (do not edit) 
+  PASS # CHECK Task 7b (do not edit) 
+  PASS # CHECK Task 8 (do not edit) 
+  FAIL # CHECK Task 9a (do not edit) AssertionError: at least one label is not right yet. For each trace: is the quote in the parsed page? in some chunk? in the context? then look at the answer.
+  PASS # CHECK Task 9b (do not edit) 
+  PRINT Task 10 printer Run flags over 10 traces: length_stop 0 | unexpected_finish_reason 0
+  FAIL # CHECK Task 11 (do not edit) AssertionError: set V0_COMMAND and V0_RESULTS
+  SUMMARY 10/12 CHECK cells passed INTENDED CHECK FAILED: yes
+variant=ladder_generation_first  (must fail: CHECK Task 9b)
+  PASS # CHECK Task 1 (do not edit) 
+  PASS # CHECK Task 2 (do not edit) 
+  PASS # CHECK Task 3 (do not edit) 
+  PASS # CHECK Task 4 (do not edit) 
+  PASS # CHECK Task 5 (do not edit) 
+  PASS # CHECK Task 6 (do not edit) 
+  PASS # CHECK Task 7 (do not edit) 
+  PASS # CHECK Task 7b (do not edit) 
+  PASS # CHECK Task 8 (do not edit) 
+  PASS # CHECK Task 9a (do not edit) 
+  FAIL # CHECK Task 9b (do not edit) AssertionError: TOY-7 gave 'generate:citation': check the stages in upstream-to-downstream order
+  PRINT Task 10 printer Run flags over 10 traces: length_stop 0 | unexpected_finish_reason 0
+  FAIL # CHECK Task 11 (do not edit) AssertionError: set V0_COMMAND and V0_RESULTS
+  SUMMARY 10/12 CHECK cells passed INTENDED CHECK FAILED: yes
+variant=ladder_counts_page_markers  (must fail: CHECK Task 9b)
+  PASS # CHECK Task 1 (do not edit) 
+  PASS # CHECK Task 2 (do not edit) 
+  PASS # CHECK Task 3 (do not edit) 
+  PASS # CHECK Task 4 (do not edit) 
+  PASS # CHECK Task 5 (do not edit) 
+  PASS # CHECK Task 6 (do not edit) 
+  PASS # CHECK Task 7 (do not edit) 
+  PASS # CHECK Task 7b (do not edit) 
+  PASS # CHECK Task 8 (do not edit) 
+  PASS # CHECK Task 9a (do not edit) 
+  FAIL # CHECK Task 9b (do not edit) AssertionError: TOY-1 came out 'generate:grounding': did you count the page number inside [toy:1] as a claim? Remove [doc:page] markers before collecting numbers.
+  PRINT Task 10 printer Run flags over 10 traces: length_stop 0 | unexpected_finish_reason 0
+  FAIL # CHECK Task 11 (do not edit) AssertionError: set V0_COMMAND and V0_RESULTS
+  SUMMARY 10/12 CHECK cells passed INTENDED CHECK FAILED: yes
+variant=cli_other_k  (must fail: CHECK Task 11)
+  PASS # CHECK Task 1 (do not edit) 
+  PASS # CHECK Task 2 (do not edit) 
+  PASS # CHECK Task 3 (do not edit) 
+  PASS # CHECK Task 4 (do not edit) 
+  PASS # CHECK Task 5 (do not edit) 
+  PASS # CHECK Task 6 (do not edit) 
+  PASS # CHECK Task 7 (do not edit) 
+  PASS # CHECK Task 7b (do not edit) 
+  PASS # CHECK Task 8 (do not edit) 
+  PASS # CHECK Task 9a (do not edit) 
+  PASS # CHECK Task 9b (do not edit) 
+  PRINT Task 10 printer Run flags over 10 traces: length_stop 0 | unexpected_finish_reason 0
+  FAIL # CHECK Task 11 (do not edit) AssertionError: the one-command run must retrieve exactly what the notebook retrieved
+  SUMMARY 11/12 CHECK cells passed INTENDED CHECK FAILED: yes
+variant=finish_length_and_none
+  PASS # CHECK Task 1 (do not edit) 
+  PASS # CHECK Task 2 (do not edit) 
+  PASS # CHECK Task 3 (do not edit) 
+  PASS # CHECK Task 4 (do not edit) 
+  PASS # CHECK Task 5 (do not edit) 
+  PASS # CHECK Task 6 (do not edit) 
+  PASS # CHECK Task 7 (do not edit) 
+  PASS # CHECK Task 7b (do not edit) 
+  PASS # CHECK Task 8 (do not edit) 
+  PASS # CHECK Task 9a (do not edit) 
+  PASS # CHECK Task 9b (do not edit) 
+  PRINT Task 10 printer finish_reason 'length' | flags ['length_stop']
+  PRINT Task 10 printer finish_reason None | flags ['unexpected_finish_reason']
+  PRINT Task 10 printer Run flags over 10 traces: length_stop 1 | unexpected_finish_reason 1
+  PASS # CHECK Task 11 (do not edit) 
+  SUMMARY 12/12 CHECK cells passed  PRINTER AS EXPECTED: yes
+variant=finish_flags_missing_in_make_answer
+  PASS # CHECK Task 1 (do not edit) 
+  PASS # CHECK Task 2 (do not edit) 
+  PASS # CHECK Task 3 (do not edit) 
+  PASS # CHECK Task 4 (do not edit) 
+  PASS # CHECK Task 5 (do not edit) 
+  PASS # CHECK Task 6 (do not edit) 
+  PASS # CHECK Task 7 (do not edit) 
+  PASS # CHECK Task 7b (do not edit) 
+  PASS # CHECK Task 8 (do not edit) 
+  PASS # CHECK Task 9a (do not edit) 
+  PASS # CHECK Task 9b (do not edit) 
+  PRINT Task 10 printer finish_reason 'length' | flags []
+  PRINT Task 10 printer finish_reason None | flags []
+  PRINT Task 10 printer Run flags over 10 traces: length_stop 0 | unexpected_finish_reason 0
+  PRINT Task 10 printer These flags do not match llm.finish_reason for ['D-001', 'D-009'] (check your C5 make_answer)
+  PASS # CHECK Task 11 (do not edit) 
+  SUMMARY 12/12 CHECK cells passed  PRINTER AS EXPECTED: yes
+
+# Real Jupyter kernel (jupyter_client, python3 kernel of the project env), good solution:
+SUMMARY real kernel: 12 / 12 CHECK cells passed

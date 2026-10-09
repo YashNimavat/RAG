@@ -1,0 +1,24 @@
+python 3.12.8 | tiktoken 0.14.0
+tiktoken.encoding_for_model('gpt-oss-20b') -> o200k_harmony
+encoding o200k_harmony n_vocab=201088
+
+=== S11a the word alone, three ways (what comes right before the word changes the cut)
+no leading space  'strawberry'     -> 3 tokens  ids=[302, 1618, 19772]  pieces=['st', 'raw', 'berry']
+leading space     ' strawberry'    -> 1 tokens  ids=[101830]  pieces=[' strawberry']
+in double quotes  '"strawberry"'   -> 5 tokens  ids=[1, 302, 1618, 19772, 1]  pieces=['"', 'st', 'raw', 'berry', '"']
+
+=== S11b inside the full question
+question "How many r's are in strawberry?": 8 tokens
+   0 id=5299    chars[ 0, 3) 'How'          
+   1 id=1991    chars[ 3, 8) ' many'        
+   2 id=428     chars[ 8,10) ' r'           
+   3 id=885     chars[10,12) "'s"           
+   4 id=553     chars[12,16) ' are'         
+   5 id=306     chars[16,19) ' in'          
+   6 id=101830  chars[19,30) ' strawberry'  <- part of the word
+   7 id=30      chars[30,31) '?'            
+the word 'strawberry' (chars [20,30)) is read as 1 token(s): ids=[101830] pieces=[' strawberry']
+
+=== S11c letters vs tokens
+letter 'r' count in 'strawberry' = 3 (string count; the model never sees letters, only the IDs above)
+DONE

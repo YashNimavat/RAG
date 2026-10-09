@@ -1,0 +1,34 @@
+--- bug: precision divides by number returned: 6/8 CHECK cells passed
+    FAIL cell 8: # CHECK Task 2 (do not edit)  <- AssertionError: a ranking with only 3 chunks, scored at k = 5: what do you divide by?
+    FAIL cell 18: # CHECK Task 5 (do not edit)  <- AssertionError: your own tests must pass on your functions first: ['test_short_list_precision: AssertionError']
+--- bug: RR counts ranks from 0 (+2): 5/8 CHECK cells passed
+    FAIL cell 12: # CHECK Task 3 (do not edit)  <- AssertionError: reciprocal_rank is not right yet. Do ranks start at 1?
+    FAIL cell 18: # CHECK Task 5 (do not edit)  <- AssertionError: your own tests must pass on your functions first: ['test_hand_values_q1: AssertionError']
+    FAIL cell 21: # CHECK Task 6 (do not edit)  <- AssertionError: your functions are not all correct yet: pass the CHECKs of Tasks 2, 3 and 4 first
+--- bug: RR ignores cut-off k: 6/8 CHECK cells passed
+    FAIL cell 12: # CHECK Task 3 (do not edit)  <- AssertionError: with k = 3, a first hit at rank 4 must count as 0
+    FAIL cell 18: # CHECK Task 5 (do not edit)  <- AssertionError: your own tests must pass on your functions first: ['test_rr_cutoff: AssertionError']
+--- bug: nDCG IDCG from retrieved only: 4/8 CHECK cells passed
+    FAIL cell 15: # CHECK Task 4 (do not edit)  <- ValueError: no relevant | File "<cell 14>", line 18, in ndcg_at_k
+    FAIL cell 18: # CHECK Task 5 (do not edit)  <- AssertionError: your own tests must pass on your functions first: ['test_ndcg_hand_q1: AssertionError']
+    FAIL cell 21: # CHECK Task 6 (do not edit)  <- AssertionError: your functions are not all correct yet: pass the CHECKs of Tasks 2, 3 and 4 first
+    FAIL cell 24: # CHECK Task 7 (do not edit)  <- AssertionError: nDCG must prefer B
+--- bug: nDCG linear gain as default: 5/8 CHECK cells passed
+    FAIL cell 15: # CHECK Task 4 (do not edit)  <- AssertionError: ndcg_at_k (exp gain) for k = 1..10 is not right yet: [0.0, 0.4796, 0.403, 0.5406, 0.5406, 0.5406, 0.6471, 0.6471, 0.6471, 0.6471]
+    FAIL cell 18: # CHECK Task 5 (do not edit)  <- AssertionError: your own tests must pass on your functions first: ['test_ndcg_hand_q1: AssertionError']
+    FAIL cell 21: # CHECK Task 6 (do not edit)  <- AssertionError: your functions are not all correct yet: pass the CHECKs of Tasks 2, 3 and 4 first
+--- bug: nDCG discount log2(i) +1 shift: 5/8 CHECK cells passed
+    FAIL cell 15: # CHECK Task 4 (do not edit)  <- AssertionError: ndcg_at_k (exp gain) for k = 1..10 is not right yet: [0.0, 0.4131, 0.3631, 0.4568, 0.4568, 0.4568, 0.5331, 0.5331, 0.5331, 0.5331]
+    FAIL cell 18: # CHECK Task 5 (do not edit)  <- AssertionError: your own tests must pass on your functions first: ['test_ndcg_hand_q1: AssertionError', 'test_perfect_ranking: AssertionError']
+    FAIL cell 21: # CHECK Task 6 (do not edit)  <- AssertionError: your functions are not all correct yet: pass the CHECKs of Tasks 2, 3 and 4 first
+--- bug: hand nDCG wrong, no explanation: 7/8 CHECK cells passed
+    FAIL cell 21: # CHECK Task 6 (do not edit)  <- AssertionError: redo these by hand and correct them in hand_corrected: ['nDCG@5']
+--- bug: correct functions, weak tests (6 tests that pass but test little):
+    MISSED   precision divides by the number of chunks returned, not by k
+    MISSED   recall ignores partial (grade 1) chunks
+    MISSED   hit looks at one chunk too few
+    MISSED   reciprocal rank ignores the cut-off k
+    MISSED   nDCG builds IDCG from the retrieved chunks only
+    MISSED   nDCG uses linear gain instead of 2^g - 1
+    FAIL cell 18: # CHECK Task 5 (do not edit)  <- AssertionError: your tests caught 0 of 6 broken versions; add tests for the MISSED ones
+    7/8 CHECK cells passed

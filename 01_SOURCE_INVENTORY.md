@@ -12,6 +12,7 @@
 5. [Prior learner materials](#5-prior-learner-materials)
 6. [Source C — supplementary references (EXTERNAL)](#6-source-c--supplementary-references-external)
 7. [Inventory limitations and UNVERIFIED items](#7-inventory-limitations-and-unverified-items)
+8. [Sources D, E and F — the AI Eval book and two MIT repos](#8-sources-d-e-and-f--the-ai-eval-book-and-two-mit-repos) (added 2026-10-09)
 
 **Citation conventions used everywhere in this workspace**
 
@@ -20,6 +21,9 @@
 | Book (A) | `Ch4 p.3/15` · `Intro p.2/8` · `Index p.1/6` · `App p.6/23` | PDF page 3 of the 15-page file `chapter 4.pdf`. The book has **no printed page numbers**; never cite printed pages. |
 | Repo (B) | `all_rag_techniques/x.ipynb cell 12` · `helper_functions.py:L48-L76` | Cell index is **0-based** (nbformat `cells` list). Line numbers are at pinned commit `009adba`. |
 | External (C) | `[C#n]` | Row *n* of the table in [§6](#6-source-c--supplementary-references-external). Not in the learner's files. |
+| AI Eval book (D) | `AE Ch3, 'Open Coding: Reading and Labeling Traces'` | Chapter *N* of the local export, then the section heading. Own words only; never 15 or more consecutive words ([§8.1](#81-source-d--the-ai-eval-book-ae)). |
+| ai-system-design-guide (E) | `SDG <path>, 'heading'` | File path at pinned commit `ed955b2`. Reference only, never evidence ([§8.2](#82-source-e--ai-system-design-guide-sdg)). |
+| AI-Engineer-Interview-Questions (F) | `AIQ <path>, 'heading'` · `AIQ 07 Q23` | File path at pinned commit `e080df2`. `AIQ 07 Q23` = question 23 in `07-evaluation-and-observability/questions.md` ([§8.3](#83-source-f--ai-engineer-interview-questions-aiq)). |
 
 ---
 
@@ -31,6 +35,9 @@
 | **Source A — book** | *RAG Made Simple: The Complete Visual Guide* (Nir Diamant), 25 split PDFs, **320 PDF pages** in total. Text extracted page-by-page with `pdftotext` (mingw64), with page markers such as `=== [chapter 4.pdf \| PDF page 3 of 15] ===`. Tradeoff tables were re-read from PyMuPDF/pypdf word positions where the text dump garbled them. |
 | **Source B — repo** | `NirDiamant/RAG_Techniques`, `git clone` on 2026-10-08, pinned at commit `009adba2be1bef49780ef73b6dd3c18fd24b035b` (2026-09-21, 538 commits). **41** technique notebooks, **5** evaluation notebooks, 21 runnable scripts, `helper_functions.py`, `evaluation/evalute_rag.py`, `tests/`, `data/`. Read **statically**: notebook JSON dumped cell by cell (0-based), `.py` files read by line, `git log` for history, and grep/AST passes for imports, models and metrics. |
 | **Source C — external** | 55 supplementary references (papers, docs, vendor guides). Bibliographic data checked via the arXiv API, WebFetch, or (for 2 ACM papers) web search. **External to the learner's files.** |
+| **Source D — AI Eval book** | *Evals for AI Engineers* (Shreya Shankar and Hamel Husain, O'Reilly, 2026; this copy is an early-release export). Local study copy in `rag_learning/AI Eval/`: 12 chapter markdown files and 24 figures, git-ignored. **Copyrighted:** own words only. Method source for Phase 3 (M1–M5) and the final judge batch. Inspected 2026-10-09 ([§8.1](#81-source-d--the-ai-eval-book-ae)). |
+| **Source E — SDG** | `ombharatiya/ai-system-design-guide`, cloned read-only to `upstream/ai-system-design-guide` at `ed955b27d94201b663a741284767a1136dc83e5e`, MIT. **Reference only; not used as evidence** ([§8.2](#82-source-e--ai-system-design-guide-sdg)). |
+| **Source F — AIQ** | `ombharatiya/AI-Engineer-Interview-Questions`, cloned read-only to `upstream/AI-Engineer-Interview-Questions` at `e080df282aaf14c128ade55c177a20c38d82df1d`, MIT. Practice questions, fresh transfer scenarios and two tested coding challenges ([§8.3](#83-source-f--ai-engineer-interview-questions-aiq)). |
 | **Prior learner materials** | Audited read-only: `RAG book step by step/` (guides, study companion, progress JSON), `my way/` (executed LangGraph notebooks), `VAI/` labs, and related folders. Nothing was modified. |
 | **Machine** | Windows 11, RTX 3060 Laptop 6 GB, Python 3.12.8 default, uv 0.9.20. Keys found: `GROQ_API_KEY`, `COHERE_API_KEY` (names only). **No OpenAI key. Ollama not installed.** |
 | **NOT done** | **No notebook, script or test was executed.** No package was installed. No LLM, embedding or other provider API was called (the only network calls were the Source C bibliographic checks: arXiv API, web fetch, web search). Nothing was imported from the global Python install either; package facts come from `dist-info` folder names and `torch/version.py` read as text. Book diagrams were judged **from their captions only**. The exceptions are App p.4/23, p.8/23, p.11/23, Ch18 p.10/12 and Ch22 p.12/19, which were rasterised with PyMuPDF and looked at. |
@@ -591,6 +598,8 @@ Gaps that Source C does **not** fill (still open; see [08](08_GAP_ANALYSIS_AND_D
 
 The last one has **no verified reference** in this table yet. Adding it is an open action.
 
+> Added 2026-10-09: three more outside sources are registered in [§8](#8-sources-d-e-and-f--the-ai-eval-book-and-two-mit-repos): the AI Eval book (Source D) and two MIT repos (Sources E and F). AE Ch3 gives M5 a method source. It is not the RAG failure-points literature, so that gap stays open.
+
 ---
 
 ## 7. Inventory limitations and UNVERIFIED items
@@ -634,3 +643,85 @@ The last one has **no verified reference** in this table yet. Adding it is an op
   - md5 comparison of the three book copies;
   - `dist-info` listings;
   - page-marker lookups in the book text.
+
+---
+
+## 8. Sources D, E and F — the AI Eval book and two MIT repos
+
+**What this is:** the register of three outside sources added on 2026-10-09: what each one is, where it is pinned, what it may be used for, and how much of it may be copied.
+**What this is not:** the review of their content. Which parts are used, and the errors found in them, are in the [external-resources review](sources/EXTERNAL_RESOURCES_REVIEW_2026-10-09.md) (§3–§6 for use, §8 for errors, §9 for the rules). The learner approved this registration on 2026-10-09.
+
+**The short version.** None of the three is required reading. The RAG book (Source A) stays the spine. Each source has one job, and the copying rule differs between the book and the two repos.
+
+| Source | Its one job | Copy its exact words? | Cite it as a source of facts? |
+|---|---|---|---|
+| D: AI Eval book (AE) | Method source for Phase 3 (M1–M5) and the final judge batch | **No.** Own words only, never 15 or more consecutive words | Yes, for method, after checking the review's error list (§8) |
+| E: ai-system-design-guide (SDG) | Reference for the coach only | Yes (MIT), marked as a quote, with the notice (§8.4) | **No.** Lessons cite the primary source instead |
+| F: AI-Engineer-Interview-Questions (AIQ) | Practice questions, fresh transfer scenarios, two tested coding challenges | Yes (MIT), marked as a quote, with the notice (§8.4) | **No.** Every item is graded with an answer key built from course sources |
+
+### 8.1 Source D — the AI Eval book (AE)
+
+| Item | Finding | Evidence |
+|---|---|---|
+| Title | *Evals for AI Engineers* | The export's figure links point to `learning.oreilly.com/library/view/evals-for-ai/9798341660717/`; that URL slug is shortened. A web search on 2026-10-09 matched ISBN 9798341660717 to the O'Reilly catalog entry *Evals for AI Engineers* (October 2026). The subtitle is not confirmed |
+| Authors | Shreya Shankar and Hamel Husain (the O'Reilly catalog's order) | The same web search, 2026-10-09. The local export has no title page or author line (grep, 2026-10-09) |
+| Edition | O'Reilly early release, so the text can change before publication | Review report; consistent with the `[Link to Come]` placeholders below |
+| Local copy | `rag_learning/AI Eval/`: 12 chapter markdown files (Ch1–Ch12) and 24 figures (14 PNG, 10 SVG). Ch2, Ch11 and Ch12 sit at the top of the folder; Ch1 and Ch3–Ch10 sit in `chapter N/` sub-folders with their figures. Each file name ends in a 32-character export id. | `find "AI Eval" -type f`, 2026-10-09 |
+| Not in git | `.gitignore` line 18 is `AI Eval/`, under a comment that it is a copyrighted study copy, never committed. `git check-ignore` matches that line; `git ls-files "AI Eval"` lists 0 files. | Checked 2026-10-09 |
+| Licence | Copyrighted. No permission to copy. | — |
+| Bibliography gaps | 20 `[Link to Come]` placeholders in 9 of the 12 files, where reference links should be. **Do not cite AE's own references** without checking the published text or the original paper. | `grep -o` count, 2026-10-09 |
+| Export gaps | Ch12's figures are missing; its line 111 holds a bare `app.notion.com` link near the Figure 12-1 reference. Ch7 promises a chunking grid-search section that is absent (review §8). | Read 2026-10-09 |
+| The learner's own notes | **Ch2, lines 661–665:** a ChatGPT share link and two Notion links, after the book's last section ('Putting It Together'). These are clearly the learner's. **Ch3, lines 289–293:** 'chapter 3 correction', 'section', and a line noting that the L41 sentence ('here are a few terms…') changes to 'There are a few terms…'. They come after the book's last footnote. Line 293 is the file's last line and has no trailing newline, so `wc -l` reports 292. They are not book prose, so they are treated as the learner's; this was not confirmed with the learner. Line 293 reuses the book's wording, so it is the easiest one to mis-cite. Never cite any of these lines as AE. | Read 2026-10-09 |
+| How to cite | `AE ChN, 'section heading'`, e.g. `AE Ch3, 'Open Coding: Reading and Labeling Traces'`. Paraphrase in every course file. | Review report §9 |
+| Role | Method source for Phase 3 (M1–M5) and the final judge batch. **AE Ch3 (error analysis) is the M5 method source**, which partly closes [08 D-29](08_GAP_ANALYSIS_AND_DECISIONS.md#part-4--open-design-decisions). Before Gate B it changes only two things: the C6 Task 10 open-coding table (Ch3) and one C4 seed (Ch7). | Review report §1, §3a rows 7 and 9, §4 M5 |
+| Known errors | 25 rows in the review's §8. Two examples: Ch4 gives 0.9² + 0.1² as about 81% (it is 82%), and Ch7's nDCG builds IDCG from the retrieved items only. **Check §8 before using any AE number or code.** | Review report §8 |
+
+**The honest limit.** AE is a general method for reading traces and naming failures. It is not the RAG "failure points" literature. That reference is still missing ([§7](#7-inventory-limitations-and-unverified-items) U15).
+
+### 8.2 Source E — ai-system-design-guide (SDG)
+
+| Item | Value |
+|---|---|
+| URL | https://github.com/ombharatiya/ai-system-design-guide (`git remote -v`) |
+| Local clone | `C:\Yash\New-Work\Book RAG\upstream\ai-system-design-guide`. **Read-only:** never edit, run or import code inside it. To run a piece, copy it to a scratch folder and use `uv run python -I`. |
+| Pinned commit | `ed955b27d94201b663a741284767a1136dc83e5e`, committed 2026-10-09 04:39 +0530; 193 commits reachable from HEAD; 145 tracked files. Working tree clean. (`git rev-parse HEAD`, `git log -1`, `git rev-list --count HEAD`, `git ls-files \| wc -l`, `git status --porcelain --ignored`; all 2026-10-09.) |
+| Licence | MIT. `LICENSE` reads "MIT License" and "Copyright (c) 2026 Om Bharatiya". |
+| Layout | 20 numbered topic folders (`00-interview-prep` … `19-multimodal-generation`), root guides, and two root eval guides (`ai_evals_*.md`). |
+| Role | **Reference only. Not used as evidence.** The coach may take a small idea from it (review §1 counts about a dozen worth taking). The lesson then cites the primary source, not the guide. Skip the two root eval guides: they paraphrase the AE authors' course, and AE is deeper. |
+| Caveats | It reads as AI-generated. It carries many dated vendor claims (models, prices, CVEs) that nobody here can check. 16 errors are listed in review §8, e.g. z-score fusion called "relative score fusion", and RankGPT's window direction. |
+| How to cite | `SDG <path>, 'heading'`, at `ed955b2`. |
+
+### 8.3 Source F — AI-Engineer-Interview-Questions (AIQ)
+
+| Item | Value |
+|---|---|
+| URL | https://github.com/ombharatiya/AI-Engineer-Interview-Questions (`git remote -v`) |
+| Local clone | `C:\Yash\New-Work\Book RAG\upstream\AI-Engineer-Interview-Questions`. **Read-only:** never edit, run or import code inside it. To run a piece, copy it to a scratch folder and use `uv run python -I`. |
+| Pinned commit | `e080df282aaf14c128ade55c177a20c38d82df1d`, committed 2026-10-03 06:57 +0530; 43 commits reachable from HEAD; 108 tracked files. Working tree clean, with no `__pycache__` (the review's scratch clone had one; this copy does not). Same commands as §8.2, 2026-10-09. |
+| Licence | MIT. `LICENSE` reads "MIT License" and "Copyright (c) 2026 Om". |
+| Layout | 15 numbered folders (`01-ml-and-dl-foundations` … `15-role-guides`), `resources/`, and root study files (`README`, `CHEATSHEET`, `GLOSSARY`, `STUDY_PLAN`, `AI-ENGINEER-75`). |
+| Role | Practice questions and fresh transfer scenarios (05 CR-13) for the coach-only seed bank. Two tested, key-free coding challenges: `12-coding-challenges/17_hybrid_search_and_rerank.py` (RRF and MMR, for R1 and R4) and `12-coding-challenges/12_eval_metrics.py` (EM and F1, for M3). Interview preparation is also a learner goal (2026-10-09), so its question style is welcome. It is not course reading. |
+| Files planned for use | `12-coding-challenges/08, 12, 17`; `02-llm-fundamentals` Q7, Q10, Q20; `04-rag-and-retrieval` Q3, Q11, Q13; `07-evaluation-and-observability` Q22, Q23; `08-inference-and-production` Q14 (Q11 as secondary); `11-ai-system-design/case-studies/07`; `14-company-interview-questions/harvey.md` Q9 and Q2, `cohere.md` Q5 and its Q1 follow-up; `09-safety-security-and-responsible-ai/README.md` (two sections, optional for D4). Source: review §9. |
+| How an item is used | 1. You attempt it first. 2. Then the repo's answer, verbatim, marked as a quote with the notice (§8.4). 3. Then our plain-English version. 4. Then any correction from review §8. Grading uses an answer key built from course sources. Never in Part A. |
+| Check answers first | 14 errors are listed in review §8. Example: `AIQ 07 Q23` defines Recall@k as the share of queries with any relevant chunk in the top k. **That is Hit@k.** Recall@k divides by all relevant chunks. `GLOSSARY.md` repeats the error. (Both read at `e080df2`, 2026-10-09.) |
+| How to cite | `AIQ <path>, 'heading'`, or folder plus question number: `AIQ 07 Q23`. |
+
+### 8.4 The MIT notice that travels with every copy
+
+**The rule.** Text or code from E or F may be copied exactly (learner decision, 2026-10-09). Wherever it is copied, the notice sits right beside it. Use these lines as they are:
+
+```
+Quoted from ombharatiya/ai-system-design-guide @ ed955b2, <path>. Copyright (c) 2026 Om Bharatiya. MIT License.
+Quoted from ombharatiya/AI-Engineer-Interview-Questions @ e080df2, <path>. Copyright (c) 2026 Om. MIT License.
+```
+
+**What this means.** A reader can always tell our words from the repo's words, and can find the exact version we copied.
+
+**For your project:** this applies to lab stubs too, e.g. the `17` tests copied for R1 and R4. Copy only the PROBLEM docstring and the tests into the stub; the solution stays hidden (review §9, 'Coding challenges as blank-file evidence').
+
+**Caveat, stated plainly:** MIT's own condition is that the copyright notice **and the permission notice** go with "all copies or substantial portions" (both `LICENSE` files, 2026-10-09). A short quoted answer carries the one-line notice above. When a whole file or most of one is copied, also copy the full `LICENSE` text next to it. This is a reading of the licence, not legal advice.
+
+**UNVERIFIED for Sources D–F**
+- AE's title and authors come from a web search of the O'Reilly catalog (2026-10-09), not from the local export. The edition (early release) is inferred from the `[Link to Come]` placeholders.
+- Whether the AE export matches the published book: it is an early release.
+- Any AE, SDG or AIQ claim the review did not accuracy-check. It checked 125 of its 266 findings; the other 141 (marked † there) are unchecked.

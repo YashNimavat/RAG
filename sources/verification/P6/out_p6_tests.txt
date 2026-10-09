@@ -1,0 +1,32 @@
+============================= test session starts =============================
+platform win32 -- Python 3.12.8, pytest-9.1.1, pluggy-1.6.0 -- C:\Yash\New-Work\Book RAG\rag_learning\.venv\Scripts\python.exe
+rootdir: C:\Yash\New-Work\Book RAG\rag_learning
+configfile: pyproject.toml
+plugins: anyio-4.15.1, platformdirs-4.12.4
+collecting ... collected 23 items
+
+sources/verification/P6/test_p6_metrics.py::test_q1_precision_hand PASSED [  4%]
+sources/verification/P6/test_p6_metrics.py::test_q1_recall_hand PASSED   [  8%]
+sources/verification/P6/test_p6_metrics.py::test_q1_hit_hand PASSED      [ 13%]
+sources/verification/P6/test_p6_metrics.py::test_q1_rr_hand PASSED       [ 17%]
+sources/verification/P6/test_p6_metrics.py::test_q1_ndcg_hand PASSED     [ 21%]
+sources/verification/P6/test_p6_metrics.py::test_mrr_hand_and_not_one_over_mean_rank PASSED [ 26%]
+sources/verification/P6/test_p6_metrics.py::test_precision_divides_by_k_on_short_list PASSED [ 30%]
+sources/verification/P6/test_p6_metrics.py::test_rr_cutoff PASSED        [ 34%]
+sources/verification/P6/test_p6_metrics.py::test_partial_grade_counts_as_relevant_for_binary_metrics PASSED [ 39%]
+sources/verification/P6/test_p6_metrics.py::test_unjudged_is_not_relevant PASSED [ 43%]
+sources/verification/P6/test_p6_metrics.py::test_perfect_ranking_ndcg_is_one PASSED [ 47%]
+sources/verification/P6/test_p6_metrics.py::test_idcg_uses_all_relevant_not_retrieved PASSED [ 52%]
+sources/verification/P6/test_p6_metrics.py::test_gain_conventions_differ_on_graded_but_not_binary PASSED [ 56%]
+sources/verification/P6/test_p6_metrics.py::test_ndcg_can_fall_as_k_grows PASSED [ 60%]
+sources/verification/P6/test_p6_metrics.py::test_recall_and_hit_never_decrease_with_k PASSED [ 65%]
+sources/verification/P6/test_p6_metrics.py::test_mrr_and_ndcg_disagree_on_constructed_pair PASSED [ 69%]
+sources/verification/P6/test_p6_metrics.py::test_06_toy_table PASSED     [ 73%]
+sources/verification/P6/test_p6_metrics.py::test_bad_k_and_duplicates_raise[precision_at_k] PASSED [ 78%]
+sources/verification/P6/test_p6_metrics.py::test_bad_k_and_duplicates_raise[recall_at_k] PASSED [ 82%]
+sources/verification/P6/test_p6_metrics.py::test_bad_k_and_duplicates_raise[hit_at_k] PASSED [ 86%]
+sources/verification/P6/test_p6_metrics.py::test_bad_k_and_duplicates_raise[reciprocal_rank] PASSED [ 91%]
+sources/verification/P6/test_p6_metrics.py::test_bad_k_and_duplicates_raise[ndcg_at_k] PASSED [ 95%]
+sources/verification/P6/test_p6_metrics.py::test_undefined_without_relevant PASSED [100%]
+
+============================= 23 passed in 0.07s ==============================

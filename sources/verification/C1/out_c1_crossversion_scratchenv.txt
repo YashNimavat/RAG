@@ -1,0 +1,12 @@
+python 3.12.8 | pymupdf 1.28.2
+pymupdf: pages 33 | len(doc_text) 72593 | doc_text_sha256 5106772efa77003b | equals the 1.26.7 value in 06 section 5.3: True
+pypdf 6.19.0
+pypdf extract_text: pages 33 | joined with \n: 72560 (LAB_FACTS PyPDFLoader: 72523)
+pages with identical text, pypdf vs pymupdf: 0 of 33
+pages with the same word sequence (\w+): 33 of 33
+pypdf: lines ending with a space 1093 of 1100 | pages ending with \n: 0
+pypdf page 1 last 12 chars 'oday. \nCoal ' | pymupdf page 1 last 12 chars 'day. \nCoal \n'
+pypdf page 1 first 40 chars 'Understanding Climate Change \nChapter 1:'
+pymupdf page 1 first 40 chars 'Understanding Climate Change \nChapter 1:'
+pages whose first 200 characters are identical: 33 of 33
+pymupdf page == pypdf page + newline on 33 of 33 pages

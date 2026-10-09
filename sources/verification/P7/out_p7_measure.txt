@@ -1,0 +1,71 @@
+
+=== S1 environment and extraction
+python 3.12.8 | {'pymupdf': '1.26.7', 'tiktoken': '0.14.0'}
+pdf sha256 1d58a0fac2435c2ce4129ff84906b93118d731e4a004e7a26f8ab8f749a92669
+pages=33 chars=72593 encoding=o200k_harmony n_vocab=201088
+tiktoken.encoding_for_model('gpt-oss-20b') -> o200k_harmony
+
+=== S2 reproduce P1 S9: the v0 prompt over the first four 1000/200 document windows
+system=107 question=20 sources=842 user=869 system+user=976  (P1 S9 reported 107 / 20 / 842 / 869 / 976)
+same prompt with the first EIGHT windows: system+user=1799 (P1 S10 estimated ~1818 by adding 842 again)
+
+=== S3 anatomy of the 976-token v0 prompt (o200k_harmony)
+  system rules                              107
+  4 block headers                            36
+  4 chunk texts                             803
+  question                                   20
+  scaffolding + boundary effects (rest)      10
+  total system+user                         976
+header tokens each: [9, 9, 9, 9]
+shares: rules 11.0%, chunk texts 82.3%, headers 3.7%, question 2.0%
+
+=== S4 lab chunks: four hand-picked 1,000-char page slices for D-001 (toy ranked list, not retrieval)
+all slices 1000 chars: True
+D-001 gold sentence inside chunk 1 (p.3 [800,1800)): True
+numeric distractors: p.10 has '2 degrees': True | p.23 slice has '1.5': True | p.23 slice has '2 degrees': True
+D-009 bait: p.1 slice mentions IPCC: True | any 4-digit year in the p.1 slice right after 'IPCC': False
+k=4 prompt: system+user=958 tokens (chars=4661); block tokens incl. header=[210, 204, 194, 214]
+k=8 prompt: system+user=1744 tokens; ratio k8/k4 = 1.82
+chunk size doubled to 2,000 chars ([(3, 183, 2183), (10, 0, 2000), (23, 204, 2204), (1, 424, 2424)]): system+user=1695 tokens; ratio vs k=4/1000 = 1.77
+gold still inside the 2,000-char p.3 slice: True
+
+=== S5 block tokens (header + text) over all per-page fixed windows (scope per page; plain slices, not the recursive splitter)
+size=1000 overlap=200: blocks=97 chars mean=880 | tokens min=85 median=178 mean=165.5 max=217
+size=2000 overlap=400: blocks=65 chars mean=1313 | tokens min=85 median=191 mean=241.7 max=410
+
+=== S6 budget with answer reserve (W values are TOY, not gpt-oss-20b's real window)
+fixed part (system rules + user scaffolding + D-001 question) = 133 tokens
+W=4096: input budget = 4096 - 512 - 128 = 3456; 1000-char blocks that fit: worst-case 217 tok -> 15, median 178 tok -> 18
+W=8192: input budget = 8192 - 512 - 128 = 7552; 1000-char blocks that fit: worst-case 217 tok -> 34, median 178 tok -> 41
+no reserve (W=4096, max_tokens=0, margin=0): worst-case blocks that fit -> 18
+
+=== S7 repo prompts: instruction tokens and features (texts asserted against the pinned repo cells)
+prompt                       instr.tok  context_only refusal cite_ids labelled_blocks invites_memory
+simple_csv_rag 16                   45  False   True  False  False  False
+local_rag_hf_faiss 22+24            53   True   True  False   True  False
+helper_functions L162-205           18   True  False  False  False  False
+reliable_rag 18                     31  False  False  False   True   True
+captioning 20                       31  False  False  False  False   True
+v0 (06 §3.3)                       107   True   True   True   True  False
+audit agrees with the manual reading: True
+
+=== S8 edges-first ordering of ranked chunks (toy)
+k=4: ranks in prompt order = [1, 3, 4, 2]; middle position(s) hold rank(s) [3, 4]
+k=5: ranks in prompt order = [1, 3, 5, 4, 2]; middle position(s) hold rank(s) [5]
+k=8: ranks in prompt order = [1, 3, 5, 7, 8, 6, 4, 2]; middle position(s) hold rank(s) [7, 8]
+
+=== S9 citation and abstention checks on toy answers (written for P7, not model outputs)
+A: cites=[('climate', 3)] invalid=[] abstain=False
+B: cites=[('climate', 3), ('climate', 12)] invalid=[('climate', 12)] abstain=False
+C: cites=[] invalid=[] abstain=True
+D: cites=[] invalid=[] abstain=True
+E: cites=[] invalid=[] abstain=False
+F: cites=[] invalid=[] abstain=False
+
+=== S10 lab CHECK fingerprints (from the reference functions above)
+Task1 stages 05578baa00e3bdcf
+Task2 prompt 6fa99768a3dfeca8 | tokens 958 debc96817a3523d6
+Task3 tokens k8 1744 0c75ccaac2812081 | 2000-char 1695 35ea9e03d5f2f465
+Task4 edges_first(1..8) 6b966d3b7c398acc
+Task6 audit d75f2da525a7de19
+DONE

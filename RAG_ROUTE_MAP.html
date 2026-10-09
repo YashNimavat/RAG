@@ -1,0 +1,358 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>RAG Route Map</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,700&family=Source+Sans+3:wght@400;600&family=IBM+Plex+Mono:wght@500&display=swap">
+<style>
+/* Layout: a vertical metro line, one station per phase; concepts hang off each station as rows. */
+:root{
+  --bg:#F3F6F7; --surface:#FFFFFF; --ink:#13222C; --muted:#56656F; --line:#D3DCE1;
+  --accent:#0E7470; --accent-soft:#D6EEEC; --gate:#A8681A; --gate-soft:#F8ECD9;
+  --exposed:#2F5E9E; --exposed-soft:#DEE7F4; --done:#2C7A4B; --done-soft:#DCEFE3;
+  --rail:#9FB2BC;
+  --f-display:"Bricolage Grotesque", "Segoe UI", system-ui, sans-serif;
+  --f-body:"Source Sans 3", "Segoe UI", system-ui, sans-serif;
+  --f-mono:"IBM Plex Mono", ui-monospace, Consolas, monospace;
+}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
+  --bg:#0F171C; --surface:#162229; --ink:#E4ECEF; --muted:#9AAAB3; --line:#2A3A43;
+  --accent:#4FC2BB; --accent-soft:#163C3B; --gate:#E0A456; --gate-soft:#3A2B17;
+  --exposed:#8DB2E8; --exposed-soft:#1B2D45; --done:#6CCB92; --done-soft:#173524;
+  --rail:#40525C; color-scheme:dark}}
+:root[data-theme="dark"]{
+  --bg:#0F171C; --surface:#162229; --ink:#E4ECEF; --muted:#9AAAB3; --line:#2A3A43;
+  --accent:#4FC2BB; --accent-soft:#163C3B; --gate:#E0A456; --gate-soft:#3A2B17;
+  --exposed:#8DB2E8; --exposed-soft:#1B2D45; --done:#6CCB92; --done-soft:#173524;
+  --rail:#40525C; color-scheme:dark}
+*{box-sizing:border-box}
+body{background:var(--bg);color:var(--ink);font-family:var(--f-body);font-size:16px;line-height:1.5;padding-inline:16px;padding-block:28px 56px}
+.wrap{max-width:980px;margin:0 auto;display:grid;gap:28px}
+h1,h2,h3{font-family:var(--f-display);text-wrap:balance;margin:0;line-height:1.15}
+h1{font-size:clamp(2rem,5vw,2.9rem);font-weight:700;letter-spacing:-.01em}
+h2{font-size:1.45rem;font-weight:700}
+h3{font-size:1.12rem;font-weight:700}
+p{margin:0}
+.mono{font-family:var(--f-mono);font-size:.82rem}
+.eyebrow{font-family:var(--f-mono);font-size:.74rem;letter-spacing:.08em;text-transform:uppercase;color:var(--muted)}
+.lede{color:var(--muted);max-width:65ch}
+header{display:grid;gap:10px}
+
+/* summary */
+.summary{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:12px}
+.stat{background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:14px 16px;display:grid;gap:4px;min-width:0}
+.stat b{font-family:var(--f-display);font-size:1.35rem;font-variant-numeric:tabular-nums}
+.stat span{color:var(--muted);font-size:.9rem}
+.stat.now{border-color:var(--accent);background:var(--accent-soft)}
+
+/* tracker strip */
+.strip{display:grid;gap:8px}
+.cells{display:flex;flex-wrap:wrap;gap:3px 10px}
+.grp{display:flex;gap:3px;align-items:center}
+.cell{width:14px;height:22px;border-radius:3px;border:1px solid var(--line);background:var(--surface)}
+.cell.exposed{background:var(--exposed);border-color:var(--exposed)}
+.cell.now{background:var(--accent);border-color:var(--accent)}
+.cell.done{background:var(--done);border-color:var(--done)}
+.legend{display:flex;flex-wrap:wrap;gap:6px 16px;color:var(--muted);font-size:.88rem}
+.legend i{display:inline-block;width:12px;height:12px;border-radius:3px;margin-right:6px;vertical-align:-1px;border:1px solid var(--line);background:var(--surface)}
+.legend i.exposed{background:var(--exposed);border-color:var(--exposed)}
+.legend i.now{background:var(--accent);border-color:var(--accent)}
+.legend i.done{background:var(--done);border-color:var(--done)}
+
+/* filter */
+.filters{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
+.filters button{font:inherit;font-size:.9rem;padding:6px 12px;border-radius:999px;border:1px solid var(--line);background:var(--surface);color:var(--ink);cursor:pointer}
+.filters button[aria-pressed="true"]{background:var(--ink);color:var(--bg);border-color:var(--ink)}
+.filters button:focus-visible,summary:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+
+/* route */
+.route{position:relative;display:grid;gap:0}
+.phase{position:relative;display:grid;grid-template-columns:34px minmax(0,1fr);gap:14px;padding-bottom:26px}
+.phase::before{content:"";position:absolute;left:16px;top:22px;bottom:-4px;width:3px;background:var(--rail);border-radius:2px}
+.phase:last-child::before{display:none}
+.phase.elective::before{background:repeating-linear-gradient(var(--rail) 0 6px,transparent 6px 12px)}
+.dot{position:relative;z-index:1;width:34px;height:34px;border-radius:50%;border:3px solid var(--rail);background:var(--bg);display:grid;place-items:center;font-family:var(--f-mono);font-size:.78rem;color:var(--muted)}
+.phase.past .dot{background:var(--exposed);border-color:var(--exposed);color:var(--bg)}
+.phase.current .dot{background:var(--accent);border-color:var(--accent);color:var(--bg);box-shadow:0 0 0 5px var(--accent-soft)}
+.pbody{display:grid;gap:10px;min-width:0}
+.phead{display:flex;flex-wrap:wrap;align-items:baseline;gap:4px 14px}
+.meta{display:flex;flex-wrap:wrap;gap:6px 14px;color:var(--muted);font-size:.9rem}
+.why{color:var(--muted);max-width:70ch;font-size:.95rem}
+.here{font-family:var(--f-mono);font-size:.72rem;letter-spacing:.06em;text-transform:uppercase;background:var(--accent);color:var(--bg);padding:2px 8px;border-radius:4px}
+
+.concepts{display:grid;gap:0;background:var(--surface);border:1px solid var(--line);border-radius:10px;overflow:hidden}
+.c{display:grid;grid-template-columns:58px minmax(0,1fr) auto;gap:4px 12px;padding:10px 14px;border-top:1px solid var(--line);align-items:start}
+.c:first-child{border-top:0}
+.c .id{font-family:var(--f-mono);font-size:.85rem;padding-top:2px}
+.c .t{font-weight:600}
+.c .sub{grid-column:2 / 4;color:var(--muted);font-size:.92rem}
+.c .book{grid-column:2 / 4;font-family:var(--f-mono);font-size:.74rem;color:var(--muted)}
+.c.now{background:var(--accent-soft)}
+.tags{display:flex;gap:6px;flex-wrap:wrap;justify-content:flex-end}
+.tier{font-family:var(--f-mono);font-size:.7rem;padding:2px 6px;border-radius:4px;border:1px solid var(--line);color:var(--muted)}
+.tier.E{color:var(--ink);border-color:var(--ink)}
+.st{font-size:.75rem;padding:2px 8px;border-radius:999px;white-space:nowrap;border:1px solid var(--line);color:var(--muted)}
+.st.exposed{background:var(--exposed-soft);color:var(--exposed);border-color:transparent}
+.st.now{background:var(--accent);color:var(--bg);border-color:transparent}
+.st.done{background:var(--done-soft);color:var(--done);border-color:transparent}
+.lesson{font-size:.75rem;color:var(--muted)}
+
+.gate{display:grid;gap:6px;background:var(--gate-soft);border-left:4px solid var(--gate);border-radius:0 8px 8px 0;padding:10px 14px;font-size:.93rem}
+.gate .gt{font-family:var(--f-mono);font-size:.74rem;letter-spacing:.06em;text-transform:uppercase;color:var(--gate)}
+.gate ul{margin:0;padding-left:18px;display:grid;gap:2px}
+.gate.passed{background:var(--done-soft);border-left-color:var(--done)}
+.gate.passed .gt{color:var(--done)}
+
+/* explainer sections */
+.panel{background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:20px;display:grid;gap:14px}
+.steps{margin:0;padding-left:22px;display:grid;gap:10px;max-width:72ch}
+.steps b{font-weight:600}
+.loop{display:flex;flex-wrap:wrap;gap:6px;align-items:center;font-size:.92rem}
+.loop span{background:var(--bg);border:1px solid var(--line);border-radius:6px;padding:4px 10px}
+.loop em{font-style:normal;color:var(--muted)}
+.approvals{display:grid;grid-template-columns:repeat(auto-fit,minmax(230px,1fr));gap:12px}
+.ap{border:1px solid var(--line);border-radius:10px;padding:12px 14px;display:grid;gap:4px;min-width:0}
+.ap .k{font-family:var(--f-mono);font-size:.74rem;text-transform:uppercase;letter-spacing:.06em}
+.ap.ok .k{color:var(--done)} .ap.part .k{color:var(--gate)} .ap.no .k{color:var(--muted)}
+.ap p{color:var(--muted);font-size:.92rem}
+.tablewrap{overflow-x:auto}
+table{border-collapse:collapse;width:100%;font-size:.92rem;min-width:520px}
+th,td{text-align:left;padding:8px 10px;border-bottom:1px solid var(--line);vertical-align:top}
+th{font-family:var(--f-mono);font-size:.74rem;text-transform:uppercase;letter-spacing:.06em;color:var(--muted);font-weight:500}
+footer{color:var(--muted);font-size:.85rem}
+.empty{padding:12px 14px;color:var(--muted);font-size:.92rem}
+@media (max-width:560px){
+  .c{grid-template-columns:48px minmax(0,1fr)}
+  .tags{grid-column:2;justify-content:flex-start}
+  .c .sub,.c .book{grid-column:2}
+}
+</style>
+</head>
+<body>
+
+<div class="wrap">
+<header>
+  <p class="eyebrow">Ask My Technical PDFs · learning plan</p>
+  <h1>RAG Route Map</h1>
+  <p class="lede">All 56 concepts in 13 phases, in the order you learn them. Each phase ends at a gate you pass with graded evidence. Progress as of <b>2026-10-08</b> (session #3).</p>
+</header>
+
+<section class="summary" aria-label="Progress summary">
+  <div class="stat now"><span>You are here</span><b>P1 · Tokens</b><span>Part A and teaching done. Lab next.</span></div>
+  <div class="stat"><span>Concepts started</span><b id="started">–</b><span>L1 "exposed" or in progress. None mastered yet.</span></div>
+  <div class="stat"><span>Next gate</span><b>Gate 1 → 2</b><span>Hand-compute cosine, BM25 and the metrics</span></div>
+  <div class="stat"><span>Next reviews</span><b>2026-10-09</b><span>M2, M3, R1, M5, O3</span></div>
+</section>
+
+<section class="strip" aria-label="All 56 concepts">
+  <p class="eyebrow">Tracker · one block per concept, grouped by phase</p>
+  <div class="cells" id="cells"></div>
+  <div class="legend">
+    <span><i></i>Not started</span>
+    <span><i class="exposed"></i>L1 exposed (seen once, not mastered)</span>
+    <span><i class="now"></i>In progress now</span>
+    <span><i class="done"></i>Mastered (L3+)</span>
+  </div>
+</section>
+
+<section class="filters" aria-label="Filter concepts">
+  <span class="eyebrow">Show</span>
+  <button type="button" id="f-all" data-f="all" aria-pressed="true">All 56</button>
+  <button type="button" id="f-E" data-f="E" aria-pressed="false">Essential only</button>
+  <button type="button" id="f-started" data-f="started" aria-pressed="false">Started</button>
+</section>
+
+<section class="route" id="route" aria-label="Phases"></section>
+
+<section class="panel" aria-labelledby="how">
+  <h2 id="how">How the order is decided</h2>
+  <ol class="steps">
+    <li><b>Prerequisites first.</b> A concept comes only after the ones it depends on. Cosine search needs tokens and vectors, so P comes before C. Full map: <span class="mono">03_RAG_CONCEPT_DEPENDENCY_MAP.md</span>.</li>
+    <li><b>Build, then measure, then improve.</b> You build a simple v0, measure it, and only then try techniques. That is why book Ch22 (evaluation) moves up to Phases 1 and 3.</li>
+    <li><b>Every technique needs a failure.</b> From Phase 4 on, a technique is studied in full only if your own v0 test results show the problem it fixes.</li>
+    <li><b>Your scores steer the route.</b> Part A decides what to teach slowly. A score of 0–1 flags a concept for repair before anything that depends on it.</li>
+    <li><b>Reviews return on a schedule:</b> 1 → 3 → 7 → 14 → 30 → 60 days. Score 3–4 moves you up one step, 2 repeats the interval, and 0–1 resets to 1 day.</li>
+    <li><b>Gates need evidence.</b> Finishing a notebook is not evidence. Graded answers, code written from a blank file, and logged experiments are.</li>
+  </ol>
+  <div>
+    <p class="eyebrow" style="margin-bottom:8px">Every technique (Phases 4–10) follows this loop</p>
+    <div class="loop"><span>Failure in your v0</span><em>→</em><span>Hypothesis, written first</span><em>→</em><span>Change one thing</span><em>→</em><span>Measure retrieval and answers separately</span><em>→</em><span>Keep or drop</span></div>
+  </div>
+  <div class="tablewrap">
+    <table>
+      <thead><tr><th>Label</th><th>Meaning</th><th>What you do</th></tr></thead>
+      <tbody>
+        <tr><td class="mono">E</td><td>Essential</td><td>Everyone learns it, to L3 (applied) or higher</td></tr>
+        <tr><td class="mono">U</td><td>Useful</td><td>Full lesson and experiment only if your tests show its failure; otherwise mechanism only</td></tr>
+        <tr><td class="mono">S</td><td>Specialized</td><td>Optional, later</td></tr>
+      </tbody>
+    </table>
+  </div>
+</section>
+
+<section class="panel" aria-labelledby="lv">
+  <h2 id="lv">Mastery levels</h2>
+  <div class="tablewrap">
+    <table>
+      <thead><tr><th>Level</th><th>Needs</th></tr></thead>
+      <tbody>
+        <tr><td class="mono">L1 exposed</td><td>Lesson reached the test step, or the diagnostic placed it</td></tr>
+        <tr><td class="mono">L2 recall</td><td>Recall score ≥ 3 on 2 different days, one at least 24 h after teaching</td></tr>
+        <tr><td class="mono">L3 applied</td><td>L2 + Application ≥ 3 on 2 items + code from a blank file</td></tr>
+        <tr><td class="mono">L4 transfer</td><td>L3 + Transfer ≥ 3 on a new scenario (+ experiment decided, for techniques)</td></tr>
+        <tr><td class="mono">L5 retained</td><td>L4 + review ≥ 3 after a 30-day gap</td></tr>
+      </tbody>
+    </table>
+  </div>
+</section>
+
+<section class="panel" aria-labelledby="ap">
+  <h2 id="ap">Approval gates: when lessons can be written</h2>
+  <p class="lede">Lessons are written just before you need them, once the gate allows it. Lessons for Phases 4 and later are built around failures from your own v0, so they cannot be written well before that data exists.</p>
+  <div class="approvals">
+    <div class="ap ok"><span class="k">Gate A · granted</span><b>Design approved</b><p>Allows Phases 0–2: O1–O3, P1–P7, C1–C6.</p></div>
+    <div class="ap part"><span class="k">Gate B · half done</span><b>Environment + working v0</b><p>Setup E-1…E-4 done. v0 not built yet. Allows Phase 3.</p></div>
+    <div class="ap no"><span class="k">Gate C · not yet</span><b>Verified eval set + harness</b><p>Allows Phases 4 and later.</p></div>
+  </div>
+</section>
+
+<footer>Sources: 02_RAG_MASTER_LEARNING_PLAN.md (cards, gates, hours), 05 (levels, reviews), progress/concept_tracker.csv (status). Book citations use PDF pages, for example Ch4 p.3/15. Hours are estimates from the plan.</footer>
+</div>
+
+<script>
+const PHASES=[
+ {n:0,name:"Orientation",goal:"Find out what you know; get a working setup",ver:"env smoke test",hrs:"4–6 h",why:"",
+  gate:{t:"Gate 0 → 1 · passed 2026-10-08",passed:true,items:["Diagnostic done closed-book and graded","Setup and smoke test pass from a clean clone","Fast-track decision recorded per concept"]},
+  c:[["O1","Prior-knowledge diagnostic","Blank-page pipeline drawing, 12 cold questions, graded","Intro","E","exposed","log"],
+     ["O2","Environment setup","uv, Python 3.12, keys, smoke test, kernel check","not in book","E","exposed","log"],
+     ["O3","How to use this system","Sessions, reviews, evidence, gates","Intro p.7–8/8","E","exposed","log"]]},
+ {n:1,name:"Prerequisites",goal:"Hand-level mechanics on toy data",ver:"toy data only",hrs:"14–22 h",why:"",
+  gate:{t:"Gate 1 → 2",items:["Hand-compute cosine, dot and L2; show why ranking is the same for unit vectors","Hand-compute one BM25 term score","Hand-compute Recall@k, Hit@k, MRR, nDCG@k; match your code","Explain chars vs tokens and embedding truncation","Write NumPy top-k and a citing prompt from memory"]},
+  c:[["P1","Tokens and LLM basics","Tokenizers, chars vs tokens, context window, max_tokens, temperature, cost","barely in book · Ch22 p.14/19","E","now","ready"],
+     ["P2","Information-retrieval framing","Query, document, relevance, ranking; inverted index","Ch3 p.1/14 · Ch13 p.1–2/13","E","","ready"],
+     ["P3","Keyword search: TF-IDF and BM25","BM25 by hand (k1, b); NumPy version matches rank_bm25","Ch12 p.5–6/14","E","","ready"],
+     ["P4","Embeddings and similarity","Cosine, dot, L2, normalization, truncation, bi- vs cross-encoder","Ch1 p.5–6/14 · Ch13 p.6–7/13","E","","ready"],
+     ["P5","Vector search","Exact top-k in NumPy; HNSW/IVF trade-offs","Ch1","E","","ready"],
+     ["P6","Retrieval metrics","Precision@k, Recall@k, Hit@k, MRR, nDCG, by hand and as tested code","Ch22 p.4–7/19","E","","ready"],
+     ["P7","Grounded prompts","Numbered sources, [doc:page] citations, lost in the middle, context budget","Ch1 p.9/14 · Ch3 p.5–6/14","E","","ready"]]},
+ {n:2,name:"Core baseline",goal:"Build a fully traceable simple RAG from scratch",ver:"v0",hrs:"16–24 h",why:"",
+  gate:{t:"Gate 2 → 3",items:["v0 runs end-to-end with one command","One query traced through every artifact, explained in writing","Chunker rewritten from memory; passes offset tests","Failure notes from 10 manual queries"]},
+  c:[["C1","Loading PDFs","PyMuPDF page text with doc_id and page; cleaning rules","Ch1","E","","ready"],
+     ["C2","Chunking","Fixed and recursive splitting, overlap, offsets, boundary cuts","Ch1 p.4/14, p.10–11/14","E","","ready"],
+     ["C3","Embedding and indexing","Index with metadata; cached embeddings; when to rebuild","Ch1","E","","ready"],
+     ["C4","Dense retrieval","Top-k cosine with scores; score gaps; choosing k","Ch1","E","","ready"],
+     ["C5","Answer generation with citations","Context blocks with [doc:page]; Groq call; cited-but-not-retrieved","Ch1 p.9/14","E","","ready"],
+     ["C6","v0 end-to-end","Run the whole pipeline; trace one query; find the failing stage","Ch1","E","","ready"],
+     ["C7","CSV/JSON RAG","Rows as documents; vector search vs SQL vs pandas","Ch2","S","","allowed"]]},
+ {n:3,name:"Measurement",goal:"Measure v0 before changing anything",ver:"v0.1",hrs:"16–24 h",why:"Moved early: the book puts evaluation last (Ch22), but you cannot improve what you have not measured (App p.12/23).",
+  gate:{t:"Gate 3 → 4",items:["≥ 40 eval questions with exact gold evidence, ≥ 6 unanswerable","Harness gives identical numbers on rerun","≥ 30 human labels on v0 answers","v0 failures sorted into buckets; fix shortlist derived from them"]},
+  c:[["M1","Evaluation set","Questions with span-level gold evidence; dev/test/holdout split","Ch22 p.7–15/19","E","","gateB"],
+     ["M2","Retrieval metrics harness","Complete-Evidence@k as primary; Hit@k, MRR, nDCG as diagnostics","Ch22","E","exposed","gateB"],
+     ["M3","Answer metrics and LLM judge","Correctness, faithfulness, citations; judge biases; human pilot","Ch22 · Ch3","E","exposed","gateB"],
+     ["M4","Experiment discipline","One variable, frozen data, reruns, bootstrap intervals, regression test","Ch22","E","","gateB"],
+     ["M5","Failure analysis","Sort each failure into a bucket; pick what to fix next","App A p.3–5/23","E","exposed","gateB"]]},
+ {n:4,name:"Indexing",goal:"Fix boundary and context-loss failures with better chunks",ver:"v1.0–v1.4",hrs:"18–28 h",why:"",
+  gate:{t:"Per-technique gate (Phases 4–7)",items:["Hypothesis written before running; one change","Retrieval and answer metrics reported separately","Cost and latency change; when NOT to use it","Keep or drop decision recorded"]},
+  c:[["I1","Chunk size and overlap experiment","Size × overlap grid at equal k and equal token budget","Ch1 p.10–11/14","E","","gateC"],
+     ["I2","Structure-aware chunking","Heading, section and page-aware splitting","—","U","","gateC"],
+     ["I3","Semantic chunking","Sentence-distance breakpoints; chunk-size spread","Ch9","U","","gateC"],
+     ["I4","Proposition chunking","LLM-made propositions on a subset; index cost","Ch4","S","","gateC"],
+     ["I5","Contextual chunk headers","Title/section headers for embedding and BM25","Ch7","U","","gateC"],
+     ["I6","Document augmentation / HyPE","Generated questions per chunk; index-size multiplier","Ch11","S","","gateC"],
+     ["I-CMP","Compare chunking methods","Choose a chunker for a new corpus from your evidence","Ch9 p.10–11/14","E","","gateC"]]},
+ {n:5,name:"Retrieval",goal:"Fix exact-term misses, rank errors, scope and redundancy",ver:"v2.0–v2.3",hrs:"14–22 h",why:"",gate:null,
+  c:[["R1","Hybrid search and fusion","BM25 + vectors; RRF by hand; weighted fusion","Ch12","E","exposed","gateC"],
+     ["R2","Metadata filtering","Pre-filter vs post-filter; recall loss","Ch14 p.9–10/13","U","","gateC"],
+     ["R3","Reranking","Local cross-encoder; candidate pool size vs latency","Ch13","E","","gateC"],
+     ["R4","Diversity: MMR / Dartboard","MMR in NumPy; redundancy metric","Ch15","U","","gateC"],
+     ["R5","Hierarchical / RAPTOR","Summary → chunk retrieval; indexing cost","Ch14","S","","gateC"]]},
+ {n:6,name:"Query side",goal:"Fix wording mismatch and multi-part questions, only where still failing",ver:"v3.0–v3.1",hrs:"6–10 h",why:"",gate:null,
+  c:[["Q1","Query transformations","Rewrite, step-back, decomposition; added calls","Ch5","U","","gateC"],
+     ["Q2","HyDE vs HyPE","Hypothetical document at query time vs index time","Ch6 · Ch11","U","","gateC"]]},
+ {n:7,name:"Context",goal:"Decide what the LLM actually sees",ver:"v4.0–v4.1",hrs:"8–12 h",why:"",gate:null,
+  c:[["X1","Context window / neighbours","±n neighbour chunks; token growth vs gain","Ch8","U","","gateC"],
+     ["X2","Contextual compression","Query-focused extraction; tokens saved vs faithfulness","Ch10","U","","gateC"],
+     ["X3","Context assembly","Dedup, ordering, hard token budget, stable citations","—","E","","gateC"]]},
+ {n:8,name:"Reliability",goal:"Verified citations, groundedness and calibrated abstention",ver:"v5.0",hrs:"10–16 h",why:"",
+  gate:{t:"Gate 8 → 9",items:["Abstention tested on ≥ 15 unanswerable questions","Every [doc:page] citation checked against retrieved text","Grader precision/recall measured against human labels"]},
+  c:[["V1","Citation verification","Check each claim against its cited span","Ch19","E","","gateC"],
+     ["V2","Relevance and groundedness checks","Input and output graders; are they worth the cost","Ch3","E","","gateC"],
+     ["V3","Answerability and abstention","\"I don't know\" policy; threshold chosen on dev data","—","E","","gateC"],
+     ["V4","Limits of hallucination detectors","Detector error rate; where humans must check","Ch22 p.9–10/19","U","","gateC"]]},
+ {n:9,name:"Production",goal:"Traces, budgets, regression tests, security",ver:"v6.0",hrs:"10–16 h",why:"",
+  gate:{t:"Gate 9 → 10",items:["Regression test catches an injected regression","A trace for every query; p50/p95 latency and cost for v0–v6","Remaining failures justify A1, A2 or neither"]},
+  c:[["D1","Observability","Structured traces; replay a failing query offline","Ch22 p.14–17/19","E","","gateC"],
+     ["D2","Latency, cost and caching","p50/p95 per stage; embedding and LLM caches","Ch22 p.14–15/19","E","","gateC"],
+     ["D3","Regression tests and index versions","pytest thresholds; incremental re-indexing","—","U","","gateC"],
+     ["D4","Security","Prompt injection in the corpus; access control as a pre-filter","Ch22 p.14–17/19","U","","gateC"]]},
+ {n:10,name:"Adaptive / corrective",goal:"One control-flow technique, chosen from remaining failures",ver:"v7.0",hrs:"8–14 h",why:"Pick one of A1 or A2 first, based on your failure buckets.",gate:null,
+  c:[["A1","Query routing","Classifier router; routing accuracy measured separately","Ch18","U","","gateC"],
+     ["A2","Corrective RAG","Score → route → refine; calibrate the bands on labels","Ch20","U","","gateC"],
+     ["A3","Self-RAG","Paper's reflection tokens vs prompt imitation","—","S","","gateC"],
+     ["A4","Feedback loops","Score adjustment vs index enrichment","Ch17","S","","gateC"],
+     ["A5","Agentic RAG","Plan → retrieve → reflect → stop; cost per task","—","S","","gateC"]]},
+ {n:11,name:"Specialized (elective)",goal:"Only if your tests show multi-hop or global failures",ver:"v8 (optional)",hrs:"0 h (10–20 if taken)",why:"",gate:null,elective:true,
+  c:[["S1","Graph RAG","Entities → graph → communities → summaries","Ch21","S","","gateC"],
+     ["S2","Multimodal RAG","Image captions linked to page; ColPali idea","Ch16","S","","gateC"],
+     ["S3","MemoRAG","Paper's memory model vs the repo's substitute","—","S","","gateC"]]},
+ {n:12,name:"Capstone",goal:"Defend your design with your own evidence",ver:"capstone",hrs:"8–12 h",why:"",
+  gate:{t:"Capstone gate",items:["Architecture defence using only your experiment evidence","Blank-page reconstruction compared with your O1 drawing","Best setup tested on an unseen set of PDFs"]},
+  c:[["K1","Architecture defence","Defend a stack; reconstruct; transfer to a new corpus","App A p.7–11/23","E","","gateC"]]}
+];
+const LESSON={ready:"Lesson ready",allowed:"Lesson can be written now",gateB:"Lesson waits for Gate B",gateC:"Lesson waits for Gate C",log:"Done in sessions"};
+const STATUS={"":["Not started",""],exposed:["L1 exposed","exposed"],now:["In progress","now"],done:["Mastered","done"]};
+const CURRENT=1;
+
+function el(tag,cls,txt){const e=document.createElement(tag);if(cls)e.className=cls;if(txt!=null)e.textContent=txt;return e}
+
+function renderCells(){
+  const box=document.getElementById("cells");let started=0;
+  PHASES.forEach(p=>{const g=el("div","grp");g.title="Phase "+p.n+": "+p.name;
+    p.c.forEach(c=>{const s=c[5];if(s)started++;const d=el("span","cell "+(STATUS[s]||STATUS[""])[1]);d.title=c[0]+" · "+c[1]+" · "+(STATUS[s]||STATUS[""])[0];g.appendChild(d)});
+    box.appendChild(g)});
+  document.getElementById("started").textContent=started+" / 56";
+}
+
+function renderRoute(filter){
+  const route=document.getElementById("route");route.textContent="";
+  PHASES.forEach(p=>{
+    const rows=p.c.filter(c=>filter==="all"||(filter==="E"&&c[4]==="E")||(filter==="started"&&c[5]));
+    if(filter!=="all"&&rows.length===0)return;
+    const ph=el("article","phase"+(p.n<CURRENT?" past":p.n===CURRENT?" current":"")+(p.elective?" elective":""));
+    ph.appendChild(el("div","dot",String(p.n)));
+    const b=el("div","pbody");
+    const head=el("div","phead");head.appendChild(el("h3",null,"Phase "+p.n+" · "+p.name));
+    if(p.n===CURRENT)head.appendChild(el("span","here","You are here"));
+    b.appendChild(head);
+    const meta=el("div","meta");meta.appendChild(el("span",null,p.goal));meta.appendChild(el("span","mono",p.ver));meta.appendChild(el("span",null,p.hrs));b.appendChild(meta);
+    if(p.why)b.appendChild(el("p","why",p.why));
+    const list=el("div","concepts");
+    rows.forEach(c=>{
+      const [id,t,sub,book,tier,st,les]=c;const S=STATUS[st]||STATUS[""];
+      const r=el("div","c"+(st==="now"?" now":""));
+      r.appendChild(el("span","id",id));r.appendChild(el("span","t",t));
+      const tags=el("span","tags");tags.appendChild(el("span","tier "+tier,tier));tags.appendChild(el("span","st "+S[1],S[0]));r.appendChild(tags);
+      r.appendChild(el("span","sub",sub));
+      r.appendChild(el("span","book","Book: "+book+" · "+LESSON[les]));
+      list.appendChild(r)});
+    b.appendChild(list);
+    if(p.gate&&filter==="all"){const g=el("div","gate"+(p.gate.passed?" passed":""));g.appendChild(el("span","gt",p.gate.t));
+      const ul=el("ul");p.gate.items.forEach(i=>ul.appendChild(el("li",null,i)));g.appendChild(ul);b.appendChild(g)}
+    ph.appendChild(b);route.appendChild(ph)});
+}
+
+function setFilter(f){
+  document.querySelectorAll(".filters button").forEach(btn=>btn.setAttribute("aria-pressed",String(btn.dataset.f===f)));
+  renderRoute(f);try{localStorage.setItem("routeFilter",f)}catch(e){}
+}
+document.querySelectorAll(".filters button").forEach(btn=>btn.addEventListener("click",()=>setFilter(btn.dataset.f)));
+renderCells();
+let saved="all";try{saved=localStorage.getItem("routeFilter")||"all"}catch(e){}
+if(!["all","E","started"].includes(saved))saved="all";
+setFilter(saved);
+</script>
+</body>
+</html>

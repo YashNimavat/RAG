@@ -1,0 +1,13 @@
+toy doc: 5 pages, 520 chars, 17 chunks; written toy_traces.json (12048 bytes)
+page 2 parsed text holds the hyphenation artifact: True
+TOY-1: planted ok                   ladder ok                   OK  | answer: Replace the main lamp every 2,000 hours of use [toy:1].
+TOY-2: planted parse                ladder parse                OK  | answer: I cannot answer this from the provided documents.
+TOY-3: planted chunk                ladder chunk                OK  | answer: The two fuel tanks hold 400 litres in total [toy:3].
+TOY-4: planted retrieve             ladder retrieve             OK  | answer: I cannot answer this from the provided documents.
+TOY-5: planted generate:citation    ladder generate:citation    OK  | answer: Shift changes happen at 06:00 and 18:00 [toy:4].
+TOY-6: planted generate:grounding   ladder generate:grounding   OK  | answer: Each keeper works an 8-hour shift [toy:5].
+TOY-7: planted retrieve             ladder retrieve             OK  | answer: Clean the lens every week with a dry cloth [toy:1].
+expected labels fingerprint (lab CHECK): 24494e44adb7c4d6
+TOY-1 with the refusal sentence -> generate:abstain
+TOY-6 with the right number -> ok
+generation-first ladder disagrees on: {'TOY-7': 'generate:citation'}

@@ -1,0 +1,129 @@
+PASS repo HEAD 009adba2be1bef49780ef73b6dd3c18fd24b035b
+
+== helper_functions.py
+PASS helper_functions.py L18: def replace_t_with_space(list_of_documents):
+PASS helper_functions.py L30: doc.page_content = doc.page_content.replace('\t', ' ')
+PASS helper_functions.py L48: def encode_pdf(path, chunk_size=1000, chunk_overlap=200):
+PASS helper_functions.py L62: loader = PyPDFLoader(path)
+PASS helper_functions.py L67: chunk_size=chunk_size, chunk_overlap=chunk_overlap, length_function=len
+PASS helper_functions.py L69: texts = text_splitter.split_documents(documents)
+PASS helper_functions.py L70: cleaned_texts = replace_t_with_space(texts)
+PASS helper_functions.py L73: embeddings = OpenAIEmbeddings()
+PASS helper_functions.py L74: vectorstore = FAISS.from_documents(cleaned_texts, embeddings)
+PASS helper_functions.py L223: def read_pdf_to_string(path):
+PASS helper_functions.py L244: content += page.get_text()
+PASS helper_functions.py L338: def get_langchain_embedding_provider(provider: EmbeddingProvider, model_id: str = None):
+PASS helper_functions.py L354: return OpenAIEmbeddings()
+PASS helper_functions.py L357: return CohereEmbeddings()
+
+== notebook cells (0-based)
+PASS simple_rag.ipynb cell 10: def encode_pdf(path, chunk_size=1000, chunk_overlap=200):
+PASS simple_rag.ipynb cell 10: cleaned_texts = replace_t_with_space(texts)
+PASS simple_rag.ipynb cell 10: get_langchain_embedding_provider(EmbeddingProvider.OPENAI)
+PASS simple_rag.ipynb cell 10: vectorstore = FAISS.from_documents(cleaned_texts, embeddings)
+PASS local_rag_huggingface_faiss.ipynb cell 10: EMBEDDING_MODEL = "BAAI/bge-base-en-v1.5"
+PASS local_rag_huggingface_faiss.ipynb cell 10: CHUNK_SIZE = 1000
+PASS local_rag_huggingface_faiss.ipynb cell 10: CHUNK_OVERLAP = 200
+PASS local_rag_huggingface_faiss.ipynb cell 12: loader = PyPDFLoader(path)
+PASS local_rag_huggingface_faiss.ipynb cell 12: chunks = text_splitter.split_documents(documents)
+PASS local_rag_huggingface_faiss.ipynb cell 14: encode_kwargs={"normalize_embeddings": True}
+PASS local_rag_huggingface_faiss.ipynb cell 16: def encode_to_faiss(chunks, embeddings):
+PASS local_rag_huggingface_faiss.ipynb cell 16: FAISS.from_documents(
+PASS local_rag_huggingface_faiss.ipynb cell 16: # vectorstore.save_local("faiss_climate_index")
+PASS local_rag_huggingface_faiss.ipynb cell 16: # vectorstore = FAISS.load_local("faiss_climate_index", embeddings, allow_dangerous_deserialization=True)
+PASS hierarchical_indices.ipynb cell 11: "chunk_id": i,
+PASS hierarchical_indices.ipynb cell 11: "page": int(chunk.metadata.get("page", 0))
+PASS hierarchical_indices.ipynb cell 11: metadata={"source": path, "page": doc.metadata["page"], "summary": True}
+PASS hierarchical_indices.ipynb cell 11: embeddings = OpenAIEmbeddings()
+PASS hierarchical_indices.ipynb cell 13: if os.path.exists("../vector_stores/summary_store") and os.path.exists("../vector_stores/detailed_store"):
+PASS hierarchical_indices.ipynb cell 13: FAISS.load_local("../vector_stores/detailed_store", embeddings, allow_dangerous_deserialization=True)
+PASS hierarchical_indices.ipynb cell 13: detailed_store.save_local("../vector_stores/detailed_store")
+PASS context_enrichment_window_around_chunk.ipynb cell 11: content = read_pdf_to_string(path)
+PASS context_enrichment_window_around_chunk.ipynb cell 13: metadata={"index": len(chunks), "text": text}
+PASS context_enrichment_window_around_chunk.ipynb cell 13: start += chunk_size - chunk_overlap
+PASS context_enrichment_window_around_chunk.ipynb cell 15: chunks_size = 400
+PASS context_enrichment_window_around_chunk.ipynb cell 15: chunk_overlap = 200
+PASS context_enrichment_window_around_chunk.ipynb cell 17: embeddings = OpenAIEmbeddings()
+PASS context_enrichment_window_around_chunk.ipynb cell 17: FAISS.from_documents(docs, embeddings)
+PASS context_enrichment_window_around_chunk.ipynb cell 23: chunk_size: int = 200, chunk_overlap: int = 20
+PASS context_enrichment_window_around_chunk.ipynb cell 23: current_index = chunk.metadata.get('index')
+PASS context_enrichment_window_around_chunk.ipynb cell 25: chunk_size=400
+PASS context_enrichment_window_around_chunk.ipynb cell 25: chunk_overlap=200
+PASS memorag.ipynb cell 22: self.store.save_local(path)
+PASS memorag.ipynb cell 22: FAISS.load_local(path, self.embeddings, allow_dangerous_deserialization=True)
+PASS reliable_rag.ipynb cell 6: CohereEmbeddings(model="embed-english-v3.0")
+PASS all_rag_techniques_runnable_scripts/hierarchical_indices.py L94 exists-check, L100-L101 save_local
+
+== repo-wide scans (all .ipynb code cells and .py files)
+INFO 'save_local': 3 -> ['all_rag_techniques/hierarchical_indices.ipynb cell 13', 'all_rag_techniques/memorag.ipynb cell 22', 'all_rag_techniques_runnable_scripts/hierarchical_indices.py']
+INFO 'load_local': 3 -> ['all_rag_techniques/hierarchical_indices.ipynb cell 13', 'all_rag_techniques/memorag.ipynb cell 22', 'all_rag_techniques_runnable_scripts/hierarchical_indices.py']
+INFO 'input_type': 0 -> []
+INFO 'manifest': 0 -> []
+INFO 'params_hash': 0 -> []
+INFO 'add_start_index': 0 -> []
+INFO 'revision': 0 -> []
+INFO 'np.save(': 0 -> []
+INFO 'OpenAIEmbeddings()': 29 -> ['all_rag_techniques/HyDe_Hypothetical_Document_Embedding.ipynb cell 12', 'all_rag_techniques/adaptive_retrieval.ipynb cell 9', 'all_rag_techniques/context_enrichment_window_around_chunk.ipynb cell 17', 'all_rag_techniques/document_augmentation.ipynb cell 13', 'all_rag_techniques/explainable_retrieval.ipynb cell 6', 'all_rag_techniques/fusion_retrieval.ipynb cell 10', 'all_rag_techniques/graph_rag.ipynb cell 7', 'all_rag_techniques/graph_rag.ipynb cell 16', 'all_rag_techniques/hierarchical_indices.ipynb cell 11', 'all_rag_techniques/hierarchical_indices.ipynb cell 13', 'all_rag_techniques/memorag.ipynb cell 22', 'all_rag_techniques/raptor.ipynb cell 7'] …
+PASS no code anywhere in the repo sets an embedding input_type
+PASS no index manifest or params hash anywhere in the repo
+PASS no model revision pinned anywhere in the repo
+
+== library source (learner's older venv; read as text, not imported)
+INFO langchain_community/vectorstores/faiss.py sha256 7f37a84e1b265f73f81b4d6df53882479bb3a081ce61220121a1701f4c4135eb
+PASS langchain_community/vectorstores/faiss.py L1147: def save_local(self, folder_path: str, index_name: str = "index") -> None:
+PASS langchain_community/vectorstores/faiss.py L1160: faiss.write_index(self.index, str(path / f"{index_name}.faiss"))
+PASS langchain_community/vectorstores/faiss.py L1164: pickle.dump((self.docstore, self.index_to_docstore_id), f)
+PASS langchain_community/vectorstores/faiss.py L1167: def load_local(
+PASS langchain_community/vectorstores/faiss.py L1170: embeddings: Embeddings,
+PASS langchain_community/vectorstores/faiss.py L1173: allow_dangerous_deserialization: bool = False,
+PASS langchain_community/vectorstores/faiss.py L1216: return cls(embeddings, index, docstore, index_to_docstore_id, **kwargs)
+INFO langchain_cohere/embeddings.py sha256 49fbae8fcc2dff002a977dd225e1dc51ca10ce3d05f65ea1c5abb0d0d921845b
+PASS langchain_cohere/embeddings.py L47: model: Optional[str] = None
+PASS langchain_cohere/embeddings.py L109: if not self.model:
+PASS langchain_cohere/embeddings.py L195: return self.embed(texts, input_type="search_document")
+PASS langchain_cohere/embeddings.py L217: return self.embed([text], input_type="search_query")[0]
+INFO langchain_community version: langchain_community-0.4.1.dist-info
+INFO langchain_cohere version: langchain_cohere-0.5.1.dist-info
+PASS save_local writes no embedding-model identity (only index.faiss + index.pkl)
+
+== book pages
+PASS chapter 1 p.5/14: 'Step 3: Clean the Text'
+PASS chapter 1 p.5/14: 'Dirty text leads to noisy embeddings'
+PASS chapter 1 p.5/14: 'Step 4: Create Embeddings'
+PASS chapter 1 p.6/14: 'Step 5: Store in a Vector Database'
+PASS chapter 1 p.6/14: 'even with millions of entries'
+PASS chapter 1 p.7/14: 'Algorithm Sketch: Document Preparation'
+PASS chapter 1 p.7/14: 'Clean each chunk (remove formatting artifacts)'
+PASS chapter 1 p.7/14: 'Store all vectors in a vector store'
+PASS chapter 1 p.12/14: 'You never update your document collection'
+PASS chapter 7 p.4/11: 'The technique modifies only the preparation phase'
+PASS chapter 8 p.4/11: 'Store Position Metadata During Chunking'
+PASS chapter 8 p.4/11: 'sequential index'
+PASS chapter 8 p.4/11: 'given an index number'
+PASS chapter 11 p.6/13: 'pointer back to the parent chunk'
+PASS chapter 11 p.10/13: 'every time the collection updates'
+PASS chapter 11 p.10/13: 'front-loads the investment'
+PASS chapter 13 p.6/13: 'document embeddings can be precomputed and stored'
+PASS chapter 14 p.9/13: 'The Role of Metadata'
+PASS chapter 14 p.9/13: 'The simplest metadata scheme uses page numbers'
+PASS chapter 14 p.10/13: 'document identifiers combined with section numbers'
+PASS chapter 15 p.12/12: 'requires no changes to the index, embedding model, or preparation pipeline'
+PASS chapter 16 p.4/11: 'tagged with metadata noting which page it came from'
+PASS Appendix p.16/23: 'Embedding A list of numbers'
+PASS Appendix p.22/23: 'Vector Database / Vector Store'
+
+== book-wide absence scan (whole book, case-insensitive)
+INFO book 'hash': 0 page(s) []
+INFO book 'manifest (as a file)': 0 page(s) []
+INFO book 'cache': 1 page(s) ['chapter 18 p.4/12']
+INFO book 're-index / reindex': 0 page(s) []
+INFO book 'rebuild': 0 page(s) []
+INFO book 're-embed': 0 page(s) []
+INFO book 'input type': 0 page(s) []
+INFO book 'search_query': 0 page(s) []
+INFO book 'normalize vectors': 0 page(s) []
+INFO book 'unit length': 0 page(s) []
+INFO book 'model revision': 0 page(s) []
+INFO book 'pickle': 0 page(s) []
+
+ALL PASS

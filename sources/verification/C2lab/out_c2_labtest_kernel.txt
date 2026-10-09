@@ -1,0 +1,52 @@
+[IPKernelApp] WARNING | Kernel is running over TCP without encryption. All communication (including code and outputs) is sent in plain text and is susceptible to eavesdropping. Use IPC transport or launch with kernel manager-provisioned CurveZMQ keys to enable transport encryption.
+C:\Yash\New-Work\Book RAG\rag_learning\.venv\Lib\site-packages\zmq\_future.py:718: RuntimeWarning: Proactor event loop does not implement add_reader family of methods required for zmq. Registering an additional selector thread for add_reader support via tornado. Use `asyncio.set_event_loop_policy(WindowsSelectorEventLoopPolicy())` to avoid this warning.
+  self._get_loop()
+kernel: C:\Yash\New-Work\Book RAG\rag_learning\.venv\Scripts\python.exe
+C:\Users\Yash\AppData\Local\Temp\claude\c--Yash-New-Work-Book-RAG\49692329-4b32-4a19-aff3-a51ccab8cfba\scratchpad\c2_kernel_good
+PASS cell 5: # CHECK Task 1 (do not edit)
+PASS cell 8: # CHECK Task 2 (do not edit)
+PASS cell 11: # CHECK Task 3 (do not edit)
+PASS cell 16: # CHECK Task 4 (do not edit)
+PASS cell 21: # CHECK Task 5 (do not edit)
+PASS cell 26: # CHECK Task 6 (do not edit)
+PASS cell 29: # CHECK Task 7 (do not edit)
+PASS cell 34: # CHECK Task 8 (do not edit)
+PASS cell 36: # CHECK save (do not edit)
+9/9 CHECK cells passed (real kernel)
+files written by the save cell: ['C2_out\\ea07572562ac_1ca9c5a3b548\\chunks.jsonl']
+
+## blank notebook (as shipped)
+[IPKernelApp] WARNING | Kernel is running over TCP without encryption. All communication (including code and outputs) is sent in plain text and is susceptible to eavesdropping. Use IPC transport or launch with kernel manager-provisioned CurveZMQ keys to enable transport encryption.
+C:\Yash\New-Work\Book RAG\rag_learning\.venv\Lib\site-packages\zmq\_future.py:718: RuntimeWarning: Proactor event loop does not implement add_reader family of methods required for zmq. Registering an additional selector thread for add_reader support via tornado. Use `asyncio.set_event_loop_policy(WindowsSelectorEventLoopPolicy())` to avoid this warning.
+  self._get_loop()
+kernel: C:\Yash\New-Work\Book RAG\rag_learning\.venv\Scripts\python.exe
+C:\Users\Yash\AppData\Local\Temp\claude\c--Yash-New-Work-Book-RAG\49692329-4b32-4a19-aff3-a51ccab8cfba\scratchpad\c2_kernel_blank
+FAIL cell 5: # CHECK Task 1 (do not edit)  <- AssertionError: write each span as (start, end) with two ints
+FAIL cell 8: # CHECK Task 2 (do not edit)  <- NameError: name 'fixed_window_chunks' is not defined
+FAIL cell 11: # CHECK Task 3 (do not edit)  <- NameError: name 'Chunk' is not defined
+FAIL cell 16: # CHECK Task 4 (do not edit)  <- AssertionError: fill all four predictions first
+FAIL cell 21: # CHECK Task 5 (do not edit)  <- AssertionError: fill your prediction and confidence first
+FAIL cell 26: # CHECK Task 6 (do not edit)  <- AssertionError: write your prediction first
+FAIL cell 29: # CHECK Task 7 (do not edit)  <- NameError: name 'params_hash' is not defined
+FAIL cell 34: # CHECK Task 8 (do not edit)  <- AssertionError: write your prediction first
+FAIL cell 36: # CHECK save (do not edit)  <- NameError: name 'make_records' is not defined
+0/9 CHECK cells passed (real kernel)
+files written by the save cell: []
+
+## B8 (infinite loop guard in a real kernel)
+[IPKernelApp] WARNING | Kernel is running over TCP without encryption. All communication (including code and outputs) is sent in plain text and is susceptible to eavesdropping. Use IPC transport or launch with kernel manager-provisioned CurveZMQ keys to enable transport encryption.
+C:\Yash\New-Work\Book RAG\rag_learning\.venv\Lib\site-packages\zmq\_future.py:718: RuntimeWarning: Proactor event loop does not implement add_reader family of methods required for zmq. Registering an additional selector thread for add_reader support via tornado. Use `asyncio.set_event_loop_policy(WindowsSelectorEventLoopPolicy())` to avoid this warning.
+  self._get_loop()
+kernel: C:\Yash\New-Work\Book RAG\rag_learning\.venv\Scripts\python.exe
+C:\Users\Yash\AppData\Local\Temp\claude\c--Yash-New-Work-Book-RAG\49692329-4b32-4a19-aff3-a51ccab8cfba\scratchpad\c2_kernel_b8
+PASS cell 5: # CHECK Task 1 (do not edit)
+FAIL cell 8: # CHECK Task 2 (do not edit)  <- TimeoutError: stopped after 300,000 steps: probably an infinite loop
+PASS cell 11: # CHECK Task 3 (do not edit)
+PASS cell 16: # CHECK Task 4 (do not edit)
+PASS cell 21: # CHECK Task 5 (do not edit)
+PASS cell 26: # CHECK Task 6 (do not edit)
+PASS cell 29: # CHECK Task 7 (do not edit)
+PASS cell 34: # CHECK Task 8 (do not edit)
+PASS cell 36: # CHECK save (do not edit)
+8/9 CHECK cells passed (real kernel)
+files written by the save cell: ['C2_out\\ea07572562ac_1ca9c5a3b548\\chunks.jsonl']

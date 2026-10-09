@@ -14,9 +14,14 @@ __pycache__/
 
 # corpora and extracted text (licences unclear; kept local)
 *.pdf
+# "Evals for AI" book text (copyrighted; study copy only, never committed)
+AI Eval/
 evaluation/snapshots/*/
 
 # caches and indexes (rebuildable)
 .cache/
 index/
 experiments/*/cache/
+
+# lab outputs (extracted text, chunks, indexes written by the learner's lab runs)
+labs/*_out/

@@ -1,0 +1,67 @@
+--- cell 2 [setup] import hashlib, json, os, re, tempfile, unicodedata
+    pymupdf 1.26.7 | snapshot folder: <scratchpad>/c1/snap | ready
+--- cell 4 [prediction/t1_pred] my_prediction_n_pages = 33
+--- cell 5 [learner/t1] def load_pages(pdf_path, doc_id):
+--- cell 6 [CHECK] # CHECK Task 1 (do not edit)
+    Task 1 OK: 33 pages; you predicted 33 | shortest page: 33 with 636 characters
+--- cell 8 [prediction/t2_pred] my_prediction_len_doc_text = 72593
+--- cell 9 [learner/t2] def build_page_table(page_texts):
+--- cell 10 [CHECK] # CHECK Task 2 (do not edit)
+    Task 2 OK. len(doc_text) = 72593 | you predicted 72593 | page 8 starts at 16074 (06 §5.3 says 16,074)
+--- cell 12 [prediction/t3_pred] my_prediction_same_id_under_1_28_2 = False
+--- cell 13 [learner/t3] def snapshot_id(backend, version, options, cleaning_version, doc_text_
+--- cell 14 [CHECK] # CHECK Task 3 (do not edit)
+    Task 3 OK. snapshot_id = ea07572562ac | same text, version 1.28.2 -> 4b7e61b9e418 | cleaning 'tabs_v1' -> 6164dfc95324
+    You predicted 'same id under 1.28.2': False
+--- cell 17 [prediction/t4_pred] my_prediction_plain_open_hash_matches = False
+--- cell 18 [learner/t4] from datetime import datetime, timezone
+--- cell 19 [CHECK] # CHECK Task 4 (do not edit)
+    shifted page table rejected: page 2 start
+    Task 4 OK. Wrote <scratchpad>/c1/snap\ea07572562ac\climate.txt and <scratchpad>/c1/snap\D_ea07572562ac.json
+--- cell 21 [learner/t5] import bisect
+--- cell 22 [CHECK] # CHECK Task 5 (do not edit)
+    Task 5 OK. First 'Paris Agreement' is on page 6 at page offset 1874 | pages: [6, 10, 23, 24]
+--- cell 24 [prediction/t6_pred] my_prediction_real_compounds = "all"
+--- cell 25 [learner/t6] import math
+--- cell 26 [CHECK] # CHECK Task 6 (do not edit)
+      p.8: 'cost-\ncompetitive'
+      p.11: 'well-\nbeing'
+      p.12: 'Public-\nprivate'
+      p.19: 'well-\nbeing'
+      p.29: 'market-\nbased'
+      p.29: 'climate-\nfriendly'
+      p.31: 'decision-\nmaking'
+    Task 6 OK. {'empty_pages': [], 'ligatures': 0, 'tabs': 0, 'double_newlines': 0, 'lines': 1100, 'lines_ending_space': 1093} | repeated lines: [17, {}]
+--- cell 29 [prediction/t7_pred] my_prediction_line_after_parsing = "Two-column pages are common"
+--- cell 30 [learner/t7] with fitz.open(ZOO_PDF) as zd:
+    Consider using the pymupdf_layout package for a greatly improved page layout analysis.
+--- cell 31 [CHECK] # CHECK Task 7 (do not edit)
+    Task 7 OK. After 'Parsing comes before chunking:' get_text() gives: 'Two-column pages are common'
+    You predicted: 'Two-column pages are common' | tables per page: [0, 1, 0, 0, 0] | kinds: ['text', 'text', 'empty', 'image_only', 'text']
+    'file' found in page 1 text: False | after NFKC: True
+--- cell 33 [prediction/t8_pred] my_prediction_edits_on_D = 0
+--- cell 34 [learner/t8] def plan_edits(doc_id, page_texts):
+--- cell 35 [CHECK] # CHECK Task 8 (do not edit)
+    Task 8 OK. Zoo edits by rule: {'R1_header_footer': 6, 'R2_dehyphenate': 1, 'R3_ligature': 3} | Corpus D edits: 0 (you predicted 0 ) | a naive '-\n' join would change 7
+    cleaned 'extraction' comes from raw page-1 offsets 101 to 112 : 'extrac-\ntion'
+--- cell 37 [learner/t9] with fitz.open(BOOK_CH1) as bd:
+--- cell 38 [CHECK] # CHECK Task 9 (do not edit)
+    Task 9 OK. [1, 0, 0, 1]
+--- cell 41 [handoff] print("pages      :", type(pages).__name__, "of", type(pages[0]).__nam
+    pages      : list of Page | n = 33 | fields: ['doc_id', 'page', 'text', 'parser']
+    doc_text   : str, len 72593 | sha256 5106772efa77003b | pages joined with '\n'
+    rows       : page_table, keys ['page', 'doc_char_start', 'doc_char_end', 'text_sha256']
+    snapshot_id: ea07572562ac | cleaning: none
+    files      : <scratchpad>/c1/snap\ea07572562ac\climate.txt | <scratchpad>/c1/snap\D_ea07572562ac.json
+
+=== CHECK summary
+PASS cell 6: # CHECK Task 1 (do not edit)
+PASS cell 10: # CHECK Task 2 (do not edit)
+PASS cell 14: # CHECK Task 3 (do not edit)
+PASS cell 19: # CHECK Task 4 (do not edit)
+PASS cell 22: # CHECK Task 5 (do not edit)
+PASS cell 26: # CHECK Task 6 (do not edit)
+PASS cell 31: # CHECK Task 7 (do not edit)
+PASS cell 35: # CHECK Task 8 (do not edit)
+PASS cell 38: # CHECK Task 9 (do not edit)
+9/9 CHECK cells pass

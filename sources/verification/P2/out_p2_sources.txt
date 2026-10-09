@@ -1,0 +1,61 @@
+PASS repo HEAD 009adba2be1bef49780ef73b6dd3c18fd24b035b
+PASS all_rag_techniques/simple_rag.ipynb cell 13: as_retriever(search_kwargs={"k": 2})
+PASS all_rag_techniques/fusion_retrieval.ipynb cell 14: def create_bm25_index(
+PASS all_rag_techniques/fusion_retrieval.ipynb cell 14: BM25 (Best Matching 25) is a ranking function used in information retrieval
+PASS all_rag_techniques/fusion_retrieval.ipynb cell 14: doc.page_content.split()
+PASS all_rag_techniques/fusion_retrieval.ipynb cell 14: return BM25Okapi(tokenized_docs)
+PASS all_rag_techniques/fusion_retrieval.ipynb cell 17: vectorstore.similarity_search("", k=vectorstore.index.ntotal)
+PASS all_rag_techniques/fusion_retrieval.ipynb cell 17: bm25.get_scores(query.split())
+PASS all_rag_techniques/fusion_retrieval.ipynb cell 17: np.argsort(combined_scores)[::-1]
+PASS all_rag_techniques/fusion_retrieval.ipynb cell 17: sorted_indices[:k]
+PASS all_rag_techniques/reliable_rag.ipynb cell 14: Binary score for relevance check on retrieved documents.
+PASS all_rag_techniques/reliable_rag.ipynb cell 14: If the document contains keyword(s) or semantic meaning related to the user question, grade it as relevant.
+PASS all_rag_techniques/reliable_rag.ipynb cell 14: It does not need to be a stringent test.
+PASS all_rag_techniques/reliable_rag.ipynb cell 14: ChatGroq(model="llama-3.1-8b-instant", temperature=0)
+PASS evaluation/define_evaluation_metrics.ipynb cell 3: Ground Truth: {ground_truth}
+PASS evaluation/define_evaluation_metrics.ipynb cell 3: ground_truth: The ground truth answer.
+PASS evaluation/define_evaluation_metrics.ipynb cell 9: 0.33 - Somewhat relevant: Contains related keywords or concepts
+PASS evaluation/define_evaluation_metrics.ipynb cell 9: 1.00 - Highly relevant: Directly and fully answers the question
+PASS evaluation/define_evaluation_metrics.ipynb cell 9: Final Score: [Average of all scores]
+PASS evaluation/define_evaluation_metrics.ipynb cell 9: relevancy_score_prompt = PromptTemplate(
+PASS evaluation/define_evaluation_metrics.ipynb cell 9: ratio_of_relevant_docs_chain = ratio_of_relevant_docs_prompt |
+PASS evaluation/evaluation_deep_eval.ipynb cell 6: ContextualRelevancyMetric(
+PASS evaluation/evaluation_deep_eval.ipynb cell 6: retrieval_context=retrieval_context
+PASS evaluation/evaluation_deep_eval.ipynb cell 11: def create_deep_eval_test_cases(questions, gt_answers, generated_answers, retrieved_documents)
+PASS evaluation/evaluation_deep_eval.ipynb cell 11: expected_output=gt_answer
+PASS evaluation/evaluation_deep_eval.ipynb cell 11: retrieval_context=retrieved_document
+PASS define_evaluation_metrics.ipynb cell 9: ratio_of_relevant_docs_prompt is never defined there
+PASS data/q_a.json: 44 items, keys {question, answer} only
+PASS repo: no 'inverted' in any notebook source cell, .py or .md file (hits: [])
+PASS repo: no 'qrel' in any notebook source cell, .py or .md file (hits: [])
+PASS Ch intro.pdf p.1/8: 'retrieved passages are almost-but-not-quite'
+PASS Ch chapter 1.pdf p.8/14: 'Find the Nearest Chunks'
+PASS Ch chapter 1.pdf p.8/14: 'most likely to contain the answer'
+PASS Ch chapter 1.pdf p.10/14: 'Search vector store for top-K nearest chunk vectors'
+PASS Ch chapter 1.pdf p.12/14: 'will miss most of the relevant material'
+PASS Ch chapter 1.pdf p.12/14: 'You only need keyword search'
+PASS Ch chapter 3.pdf p.1/14: 'Similarity search returns the closest chunks by meaning'
+PASS Ch chapter 3.pdf p.1/14: 'page footer stuffed with navigation links'
+PASS Ch chapter 12.pdf p.2/14: 'The meaning is there. The words are not.'
+PASS Ch chapter 12.pdf p.3/14: 'The index tells you exactly which pages mention those words.'
+PASS Ch chapter 12.pdf p.5/14: 'It works purely with words'
+PASS Ch chapter 12.pdf p.6/14: 'One index understands meaning. The other counts words.'
+PASS Ch chapter 13.pdf p.1/13: 'None of them names Paris.'
+PASS Ch chapter 13.pdf p.2/13: 'embedding similarity is a rough proxy for relevance'
+PASS Ch chapter 13.pdf p.5/13: 'makes it into the candidate set'
+PASS Ch chapter 13.pdf p.9/13: 'pairs labeled as relevant or not relevant'
+PASS Ch chapter 22.pdf p.4/19: 'precision at five is 0.6'
+PASS Ch chapter 22.pdf p.5/19: 'recall is 0.3'
+PASS Ch chapter 22.pdf p.5/19: 'accounts for ranking order'
+PASS Ch chapter 22.pdf p.6/19: 'what was retrieved but not how well it was ranked'
+PASS Ch chapter 22.pdf p.7/19: 'even when both lists contain the same documents'
+PASS Ch chapter 22.pdf p.12/19: 'paired with the expected relevant documents and a reference answer'
+PASS Ch Appendix.pdf p.19/23: 'Precision at K'
+PASS Ch Appendix.pdf p.20/23: 'Recall at K'
+PASS Ch Appendix.pdf p.20/23: 'Relevancy Grading'
+PASS Ch Appendix.pdf p.22/23: 'returning the K chunks with the highest similarity scores'
+PASS book: 'inverted' never appears ([])
+PASS book: 'qrel' never appears ([])
+PASS book: 'relevance judg' only at ['Appendix.pdf p.9/23']
+
+ALL PASS

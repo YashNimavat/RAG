@@ -1,0 +1,54 @@
+--- cell 2 [given] import hashlib, json, math, re
+    33 pages, 72,593 characters; PyMuPDF 1.26.7; snapshot ea07572562ac
+    len(PARA) = 785, FACT_SPAN = (558, 629)
+--- cell 4 [prediction/T1] my_spans_10_3 = [(0, 10), (7, 17), (14, 23)]
+--- cell 5 [CHECK] # CHECK Task 1 (do not edit)
+    Task 1 recorded. Task 2's CHECK compares it with your code.
+--- cell 7 [learner/T2] from dataclasses import dataclass
+--- cell 8 [CHECK] # CHECK Task 2 (do not edit)
+    Task 2 OK. Your Task 1 hand trace was right (confidence 3): log it.
+    doc_text: 72,593 characters -> 91 windows at 1000/200 (07 D.2 also gets 91 on PyPDFLoader's 72,523 characters).
+--- cell 10 [learner/T3] def check_chunks(text, chunks, size):
+--- cell 11 [CHECK] # CHECK Task 3 (do not edit)
+    Task 3 OK. check_chunks passes good chunks and catches all 7 broken lists.
+--- cell 13 [prediction/T4p] my_fact_chunks_o0 = []
+--- cell 15 [learner/T4] def chunks_containing(chunks, start, end):
+--- cell 16 [CHECK] # CHECK Task 4 (do not edit)
+    Task 4 OK.  overlap 0: predicted [], actual [];  overlap 60: predicted [2], actual [2]
+    largest always-whole F at 1000/200: predicted 201, actual 201 (= O + 1, 07 D.3)
+    P(contained) for the 71-character fact at 300/60: formula 0.958; interior 1000/200/500: 0.626, whole text L = 20,000: 0.6320
+--- cell 18 [prediction/T5p] my_w_spans = [(0, 8), (4, 12), (8, 15), (12, 22)]
+--- cell 20 [learner/T5] def split_spans(text, start, end, separators, size):
+--- cell 21 [CHECK] # CHECK Task 5 (do not edit)
+    Task 5 OK. W: predicted [(0, 8), (4, 12), (8, 15), (12, 22)], actual [(0, 8), (4, 12), (8, 15), (12, 22)]
+    PARA 300/60: [(0, 294), (238, 534), (478, 773), (714, 785)]; the fact is in chunk [2]
+    doc_text 1000/200, one piece of text: 92 chunks (07 H.1 also 92 on PyPDFLoader text)
+--- cell 23 [prediction/T6p] my_guess_per_page_count = 97
+--- cell 25 [learner/T6] def chunk_pages(pages, size, overlap):
+--- cell 26 [CHECK] # CHECK Task 6 (do not edit)
+    Task 6 OK. per-page 1000/200: predicted 97, actual 97 (one piece of text: 92)
+    lengths min / median / max: 393 / 935 / 1000  (07 D.8 got 97 chunks, 391 / 933 / 999, on PyPDFLoader text)
+--- cell 28 [learner/T7] def params_hash(params):
+--- cell 29 [CHECK] # CHECK Task 7 (do not edit)
+    Task 7 OK. 97 records; params_hash 1ca9c5a3b548; first id climate:ea07572562ac:1ca9c5a3b548:00000; last id climate:ea07572562ac:1ca9c5a3b548:00096
+--- cell 31 [prediction/T8p] my_guess_all_200 = False
+--- cell 33 [learner/T8] def achieved_overlaps(records):
+--- cell 34 [CHECK] # CHECK Task 8 (do not edit)
+    Task 8 OK. 64 same-page pairs; real overlap min / median / max = 109 / 177.0 / 200; exactly 200: 2
+    You predicted 'always 200' = False; actual = False.
+    First four: [182, 142, 199, 179]. 07 H.2 shows 180, 140, 197, 177: LangChain on PyPDFLoader text, which also strips spaces at chunk edges.
+--- cell 36 [CHECK] # CHECK save (do not edit)
+    wrote C2_out\ea07572562ac_1ca9c5a3b548\chunks.jsonl: 97 lines, 122,774 bytes, sha256 d4108b8936093394c6eb50d4c22e8d4013d9a048fb38d5769281af4aadb3011b
+    Matches the v0 reference file.
+
+=== CHECK summary
+PASS cell 5: # CHECK Task 1 (do not edit)
+PASS cell 8: # CHECK Task 2 (do not edit)
+PASS cell 11: # CHECK Task 3 (do not edit)
+PASS cell 16: # CHECK Task 4 (do not edit)
+PASS cell 21: # CHECK Task 5 (do not edit)
+PASS cell 26: # CHECK Task 6 (do not edit)
+PASS cell 29: # CHECK Task 7 (do not edit)
+PASS cell 34: # CHECK Task 8 (do not edit)
+PASS cell 36: # CHECK save (do not edit)
+9/9 CHECK cells passed

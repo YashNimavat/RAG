@@ -1,0 +1,13 @@
+python 3.12.8 | pandas 3.0.6
+csv sha256 f2147696392a019d768a11ff68bab8e8dec77b5af2c93e8e5d5e399bd7bba8b9
+rows=100 columns=['Index', 'Customer Id', 'First Name', 'Last Name', 'Company', 'City', 'Country', 'Phone 1', 'Phone 2', 'Email', 'Subscription Date', 'Website']
+df[df.Country == 'Chile'] -> 1 row(s); == 'chile' -> 0; casefold == 'chile' -> 1
+distinct Country values: 85; values containing 'chil' (any case): ['Chile']
+the matching row (Index, Country): [[1, 'Chile']]
+PASS 100 data rows  [100]
+PASS 'Chile' matches exactly 1 row  [1]
+PASS 'chile' matches 0 rows  [0]
+PASS a case-folded filter finds the 1 row  [1]
+PASS 'Chile' is in the distinct-values list
+
+RESULT: 5 PASS, 0 FAIL

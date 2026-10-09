@@ -1,0 +1,171 @@
+
+=== S1 environment, extraction, snapshot
+python 3.12.8 | {'pymupdf': '1.26.7', 'tiktoken': '0.14.0', 'numpy': '2.5.3', 'sentence-transformers': '6.1.0', 'groq': '1.7.0'}
+pdf sha256 1d58a0fac2435c2ce4129ff84906b93118d731e4a004e7a26f8ab8f749a92669
+pages=33 chars=72593 encoding=o200k_harmony
+doc_text_sha256=5106772efa77003b0d6c79bc1a429b8dacf244d9556f412bae1c4fe6bc7368c6  snapshot_id=ea07572562ac  (06 §5.3 states ea07572562ac: True)
+
+=== S2 chunks: the v0 per-page recursive 1000/200 spans (07 H.1/H.3 via the acceptance suite's loader, as C2 lab and C4); ids per 06 §2.3
+params_hash=1ca9c5a3b548 (course id 1ca9c5a3b548: True) chunks=97 example chunk_id=climate:ea07572562ac:1ca9c5a3b548:00000
+chunks.jsonl sha256 equals the C2 lab / C4 file d4108b89…: True
+
+=== S3 local MiniLM retrieval (fallback model, exact cosine, ties by chunk_id; = C4's v0 stand-in; DEMO FIXTURE, not evaluation)
+D-001 top-4 (seq, page, doc_start, doc_end, score): [(1, 1, 767, 1763, 0.4929), (0, 1, 0, 949, 0.4706), (7, 3, 5582, 6541, 0.4692), (8, 3, 6341, 7019, 0.4608)] | gold pages [3] | a gold PAGE in top-4 (page level only): True
+D-002 top-4 (seq, page, doc_start, doc_end, score): [(69, 24, 51414, 52396, 0.4606), (68, 23, 50756, 51413, 0.4513), (27, 10, 20555, 21506, 0.4386), (17, 6, 13112, 13935, 0.4385)] | gold pages [10] | a gold PAGE in top-4 (page level only): True
+D-003 top-4 (seq, page, doc_start, doc_end, score): [(68, 23, 50756, 51413, 0.6497), (27, 10, 20555, 21506, 0.632), (17, 6, 13112, 13935, 0.5351), (69, 24, 51414, 52396, 0.4791)] | gold pages [23] | a gold PAGE in top-4 (page level only): True
+D-004 top-4 (seq, page, doc_start, doc_end, score): [(67, 23, 49953, 50926, 0.421), (23, 8, 17650, 18299, 0.4035), (68, 23, 50756, 51413, 0.3604), (27, 10, 20555, 21506, 0.2136)] | gold pages [8, 23] | a gold PAGE in top-4 (page level only): True
+D-005 top-4 (seq, page, doc_start, doc_end, score): [(3, 2, 2425, 3357, 0.4272), (4, 2, 3158, 4067, 0.3581), (2, 1, 1621, 2424, 0.3521), (5, 2, 3888, 4835, 0.3192)] | gold pages [2] | a gold PAGE in top-4 (page level only): True
+D-006 top-4 (seq, page, doc_start, doc_end, score): [(21, 8, 16074, 17060, 0.5331), (64, 22, 47810, 48731, 0.5004), (14, 5, 10845, 11545, 0.4772), (13, 5, 10086, 11018, 0.4696)] | gold pages [8] | a gold PAGE in top-4 (page level only): True
+D-007 top-4 (seq, page, doc_start, doc_end, score): [(69, 24, 51414, 52396, 0.7094), (27, 10, 20555, 21506, 0.6105), (85, 29, 63419, 64381, 0.5954), (84, 29, 62565, 63528, 0.5902)] | gold pages [10, 29] | a gold PAGE in top-4 (page level only): True
+D-008 top-4 (seq, page, doc_start, doc_end, score): [(28, 10, 21315, 22262, 0.2598), (69, 24, 51414, 52396, 0.2535), (58, 20, 43256, 44253, 0.2478), (12, 5, 9290, 10243, 0.2041)] | gold pages [24] | a gold PAGE in top-4 (page level only): True
+D-009 top-4 (seq, page, doc_start, doc_end, score): [(85, 29, 63419, 64381, 0.3099), (27, 10, 20555, 21506, 0.2798), (69, 24, 51414, 52396, 0.2738), (84, 29, 62565, 63528, 0.2571)] | gold pages [] | a gold PAGE in top-4 (page level only): False
+D-010 top-4 (seq, page, doc_start, doc_end, score): [(2, 1, 1621, 2424, 0.5196), (1, 1, 767, 1763, 0.434), (5, 2, 3888, 4835, 0.4061), (85, 29, 63419, 64381, 0.4043)] | gold pages [] | a gold PAGE in top-4 (page level only): False
+D-002 top-8 (rank, page, score): [(1, 24, 0.4606), (2, 23, 0.4513), (3, 10, 0.4386), (4, 6, 0.4385), (5, 29, 0.3387), (6, 29, 0.3114), (7, 24, 0.2567), (8, 12, 0.2448)]
+D-002 gold quote inside which top-4 ranks: [3]
+D-002 top-4 chunks containing '2015': [3]
+D-009 top-4 pages: [29, 10, 24, 29] | same-page pairs: [29]
+'IPCC' on pages: [1] | '1988' anywhere: False | p.1 in D-009 top-4: False
+
+=== S4 template file, messages, token counts (o200k_harmony)
+system part == P7 SYSTEM_V0: True | user pattern: 'Sources:\n{sources}\n\nQuestion: {question}\nAnswer:'
+template sha256: 739752dc0db63269dc9b0e9ac4fbb1d8ef1bf2add991d28f67595d8749351a4f | one extra space changes it: True
+P7 lab chunks through the template file: system+user tokens = 958 (P7 S4: 958)
+D-002 k=4: system=107 user=695 system+user=802 context_tokens(sources)=680 chars=4022
+D-002 k=4 block tokens incl. header: [199, 133, 196, 152]
+D-002 headers in prompt order: ['[1] (climate:24)', '[2] (climate:23)', '[3] (climate:10)', '[4] (climate:6)']
+shuffled input order: [3, 1, 2, 4] | same messages after rank sort: True
+messages sha256 (D-002, k=4): 820b2956c6ec6f35366243d06e0f3645a41094ea9daa15e0d04a945a79c1f0dd
+D-002 k=8: system+user=1442; ratio k8/k4 = 1.80; context_tokens k8=1320
+D-009 k=4: system+user = 858
+10 seed prompts (k=4) system+user tokens: {'D-001': 865, 'D-002': 802, 'D-003': 820, 'D-004': 771, 'D-005': 894, 'D-006': 804, 'D-007': 873, 'D-008': 858, 'D-009': 858, 'D-010': 882} | min 771 max 894 sum 8427
+
+=== S5 call_llm against FakeGroq (no network)
+kwargs sent: {'model': 'fake-model-x', 'temperature': 0.0, 'max_tokens': 512, 'reasoning_effort': 'low'} | messages passed through: True
+result: {'text': 'The Paris Agreement was adopted in 2015 [climate:10].', 'finish_reason': 'stop', 'input_tokens': 1000, 'output_tokens': 60, 'reasoning_tokens': 40, 'params': {'model': 'fake-model-x', 'temperature': 0.0, 'max_tokens': 512, 'reasoning_effort': 'low'}}
+empty string: AssertionError -> empty answer (finish_reason=stop): the output budget may have gone to reasoning; raise max_tokens or lower reasoning_effort
+None: AssertionError -> empty answer (finish_reason=stop): the output budget may have gone to reasoning; raise max_tokens or lower reasoning_effort
+whitespace: AssertionError -> empty answer (finish_reason=stop): the output budget may have gone to reasoning; raise max_tokens or lower reasoning_effort
+empty at length cap: AssertionError -> empty answer (finish_reason=length): the output budget may have gone to reasoning; raise max_tokens or lower reasoning_effort
+usage without completion_tokens_details -> reasoning_tokens: None
+cut-off reply 'The Paris Agreement was adopted in 2015 [climate:10]. It aims to limit warming to' with finish_reason='length': call_llm passes; answer flags = ['length_stop', 'uncited_sentence']; citation_subset_ok = True; failing_qids([record]) = []
+make_answer(T01 text, finish_reason='stop') flags: []
+make_answer(T01 text, finish_reason='length') flags: ['length_stop']
+make_answer(T01 text, finish_reason='tool_calls') flags: ['unexpected_finish_reason']
+make_answer(T01 text, finish_reason=None) flags: ['unexpected_finish_reason']
+
+=== S6 hand-written toy answers (NOT model outputs) through parse/check/make_answer; D-002 top-4 unless noted
+T01 good                     cits=[('[climate:10]', ['00027'])] invalid=[] malformed=[] unused=['00069', '00068', '00017'] uncited=0 abstained=False subset_ok=True flags=[]
+T02 fabricated page          cits=[('[climate:12]', [])] invalid=['[climate:12]'] malformed=[] unused=['00069', '00068', '00027', '00017'] uncited=0 abstained=False subset_ok=False flags=['cited_not_retrieved']
+T03 wrong doc id             cits=[('[paris:10]', [])] invalid=['[paris:10]'] malformed=[] unused=['00069', '00068', '00027', '00017'] uncited=0 abstained=False subset_ok=False flags=['cited_not_retrieved']
+T04 case differs             cits=[('[Climate:10]', [])] invalid=['[Climate:10]'] malformed=[] unused=['00069', '00068', '00027', '00017'] uncited=0 abstained=False subset_ok=False flags=['cited_not_retrieved']
+T05 no citation              cits=[] invalid=[] malformed=[] unused=['00069', '00068', '00027', '00017'] uncited=1 abstained=False subset_ok=True flags=['no_citation']
+T06 one of two uncited       cits=[('[climate:10]', ['00027'])] invalid=[] malformed=[] unused=['00069', '00068', '00017'] uncited=1 abstained=False subset_ok=True flags=['uncited_sentence']
+T07 block number             cits=[] invalid=[] malformed=['[4]'] unused=['00069', '00068', '00027', '00017'] uncited=1 abstained=False subset_ok=False flags=['malformed_tag', 'no_citation']
+T08 space inside             cits=[] invalid=[] malformed=['[climate: 10]'] unused=['00069', '00068', '00027', '00017'] uncited=1 abstained=False subset_ok=False flags=['malformed_tag', 'no_citation']
+T09 header copy ()           cits=[] invalid=[] malformed=['(climate:10)'] unused=['00069', '00068', '00027', '00017'] uncited=1 abstained=False subset_ok=False flags=['malformed_tag', 'no_citation']
+T10 two in one []            cits=[] invalid=[] malformed=['[climate:10, climate:24]'] unused=['00069', '00068', '00027', '00017'] uncited=1 abstained=False subset_ok=False flags=['malformed_tag', 'no_citation']
+T11 after full stop          cits=[('[climate:10]', ['00027'])] invalid=[] malformed=[] unused=['00069', '00068', '00017'] uncited=0 abstained=False subset_ok=True flags=[]
+T12 two valid tags           cits=[('[climate:10]', ['00027']), ('[climate:24]', ['00069'])] invalid=[] malformed=[] unused=['00068', '00017'] uncited=0 abstained=False subset_ok=True flags=[]
+T13 exact abstention         cits=[] invalid=[] malformed=[] unused=['00069', '00068', '00027', '00017'] uncited=0 abstained=True subset_ok=True flags=[]
+T14 abstention variant       cits=[] invalid=[] malformed=[] unused=['00069', '00068', '00027', '00017'] uncited=0 abstained=True subset_ok=True flags=[]
+T15 paraphrased refusal      cits=[] invalid=[] malformed=[] unused=['00069', '00068', '00027', '00017'] uncited=1 abstained=False subset_ok=True flags=['no_citation']
+T16 abstention + tag         cits=[('[climate:23]', ['00068'])] invalid=[] malformed=[] unused=['00069', '00027', '00017'] uncited=0 abstained=False subset_ok=True flags=['abstention_inside_answer']
+T17 empty                    cits=[] invalid=[] malformed=[] unused=['00069', '00068', '00027', '00017'] uncited=0 abstained=False subset_ok=True flags=['empty']
+T18 D-009 abstention         cits=[] invalid=[] malformed=[] unused=['00085', '00027', '00069', '00084'] uncited=0 abstained=True subset_ok=True flags=[]
+T19 D-009 memory+valid tag   cits=[('[climate:29]', ['00085', '00084'])] invalid=[] malformed=[] unused=['00027', '00069'] uncited=0 abstained=False subset_ok=True flags=[]
+split_sentences(T11): ['The Paris Agreement was adopted in 2015 [climate:10].'] | split_sentences('About 1.2 degrees. Yes.'): ['About 1.2 degrees.', 'Yes.']
+
+=== S7 diagnosis scenarios (lab Task 7): kind of failure and which v0 check catches it
+a: generation subset_check       | D-002, gold p.10 retrieved (rank 3); answer T02 cites [climate:12]
+b: none       nothing_to_catch   | D-002, gold p.10 retrieved; answer T01 cites only p.10; p.24, p.23, p.6 unused
+c: generation not_caught_in_v0   | D-009 (unanswerable); answer T19 '1988 [climate:29]', p.29 was retrieved
+d: retrieval  retrieval_metric   | gold page not in top-4; answer is the exact abstention sentence
+e: generation not_caught_in_v0   | D-002, gold p.10 retrieved; answer 'adopted in 2016 [climate:23]'
+f: both       no_citation_flag   | gold page not in top-4; answer correct, no citation
+e: answer check: [] True
+
+=== S8 CR-08: k doubles; max_tokens halves
+T01 with k=4: unused 3 of 4; with k=8: unused 7 of 8
+prompt tokens k=4 -> k=8: 802 -> 1442 (x1.80)
+TOY window 8192: input budget with max_tokens=512, margin 128 = 7552
+TOY window 8192: input budget with max_tokens=256, margin 128 = 7808
+10-query run, upper bound on billed output tokens at max_tokens=512: 5120 | local input tokens (sum, before provider template overhead): 8427
+
+=== S9 answer record (C5 output, consumed by C6's trace); FakeGroq reply = hand-written T01; latency rounded
+{
+ "qid": "D-002",
+ "question": "In what year was the Paris Agreement adopted?",
+ "context": {
+  "chunk_ids": [
+   "climate:ea07572562ac:1ca9c5a3b548:00069",
+   "climate:ea07572562ac:1ca9c5a3b548:00068",
+   "climate:ea07572562ac:1ca9c5a3b548:00027",
+   "climate:ea07572562ac:1ca9c5a3b548:00017"
+  ],
+  "context_tokens": 680,
+  "tokenizer": "o200k_harmony",
+  "truncated_chunks": 0
+ },
+ "prompt": {
+  "template_version": "answer_v1",
+  "template_sha256": "739752dc0db63269dc9b0e9ac4fbb1d8ef1bf2add991d28f67595d8749351a4f",
+  "sha256": "820b2956c6ec6f35366243d06e0f3645a41094ea9daa15e0d04a945a79c1f0dd",
+  "local_tokens": 802,
+  "input_tokens": 1000
+ },
+ "llm": {
+  "provider": "groq",
+  "model_id": "openai/gpt-oss-20b",
+  "temperature": 0.0,
+  "max_tokens": 512,
+  "reasoning_effort": "low",
+  "finish_reason": "stop",
+  "cache_hit": false
+ },
+ "answer": {
+  "text": "The Paris Agreement was adopted in 2015 [climate:10].",
+  "abstained": false,
+  "citations": [
+   {
+    "marker": "[climate:10]",
+    "doc_id": "climate",
+    "page": 10,
+    "resolved_chunk_ids": [
+     "climate:ea07572562ac:1ca9c5a3b548:00027"
+    ]
+   }
+  ],
+  "invalid_citations": [],
+  "malformed_markers": [],
+  "unused_chunk_ids": [
+   "climate:ea07572562ac:1ca9c5a3b548:00069",
+   "climate:ea07572562ac:1ca9c5a3b548:00068",
+   "climate:ea07572562ac:1ca9c5a3b548:00017"
+  ],
+  "uncited_sentences": 0,
+  "citation_subset_ok": true,
+  "flags": [],
+  "output_tokens": 60,
+  "reasoning_tokens": 40
+ },
+ "latency_ms": {
+  "llm": 0.0
+ },
+ "errors": []
+}
+failing_qids on toy records T01,T02,T05(+error),T07,T13,T12: ['T02', 'T05', 'T07']
+
+=== S10 lab fingerprints (_fp = first 16 hex of sha256(json.dumps(x, sort_keys=True)))
+task1 messages D-002 k=4     820b2956c6ec6f35
+task1 tokens k=4             477f4b2cdd3fe2b9
+task1 template sha           1dd899a0d65f877a
+task3 parse T10              48e8934be17570b4
+task4 check D-009 T19        d198d0a723892dc6
+task5 answers T01..T19       3133756f8e11d25f
+task7 kinds                  694ce518d388e59b
+task7 caught_by              f59019086a14da25
+task8 tokens k=8             8fd238119777a31e
+task8 unused k=8             7902699be42c8a8e
+lab fixture: SNAPSHOT_ID ea07572562ac PARAMS_HASH 1ca9c5a3b548
+lab fixture TOP4 (all 10 seeds): {"D-001": [[1, 1, 767, 1763, 0.4929], [0, 1, 0, 949, 0.4706], [7, 3, 5582, 6541, 0.4692], [8, 3, 6341, 7019, 0.4608]], "D-002": [[69, 24, 51414, 52396, 0.4606], [68, 23, 50756, 51413, 0.4513], [27, 10, 20555, 21506, 0.4386], [17, 6, 13112, 13935, 0.4385]], "D-003": [[68, 23, 50756, 51413, 0.6497], [27, 10, 20555, 21506, 0.632], [17, 6, 13112, 13935, 0.5351], [69, 24, 51414, 52396, 0.4791]], "D-004": [[67, 23, 49953, 50926, 0.421], [23, 8, 17650, 18299, 0.4035], [68, 23, 50756, 51413, 0.3604], [27, 10, 20555, 21506, 0.2136]], "D-005": [[3, 2, 2425, 3357, 0.4272], [4, 2, 3158, 4067, 0.3581], [2, 1, 1621, 2424, 0.3521], [5, 2, 3888, 4835, 0.3192]], "D-006": [[21, 8, 16074, 17060, 0.5331], [64, 22, 47810, 48731, 0.5004], [14, 5, 10845, 11545, 0.4772], [13, 5, 10086, 11018, 0.4696]], "D-007": [[69, 24, 51414, 52396, 0.7094], [27, 10, 20555, 21506, 0.6105], [85, 29, 63419, 64381, 0.5954], [84, 29, 62565, 63528, 0.5902]], "D-008": [[28, 10, 21315, 22262, 0.2598], [69, 24, 51414, 52396, 0.2535], [58, 20, 43256, 44253, 0.2478], [12, 5, 9290, 10243, 0.2041]], "D-009": [[85, 29, 63419, 64381, 0.3099], [27, 10, 20555, 21506, 0.2798], [69, 24, 51414, 52396, 0.2738], [84, 29, 62565, 63528, 0.2571]], "D-010": [[2, 1, 1621, 2424, 0.5196], [1, 1, 767, 1763, 0.434], [5, 2, 3888, 4835, 0.4061], [85, 29, 63419, 64381, 0.4043]]}
+lab fixture D-002 ranks 5-8: [(84, 29, 62565, 63528, 0.3387), (85, 29, 63419, 64381, 0.3114), (70, 24, 52277, 53236, 0.2567), (35, 12, 26295, 26966, 0.2448)]

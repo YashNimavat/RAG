@@ -1,0 +1,36 @@
+
+=== E1 environment and data
+python 3.12.8 | {'pymupdf': '1.26.7', 'numpy': '2.5.3', 'sentence-transformers': '6.1.0', 'torch': '2.14.1'}
+pdf sha256 1d58a0fac2435c2ce4129ff84906b93118d731e4a004e7a26f8ab8f749a92669
+pages=33 chars=72593 chunks=91 (size 1000, overlap 200, plain slices)
+index: (91, 384) float32; duplicated index: (455, 384) (5 copies of each chunk)
+queries: 33 page-head texts, 2 demo questions (D-002, D-008), 200 random unit vectors (seed 0)
+
+=== E2 consistency with out_p5_measure.txt S5 (query D-002, k = 4)
+argpartition(-s5, 3)[:4] rows -> [428, 337, 64, 246]  (P5 S5 logged [428, 337, 64, 246])
+top_k(s5, 4) rows -> [64, 155, 246, 337]  (P5 S5 logged [64, 155, 246, 337])
+variant A rows -> [428, 337, 64, 246]
+variant B rows -> [64, 246, 337, 428]
+reference rows -> [64, 155, 246, 337]
+
+=== E3 duplicated index: queries where each variant's ordered ids differ from the reference
+k= 3 page-head n= 33: tie across the cut  33/33 | differ: A  33/33 (set  31/33), B  31/33, C top_k   0/33 | A same rows on a second call  33/33
+k= 3 demo      n=  2: tie across the cut   2/2 | differ: A   2/2 (set   2/2), B   2/2, C top_k   0/2 | A same rows on a second call   2/2
+k= 3 random    n=200: tie across the cut 200/200 | differ: A 196/200 (set 195/200), B 195/200, C top_k   0/200 | A same rows on a second call 200/200
+k= 4 page-head n= 33: tie across the cut  33/33 | differ: A  33/33 (set  26/33), B  26/33, C top_k   0/33 | A same rows on a second call  33/33
+k= 4 demo      n=  2: tie across the cut   2/2 | differ: A   2/2 (set   1/2), B   1/2, C top_k   0/2 | A same rows on a second call   2/2
+k= 4 random    n=200: tie across the cut 197/200 | differ: A 197/200 (set 155/200), B 155/200, C top_k   0/200 | A same rows on a second call 200/200
+k=10 page-head n= 33: tie across the cut   0/33 | differ: A  33/33 (set   0/33), B   0/33, C top_k   0/33 | A same rows on a second call  33/33
+k=10 demo      n=  2: tie across the cut   0/2 | differ: A   2/2 (set   0/2), B   0/2, C top_k   0/2 | A same rows on a second call   2/2
+k=10 random    n=200: tie across the cut   0/200 | differ: A 200/200 (set   0/200), B   0/200, C top_k   0/200 | A same rows on a second call 200/200
+
+=== E4 control: the same variants on the plain index (no duplicates)
+k= 3 page-head n= 33: differ A 0/33, B 0/33
+k= 3 demo      n=  2: differ A 0/2, B 0/2
+k= 3 random    n=200: differ A 0/200, B 0/200
+k= 4 page-head n= 33: differ A 0/33, B 0/33
+k= 4 demo      n=  2: differ A 0/2, B 0/2
+k= 4 random    n=200: differ A 0/200, B 0/200
+k=10 page-head n= 33: differ A 0/33, B 0/33
+k=10 demo      n=  2: differ A 0/2, B 0/2
+k=10 random    n=200: differ A 0/200, B 0/200

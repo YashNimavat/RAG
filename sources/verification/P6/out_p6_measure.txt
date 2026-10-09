@@ -1,0 +1,111 @@
+
+=== S1 environment
+python 3.12.8 | numpy 2.5.3 | scikit-learn 1.9.1
+
+=== S2 toy data (made up)
+Q1: 'Which gases trap heat in the atmosphere?'
+   qrels {'c3': 2, 'c7': 1, 'c9': 1}  (all other chunks grade 0)
+   ranking ['c5', 'c3', 'c8', 'c7', 'c1', 'c2', 'c9', 'c4', 'c6', 'c10']
+   relevant at ranks: {'c3': 2, 'c7': 4, 'c9': 7}
+Q2: 'What does the Paris Agreement aim for?'
+   qrels {'c4': 2}  (all other chunks grade 0)
+   ranking ['c4', 'c2', 'c1', 'c3', 'c5', 'c6', 'c7', 'c8', 'c9', 'c10']
+   relevant at ranks: {'c4': 1}
+Q3: 'How does cutting forests add CO2 to the air?'
+   qrels {'c6': 2, 'c10': 1}  (all other chunks grade 0)
+   ranking ['c1', 'c8', 'c2', 'c10', 'c6', 'c3', 'c4', 'c5', 'c7', 'c9']
+   relevant at ranks: {'c6': 5, 'c10': 4}
+
+=== S3 discount table 1/log2(i+1) and gains
+rank  1: log2(i+1)=1.0000  1/log2(i+1)=1.0000
+rank  2: log2(i+1)=1.5850  1/log2(i+1)=0.6309
+rank  3: log2(i+1)=2.0000  1/log2(i+1)=0.5000
+rank  4: log2(i+1)=2.3219  1/log2(i+1)=0.4307
+rank  5: log2(i+1)=2.5850  1/log2(i+1)=0.3869
+rank  6: log2(i+1)=2.8074  1/log2(i+1)=0.3562
+rank  7: log2(i+1)=3.0000  1/log2(i+1)=0.3333
+rank  8: log2(i+1)=3.1699  1/log2(i+1)=0.3155
+rank  9: log2(i+1)=3.3219  1/log2(i+1)=0.3010
+rank 10: log2(i+1)=3.4594  1/log2(i+1)=0.2891
+gain exp (2^g-1): g=0 -> 0, g=1 -> 1, g=2 -> 3 | gain linear: g=0 -> 0, g=1 -> 1, g=2 -> 2
+
+=== S4 Q1 at k = 5, every metric (the Part F worked example)
+P@5=0.4000 R@5=0.6667 Hit@5=1 RR@5=0.5000 nDCG@5=0.5625
+Hit@1=0  P@1=0.0000
+DCG@5 (exp)=2.3235  IDCG@5 (exp)=4.1309
+  DCG terms: c3 at rank 2 -> 3/log2(3)=1.8928; c7 at rank 4 -> 1/log2(5)=0.4307
+  IDCG terms: grades [2,1,1] -> 3/1 + 1/log2(3) + 1/log2(4) = 3 + 0.6309 + 0.5000
+Q2 P@5=0.2000 R@5=1.0000 Hit@5=1 RR@5=1.0000 nDCG@5=1.0000
+Q3 P@5=0.4000 R@5=1.0000 Hit@5=1 RR@5=0.2500 nDCG@5=0.4382
+Q3 DCG@5=1.5912 IDCG@5=3.6309
+
+=== S5 k sweep for Q1 (the CR-08 'k doubles' probe uses k = 5 -> 10)
+k= 1 P@1=0.0000 R@1=0.0000 Hit@1=0 RR@1=0.0000 nDCG@1=0.0000
+k= 2 P@2=0.5000 R@2=0.3333 Hit@2=1 RR@2=0.5000 nDCG@2=0.5213
+k= 3 P@3=0.3333 R@3=0.3333 Hit@3=1 RR@3=0.5000 nDCG@3=0.4582
+k= 4 P@4=0.5000 R@4=0.6667 Hit@4=1 RR@4=0.5000 nDCG@4=0.5625
+k= 5 P@5=0.4000 R@5=0.6667 Hit@5=1 RR@5=0.5000 nDCG@5=0.5625
+k= 6 P@6=0.3333 R@6=0.6667 Hit@6=1 RR@6=0.5000 nDCG@6=0.5625
+k= 7 P@7=0.4286 R@7=1.0000 Hit@7=1 RR@7=0.5000 nDCG@7=0.6431
+k= 8 P@8=0.3750 R@8=1.0000 Hit@8=1 RR@8=0.5000 nDCG@8=0.6431
+k= 9 P@9=0.3333 R@9=1.0000 Hit@9=1 RR@9=0.5000 nDCG@9=0.6431
+k=10 P@10=0.3000 R@10=1.0000 Hit@10=1 RR@10=0.5000 nDCG@10=0.6431
+nDCG@k can fall as k grows (QF: a relevant at rank 1, b relevant but never retrieved):
+  QF k=1: DCG=1.0000 IDCG=1.0000 nDCG=1.0000
+  QF k=2: DCG=1.0000 IDCG=1.6309 nDCG=0.6131
+  QF k=5: DCG=1.0000 IDCG=1.6309 nDCG=0.6131
+
+=== S6 MRR over Q1-Q3 (cut-off k = 10) and the '1 / mean rank' trap
+RR per query: {'Q1': '0.5000', 'Q2': '1.0000', 'Q3': '0.2500'}
+MRR@10 = 0.5833
+first relevant ranks: {'Q1': 2, 'Q2': 1, 'Q3': 4} | mean rank = 2.3333 | 1/mean rank = 0.4286 (NOT the MRR)
+MRR@3 = 0.5000 (Q3's first hit at rank 4 is cut off)
+
+=== S7 nDCG conventions and a cross-check
+Q1 nDCG@5 exp gain = 0.5625 | linear gain = 0.5406
+Q1 DCG@5 linear = 1.6925 IDCG@5 linear = 3.1309
+Q1 binary (all grades -> 1): exp = 0.4982 linear = 0.4982
+Q1 ranking: nDCG@5 correct = 0.5625 | IDCG from retrieved only (bug) = 0.6399
+J2 ranking (only c7 found): nDCG@5 correct = 0.2421 | IDCG from retrieved only (bug) = 1.0000
+sklearn.metrics.ndcg_score cross-check (k <= length of the ranking): 66 comparisons over 10 rankings, k in (1,3,5,10), 2 gains; max |ours - sklearn| = 1.11e-16
+k > length of the ranking: sklearn ranks every doc it is given, so relevant docs that were never retrieved still earn gain after the list. Not comparable (a convention difference):
+    QD_A k=10 exp: ours 0.4693 sklearn 0.7929
+    QD_A k=10 linear: ours 0.4693 sklearn 0.7929
+    QF k=10 exp: ours 0.6131 sklearn 0.8316
+    QF k=10 linear: ours 0.6131 sklearn 0.8316
+    J2 k=10 exp: ours 0.2421 sklearn 0.5815
+    J2 k=10 linear: ours 0.3194 sklearn 0.6534
+  Q1 k=5: sklearn linear = 0.5406, sklearn on 2^g-1 gains = 0.5625
+
+=== S8 MRR and nDCG disagree
+QD_A ['d1', 'n1', 'n2', 'n3', 'n4']: P@5=0.2000 R@5=0.3333 Hit@5=1 RR@5=1.0000 nDCG@5=0.4693
+QD_B ['n1', 'd1', 'd2', 'd3', 'n2']: P@5=0.6000 R@5=1.0000 Hit@5=1 RR@5=0.5000 nDCG@5=0.7328
+QD IDCG@5 = 2.1309; QD_A DCG@5 = 1.0000; QD_B DCG@5 = 1.5616
+QG_A ['p', 'h', 'n1', 'n2', 'n3']: RR@5=1.0000 nDCG@5 exp=0.7967 linear=0.8597 DCG@5 exp=2.8928
+QG_B ['h', 'p', 'n1', 'n2', 'n3']: RR@5=1.0000 nDCG@5 exp=1.0000 linear=1.0000 DCG@5 exp=3.6309
+QG IDCG@5 exp = 3.6309
+Same set, different order (QS, Part B):
+  good ['a', 'b', 'x', 'y', 'z']: P@5=0.4000 R@5=1.0000 Hit@5=1 RR@5=1.0000 nDCG@5=1.0000
+  poor ['x', 'y', 'a', 'z', 'b']: P@5=0.4000 R@5=1.0000 Hit@5=1 RR@5=0.3333 nDCG@5=0.5438
+
+=== S9 replicate the 06 §7.3 toy table
+Hit@1/3/5 = [0, 1, 1]
+P@3 / P@5 = 0.3333 / 0.4000
+CE@3 / CE@5 (chunk-level preview) = 0 / 1
+RR = 0.5000
+nDCG@5 binary = 0.6509 | DCG 1.0616 IDCG 1.6309
+nDCG@5 graded (exp) = 0.6399 | DCG 2.3235 IDCG 3.6309
+context precision@5 (AP over retrieved relevant) = 0.5000
+MRR of RR (0.5, 1, 0) = 0.5000
+
+=== S10 CE@k preview vs Recall@k (QE: overlapping chunks e2, e3 both hold G1; e6 holds G2)
+k=2: Hit=1 P=1.0000 Recall=0.6667 CE=0
+k=3: Hit=1 P=0.6667 Recall=0.6667 CE=0
+k=4: Hit=1 P=0.7500 Recall=1.0000 CE=1
+
+=== S11 book-wording checks: MAP denominators; Precision@k on a short list (J1)
+Q1 AP@5: standard (/ all relevant) = 0.3333 | / relevant retrieved = 0.5000
+Q1 AP@10: standard (/ all relevant) = 0.4762 | / relevant retrieved = 0.4762
+QD_A AP@5: standard = 0.3333 | / relevant retrieved = 1.0000
+J1 ['c3', 'c5', 'c7'] (3 returned), Q1 qrels: P@5 (divide by k) = 0.4000 | divide by 3 returned = 0.6667
+Book examples: 3/5 = 0.6 | 3/10 = 0.3 | 1/1 = 1.0 | 1/3 = 0.3333

@@ -1,0 +1,80 @@
+
+=== S1 environment and extraction
+python 3.12.8 | {'pymupdf': '1.26.7', 'tiktoken': '0.14.0', 'transformers': '5.19.0', 'sentence-transformers': '6.1.0', 'torch': '2.14.1', 'numpy': '2.5.3', 'tokenizers': '0.23.2'}
+pdf sha256 1d58a0fac2435c2ce4129ff84906b93118d731e4a004e7a26f8ab8f749a92669
+pages=33 chars=72593 page1_chars=2424 pymupdf.VersionBind=1.26.7
+
+=== S2 tokenizer identities
+cl100k_base    n_vocab=100277
+o200k_base     n_vocab=200019
+o200k_harmony  n_vocab=201088
+gpt2           n_vocab=50257
+MiniLM WordPiece vocab=30522 do_lower_case=True class=BertTokenizer
+tiktoken.encoding_for_model('gpt-3.5-turbo') -> cl100k_base
+tiktoken.encoding_for_model('gpt-4o-mini') -> o200k_base
+tiktoken.encoding_for_model('gpt-oss-20b') -> o200k_harmony
+tiktoken.encoding_for_model('gpt2') -> gpt2
+
+=== S3 chars per token on samples (WordPiece counts exclude [CLS]/[SEP])
+sample                    chars | cl100k   c/t |  o200k   c/t | WordPc   c/t [UNK] | chars/4 err vs cl100k
+whole document            72593 |  13026  5.57 |  12840  5.65 |  11694  6.21     0 |   18148          +39%
+page 1                     2424 |    490  4.95 |    486  4.99 |    441  5.50     0 |     606          +24%
+window 0 [0,1000)          1000 |    201  4.98 |    198  5.05 |    186  5.38     0 |     250          +24%
+window 1 [800,1800)        1000 |    196  5.10 |    193  5.18 |    171  5.85     0 |     250          +28%
+window 2 [1600,2600)       1000 |    217  4.61 |    218  4.59 |    198  5.05     0 |     250          +15%
+code snippet (toy)          142 |     45  3.16 |     45  3.16 |     61  2.33     0 |      36          -21%
+numbers line (toy)           94 |     63  1.49 |     63  1.49 |     62  1.52     0 |      24          -63%
+German sentence              74 |     22  3.36 |     16  4.62 |     25  2.96     0 |      18          -16%
+Hindi sentence               61 |     62  0.98 |     18  3.39 |     36  1.69     0 |      15          -75%
+whole document gpt2=14375 c/t=5.05; o200k_harmony=12840 (o200k_base=12840)
+whole document whitespace words=9255 chars/word=7.84
+
+=== S4 distribution over ALL plain 1000/200 character windows of the document
+windows=91 (last one is 593 chars)
+cl100k_base  chars/token min/median/max = 4.61/5.52/6.37; tokens per full 1000-char window min/median/max = 157/180.5/217
+o200k_base   chars/token min/median/max = 4.59/5.62/6.49; tokens per full 1000-char window min/median/max = 154/177.5/218
+WordPiece    chars/token min/median/max = 5.05/6.21/7.04; tokens per full 1000-char window min/median/max = 142/160.5/198
+
+=== S5 see the cut (one short sentence)
+sentence chars=67
+cl100k_base  12 tokens: ['Anth', 'rop', 'ogenic', ' emissions', ' are', ' accelerating', ' deg', 'lac', 'iation', ' in', ' Greenland', '.']
+o200k_base   13 tokens: ['Anth', 'rop', 'ogenic', ' emissions', ' are', ' accelerating', ' de', 'gl', 'aci', 'ation', ' in', ' Greenland', '.']
+WordPiece    16 ids incl. [CLS]/[SEP]: ['[CLS]', 'ant', '##hr', '##op', '##ogenic', 'emissions', 'are', 'accelerating', 'de', '##gl', '##ac', '##iation', 'in', 'greenland', '.', '[SEP]']
+same word, other case (cl100k): 'Greenland'->2 ' Greenland'->1 'GREENLAND'->2
+
+=== S6 MiniLM max_seq_length and silent truncation
+MiniLM cache snapshot: 1110a243fdf4706b3f48f1d95db1a4f5529b4d41
+model.max_seq_length=256 tokenizer.model_max_length=256 dim=384 modules=['Transformer', 'Pooling', 'Normalize']
+passage start offset=4836 chars=2187 WordPiece content tokens=400; prefix254 chars=1372; prefix200 chars=1122; swapped-tail tokens=502
+model.preprocess(long) input_ids shape=(1, 256) first=101([CLS]=101) last=102([SEP]=102)
+encode() of the 400- and 502-token texts on a fresh model: exceptions=0 python-warnings=0 log-records=0 []
+cos(long400, prefix254)      = 1.000000  max|diff| = 0.00e+00
+cos(long400, swapped tail)   = 1.000000  max|diff| = 0.00e+00
+cos(long400, prefix200)      = 0.988245
+cos(long400, its own tail)   = 0.350182   (tail = tokens 255..400, never seen by the vector)
+tail starts: ' risks to human health, agriculture, \nand infrastructure. Cities are particularly vulnerab'
+
+=== S7 temperature: softmax(logits / T)  [TOY logits, not from any model]
+T=0.25 p=[0.879, 0.119, 0.002, 0.0] entropy=0.55 bits
+T=0.5  p=[0.704, 0.259, 0.035, 0.002] entropy=1.05 bits
+T=1.0  p=[0.532, 0.323, 0.119, 0.026] entropy=1.51 bits
+T=2.0  p=[0.404, 0.315, 0.191, 0.09] entropy=1.82 bits
+T=4.0  p=[0.329, 0.29, 0.226, 0.155] entropy=1.95 bits
+T->0 (greedy): argmax = YES with probability 1
+T=0.5: 1000 seeded draws (rng seed 0) -> counts {'YES': 681, 'NO': 282, 'PARTIAL': 36, 'MAYBE': 1}
+T=1.0: 1000 seeded draws (rng seed 0) -> counts {'YES': 557, 'NO': 301, 'PARTIAL': 117, 'MAYBE': 25}
+T=2.0: 1000 seeded draws (rng seed 0) -> counts {'YES': 409, 'NO': 322, 'PARTIAL': 184, 'MAYBE': 85}
+
+=== S8 contextual_chunk_headers cell 11: 4000 tokens described as ~3000 words
+first 4000 cl100k tokens of the document = 21085 chars = 2869 whitespace words
+
+=== S9 token counts for one v0 prompt (06 §3.3 template, 4 sample windows; NOT a retrieval result)
+o200k_harmony  system=107 question=20 sources(4 x 1000 chars + headers)=842 user message=869 system+user=976 (chars=4659)
+cl100k_base    system=106 question=20 sources(4 x 1000 chars + headers)=845 user message=872 system+user=978 (chars=4659)
+O2 smoke message: chars=33 o200k_harmony tokens=7; reply 'smoke test ok' tokens=4
+
+=== S10 cost formula with placeholder prices (X, Y are NOT real prices)
+100 queries: input tokens = 100 x 976 = 97,600; output tokens <= 100 x 256 = 25,600 -> cost <= (97,600 * X + 25,600 * Y) / 1,000,000
+100 queries: input tokens = 100 x 976 = 97,600; output tokens <= 100 x 512 = 51,200 -> cost <= (97,600 * X + 51,200 * Y) / 1,000,000
+doubling k from 4 to 8 (similar chunks) adds about 842 tokens per query: 976 -> ~1818 (x1.86 input tokens, not x2: the instructions and question do not double)
+DONE

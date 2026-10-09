@@ -1,0 +1,15 @@
+=== I1 06 YAML separators vs 07 code
+06 sec. 2.4 separators: ["\n\n", "\n", " ", ""]
+07 H.1 DEFAULT_SEPARATORS: ("\n\n", "\n", " ")
+text with a 1,200-char whitespace-free run, separators incl. '': TIMEOUT: the child did not finish within 20 s
+why: in _split_spans, text.find('', i, end) returns i, so the piece is (i, i) and i never advances
+
+=== I2 chunker name
+06 sec. 2.4 chunking.name: recursive_char
+07 H.3 REGISTRY keys: ['fixed', 'recursive']
+
+=== I3 a 20-char toy text where no piece reaches the '' level
+default separators: [(0, 10), (10, 20)] | with '': [(0, 10), (10, 20)] | same: True
+
+=== I4 Corpus D per page with the 06 separator list
+child exit 0 | spans identical: True | chunks: 97 | longest whitespace-free run: 18 chars
