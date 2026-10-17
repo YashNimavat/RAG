@@ -66,4 +66,44 @@ PASS book: pattern 'lowercas|lower-cas' occurs nowhere ([])
 PASS book: pattern 'saturat' occurs nowhere ([])
 PASS book: pattern 'stop ?words?' occurs nowhere ([])
 
+--- added 2026-10-17
+PASS chapter 12.pdf p.2/14: 'Keyword search misses'
+PASS chapter 12.pdf p.3/14: 'The index catches what the chef'
+PASS chapter 12.pdf p.9/14: 'serving technical queries with'
+PASS chapter 12.pdf p.12/14: 'all keyword lookups (BM25 alone'
+PASS chapter 12.pdf p.12/14: '(vector search alone suffices)'
+PASS chapter 12.pdf p.12/14: 'Overkill when'
+PASS Appendix.pdf p.9/23: 'exact method names via keyword search'
+PASS AI-Engineer-Interview-Questions HEAD e080df282aaf14c128ade55c177a20c38d82df1d
+PASS AIQ LICENSE: MIT, Copyright (c) 2026 Om
+PASS AIQ 04 Q12: ### 12. What does BM25 actually compute? Walk me through the formula's
+PASS AIQ 04 Q12: BM25 pushes TF through `tf / (tf + k1 * (...))`
+PASS AIQ 04 Q12: 20 to 21 barely registers
+PASS AIQ 04 Q12: `k1` (typically ~1.2 to 2.0)
+PASS AIQ 04 Q12: **Length normalization** divides by document length
+PASS AIQ 04 Q12: `b=0` disables it, `b=1` normalizes fully.
+PASS AIQ 04 Q12: BM25 is purely lexical
+PASS AIQ 04 Q12: depends heavily on the analyzer
+PASS AIQ 04 Q12 gives no idf formula and no (k1 + 1) factor (P3-R-05 corrections 1 and 3)
+PASS AE Ch2 'Retrieval Fundamentals': keyword search recommended first (short phrase; paraphrased in P3 B.3)
+PASS R1_FACTS: | `IPCC` | seq 1, page 1 | 3 | 1 | none | 1 | 1 |
+PASS R1_FACTS: | `What does BECCS stand for?` | seq 88, page 30 | 4 | 1 | none | 1 | 1 |
+PASS R1_FACTS: | `methane CH4` | seq 2, page 1 | 4 | 1 | 2 | 1 | 1 |
+PASS R1_FACTS: | `Kyoto Protocol 1997` | seq 69, page 24 | 1 | 1 | 1 | 1 | 1 |
+PASS R1_FACTS: | `limit warming to 1.5 degrees` | seq 27, 68 | 4 | 1 | 1 | 2 | 1 |
+PASS R1_FACTS: | dense | 8/8 | 8/8 | 0.708 | 3, 3, 1, 1, 1, 1, 2, 2
+PASS R1_FACTS: | bm25 (`tok_norm`) | 8/8 | 8/8 | 0.938 | 1, 1, 1, 1, 1, 2, 1, 1 |
+PASS R1_FACTS: | bm25 (`split()`) | 8/8 | 8/8 | 0.875 | 1, 2, 1, 1, 1, 2, 1, 1 |
+PASS R1_FACTS: BM25 seq 64 13.6205, seq 21 9.2298
+PASS R1_FACTS: (`panels` idf 4.1641)
+PASS R1_FACTS: D-009 dense 0.3099 → 1.0, BM25 6.9559 → 1.0; D-010 dense 0.5196 → 1.0, BM25 13.2
+PASS R1_FACTS: avgdl 111.23, vocab 1,769
+PASS R1_FACTS: repo-style (with epsilon) returns [89, 50, 48, 49, 81]
+PASS R1_FACTS: NaN 97/97
+PASS R1_FACTS: **P3 H.2 answer 4**: "vector-only" holds for aligned arrays
+PASS 06 §6.2: the exact-term category
+PASS 06 §4.2 v2.0 card: three arms (dense, BM25 alone, hybrid)
+PASS 02 P3 card: book pages Ch12 p.5–6/14 only (P3 G.3 item 5)
+PASS 04 P3 row: cells 14-15 only; book p.5–6/14 only (P3 G.3 items 1-2)
+
 ALL PASS

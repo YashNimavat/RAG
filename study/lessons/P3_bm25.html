@@ -1,0 +1,1274 @@
+<!doctype html>
+<html lang="en" data-style="notebook" data-theme="light">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Keyword Search Lesson</title>
+<meta name="description" content="P3: how keyword search (TF-IDF and BM25) scores chunks. Short and full depths, five themes, light and dark. Works offline.">
+<script>
+/* Apply saved choices before the page paints (no flash). Shared by every lesson. */
+(function () {
+  var d = document.documentElement, get = function (k) { try { return localStorage.getItem(k); } catch (e) { return null; } };
+  var p = new URLSearchParams(location.search), styles = ["reader", "hyper", "notebook", "textbook", "editor", "minimal", "catalogue"];
+  var dark = !!(window.matchMedia && window.matchMedia("(prefers-color-scheme: dark)").matches);
+  var pick = function (key, allowed, stored, dflt) { var v = p.get(key); return allowed.indexOf(v) >= 0 ? v : (allowed.indexOf(stored) >= 0 ? stored : dflt); };
+  d.dataset.style = pick("style", styles, get("lesson-style"), "notebook");
+  d.dataset.theme = pick("color", ["light", "dark"], get("lesson-color"), dark ? "dark" : "light");
+  d.dataset.toc = pick("toc", ["shown", "hidden"], get("lesson-toc"), "shown");
+  d.dataset.side = pick("side", ["left", "right"], get("lesson-side"), "left");
+})();
+</script>
+<style>
+/* ---------- themes: five styles, each light and dark. Colours and fonts live in variables. ---------- */
+:root{--content-w:800px;--f-mono:"Cascadia Mono",Consolas,ui-monospace,monospace;--radius:8px;--body-size:16.5px;--h-weight:650;--sec-pad:40px}
+:root[data-style="notebook"]{--f-head:"Segoe UI Variable Display","Segoe UI",system-ui,sans-serif;--f-body:"Segoe UI Variable Text","Segoe UI",system-ui,sans-serif;
+  --paper:#FFFFFF;--card:#F6F8FA;--side:#F6F8FA;--ink:#1F2328;--muted:#59636E;--line:#D1D9E0;--rule:#BFC8D2;--code:#F2F4F7;
+  --accent:#0969DA;--accent-soft:#DDF4FF;--dense:#8250DF;--dense-soft:#F4EDFF;--good:#1A7F37;--good-soft:#DAFBE1;--warn:#9A6700;--warn-soft:#FFF8C5;--bad:#CF222E;--bad-soft:#FFEBE9}
+:root[data-style="notebook"][data-theme="dark"]{--paper:#0D1117;--card:#161B22;--side:#010409;--ink:#E6EDF3;--muted:#9198A1;--line:#30363D;--rule:#3D444D;--code:#1B2129;
+  --accent:#4493F8;--accent-soft:#0C2D6B;--dense:#AB7DF8;--dense-soft:#2A1F45;--good:#3FB950;--good-soft:#12261E;--warn:#D29922;--warn-soft:#2E2410;--bad:#F85149;--bad-soft:#3A1418}
+:root[data-style="textbook"]{--f-head:Cambria,"Palatino Linotype",Georgia,serif;--f-body:Cambria,"Palatino Linotype",Georgia,serif;--body-size:17.5px;--radius:3px;--h-weight:700;
+  --paper:#FFFDF8;--card:#FFFFFF;--side:#FAF6EE;--ink:#1B1B1B;--muted:#5E5A55;--line:#E4DED3;--rule:#CFC6B6;--code:#F5F1E8;
+  --accent:#9E1B32;--accent-soft:#F7E4E7;--dense:#1F4E79;--dense-soft:#E3ECF5;--good:#2E6B3A;--good-soft:#E3F0E5;--warn:#8A5A00;--warn-soft:#FAF0D7;--bad:#9E1B32;--bad-soft:#F7E4E7}
+:root[data-style="textbook"][data-theme="dark"]{--paper:#1A1917;--card:#22201D;--side:#1F1D1A;--ink:#ECE7DE;--muted:#A8A196;--line:#3A3631;--rule:#4E4840;--code:#2A2723;
+  --accent:#E26D7E;--accent-soft:#3D1C22;--dense:#8DB4DE;--dense-soft:#1B2A3A;--good:#86C48F;--good-soft:#1C2D1F;--warn:#E0B65A;--warn-soft:#33290F;--bad:#E26D7E;--bad-soft:#3D1C22}
+:root[data-style="editor"]{--f-head:"Cascadia Code","Cascadia Mono",Consolas,monospace;--f-body:"Segoe UI",system-ui,sans-serif;--radius:4px;--h-weight:600;
+  --paper:#FFFFFF;--card:#F3F3F3;--side:#F3F3F3;--ink:#1E1E1E;--muted:#6E6E6E;--line:#E0E0E0;--rule:#CCCCCC;--code:#F8F8F8;
+  --accent:#005FB8;--accent-soft:#E5F0FB;--dense:#AF00DB;--dense-soft:#F7E6FB;--good:#008000;--good-soft:#E8F5E8;--warn:#795E26;--warn-soft:#FBF4E2;--bad:#A31515;--bad-soft:#FBE9E9}
+:root[data-style="editor"][data-theme="dark"]{--paper:#1E1E1E;--card:#252526;--side:#181818;--ink:#D4D4D4;--muted:#9D9D9D;--line:#3C3C3C;--rule:#4A4A4A;--code:#1A1A1A;
+  --accent:#569CD6;--accent-soft:#1B2B3A;--dense:#C586C0;--dense-soft:#33243A;--good:#6A9955;--good-soft:#1F2A1C;--warn:#DCDCAA;--warn-soft:#2E2E22;--bad:#CE9178;--bad-soft:#3A2820}
+:root[data-style="minimal"]{--f-head:"Segoe UI Variable Display","Segoe UI",system-ui,sans-serif;--f-body:Charter,"Bitstream Charter",Georgia,serif;--body-size:19px;--radius:12px;--h-weight:700;--sec-pad:60px;
+  --paper:#FFFFFF;--card:#FAFAFA;--side:#FFFFFF;--ink:#242424;--muted:#6B6B6B;--line:#EEEEEE;--rule:#E2E2E2;--code:#F6F6F6;
+  --accent:#1A8917;--accent-soft:#E9F5E9;--dense:#2F6FDB;--dense-soft:#EAF1FD;--good:#1A8917;--good-soft:#E9F5E9;--warn:#B26B00;--warn-soft:#FFF4E0;--bad:#C94A4A;--bad-soft:#FBECEC}
+:root[data-style="minimal"][data-theme="dark"]{--paper:#191919;--card:#202020;--side:#191919;--ink:#E6E6E6;--muted:#9B9B9B;--line:#2E2E2E;--rule:#3A3A3A;--code:#252525;
+  --accent:#5DBB63;--accent-soft:#1E2E20;--dense:#6EA8FE;--dense-soft:#1C2638;--good:#5DBB63;--good-soft:#1E2E20;--warn:#E3A33B;--warn-soft:#33270F;--bad:#E57373;--bad-soft:#3A1F1F}
+:root[data-style="catalogue"]{--f-head:"Iowan Old Style","Palatino Linotype","Book Antiqua",Palatino,Georgia,serif;--f-body:"Segoe UI",system-ui,sans-serif;--h-weight:700;
+  --paper:#FBF7EF;--card:#FFFDF8;--side:#F6F0E3;--ink:#231F18;--muted:#6B6457;--line:#E2D9C7;--rule:#C9BBA0;--code:#F1EBDD;
+  --accent:#B0431A;--accent-soft:#F6E2D6;--dense:#355C8C;--dense-soft:#E0E8F2;--good:#2D7549;--good-soft:#DDEFE2;--warn:#8F6200;--warn-soft:#F6EBCB;--bad:#B0431A;--bad-soft:#F6E2D6}
+:root[data-style="catalogue"][data-theme="dark"]{--paper:#16140F;--card:#1F1C16;--side:#1B1813;--ink:#EDE6D6;--muted:#A99F8D;--line:#38322A;--rule:#5A5040;--code:#29251D;
+  --accent:#F08B5E;--accent-soft:#3B2318;--dense:#8DB2E3;--dense-soft:#1C2939;--good:#7BCB97;--good-soft:#18301F;--warn:#E3B653;--warn-soft:#352A12;--bad:#F08B5E;--bad-soft:#3B2318}
+/* Reader themes: research-based reading typography (bundled OFL fonts, so they work offline).
+   Lines about 68 characters, line height about 1.7, off-white paper; dark mode on dark grey with off-white text (no pure black or white). */
+@font-face{font-family:"Literata";src:url("fonts/literata-latin-opsz-normal.woff2") format("woff2");font-weight:200 900;font-style:normal;font-display:swap}
+@font-face{font-family:"Literata";src:url("fonts/literata-latin-opsz-italic.woff2") format("woff2");font-weight:200 900;font-style:italic;font-display:swap}
+@font-face{font-family:"Atkinson Hyperlegible";src:url("fonts/atkinson-hyperlegible-latin-400-normal.woff2") format("woff2");font-weight:400;font-style:normal;font-display:swap}
+@font-face{font-family:"Atkinson Hyperlegible";src:url("fonts/atkinson-hyperlegible-latin-400-italic.woff2") format("woff2");font-weight:400;font-style:italic;font-display:swap}
+@font-face{font-family:"Atkinson Hyperlegible";src:url("fonts/atkinson-hyperlegible-latin-700-normal.woff2") format("woff2");font-weight:700;font-style:normal;font-display:swap}
+@font-face{font-family:"Atkinson Hyperlegible";src:url("fonts/atkinson-hyperlegible-latin-700-italic.woff2") format("woff2");font-weight:700;font-style:italic;font-display:swap}
+:root[data-style="reader"],:root[data-style="hyper"]{
+  --paper:#FBF8F1;--card:#F5F1E8;--side:#F3EEE3;--ink:#2A2723;--muted:#6B655B;--line:#E4DCCD;--rule:#CFC4AF;--code:#F0EADF;
+  --accent:#8C3A12;--accent-soft:#F5E3D6;--dense:#24588A;--dense-soft:#E2ECF6;--good:#2F6B3B;--good-soft:#E3F0E3;--warn:#8A5B00;--warn-soft:#F8EDCF;--bad:#A1271B;--bad-soft:#F8E1DD;
+  --radius:6px;--sec-pad:56px}
+:root[data-style="reader"][data-theme="dark"],:root[data-style="hyper"][data-theme="dark"]{
+  --paper:#1C1B19;--card:#24221F;--side:#191816;--ink:#DEDAD2;--muted:#A39E93;--line:#36332E;--rule:#4A463F;--code:#2A2825;
+  --accent:#E3A178;--accent-soft:#3A2A20;--dense:#94BCE6;--dense-soft:#1F2B38;--good:#8CC79A;--good-soft:#1F2D22;--warn:#E2BD6A;--warn-soft:#352B14;--bad:#EE8E80;--bad-soft:#3B2420}
+:root[data-style="reader"]{--f-head:"Literata",Cambria,Georgia,serif;--f-body:"Literata",Cambria,Georgia,serif;--body-size:19px;--h-weight:650}
+:root[data-style="hyper"]{--f-head:"Atkinson Hyperlegible","Segoe UI",system-ui,sans-serif;--f-body:"Atkinson Hyperlegible","Segoe UI",system-ui,sans-serif;--body-size:18.5px;--h-weight:700}
+:root[data-theme="dark"]{color-scheme:dark}
+
+/* ---------- base ---------- */
+*{box-sizing:border-box}
+html{scroll-behavior:smooth;scroll-padding-top:72px}
+body{margin:0;background:var(--paper);color:var(--ink);font:var(--body-size)/1.62 var(--f-body)}
+a{color:var(--accent)}
+a:focus-visible,button:focus-visible,input:focus-visible,select:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+h1,h2,h3{font-family:var(--f-head);font-weight:var(--h-weight);line-height:1.2;margin:0;text-wrap:balance}
+h1{font-size:clamp(1.8rem,4.2vw,2.6rem);letter-spacing:-.01em}
+h2{font-size:clamp(1.3rem,2.8vw,1.65rem)}
+h3{font-size:1.06rem}
+p{margin:0}
+code,.mono{font-family:var(--f-mono);font-size:.86em}
+:not(pre)>code{background:var(--code);padding:.08em .35em;border-radius:4px}
+pre{font-family:var(--f-mono);font-size:.84rem;background:var(--code);padding:12px 14px;border-radius:var(--radius);overflow-x:auto;margin:0;line-height:1.5;border:1px solid var(--line)}
+ul,ol{margin:0;padding-left:1.25em}
+li+li{margin-top:4px}
+
+/* ---------- top bar, sidebar, layout ---------- */
+.top{position:sticky;top:0;z-index:30;height:56px;display:flex;align-items:center;gap:10px;padding:0 16px;background:color-mix(in srgb,var(--paper) 92%,transparent);backdrop-filter:blur(8px);border-bottom:1px solid var(--line)}
+.top .t{font-family:var(--f-head);font-weight:var(--h-weight);margin-right:auto;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;min-width:0}
+.menu,.home{display:inline-flex;gap:4px;align-items:center;flex:none}
+.home{text-decoration:none}
+.side .course a{display:grid;grid-template-columns:26px minmax(0,1fr);gap:4px;padding:5px 8px;border-radius:6px;color:var(--ink);text-decoration:none;font-size:.88rem;line-height:1.35}
+.side .course a .n{font-family:var(--f-mono);font-size:.74rem;color:var(--muted)}
+.side .course a:hover{background:color-mix(in srgb,var(--accent) 10%,transparent)}
+.top .btn,.top .seg{flex:none;white-space:nowrap}
+.crumb{display:none;color:var(--muted);font-weight:400;font-family:var(--f-body)}
+html[data-toc="hidden"] .crumb{display:inline}
+.topprog{position:absolute;left:0;bottom:-1px;height:3px;width:0;background:var(--accent);transition:width .15s}
+html:not([data-toc="hidden"]) .topprog{display:none}
+.seg{display:inline-flex;border:1px solid var(--rule);border-radius:999px;overflow:hidden;flex:none}
+.seg button{font:inherit;font-family:var(--f-body);font-size:.88rem;border:0;background:transparent;color:var(--ink);padding:5px 12px;cursor:pointer}
+.seg button[aria-pressed="true"]{background:var(--ink);color:var(--paper)}
+.btn,select.btn{font:inherit;font-family:var(--f-body);font-size:.88rem;border:1px solid var(--rule);background:var(--card);color:var(--ink);border-radius:8px;padding:5px 10px;cursor:pointer}
+.btn:hover{border-color:var(--ink)}
+/* Panel docked to the window edge (like VS Code); the text starts right beside it; spare space goes to the far side only. */
+.shell{--side-w:260px;display:grid;grid-template-columns:var(--side-w) minmax(0,var(--content-w));justify-content:start;column-gap:48px;padding:0 24px 0 0}
+aside.side{position:sticky;top:56px;height:calc(100vh - 56px);overflow:auto;background:var(--side);border-right:1px solid var(--line);padding:20px 12px 24px;font-family:var(--f-body)}
+.side .lab{font-size:.72rem;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);margin:14px 8px 6px}
+.side .head{display:flex;justify-content:space-between;align-items:center;gap:8px;margin:0 8px 8px}
+.side .head .lab{margin:0}
+.side .head button{font:inherit;font-family:var(--f-body);font-size:.74rem;border:1px solid var(--rule);background:var(--paper);color:var(--muted);border-radius:6px;padding:2px 7px;cursor:pointer}
+.side .head button:hover{color:var(--ink);border-color:var(--ink)}
+html[data-side="right"] .shell{grid-template-columns:minmax(0,var(--content-w)) var(--side-w);justify-content:end;padding:0 0 0 24px}
+html[data-side="right"] aside.side{order:2;border-right:0;border-left:1px solid var(--line)}
+html[data-toc="hidden"] .shell{grid-template-columns:minmax(0,var(--content-w));justify-content:center;padding:0 24px}
+html[data-toc="hidden"] aside.side{display:none}
+.prog{margin:0 8px 6px;display:grid;gap:4px;font-size:.8rem;color:var(--muted)}
+.prog .track{height:5px;border-radius:3px;background:var(--line);overflow:hidden}
+.prog .track i{display:block;height:100%;width:0;background:var(--accent);transition:width .15s}
+.side nav a{display:grid;grid-template-columns:26px minmax(0,1fr) auto;gap:4px;align-items:baseline;padding:5px 8px;border-radius:6px;color:var(--ink);text-decoration:none;font-size:.88rem;line-height:1.35}
+.side nav a .n{font-family:var(--f-mono);font-size:.74rem;color:var(--muted)}
+.side nav a:hover{background:color-mix(in srgb,var(--accent) 10%,transparent)}
+.side nav a.on{background:var(--accent-soft);color:var(--accent);font-weight:600}
+.side nav a.on .n{color:var(--accent)}
+.side nav a .fo{font-size:.66rem;font-family:var(--f-mono);color:var(--dense);border:1px solid var(--dense);border-radius:4px;padding:0 4px}
+html[data-depth="short"] .side nav a.fullonly{opacity:.55}
+main{padding:8px 0 90px;min-width:0;width:100%}
+@media (max-width:980px){
+  .shell,html[data-side="right"] .shell,html[data-toc="hidden"] .shell{grid-template-columns:minmax(0,1fr);padding:0}
+  aside.side,html[data-toc="hidden"] aside.side,html[data-side="right"] aside.side{display:block;position:fixed;left:0;top:56px;bottom:0;height:auto;width:min(300px,86vw);z-index:25;transform:translateX(-104%);transition:transform .2s;box-shadow:0 10px 30px rgba(0,0,0,.25);background:var(--side);padding:16px 12px 24px}
+  html[data-side="right"] aside.side{left:auto;right:0;transform:translateX(104%)}
+  body.side-open aside.side{transform:none!important}
+  .topprog{display:block!important}
+  .crumb{display:inline}
+  main{padding:8px 16px 90px}
+}
+@media (max-width:620px){.top .t{display:none}.top .seg{margin-left:auto}.top select.btn{max-width:118px}}
+@media (max-width:480px){.top{gap:6px;padding:0 10px}.top .lbl{display:none}.top select.btn{max-width:100px}.seg button{padding:5px 10px}}
+.totop{position:fixed;right:20px;bottom:20px;width:46px;height:46px;border-radius:50%;border:1px solid var(--rule);background:var(--ink);color:var(--paper);font-size:1.3rem;line-height:1;cursor:pointer;box-shadow:0 4px 14px rgba(0,0,0,.2);opacity:0;pointer-events:none;transform:translateY(8px);transition:opacity .2s,transform .2s;z-index:20}
+.totop.show{opacity:1;pointer-events:auto;transform:none}
+
+/* ---------- content blocks ---------- */
+header.hero{padding:28px 0 4px;display:grid;gap:10px}
+.eyebrow{font-family:var(--f-mono);font-size:.72rem;letter-spacing:.08em;text-transform:uppercase;color:var(--muted)}
+.sub{color:var(--muted);font-size:1.05rem}
+section.s{padding-top:var(--sec-pad);display:grid;gap:14px}
+section.s>.num{font-family:var(--f-mono);font-size:.74rem;letter-spacing:.08em;color:var(--accent)}
+.lede{font-size:1.1rem}
+.badge{font-size:.72rem;font-family:var(--f-mono);padding:1px 7px;border-radius:999px;border:1px solid var(--rule);color:var(--muted);background:var(--card);white-space:nowrap;vertical-align:1px}
+.badge.m{border-color:var(--good);color:var(--good)}
+.badge.t{border-color:var(--warn);color:var(--warn)}
+.badge.f{border-color:var(--dense);color:var(--dense)}
+.card{background:var(--card);border:1px solid var(--line);border-radius:var(--radius);padding:14px 16px}
+.call{padding:10px 14px;border-radius:0 var(--radius) var(--radius) 0;border-left:4px solid}
+.call.proj{border-color:var(--good);background:var(--good-soft)}
+.call.wrong{border-color:var(--bad);background:var(--bad-soft)}
+.call.wrong>b:first-child{color:var(--bad)}
+.call.note{border-color:var(--warn);background:var(--warn-soft)}
+.full{border:1px dashed var(--dense);border-radius:var(--radius);padding:14px 16px;display:grid;gap:12px;background:color-mix(in srgb,var(--dense-soft) 50%,transparent)}
+.full>.tag{font-family:var(--f-mono);font-size:.7rem;letter-spacing:.08em;text-transform:uppercase;color:var(--dense)}
+html[data-depth="short"] .full{display:none}
+.two{display:grid;gap:12px}
+@media (min-width:760px){.two{grid-template-columns:1fr 1fr}}
+.three{display:grid;gap:10px}
+@media (min-width:760px){.three{grid-template-columns:repeat(3,1fr)}}
+table{border-collapse:collapse;width:100%;font-size:.92rem;font-family:var(--f-body)}
+th,td{text-align:left;padding:7px 9px;border-bottom:1px solid var(--line);vertical-align:top}
+th{font-size:.78rem;color:var(--muted);font-weight:600}
+td.n,th.n{text-align:right;font-variant-numeric:tabular-nums;font-family:var(--f-mono);font-size:.84rem}
+.tw{overflow-x:auto}
+caption,figcaption{caption-side:bottom;text-align:left;color:var(--muted);font-size:.84rem;padding-top:6px;font-family:var(--f-body)}
+figure{margin:0;display:grid;gap:8px}
+.hit{color:var(--good);font-weight:700}
+.miss{color:var(--bad);font-weight:700}
+.formula{font-family:var(--f-mono);font-size:.92rem;background:var(--code);padding:12px 14px;border-radius:var(--radius);overflow-x:auto;line-height:1.75;border:1px solid var(--line)}
+.formula .w{color:var(--accent);font-weight:700}
+.formula .c{color:var(--muted)}
+
+/* at a glance */
+.glance{display:grid;gap:10px;grid-template-columns:repeat(auto-fill,minmax(240px,1fr))}
+.g{background:var(--card);border:1px solid var(--line);border-radius:var(--radius);padding:10px 12px;display:grid;gap:5px;align-content:start}
+.g h3{font-size:.95rem;display:flex;justify-content:space-between;gap:8px;align-items:baseline}
+.g h3 a{font-family:var(--f-mono);font-size:.72rem;font-weight:400;text-decoration:none}
+.g .fx{font-family:var(--f-mono);font-size:.8rem;background:var(--code);border:1px solid var(--line);padding:5px 8px;border-radius:6px;white-space:normal;overflow-wrap:anywhere;line-height:1.45}
+.g p{font-size:.88rem}
+.g .ex{font-size:.8rem;color:var(--muted)}
+.key{font-size:.86rem;color:var(--muted)}
+.key code{color:var(--ink)}
+
+/* rank cards, index explorer */
+.ranks{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.rank{border-radius:var(--radius);padding:14px;border:1px solid var(--line);background:var(--card);display:grid;gap:4px}
+.rank .big{font-family:var(--f-head);font-size:2.5rem;line-height:1;font-weight:700}
+.rank.d .big{color:var(--dense)}
+.rank.k .big{color:var(--accent)}
+.idx-docs{display:grid;gap:6px}
+.doc{font-family:var(--f-mono);font-size:.8rem;padding:6px 10px;border:1px solid var(--line);border-radius:8px;background:var(--paper);display:flex;gap:10px;align-items:baseline}
+.doc .id{font-weight:700;min-width:2.2em}
+.doc .tok{padding:0 2px;border-radius:3px}
+.doc .tok.on{background:var(--accent-soft);color:var(--accent);font-weight:700}
+.doc.cand{border-color:var(--accent)}
+.chips{display:flex;flex-wrap:wrap;gap:6px}
+.chip{font:inherit;font-family:var(--f-mono);font-size:.82rem;border:1px solid var(--rule);background:var(--paper);color:var(--ink);border-radius:999px;padding:3px 10px;cursor:pointer}
+.chip[aria-pressed="true"]{background:var(--accent);border-color:var(--accent);color:var(--paper)}
+.cards{display:grid;gap:8px;grid-template-columns:repeat(auto-fill,minmax(190px,1fr))}
+.icard{background:var(--paper);border:1px solid var(--rule);border-radius:4px;padding:8px 10px 10px;position:relative}
+.icard::before{content:"";position:absolute;left:0;right:0;top:28px;border-top:1px solid var(--accent);opacity:.55}
+.icard h4{margin:0 0 10px;font-family:var(--f-mono);font-size:.92rem}
+.icard p{font-size:.82rem;font-family:var(--f-mono)}
+.icard .meta{color:var(--muted);font-family:var(--f-body);font-size:.78rem;margin-top:4px}
+
+/* controls and charts */
+.ctl{display:grid;grid-template-columns:160px minmax(0,1fr) 64px;gap:10px;align-items:center;font-size:.9rem;font-family:var(--f-body)}
+.ctl input[type=range]{width:100%;accent-color:var(--accent)}
+.ctl output{font-family:var(--f-mono);text-align:right}
+@media (max-width:560px){.ctl{grid-template-columns:110px minmax(0,1fr) 54px}}
+svg.chart{width:100%;height:auto;display:block;background:var(--card);border:1px solid var(--line);border-radius:var(--radius)}
+svg .ax{stroke:var(--rule);stroke-width:1}
+svg .grid{stroke:var(--line);stroke-width:1}
+svg text{fill:var(--muted);font-family:"Segoe UI",system-ui,sans-serif;font-size:12px}
+svg .lab{fill:var(--ink);font-size:12.5px}
+svg .s-bm25{stroke:var(--accent);stroke-width:3;fill:none}
+svg .s-tfidf{stroke:var(--muted);stroke-width:2;fill:none;stroke-dasharray:6 5}
+svg .s-raw{stroke:var(--accent);stroke-width:1.5;fill:none;stroke-dasharray:2 4;opacity:.8}
+svg .s-ceil{stroke:var(--warn);stroke-width:1.5;stroke-dasharray:5 4}
+svg .s-ref{stroke:var(--dense);stroke-width:2;fill:none;opacity:.55}
+svg .dot{fill:var(--accent);stroke:var(--card);stroke-width:2}
+svg .dot2{fill:var(--dense);stroke:var(--card);stroke-width:2}
+svg .zero{stroke:var(--ink);stroke-width:1;opacity:.45}
+.readout{font-size:.9rem;background:var(--card);border:1px solid var(--line);border-radius:8px;padding:8px 12px;font-family:var(--f-body)}
+.readout b{font-family:var(--f-mono)}
+.sbars{display:grid;gap:8px}
+.sbar{display:grid;grid-template-columns:130px minmax(0,1fr) 64px;gap:10px;align-items:center;font-size:.88rem;font-family:var(--f-body)}
+.sbar .track{display:flex;height:22px;background:var(--paper);border:1px solid var(--line);border-radius:4px;overflow:hidden}
+.sbar .p1{background:var(--accent)}
+.sbar .p2{background:var(--warn);opacity:.75}
+.sbar .v{font-family:var(--f-mono);text-align:right}
+@media (max-width:560px){.sbar{grid-template-columns:92px minmax(0,1fr) 54px}}
+.legend{display:flex;flex-wrap:wrap;gap:12px;font-size:.82rem;color:var(--muted);font-family:var(--f-body)}
+.legend i{display:inline-block;width:12px;height:12px;border-radius:2px;margin-right:5px;vertical-align:-1px}
+.play{display:grid;gap:10px}
+.play label{display:grid;gap:4px;font-size:.88rem;font-family:var(--f-body)}
+.play input[type=text]{font:inherit;font-family:var(--f-mono);font-size:.86rem;padding:8px 10px;border:1px solid var(--rule);border-radius:8px;background:var(--paper);color:var(--ink);width:100%}
+.toks{display:grid;gap:8px}
+.tokrow{border:1px solid var(--line);border-radius:10px;padding:8px 10px;background:var(--paper);display:grid;gap:6px}
+.tokrow .h{display:flex;flex-wrap:wrap;gap:8px;align-items:baseline;justify-content:space-between;font-family:var(--f-body)}
+.tokrow .h b{font-family:var(--f-mono);font-size:.84rem}
+.tk{display:inline-block;font-family:var(--f-mono);font-size:.78rem;padding:1px 6px;margin:2px 3px 2px 0;border:1px solid var(--line);border-radius:4px;background:var(--card)}
+.tk.sh{border-color:var(--good);background:var(--good-soft);color:var(--good);font-weight:700}
+.verdict{font-size:.86rem;font-weight:600}
+.verdict.yes{color:var(--good)}
+.verdict.no{color:var(--bad)}
+.ov{position:relative;height:84px;border:1px solid var(--line);border-radius:var(--radius);background:var(--card);overflow:hidden}
+.ov .w{position:absolute;height:24px;border-radius:4px;font-size:.76rem;font-family:var(--f-mono);display:flex;align-items:center;justify-content:center;color:var(--ink);background:var(--dense-soft);border:1px solid var(--dense)}
+.ov .w82{top:12px;left:4%;width:56%}
+.ov .w83{top:46px;left:40%;width:56%}
+.ov .pin{position:absolute;top:4px;bottom:4px;left:44.1%;width:3px;background:var(--accent)}
+.ov .pinl{position:absolute;top:2px;left:45.3%;font-size:.74rem;font-family:var(--f-mono);color:var(--accent);font-weight:700}
+.q{display:grid;gap:8px}
+.q fieldset{border:1px solid var(--line);border-radius:var(--radius);padding:10px 14px;background:var(--card);margin:0;display:grid;gap:6px}
+.q legend{font-weight:600;padding:0 4px}
+.q label{display:flex;gap:8px;align-items:flex-start;font-size:.94rem;cursor:pointer}
+.q .fb{font-size:.9rem;padding:6px 10px;border-radius:6px;display:none}
+.q .fb.show{display:block}
+.q .fb.ok{background:var(--good-soft);color:var(--good)}
+.q .fb.no{background:var(--bad-soft);color:var(--bad)}
+.check{display:grid;gap:6px}
+.check label{display:grid;grid-template-columns:22px minmax(0,1fr);gap:8px;align-items:start;padding:8px 10px;border:1px solid var(--line);border-radius:8px;background:var(--card);cursor:pointer;font-size:.92rem}
+.check label:has(input:checked){border-color:var(--good);background:var(--good-soft)}
+.check input{width:17px;height:17px;margin-top:3px;accent-color:var(--good)}
+.check .how{display:block;color:var(--muted);font-size:.84rem;margin-top:2px}
+footer{margin-top:48px;padding:22px 0 0;border-top:1px solid var(--line);color:var(--muted);font-size:.86rem;display:grid;gap:8px}
+
+
+/* the theory in one read: a numbered chain of ideas */
+.chain{list-style:none;counter-reset:idea;margin:0;padding:0;display:grid;gap:0}
+.chain>li{counter-increment:idea;position:relative;padding:0 0 22px 52px;display:grid;gap:7px;margin:0}
+.chain>li::before{content:counter(idea);position:absolute;left:0;top:-2px;width:34px;height:34px;border-radius:50%;display:grid;place-items:center;
+  background:var(--accent-soft);color:var(--accent);border:1px solid var(--accent);font:600 .9rem/1 var(--f-body);font-variant-numeric:lining-nums}
+.chain>li::after{content:"";position:absolute;left:16.5px;top:36px;bottom:4px;width:1px;background:var(--rule)}
+.chain>li:last-child::after{display:none}
+.chain h3{font-size:1.08rem}
+.chain .formula{font-size:.86rem;padding:8px 12px;line-height:1.65}
+.chain .go{justify-self:start;font-size:.86rem;font-family:var(--f-body);text-decoration:none;border:1px solid var(--rule);border-radius:999px;padding:1px 10px;color:var(--accent)}
+.chain .go:hover{border-color:var(--accent)}
+
+/* ---------- small per-theme touches ---------- */
+[data-style="textbook"] section.s>.num{font-family:var(--f-head);font-size:.95rem;letter-spacing:.02em;font-style:italic;text-transform:none}
+[data-style="textbook"] #answer .lede::first-letter{float:left;font-size:3.1em;line-height:.9;padding:5px 8px 0 0;color:var(--accent);font-family:var(--f-head)}
+[data-style="textbook"] .call{border-left-width:2px;font-style:italic}
+[data-style="textbook"] .call b{font-style:normal}
+[data-style="editor"] h2::before{content:"## ";color:var(--muted)}
+[data-style="editor"] h1::before{content:"# ";color:var(--muted)}
+[data-style="editor"] .formula,[data-style="editor"] pre{border-left:3px solid var(--accent)}
+[data-style="minimal"] .card,[data-style="minimal"] .g,[data-style="minimal"] .rank,[data-style="minimal"] svg.chart{border-color:transparent}
+[data-style="minimal"] aside.side{border-right-color:transparent}
+[data-style="minimal"] .call{border-left-width:3px}
+[data-style="catalogue"] .g,[data-style="catalogue"] .card{box-shadow:0 1px 0 var(--line)}
+/* Reader themes: the rich typographic details */
+:is([data-style="reader"],[data-style="hyper"]){--content-w:720px}
+:is([data-style="reader"],[data-style="hyper"]) body{line-height:1.72;font-variant-numeric:lining-nums;text-rendering:optimizeLegibility;-webkit-font-smoothing:antialiased}
+:is([data-style="reader"],[data-style="hyper"]) :is(p,li){text-wrap:pretty;hanging-punctuation:first}
+:is([data-style="reader"],[data-style="hyper"]) section.s{border-top:1px solid var(--line);margin-top:30px}
+:is([data-style="reader"],[data-style="hyper"]) section.s>.num{font-family:var(--f-body);font-variant-caps:all-small-caps;font-size:1rem;letter-spacing:.09em;color:var(--accent)}
+:is([data-style="reader"],[data-style="hyper"]) .eyebrow{font-family:var(--f-body);font-variant-caps:all-small-caps;font-size:.95rem;text-transform:none;letter-spacing:.08em}
+:is([data-style="reader"],[data-style="hyper"]) h2{font-size:clamp(1.5rem,3vw,1.9rem);letter-spacing:-.005em}
+[data-style="reader"] h1{font-weight:720;font-size:clamp(2rem,5vw,3rem);letter-spacing:-.015em}
+:is([data-style="reader"],[data-style="hyper"]) #answer .lede{font-size:1.2em;line-height:1.62}
+[data-style="reader"] #answer .lede::first-letter{float:left;font-size:3.5em;line-height:.84;padding:6px 10px 0 0;color:var(--accent);font-weight:700}
+:is([data-style="reader"],[data-style="hyper"]) .call{border-left-width:3px;border-radius:0 8px 8px 0;padding:12px 16px}
+:is([data-style="reader"],[data-style="hyper"]) .call.proj::before{content:"✦ ";color:var(--good)}
+:is([data-style="reader"],[data-style="hyper"]) a{text-underline-offset:.18em;text-decoration-thickness:1px}
+:is([data-style="reader"],[data-style="hyper"]) ::selection{background:var(--accent-soft)}
+:is([data-style="reader"],[data-style="hyper"]) table{font-variant-numeric:lining-nums tabular-nums}
+:is([data-style="reader"],[data-style="hyper"]) :is(.g,.card,.rank){box-shadow:0 1px 2px rgba(0,0,0,.05)}
+:is([data-style="reader"],[data-style="hyper"]) .side nav a{font-size:.9rem}
+@media print{.top,aside.side,.totop,.ctl,.btn,.play input{display:none!important} html[data-depth] .full{display:grid!important} .shell{display:block} main{padding:0}}
+</style>
+</head>
+<body>
+<div class="top">
+  <a class="btn home" id="home" href="../../RAG_ROUTE_MAP.html" title="Back to all phases"><span aria-hidden="true">⌂</span><span class="lbl">All phases</span></a>
+  <button type="button" class="btn menu" id="menu" aria-expanded="true" aria-controls="side" title="Show or hide the contents (key: T)"><span aria-hidden="true">☰</span><span class="lbl">Contents</span></button>
+  <span class="t">P3 · Keyword search: TF-IDF and BM25<span class="crumb" id="crumb" aria-live="polite"></span></span>
+  <i class="topprog" id="topprog" aria-hidden="true"></i>
+  <div class="seg" role="group" aria-label="Reading depth">
+    <button type="button" data-depth="short" aria-pressed="true">Short</button>
+    <button type="button" data-depth="full" aria-pressed="false">Full</button>
+  </div>
+  <select class="btn" id="style" aria-label="Theme">
+    <option value="reader">Reader · Literata (new)</option>
+    <option value="hyper">Reader · Atkinson Hyperlegible (new)</option>
+    <option value="notebook">Clean notebook</option>
+    <option value="textbook">Textbook</option>
+    <option value="editor">Editor (VS Code)</option>
+    <option value="minimal">Minimal reading</option>
+    <option value="catalogue">Card catalogue (first version)</option>
+  </select>
+  <button type="button" class="btn" id="color" aria-label="Switch light or dark">☾ Dark</button>
+</div>
+
+<div class="shell">
+<aside class="side" id="side" aria-label="Sections">
+  <div class="head"><div class="lab">On this page</div><button type="button" id="sidepos" title="Move the contents to the other side">⇆ Right</button></div>
+  <div class="prog"><span id="where">The answer first</span><span class="track" aria-hidden="true"><i id="bar"></i></span></div>
+  <nav id="toc">
+    <a href="#answer"><span class="n">→</span><span>The answer first</span></a>
+    <a href="#theory"><span class="n">◆</span><span>The theory in one read</span></a>
+    <a href="#glance"><span class="n">★</span><span>Formula sheet</span></a>
+    <div class="lab">Step by step</div>
+    <a href="#problem"><span class="n">1</span><span>Why keyword search exists</span></a>
+    <a href="#bridge"><span class="n">2</span><span>Meaning vs words</span></a>
+    <a href="#index"><span class="n">3</span><span>The index</span></a>
+    <a href="#counts"><span class="n">4</span><span>Three counts: tf, df, idf</span></a>
+    <a href="#tfidf"><span class="n">5</span><span>TF-IDF and repeats</span></a>
+    <a href="#bm25"><span class="n">6</span><span>BM25's two brakes</span></a>
+    <a href="#floor"><span class="n">7</span><span>Common words and the floor</span></a>
+    <a href="#walk"><span class="n">8</span><span>The BECCS question, scored</span></a>
+    <a href="#tokens"><span class="n">9</span><span>The token trap</span></a>
+    <a href="#chunks"><span class="n">10</span><span>Chunking changes counts</span></a>
+    <a href="#score"><span class="n">11</span><span>Score is not an answer</span></a>
+    <a href="#measure"><span class="n">12</span><span>Measuring it</span></a>
+    <a href="#when"><span class="n">13</span><span>When to use it</span></a>
+    <a href="#decisions" class="fullonly"><span class="n">14</span><span>Defaults &amp; checks</span><span class="fo">Full</span></a>
+    <a href="#book" class="fullonly"><span class="n">15</span><span>The book, checked</span><span class="fo">Full</span></a>
+    <div class="lab">Practise and apply</div>
+    <a href="#verify"><span class="n">✓</span><span>Verify it: the notebook</span></a>
+    <a href="#apply"><span class="n">⚙</span><span>Use it on your data</span></a>
+    <a href="#check"><span class="n">?</span><span>Check yourself</span></a>
+  </nav>
+  <div class="lab">Course</div>
+  <div class="course">
+    <a id="toRoute" href="../../RAG_ROUTE_MAP.html"><span class="n">⌂</span><span>All phases (the route)</span></a>
+    <a class="kitonly" data-route="#/c/P3" href="#"><span class="n">≡</span><span>P3 page: steps, lab, quiz</span></a>
+    <a class="kitonly" data-route="#/c/R1" href="#"><span class="n">→</span><span>Next topic: R1 hybrid search</span></a>
+  </div>
+</aside>
+
+<main id="main">
+<header class="hero" id="top">
+  <div class="eyebrow">RAG study kit · Phase 1 · concept P3</div>
+  <h1>Keyword search: TF-IDF and BM25</h1>
+  <p class="sub">How a search engine decides which chunk wins when it only looks at words, and when that is exactly what you need.</p>
+  <p class="key"><span class="badge m">measured</span> from the course's climate PDF (<b>91 windows</b> = 1,000-character slices; <b>97 chunks</b> = the main index) · <span class="badge t">toy</span> six made-up documents · <span class="badge f">formula</span> computed on this page</p>
+</header>
+
+<!-- ======================= ANSWER FIRST ======================= -->
+<section class="s" id="answer" aria-labelledby="h-answer">
+  <div class="num">THE ANSWER FIRST</div>
+  <h2 id="h-answer">BM25 in five sentences</h2>
+  <p class="lede"><b>Keyword search scores a chunk by the words it shares with your question.</b> Rare shared words count most. Repeats count less and less. A match in a short chunk counts a little more. That is BM25. It knows nothing about meaning, and it can only match words that your tokenizer turns into the <i>same token</i> on both sides.</p>
+  <p>Next comes <b>the whole theory in one read</b>, then a <b>formula sheet</b>, then the <b>step-by-step</b> part, which follows one real question through the course's climate PDF: <b>"What does BECCS stand for?"</b> <b>Short</b> gives a complete first understanding. <b>Full</b> adds the exact library behaviour, a calculator, edge cases and the engineering checks; its parts have a dashed border.</p>
+</section>
+
+<!-- ======================= THEORY IN ONE READ ======================= -->
+<section class="s" id="theory" aria-labelledby="h-theory">
+  <div class="num">THE THEORY IN ONE READ</div>
+  <h2 id="h-theory">The whole topic, idea by idea</h2>
+  <p>Eleven ideas, in the order they build on each other. This part is pure theory, with no measurements. Each idea links to its step below, where one real question, charts and numbers show it working.</p>
+  <ol class="chain">
+    <li><h3>What keyword search is for</h3>
+      <p>Keyword search (also called <b>lexical</b> or <b>sparse</b> retrieval) ranks chunks by the words they share with the question. It complements search by meaning (<b>dense</b> retrieval): dense search matches meaning but can blur a rare name into its topic, while keyword search matches exact words but knows no synonyms. In a RAG pipeline, either one fills the top-k chunks that the LLM reads.</p>
+      <a class="go" href="#problem">Steps 1–2 →</a></li>
+    <li><h3>Tokens come first</h3>
+      <p>Before anything is counted, a <b>tokenizer</b> cuts text into tokens (here, words). A "match" means two token strings are identical, so the same tokenizer must run on the chunks and on the question. These are not the LLM's sub-word tokens; BM25 sees only what your tokenizer outputs.</p>
+      <a class="go" href="#tokens">Step 9 →</a></li>
+    <li><h3>The inverted index</h3>
+      <p>For every token, the index keeps a list of the chunks that contain it and how often. A question only looks up the lists of its own tokens, so a chunk that shares no token with it scores 0. The index also records each chunk's length and the average length.</p>
+      <div class="formula">token → [ (chunk, count), (chunk, count), … ]</div>
+      <a class="go" href="#index">Step 3 →</a></li>
+    <li><h3>tf, df and idf</h3>
+      <p><b>tf</b> (term frequency) is how often a token occurs in one chunk. <b>df</b> (document frequency, <code>n</code>) is how many chunks contain it. <b>idf</b> turns df into a weight: high for rare tokens, near zero for tokens found everywhere. idf belongs to your collection, so the same word weighs differently elsewhere.</p>
+      <div class="formula">idf = ln( N / n )&nbsp;&nbsp;<span class="c">N chunks in total · n chunks containing the token</span></div>
+      <a class="go" href="#counts">Step 4 →</a></li>
+    <li><h3>TF-IDF</h3>
+      <p>Multiply tf by idf for each question token and add the results. Rare matches count most, which is right. But every repeat counts in full, so a chunk that repeats one word can beat a chunk that matches the whole question.</p>
+      <div class="formula">score = Σ over the question's tokens of  f × ln( N / n )</div>
+      <a class="go" href="#tfidf">Step 5 →</a></li>
+    <li><h3>BM25: tf × idf with two brakes</h3>
+      <p>BM25 ("Best Match 25") keeps tf × idf and adds two brakes. <b>Saturation:</b> each extra mention adds less, and one token can never add more than idf × (k1 + 1). <b>Length normalisation:</b> a mention in a chunk longer than average counts a little less, and in a shorter chunk a little more; <code>b</code> sets how strongly, and 0 switches it off.</p>
+      <div class="formula">score = Σ  idf × f·(k1 + 1) / ( f + K )<br>K = k1 · ( 1 − b + b · dl / avgdl )&nbsp;&nbsp;<span class="c">defaults k1 = 1.5, b = 0.75 · dl = chunk length, avgdl = average</span></div>
+      <a class="go" href="#bm25">Step 6 →</a></li>
+    <li><h3>Your library's idf matters</h3>
+      <p>Libraries compute idf differently. <code>rank_bm25</code> uses a formula that turns negative for tokens in more than half of the chunks, and replaces any negative value with a small positive <b>floor</b>. So the most common words keep a little weight, and words in about half of the chunks can end up worth <i>less</i> than them.</p>
+      <div class="formula">idf = ln( (N − n + 0.5) / (n + 0.5) )&nbsp;&nbsp;→&nbsp;&nbsp;if negative: 0.25 × the mean idf</div>
+      <a class="go" href="#floor">Step 7 →</a></li>
+    <li><h3>Tokenizer choices decide what can match</h3>
+      <p>Lower-casing, stripping punctuation, keeping numbers like <code>1.5</code> whole, stemming (cutting word endings), dropping stop words, splitting code identifiers like <code>getUserId</code>: each choice fixes some matches and breaks others. The tokenizer, not the formula, decides whether an exact term can match at all, so test it on your own identifiers.</p>
+      <a class="go" href="#tokens">Step 9 →</a></li>
+    <li><h3>Chunking changes the statistics</h3>
+      <p>Every count belongs to one chunking. Overlap between chunks counts a word in two chunks (higher df, lower idf), and the chunk size changes each chunk's length and the average. Change the chunker and every BM25 score changes with it.</p>
+      <a class="go" href="#chunks">Step 10 →</a></li>
+    <li><h3>A score is not relevance, so measure</h3>
+      <p>A BM25 score is a ranking number for one question on one index. It has no fixed range, cannot be compared across questions, and says nothing about whether a chunk actually answers (that is <b>relevance</b>, judged by a person or labelled data). To know whether BM25 helps, label questions with their right chunk and compare retrievers per question type.</p>
+      <div class="formula">Hit@k = share of questions with the right chunk in the top k<br>MRR = average of 1 / rank of the first right chunk</div>
+      <a class="go" href="#score">Steps 11–12 →</a></li>
+    <li><h3>When to use it</h3>
+      <p>Use BM25 when users search exact identifiers: codes, names, versions, years. Combine it with dense search (hybrid) when users also ask in their own words. Decide per question type from measurements, never put a fixed threshold on raw scores, and return only chunks that scored above 0.</p>
+      <a class="go" href="#when">Step 13 →</a></li>
+  </ol>
+</section>
+
+<!-- ======================= AT A GLANCE ======================= -->
+<section class="s" id="glance" aria-labelledby="h-glance">
+  <div class="num">FORMULA SHEET</div>
+  <h2 id="h-glance">Every term and formula, on one screen</h2>
+  <div class="glance">
+    <div class="g"><h3>Token <a href="#tokens">§9</a></h3><p>What your tokenizer cuts the text into. BM25 compares tokens <b>exactly</b>.</p><div class="fx">split(): (BECCS),  ·  tok_norm: beccs</div></div>
+    <div class="g"><h3>Inverted index <a href="#index">§3</a></h3><p>For every word, the list of chunks that contain it, with counts.</p><div class="fx">bpa → d0 ×2, d2 ×2</div></div>
+    <div class="g"><h3>TF · term frequency <a href="#counts">§4</a></h3><div class="fx">f = mentions of the word in this chunk</div><p class="ex"><code>bpa</code> in toy d0: f = 2</p></div>
+    <div class="g"><h3>DF · document frequency <a href="#counts">§4</a></h3><div class="fx">n = chunks that contain the word</div><p class="ex"><code>beccs</code>: n = 2 of 91 windows</p></div>
+    <div class="g"><h3>IDF · textbook <a href="#tfidf">§5</a></h3><div class="fx">idf = ln( N / n )</div><p>Rare word → high weight; word everywhere → 0.</p></div>
+    <div class="g"><h3>IDF · rank_bm25 <a href="#floor">§7</a></h3><div class="fx">idf = ln( (N − n + 0.5) / (n + 0.5) )</div><p>If negative (word in over half the chunks): use the <b>floor</b> = 0.25 × mean idf.</p><p class="ex"><code>beccs</code> 3.578 · <code>for</code> 0.838 (floor)</p></div>
+    <div class="g"><h3>TF-IDF <a href="#tfidf">§5</a></h3><div class="fx">score = Σ  f × ln( N / n )</div><p>Every repeat counts in full: 10 mentions = 10 × one.</p></div>
+    <div class="g"><h3>BM25 <a href="#bm25">§6</a></h3><div class="fx">score = Σ  idf × f·(k1+1) / (f + K)</div><div class="fx">K = k1 · (1 − b + b · dl / avgdl)</div><p class="ex">BECCS question, window 83: 5.062</p></div>
+    <div class="g"><h3>k1 = 1.5 · repeat brake <a href="#bm25">§6</a></h3><p>Repeats help less and less. One word adds at most <b>idf × (k1 + 1)</b>.</p><p class="ex">10 mentions → 2.174 × one mention</p></div>
+    <div class="g"><h3>b = 0.75 · length brake <a href="#bm25">§6</a></h3><p>0 = ignore length, 1 = full. Short chunks are lifted, long ones lowered.</p><p class="ex">half length 1.290 · double 0.690</p></div>
+    <div class="g"><h3>Hit@k <a href="#measure">§12</a></h3><div class="fx">share of questions with the right chunk in the top k</div><p class="ex">"Did the evidence arrive?"</p></div>
+    <div class="g"><h3>MRR <a href="#measure">§12</a></h3><div class="fx">average of 1 / rank of the first right chunk</div><p class="ex">rank 1 → 1 · rank 4 → 0.25 · missing → 0</p></div>
+  </div>
+  <p class="key"><b>Symbols:</b> <code>N</code> chunks in the collection · <code>n</code> chunks containing the word · <code>f</code> mentions in this chunk · <code>dl</code> this chunk's length in tokens · <code>avgdl</code> the average length · <code>Σ</code> add over the question's words · <code>ln</code> natural logarithm (§4).</p>
+</section>
+
+<!-- 1 -->
+<section class="s" id="problem" aria-labelledby="h-problem">
+  <div class="num">STEP 1 · WHY IT EXISTS</div>
+  <h2 id="h-problem">The chunk that names the word can still lose</h2>
+  <p>Search by meaning is very good at questions asked in other words. But it has a blind spot. The book opens its fusion chapter with a researcher looking for a chemical code: the one chunk that actually names the code comes <b>fourth</b>, behind chunks that only talk about the topic (<a data-book="chapter 12.pdf" data-page="1">Ch12 p.1/14</a>). The same thing happens on our climate PDF. The PDF spells BECCS out once, as <i>bioenergy with carbon capture and storage (BECCS)</i>:</p>
+  <div class="ranks" role="group" aria-label="Where the chunk that names BECCS lands">
+    <div class="rank d"><span class="eyebrow">Search by meaning (dense)</span><span class="big">#4</span><span>the chunk naming BECCS</span></div>
+    <div class="rank k"><span class="eyebrow">Keyword search (BM25)</span><span class="big">#1</span><span><b>the rare word matches</b></span></div>
+  </div>
+  <div class="tw"><table>
+    <thead><tr><th>Query</th><th class="n">Dense</th><th class="n">BM25</th><th class="n">BM25, repo's <code>split()</code></th></tr></thead>
+    <tbody>
+      <tr><td>"IPCC"</td><td class="n">3</td><td class="n">1</td><td class="n miss">not found</td></tr>
+      <tr><td>"What does BECCS stand for?"</td><td class="n">4</td><td class="n">1</td><td class="n miss">not found</td></tr>
+      <tr><td>"methane CH4"</td><td class="n">4</td><td class="n">1</td><td class="n">2</td></tr>
+      <tr><td>"Kyoto Protocol 1997"</td><td class="n">1</td><td class="n">1</td><td class="n">1</td></tr>
+      <tr><td>"limit warming to 1.5 degrees"</td><td class="n">4</td><td class="n">1</td><td class="n">1</td></tr>
+    </tbody>
+    <caption><span class="badge m">measured · 97 chunks</span> Rank of the chunk that contains the term, for five hand-picked queries. It shows the mechanism; it is not an evaluation.</caption>
+  </table></div>
+  <p>Keyword search puts the naming chunk first every time. But the last column is a warning: cut the text into words the wrong way and keyword search finds <b>nothing</b> for two of the five. Step 9 explains why.</p>
+  <p class="call proj"><b>In your project:</b> keyword search is the retriever for identifiers: acronyms, codes, version strings, years. Your eval set has an <code>exact-term</code> question type for exactly these, and the v2.0 experiment tests it.</p>
+</section>
+
+<!-- 2 -->
+<section class="s" id="bridge" aria-labelledby="h-bridge">
+  <div class="num">STEP 2 · WHAT YOU ALREADY KNOW</div>
+  <h2 id="h-bridge">Two ways to search: by meaning, or by the words themselves</h2>
+  <div class="two">
+    <div class="card" style="border-top:4px solid var(--dense)"><h3>By meaning (dense retrieval)</h3>
+      <p style="margin-top:6px">An embedding model turns each chunk, and your question, into a list of numbers called a <b>vector</b> (384 numbers for the course's local MiniLM model). Texts with similar meaning get similar vectors, so search returns the chunks whose vectors sit closest to the question's.</p>
+      <p style="margin-top:6px"><span class="hit">Good at</span> other wording: "carbon dioxide output" can find "greenhouse gas emissions" (<a data-book="chapter 12.pdf" data-page="1">Ch12 p.1/14</a>). <span class="miss">Weak at</span> rare codes: one acronym is a tiny part of a chunk's meaning.</p></div>
+    <div class="card" style="border-top:4px solid var(--accent)"><h3>By words (keyword retrieval)</h3>
+      <p style="margin-top:6px">No model at all. Count which of the question's words appear in each chunk and how informative each word is. BM25, short for "Best Match 25", is the classic formula for that count (<a data-book="chapter 12.pdf" data-page="5">Ch12 p.5/14</a>).</p>
+      <p style="margin-top:6px"><span class="hit">Good at</span> exact codes, names, numbers. <span class="miss">Weak at</span> other wording: "my screen goes dark" shares no word with "the display turns off".</p></div>
+  </div>
+  <p>You will also hear keyword search called <b>lexical</b> or <b>sparse</b> retrieval. "Sparse" describes the vector you would get by giving each chunk one slot per distinct word in the collection (1,870 slots on our 91 windows): almost every slot is 0. A dense embedding has a few hundred slots, all filled.</p>
+  <div class="full"><span class="tag">Full · the name</span>
+    <p>The library class is <code>BM25Okapi</code>: BM25 was developed for the <i>Okapi</i> search system, so textbooks often say "Okapi BM25". This is added background from the course's reading list; the book never names Okapi.</p>
+  </div>
+  <p class="call proj"><b>In your project:</b> neither method is "better". Each misses what the other catches (<a data-book="chapter 12.pdf" data-page="2">Ch12 p.2/14</a>), which is why v2.0 compares BM25 alone, dense alone, and both together (R1).</p>
+</section>
+
+<!-- 3 -->
+<section class="s" id="index" aria-labelledby="h-index">
+  <div class="num">STEP 3 · HOW IT FINDS CHUNKS</div>
+  <h2 id="h-index">It starts with an index, like the one at the back of a book</h2>
+  <p>Look up "saffron" in a cookbook's back index and it lists the pages that mention it (<a data-book="chapter 12.pdf" data-page="3">Ch12 p.3/14</a>). Keyword search builds the same thing for your chunks, and it is called an <b>inverted index</b>: it turns "chunk → its words" around into "word → the chunks that contain it". Building and using it takes three moves: cut every chunk into tokens; record, for each token, which chunks contain it and how often; at question time, cut the question <b>the same way</b> and look up only its tokens. A chunk that shares no token with the question is never touched, and its score is 0.</p>
+  <figure class="card" style="display:grid;gap:12px">
+    <div><b>Try it</b> <span class="badge t">toy · 6 documents</span> <span style="font-size:.88rem;color:var(--muted)">Pick question words: their index cards appear, the chunks they point to light up, and the documents are ranked by their BM25 score (built up in steps 4–6).</span></div>
+    <div class="chips" id="ix-words" role="group" aria-label="Question words"></div>
+    <div class="cards" id="ix-cards" aria-live="polite"></div>
+    <div class="idx-docs" id="ix-docs"></div>
+    <div class="readout" id="ix-rank" aria-live="polite"></div>
+    <figcaption>What to notice: a word's <b>df</b> (document frequency) is simply how many entries its card has. "climate" has 4, "eu" has 1. A document sharing no word with the question scores exactly 0.</figcaption>
+  </figure>
+  <div class="full"><span class="tag">Full · what is actually stored</span>
+    <pre>per chunk:   how often each token occurs (f), and the chunk length in tokens (dl)
+per token:   in how many chunks it occurs (n), and its idf weight
+once:        number of chunks N, average length avgdl, the mean idf (used in step 7)
+
+91 windows (tok_norm):  N 91, avgdl 129.67, 1,870 distinct tokens, mean idf 3.352948</pre>
+    <p><span class="badge m">measured · 91 windows</span> The course's library, <code>rank_bm25</code> 0.2.2, keeps a word counter per chunk and scores every chunk on each question, which is fine for 91 windows. Search engines keep the word → chunks lists, so a question only touches chunks that share a word with it; the scores come out the same (added background). The book notes that this second index adds storage that grows with the collection (<a data-book="chapter 12.pdf" data-page="13">Ch12 p.13/14</a>).</p>
+  </div>
+  <p class="call proj"><b>In your project:</b> an index is defined by its chunks and its tokenizer. Change either and every count changes, so keep both recorded with the index.</p>
+</section>
+
+<!-- 4 -->
+<section class="s" id="counts" aria-labelledby="h-counts">
+  <div class="num">STEP 4 · THREE COUNTS</div>
+  <h2 id="h-counts">Three counts decide how much a word is worth</h2>
+  <p>Before any formula, the idea in plain words. A word tells you more about a chunk the more often it appears <i>there</i>, and the fewer <i>other</i> chunks contain it. Those are two different counts, plus a weight made from the second:</p>
+  <div class="three">
+    <div class="card"><h3>tf · term frequency</h3><p style="margin-top:4px">How often the word occurs <b>inside one chunk</b>, written <code>f</code>.</p></div>
+    <div class="card"><h3>df · document frequency</h3><p style="margin-top:4px">How many chunks contain it <b>at least once</b>, over the whole collection, written <code>n</code>.</p></div>
+    <div class="card"><h3>idf · inverse document frequency</h3><p style="margin-top:4px">A <b>weight</b> made from df: high when few chunks have the word.</p></div>
+  </div>
+  <div class="two">
+    <div class="tw"><table>
+      <thead><tr><th>Word</th><th class="n">tf in d0</th><th class="n">df of 6</th><th>Weight</th></tr></thead>
+      <tbody><tr><td><code>eu</code></td><td class="n">1</td><td class="n">1</td><td>highest</td></tr>
+      <tr><td><code>bpa</code></td><td class="n">2</td><td class="n">2</td><td>middle</td></tr>
+      <tr><td><code>climate</code></td><td class="n">0</td><td class="n">4</td><td>low</td></tr></tbody>
+      <caption><span class="badge t">toy</span> d0 = "BPA regulation (2019): the EU limits BPA in food-contact plastics."</caption>
+    </table></div>
+    <div class="tw"><table>
+      <thead><tr><th>BECCS question token</th><th class="n">df of 91</th><th>Effect</th></tr></thead>
+      <tbody><tr><td><code>what</code> <code>does</code> <code>stand</code></td><td class="n">0</td><td>not in the index: adds nothing</td></tr>
+      <tr><td><code>beccs</code></td><td class="n">2</td><td>rare: carries the score</td></tr>
+      <tr><td><code>for</code></td><td class="n">80</td><td>almost everywhere</td></tr></tbody>
+      <caption><span class="badge m">measured · 91 windows</span> df 2 for a word written once? Step 10.</caption>
+    </table></div>
+  </div>
+  <p class="call wrong"><b>Common mistake:</b> "idf counts how often the word appears in the chunk." That is tf. idf is computed from df, a count across the whole collection, so the same word gets a different idf in a different collection.</p>
+  <div class="call note"><b>The one piece of maths you need: ln.</b> idf uses the natural logarithm. Three facts are enough: <code>ln(1) = 0</code>; a number above 1 gives a positive value (<code>ln 60.3 ≈ 4.10</code>); a number below 1 gives a negative one (<code>ln 0.143 ≈ −1.95</code>). It also grows slowly (<code>ln 10 ≈ 2.3</code>, <code>ln 100 ≈ 4.6</code>), so a word 100 times rarer is not 100 times more valuable. Remember the negative case: it comes back in step 7.</div>
+</section>
+
+<!-- 5 -->
+<section class="s" id="tfidf" aria-labelledby="h-tfidf">
+  <div class="num">STEP 5 · THE CLASSIC COMBINATION</div>
+  <h2 id="h-tfidf">TF-IDF multiplies the counts, and over-rewards repeats</h2>
+  <p>The textbook way to combine the two counts is to multiply them, then add up over the question's words:</p>
+  <div class="formula">tf-idf(word, chunk) = <span class="w">f</span> × ln( <span class="w">N</span> / <span class="w">n</span> )<br><span class="c">f = mentions in this chunk · N = chunks · n = chunks containing the word</span></div>
+  <p>It rewards rare words, which is good. But every repeat counts in full. Take the question "bpa ban" and two equally long toy documents: <b>x</b> says each word once, <b>y</b> says "BPA" six times and never "ban".</p>
+  <div class="tw"><table>
+    <thead><tr><th>Method</th><th class="n">x: "bpa" + "ban"</th><th class="n">y: "bpa" × 6</th><th>Wins</th></tr></thead>
+    <tbody><tr><td>Textbook TF-IDF</td><td class="n">2.8904</td><td class="n">6.5917</td><td class="miss">y, by repetition</td></tr>
+    <tr><td>BM25 (<code>rank_bm25</code>)</td><td class="n">1.8871</td><td class="n">1.1756</td><td class="hit">x, matches both words</td></tr></tbody>
+    <caption><span class="badge t">toy</span> Six documents of 8 tokens; <code>bpa</code> is in 2 of them, <code>ban</code> in 1.</caption>
+  </table></div>
+  <p>A chunk that repeats one of your words beats a chunk that answers more of your question. After the first few mentions, repetition is weak evidence, and BM25 is built on that observation.</p>
+  <div class="full"><span class="tag">Full · which TF-IDF?</span>
+    <p>There are many variants. scikit-learn's default <code>TfidfVectorizer</code> (1.9.1) uses idf = ln((1 + N)/(1 + n)) + 1 (1.847298 for <code>bpa</code>), normalises each chunk's vector to length 1, and drops one-character tokens, so "1.5" vanishes from "limit warming to 1.5 degrees". Always say which variant you mean.</p>
+  </div>
+</section>
+
+<!-- 6 -->
+<section class="s" id="bm25" aria-labelledby="h-bm25">
+  <div class="num">STEP 6 · THE FORMULA</div>
+  <h2 id="h-bm25">BM25 keeps the idea and adds two brakes</h2>
+  <p>BM25 keeps "rarity × mentions" and adds two brakes: <b>repeats flatten out</b>, and <b>chunk length is taken into account</b>. The book describes both in words only (<a data-book="chapter 12.pdf" data-page="5">Ch12 p.5/14</a>); this is what the course's library runs:</p>
+  <div class="formula">score(chunk) = Σ over the question's words of &nbsp;<span class="w">idf</span> × <span class="w">f</span> × (k1 + 1) / ( <span class="w">f</span> + K )<br>K = k1 × ( 1 − b + b × <span class="w">dl</span> / avgdl )&nbsp;&nbsp;&nbsp;<span class="c">defaults: k1 = 1.5, b = 0.75</span></div>
+  <p>Call the fraction after idf the <b>tf part</b>: the mentions, after both brakes. Everything else is the idf from step 4.</p>
+
+  <h3>Brake 1: the tenth mention adds little (k1)</h3>
+  <figure>
+    <div class="ctl"><label for="k1">k1 (repeat payoff)</label><input id="k1" type="range" min="0.25" max="3" step="0.25" value="1.5"><output id="k1o" for="k1">1.50</output></div>
+    <svg class="chart" id="satChart" viewBox="0 0 640 300" role="img" aria-labelledby="satTitle satDesc"><title id="satTitle">Score from one word as mentions grow</title><desc id="satDesc">TF-IDF rises in a straight line; BM25's tf part rises quickly and then flattens toward k1 + 1.</desc></svg>
+    <div class="readout" id="satRead" aria-live="polite"></div>
+    <figcaption><span class="badge f">formula</span> A chunk of average length; both lines show "times the one-mention value". Move k1 and watch the ceiling move.</figcaption>
+  </figure>
+  <p>So <b>one word can add at most idf × (k1 + 1)</b> to a chunk's score, 2.5 × its idf at the default, however often it repeats. A larger k1 simply lets repeats keep paying off for longer.</p>
+
+  <h3>Brake 2: length cuts both ways (b)</h3>
+  <p>A long chunk contains more words, so it matches a question word by coincidence more often (<a data-book="chapter 12.pdf" data-page="5">Ch12 p.5/14</a>). BM25 compares each chunk's length with the average:</p>
+  <div class="tw"><table>
+    <thead><tr><th>One mention, b =</th><th class="n">half the average length</th><th class="n">average</th><th class="n">twice the average</th></tr></thead>
+    <tbody><tr><td>0 (length ignored)</td><td class="n">1.000</td><td class="n">1.000</td><td class="n">1.000</td></tr>
+    <tr><td>0.75 (default)</td><td class="n">1.290</td><td class="n">1.000</td><td class="n">0.690</td></tr>
+    <tr><td>1 (full normalisation)</td><td class="n">1.429</td><td class="n">1.000</td><td class="n">0.625</td></tr></tbody>
+    <caption><span class="badge f">formula</span> tf part, k1 = 1.5. Read by column: short chunks are lifted, long ones lowered.</caption>
+  </table></div>
+  <div class="call wrong"><b>Common mistakes:</b>
+    <ul style="margin-top:4px"><li>"Ten mentions, ten times the score." No: 2.174 times at the default.</li>
+    <li>"Length normalisation only punishes long chunks." It also lifts short ones.</li>
+    <li>"b = 0 switches the score off." At b = 0, K = k1 for every chunk, so only the length part goes; rarity and repeats still count.</li></ul></div>
+
+  <h3>One score by hand</h3>
+  <pre>toy word bpa in d0:  N 6 chunks, n 2 contain it, f 2 mentions, dl 11 tokens, avgdl 10.0, k1 1.5, b 0.75
+1  idf      = ln((6 − 2 + 0.5) / (2 + 0.5)) = ln(1.8)          = 0.587787
+2  K        = 1.5 × (1 − 0.75 + 0.75 × 11/10) = 1.5 × 1.075    = 1.6125
+3  tf part  = 2 × 2.5 / (2 + 1.6125)                            = 1.384083
+4  score    = 0.587787 × 1.384083                               = 0.813546   (rank_bm25 gives 0.813546)
+5  question "bpa regulation 2019":  d0 = 0.813546 + 0.562475 + 0.562475 = 1.938496</pre>
+  <p style="font-size:.9rem;color:var(--muted)"><span class="badge t">toy</span> Self-check: d0 is slightly longer than average (11 vs 10), so its tf part must sit a little below the 1.429 that two mentions get at average length. It does: 1.384.</p>
+
+  <div class="full"><span class="tag">Full · the length curve, a calculator, and three details</span>
+    <figure>
+      <div class="ctl"><label for="bb">b (length weight)</label><input id="bb" type="range" min="0" max="1" step="0.05" value="0.75"><output id="bbo" for="bb">0.75</output></div>
+      <svg class="chart" id="lenChart" viewBox="0 0 640 280" role="img" aria-labelledby="lenTitle lenDesc"><title id="lenTitle">One mention: tf part against chunk length</title><desc id="lenDesc">Above 1 for chunks shorter than average, below 1 for longer ones; flat at b = 0.</desc></svg>
+      <figcaption><span class="badge f">formula</span> One mention, k1 = 1.5; x = chunk length ÷ average length.</figcaption>
+    </figure>
+    <div class="card" style="display:grid;gap:10px">
+      <b>Score one word in one window</b> <span class="badge m">idf values measured · 91 windows</span>
+      <div class="chips" role="group" aria-label="Presets">
+        <button type="button" class="chip" data-pre="beccs83">beccs in window 83</button>
+        <button type="button" class="chip" data-pre="for16">"for" × 6 in window 16</button>
+        <button type="button" class="chip" data-pre="ipcc1">ipcc in window 1</button>
+      </div>
+      <div class="ctl"><label for="cw">word (idf)</label><select id="cw" class="btn">
+        <option value="4.099885">ipcc (df 1) · 4.0999</option><option value="3.577948" selected>beccs (df 2) · 3.5779</option>
+        <option value="0.510826">emissions (df 34) · 0.5108</option><option value="0.838237">for / climate (floor) · 0.8382</option></select><span></span></div>
+      <div class="ctl"><label for="cf">mentions f</label><input id="cf" type="range" min="0" max="20" step="1" value="1"><output id="cfo">1</output></div>
+      <div class="ctl"><label for="cdl">chunk length dl</label><input id="cdl" type="range" min="20" max="400" step="1" value="124"><output id="cdlo">124</output></div>
+      <div class="ctl"><label for="ck1">k1</label><input id="ck1" type="range" min="0.25" max="3" step="0.25" value="1.5"><output id="ck1o">1.50</output></div>
+      <div class="ctl"><label for="cb">b</label><input id="cb" type="range" min="0" max="1" step="0.05" value="0.75"><output id="cbo">0.75</output></div>
+      <div class="readout" id="calcRead" aria-live="polite"></div>
+    </div>
+    <ul>
+      <li><b>Predict:</b> <code>bpa</code> also appears twice in toy d2, which is longer (13 tokens). Above or below d0's 0.8135? Below, 0.765846: same f, same idf, larger K.</li>
+      <li><b>At average length, one mention gives a tf part of exactly 1 for any k1</b>, so k1 only shows from the second mention on.</li>
+      <li><b>Length, checked in the library:</b> one mention in a 5-token and a 20-token toy chunk scores 0.829 and 0.496 at b = 0.75, and 0.588 each at b = 0.</li>
+      <li><b>The question is a list, not a set:</b> "bpa bpa" scores 1.627091, exactly twice "bpa".</li>
+      <li><b>k1 = 0</b> would mean "present or absent" in theory, but in <code>rank_bm25</code> every chunk without the word computes 0 ÷ 0 = NaN. Use a small positive k1 instead.</li>
+    </ul>
+  </div>
+  <p class="call proj"><b>In your project:</b> keep k1 = 1.5 and b = 0.75. Changing them is an experiment on the eval set, not a guess.</p>
+</section>
+
+<!-- 7 -->
+<section class="s" id="floor" aria-labelledby="h-floor">
+  <div class="num">STEP 7 · A LIBRARY DETAIL THAT CHANGES RESULTS</div>
+  <h2 id="h-floor">In <code>rank_bm25</code>, the most common words are not worth zero</h2>
+  <div class="formula">idf = ln( (N − n + 0.5) / (n + 0.5) )<br>if that is negative:&nbsp; idf = 0.25 × (average idf of all words)&nbsp;&nbsp;<span class="c">← the "floor"</span></div>
+  <p>For a word in more than half of the chunks, the fraction inside ln drops below 1, so its idf turns negative (the ln fact from step 4). The library then swaps in a floor, which is <b>0.838</b> on our 91 windows. That creates a surprise: words in the middle get <i>less</i> weight than the most common words.</p>
+  <figure>
+    <div class="ctl"><label for="nn">chunks containing the word (n)</label><input id="nn" type="range" min="1" max="91" step="1" value="34"><output id="nno">34</output></div>
+    <svg class="chart" id="idfChart" viewBox="0 0 640 320" role="img" aria-labelledby="idfTitle idfDesc"><title id="idfTitle">idf against document frequency on 91 windows</title><desc id="idfDesc">The textbook idf falls smoothly. rank_bm25's raw idf crosses zero near half the chunks; above that the floor of 0.838 is used, so words in 28 to 45 of 91 chunks get less weight than the most common words.</desc></svg>
+    <div class="readout" id="idfRead" aria-live="polite"></div>
+    <figcaption><span class="badge f">formula, N = 91</span> <span class="badge m">floor and marked words measured · 91 windows</span> Drag n and watch the dot: between 28 and 45 it sits <b>below</b> the floor line.</figcaption>
+  </figure>
+  <p>The book's idea that "common words score almost nothing" (<a data-book="chapter 12.pdf" data-page="5">Ch12 p.5/14</a>) is right in spirit but not this library's behaviour: on our windows <code>climate</code> (in 77 of 91) gets 0.838, <b>more</b> than <code>emissions</code> (in 34) at 0.511, and <code>the</code> (in 80) gets 0.838 too.</p>
+  <p class="call wrong"><b>Common mistake:</b> "common words get an idf of 0." Only a word in <i>exactly</i> half the chunks gets 0; a word in more than half gets the floor.</p>
+  <div class="full"><span class="tag">Full · edge cases (toys)</span>
+    <ul>
+      <li><b>Exactly half gives 0:</b> <code>plastics</code> in 3 of 6 toy documents: ln(3.5/3.5) = 0, and 0 is not negative, so it stays 0. A word in 3 documents then scores less than a word in 4.</li>
+      <li><b>The floor can be negative:</b> when most words are in most chunks (near-duplicates), the average idf is negative: floor −0.282, scores −0.250 and −0.301.</li>
+      <li><b>Two documents, no score above 0:</b> a word in one of two gets ln(1.5/1.5) = 0; a word in both gets a negative floor, −0.080472 each. Never unit-test BM25 on two documents.</li>
+      <li><b>A word the index has never seen adds 0</b>, with no error or warning.</li>
+      <li><b>Stop words:</b> a tokenizer can drop very common words ("the", "for") with a stop-word list. That changes every number above; the book does not discuss it, so test it before using it.</li>
+    </ul>
+    <p>Other libraries (Lucene, for example) use an idf that never goes negative; that is not checked in this course (UNVERIFIED). Always use the formula of the library you actually run.</p>
+  </div>
+  <p class="call proj"><b>In your project:</b> before reading a BM25 result, know your library's idf: the same words can rank differently under a different library.</p>
+</section>
+
+<!-- 8 -->
+<section class="s" id="walk" aria-labelledby="h-walk">
+  <div class="num">STEP 8 · ONE QUESTION, SCORED</div>
+  <h2 id="h-walk">The BECCS question, scored word by word</h2>
+  <p>Now put steps 4–7 together on the real question. "What does BECCS stand for?" matches 80 of the 91 windows; here are the top three, split into what each word adds.</p>
+  <figure class="card">
+    <div class="legend"><span><i style="background:var(--accent)"></i>beccs (idf 3.578)</span><span><i style="background:var(--warn);opacity:.75"></i>for (floor 0.838)</span></div>
+    <div class="sbars" id="walkBars" style="margin-top:10px"></div>
+    <figcaption><span class="badge m">measured · 91 windows</span> Drawn to scale; the longest bar is 5.06.</figcaption>
+  </figure>
+  <p>The rare word carries the score: about 3.65 for each window that holds it. The floored common word decides the order between the two BECCS windows, because window 83 says "for" three times and window 82 twice. And 78 of the 80 matching windows contain no BECCS at all; they match on "for" alone.</p>
+  <div class="full"><span class="tag">Full · the numbers behind the bars</span>
+    <pre>window  dl    K          beccs: tf part × idf          for: f, tf part × floor         total
+83      124   1.450805   1.020073 × 3.577948 = 3.649768  3, 1.685088 × 0.838237 = 1.412504   5.062271
+82      123   1.442129   1.023697 × 3.577948 = 3.662734  2, 1.452589 × 0.838237 = 1.217614   4.880348
+16      132   1.520212   (none)                          6, 1.994625 × 0.838237 = 1.671968   1.671968</pre>
+    <p>Window 82 gets a slightly <i>larger</i> beccs part than 83 because it is one token shorter. Window 16's six "for"s reach a tf part of 1.995, close to the 2.5 ceiling.</p>
+  </div>
+</section>
+
+<!-- 9 -->
+<section class="s" id="tokens" aria-labelledby="h-tokens">
+  <div class="num">STEP 9 · THE EASY-TO-MISS FAILURE</div>
+  <h2 id="h-tokens">A perfect formula cannot match a broken token</h2>
+  <p>Everything so far assumed the question's word and the chunk's word are the same token. BM25 compares token strings <b>exactly</b>. The repo's notebook cuts text at spaces only, with Python's <code>split()</code> (<code>fusion_retrieval.ipynb</code> cells 14 and 17), so the text's <code>(BECCS),</code> and the question's <code>BECCS</code> never match. The course's tokenizer, <code>tok_norm</code>, lower-cases and keeps runs of letters and digits, keeping <code>1.5</code> and <code>650,000</code> whole.</p>
+  <figure class="card play">
+    <div><b>Tokenizer playground</b> <span style="color:var(--muted);font-size:.88rem">Change the text or the question; shared tokens turn green.</span></div>
+    <div class="chips" role="group" aria-label="Examples">
+      <button type="button" class="chip" data-ex="beccs">BECCS</button>
+      <button type="button" class="chip" data-ex="ipcc">IPCC in brackets</button>
+      <button type="button" class="chip" data-ex="syn">Different wording</button>
+      <button type="button" class="chip" data-ex="ver">Version and error code</button>
+      <button type="button" class="chip" data-ex="code">Function names</button>
+    </div>
+    <div class="two">
+      <label>Text inside a chunk<input type="text" id="ptext" spellcheck="false"></label>
+      <label>The user's question<input type="text" id="pq" spellcheck="false"></label>
+    </div>
+    <div class="toks" id="ptoks" aria-live="polite"></div>
+    <figcaption>"Shared" means BM25 can match it. No shared token means a score of 0, whatever the formula.</figcaption>
+  </figure>
+  <div class="tw"><table>
+    <thead><tr><th>On the 91 windows</th><th><code>split()</code></th><th><code>tok_norm</code></th></tr></thead>
+    <tbody><tr><td>BECCS question: windows above 0</td><td class="n miss">0</td><td class="n hit">80, BECCS windows first</td></tr>
+    <tr><td>"IPCC"</td><td class="n miss">0 windows</td><td class="n hit">rank 1, score 3.8928</td></tr>
+    <tr><td>distinct tokens in the PDF</td><td class="n">2,630</td><td class="n">1,769</td></tr>
+    <tr><td>spellings of "emissions"</td><td class="n">4 (22, 20, 7, 1 uses)</td><td class="n">1</td></tr></tbody>
+    <caption><span class="badge m">measured · 91 windows</span> Under <code>split()</code> even the question's <code>for?</code> keeps its question mark.</caption>
+  </table></div>
+  <p>So the tokenizer, not the formula, decides whether an exact term can match at all. Worse, when nothing matches, the repo's code still returns five chunks, picked by position (the last five windows, 90 to 86), and nothing errors.</p>
+  <div class="card"><b>Two identifier traps</b> (try both in the playground)
+    <ul style="margin-top:6px">
+      <li><b>Versions vs error codes:</b> <code>tok_norm</code> keeps <code>v2.10.3</code> whole but cuts <code>ERR_CONN_RESET</code> into <code>err</code>, <code>conn</code>, <code>reset</code>; a plain <code>\w+</code> rule does the opposite. If users search both, keep digit-dot-digit <i>and</i> underscores.</li>
+      <li><b>Function names:</b> <code>tok_norm</code> keeps <code>getUserId</code> as one token, <code>getuserid</code>, so "user id" never reaches it. A code-aware tokenizer splits at <code>_</code> and case changes <i>and</i> keeps the whole name, so both "user id" and an exact <code>getUserId</code> search work.</li>
+    </ul></div>
+  <p class="call wrong"><b>BM25 tokens are not the LLM's tokens.</b> An LLM or embedding model cuts text into sub-word pieces from a fixed vocabulary (P1). BM25 never sees those; it uses whatever <b>your</b> tokenizer outputs, here whole words.</p>
+  <div class="full"><span class="tag">Full · every tokenizer choice fixes one thing and can break another</span>
+    <div class="tw"><table>
+      <thead><tr><th>Choice</th><th>Fixes</th><th>Can break</th></tr></thead>
+      <tbody>
+        <tr><td><b>Lower-case</b></td><td><code>Emissions</code> = <code>emissions</code></td><td>Lower-casing <i>only the question</i> while chunks keep capitals makes it worse: toy d0 drops from 2.125 to 1.289.</td></tr>
+        <tr><td><b>Strip punctuation</b></td><td><code>(IPCC)</code> → <code>ipcc</code></td><td>Identifiers with punctuation, such as <code>v2.10.3</code>, if the rule cuts at dots.</td></tr>
+        <tr><td><b>Numbers</b></td><td><code>tok_norm</code> keeps <code>1.5</code></td><td><code>\w+</code> cuts it into <code>1</code> and <code>5</code>; scikit-learn's default drops it.</td></tr>
+        <tr><td><b>Stemming</b>: cut word endings so forms match</td><td><code>emissions</code> = <code>emission</code></td><td>A toy plural rule also turns <code>beccs</code> into <code>becc</code>. Real stemmers (Porter, Snowball) are untested here (UNVERIFIED).</td></tr>
+        <tr><td><b>Stop words</b>: drop very common words</td><td>removes "for"-only matches</td><td>Changes every idf and the floor (step 7); untested here.</td></tr>
+        <tr><td><b>Code identifiers</b>: split at <code>_</code> and case changes, keep the whole name</td><td>"user id" finds <code>getUserId</code></td><td>Parts alone make an exact <code>getUserId</code> search tie with <code>get_user_id</code>.</td></tr>
+      </tbody></table></div>
+    <pre>toy, ten function signatures (illustration):
+tok_norm:            "user id"   → getUserId not found (one token, getuserid)
+parts + whole name:  "user id"   → getUserId rank 2 (1.1126)
+                     "getUserId" → getUserId 3.6807, get_user_id 1.8631</pre>
+  </div>
+  <p class="call proj"><b>In your project:</b> one tokenizer for chunks and question, tested on your own identifiers before indexing, and return only chunks that scored above 0.</p>
+</section>
+
+<!-- 10 -->
+<section class="s" id="chunks" aria-labelledby="h-chunks">
+  <div class="num">STEP 10 · HOW CHUNKING CHANGES THE MATHS</div>
+  <h2 id="h-chunks">One mention can count as two chunks</h2>
+  <p>The PDF says "BECCS" once, yet its df is 2. The 91 windows are 1,000-character slices with <b>overlap</b>: neighbouring windows share 200 characters, so a sentence at a boundary is not cut in half (C2). The mention sits in a shared part, so both windows count it.</p>
+  <figure>
+    <div class="ov" role="img" aria-label="Window 82 covers characters 65,600 to 66,600; window 83 covers 66,400 to 67,400; BECCS at character 66,441 lies in both.">
+      <div class="w w82">window 82 · 65,600–66,600</div><div class="w w83">window 83 · 66,400–67,400</div>
+      <div class="pin"></div><div class="pinl">BECCS @ 66,441</div>
+    </div>
+    <figcaption><span class="badge m">measured · 91 windows</span> In both windows → df 2 → idf 3.578 instead of 4.100 (the value for a once-only word such as <code>ipcc</code>).</figcaption>
+  </figure>
+  <div class="full"><span class="tag">Full · how often this happens</span>
+    <p>Of the 799 tokens that occur once in the whole text, 184 (23.0%) are counted in two windows. Plain character windows also cut words at their edges, adding 101 token "fragments" that do not exist in the whole text.</p>
+  </div>
+  <p class="call proj"><b>In your project:</b> BM25 numbers belong to one chunking, which is why every measured number here says "91 windows" or "97 chunks".</p>
+</section>
+
+<!-- 11 -->
+<section class="s" id="score" aria-labelledby="h-score">
+  <div class="num">STEP 11 · WHAT A SCORE IS, AND IS NOT</div>
+  <h2 id="h-score">A high score is not a correct answer</h2>
+  <p>A BM25 score measures weighted word overlap, and it has no fixed range: the book's example scores are 14.2, 9.8 and 3.1, next to cosine scores around 0.8 (<a data-book="chapter 12.pdf" data-page="8">Ch12 p.8/14</a>). So what does a big number tell you? Compare a vague question with the BECCS question:</p>
+  <figure class="card">
+    <div class="sbars" id="scoreBars"></div>
+    <figcaption><span class="badge m">measured · 91 windows</span> "What can be done about this?" has no rare word, yet 81 of 91 windows score above 0.</figcaption>
+  </figure>
+  <p>The vague question gets the <b>higher</b> top score. The score reflects which question words exist in the index and how rare they are, not whether any chunk answers. Whether a chunk really answers is called <b>relevance</b>, and a person or a labelled test set judges it, not the score (P2).</p>
+  <div class="full"><span class="tag">Full · two more cases (97 chunks)</span>
+    <pre>draft seed D-009 (no answer in the PDF)   best BM25 score  6.9559
+draft seed D-010 (no answer in the PDF)   best BM25 score 13.2576
+draft seed D-006 (a paraphrase)           a chunk containing "panels" 13.6205 above the real evidence 9.2298;
+                                          dense ranks the evidence 1st</pre>
+  </div>
+  <p class="call proj"><b>In your project:</b> compare scores only within one question on one index, and never use a fixed threshold ("below 5 means no answer") on raw BM25 scores.</p>
+</section>
+
+<!-- 12 -->
+<section class="s" id="measure" aria-labelledby="h-measure">
+  <div class="num">STEP 12 · HOW YOU WOULD KNOW</div>
+  <h2 id="h-measure">Measuring: where does the right chunk land?</h2>
+  <p>To know whether BM25 helps, write questions where you know which chunk holds the answer, group them by type (exact-term, paraphrase, …), run each retriever, and note the <b>rank</b> of the right chunk. Two numbers summarise the ranks:</p>
+  <div class="two">
+    <div class="card"><h3>Hit@k</h3><p style="margin-top:4px">The share of questions whose right chunk is in the top <i>k</i>. The top <i>k</i> is what the LLM receives, so it asks "did the evidence arrive?"</p></div>
+    <div class="card"><h3>MRR · mean reciprocal rank</h3><p style="margin-top:4px">Take 1 ÷ the rank of the first right chunk (rank 1 → 1, rank 4 → 0.25, missing → 0), then average. It asks "how high did it land?"</p></div>
+  </div>
+  <div class="tw"><table>
+    <thead><tr><th>Retriever</th><th>Ranks of step 1's queries</th><th class="n">Hit@1</th><th class="n">Hit@4</th><th class="n">MRR</th></tr></thead>
+    <tbody><tr><td>Dense</td><td class="mono">3, 4, 4, 1, 4</td><td class="n">1/5</td><td class="n">5/5</td><td class="n">0.417</td></tr>
+    <tr><td>BM25, <code>tok_norm</code></td><td class="mono">1, 1, 1, 1, 1</td><td class="n">5/5</td><td class="n">5/5</td><td class="n">1.000</td></tr>
+    <tr><td>BM25, <code>split()</code></td><td class="mono">–, –, 2, 1, 1</td><td class="n">2/5</td><td class="n">3/5</td><td class="n">0.500</td></tr></tbody>
+    <caption><span class="badge f">computed from the measured ranks · 97 chunks</span> Five hand-picked queries show how the metrics work, not which retriever is better.</caption>
+  </table></div>
+  <p>At k = 4, dense and BM25 tie: the LLM would get the evidence either way. MRR shows that BM25 puts it higher. Which number matters depends on your k and your question types, so report each type separately.</p>
+  <div class="full"><span class="tag">Full · the course's metrics</span>
+    <ul>
+      <li><b>Recall@k:</b> the share of <i>all</i> relevant chunks found in the top k (book glossary). With one relevant chunk per question it equals Hit@k.</li>
+      <li><b>CE@k (complete evidence):</b> the course's main metric (P6): a question counts only if <i>every</i> piece of evidence it needs is in the top k. For one-piece questions it equals Hit@k.</li>
+      <li><b>Per type ("slices"):</b> a tokenizer change should help the <code>exact-term</code> type without hurting the paraphrase type.</li>
+      <li><b>An observation, not a result:</b> on the 8 answerable draft seeds (97 chunks), dense and BM25 both reach CE@4 = 8/8, and MRR@10 is 0.708 against 0.938. The questions were drafted by an LLM, not asked by users.</li>
+    </ul>
+  </div>
+  <p class="call proj"><b>In your project:</b> these metrics measure retrieval only (did the evidence arrive?). Answer quality (did the LLM use it well?) is measured separately.</p>
+</section>
+
+<!-- 13 -->
+<section class="s" id="when" aria-labelledby="h-when">
+  <div class="num">STEP 13 · DECISIONS</div>
+  <h2 id="h-when">When BM25 alone is enough, and when it is not</h2>
+  <div class="tw"><table>
+    <thead><tr><th>If your users…</th><th>Start with</th><th>Because</th></tr></thead>
+    <tbody>
+      <tr><td>type codes, names, versions</td><td>BM25, with a tokenizer tested on them</td><td>rare exact words carry the score (steps 1, 8)</td></tr>
+      <tr><td>write in their own words</td><td>dense, or dense + BM25</td><td>BM25 has no synonyms (step 2)</td></tr>
+      <tr><td>do both</td><td>compare BM25, dense and hybrid per type</td><td>each misses what the other catches</td></tr>
+      <tr><td>ask vague questions</td><td>do not trust BM25's ranking or score</td><td>it ranks by common words, silently (step 11)</td></tr>
+    </tbody></table></div>
+  <p>The book's rule of thumb: BM25 alone is enough when every query is a keyword lookup, and vector search alone when every query is a natural-language question (<a data-book="chapter 12.pdf" data-page="12">Ch12 p.12/14</a>). Treat it as a hypothesis, and check it per question type (step 12). Next comes <b>hybrid search</b>, which runs both and merges their ranked lists (R1, <a data-book="chapter 12.pdf" data-page="5">Ch12 p.5–6/14</a>), and <b>reranking</b>, which can use BM25 as the fast first stage (<a data-book="chapter 13.pdf" data-page="5">Ch13 p.5/13</a>).</p>
+  <div class="full"><span class="tag">Full · also avoid</span><p>Tiny or near-duplicate collections (odd idf values, step 7), and identifiers your tokenizer cuts apart (step 9), until the tokenizer is fixed and tested.</p></div>
+</section>
+
+<!-- 14 -->
+<section class="s full" id="decisions" aria-labelledby="h-dec">
+  <span class="tag">Full only</span>
+  <div class="num">STEP 14 · ENGINEERING</div>
+  <h2 id="h-dec">Defaults, and the one-line checks that catch bugs</h2>
+  <div class="tw"><table>
+    <thead><tr><th>Decision</th><th>Default</th><th>Why</th></tr></thead>
+    <tbody>
+      <tr><td>Library</td><td><code>rank_bm25</code> 0.2.2 <code>BM25Okapi</code></td><td>its formula was read from the source and matched by NumPy to 1e-13</td></tr>
+      <tr><td>Tokenizer</td><td><code>tok_norm</code>, same for chunks and question</td><td>fixes the measured <code>split()</code> misses without cutting <code>1.5</code></td></tr>
+      <tr><td>Stemming, stop words</td><td>off until tested</td><td>the toy rule mangled <code>beccs</code>; both change every count</td></tr>
+      <tr><td>k1, b</td><td>1.5, 0.75</td><td>nothing on our data justifies a change yet</td></tr>
+      <tr><td>No word matched</td><td>return fewer than k (maybe none) and log it</td><td>never pad with arbitrary chunks (step 9)</td></tr>
+      <tr><td>Ties</td><td>break by chunk id</td><td>the same run gives the same order</td></tr>
+      <tr><td>Stored with the index</td><td>tokenizer, k1, b, epsilon, library version, chunking</td><td>each one changes the scores</td></tr>
+    </tbody></table></div>
+  <pre>assert (scores &gt; 0).any(), "BM25: no question token matched"   # catches the (IPCC) bug
+assert np.isfinite(scores).all()                                 # catches k1 = 0
+assert tokenize("ERR_CONN_RESET v2.10.3") == [...your expected tokens...]
+# and: test with 3 or more different documents, never 2 (step 7)</pre>
+</section>
+
+<!-- 15 -->
+<section class="s full" id="book" aria-labelledby="h-book">
+  <span class="tag">Full only</span>
+  <div class="num">STEP 15 · READING THE BOOK CRITICALLY</div>
+  <h2 id="h-book">What the book says, checked against measurements</h2>
+  <div class="tw"><table>
+    <thead><tr><th>Book</th><th>Claim (in our words)</th><th>Our check</th></tr></thead>
+    <tbody>
+      <tr><td><a data-book="chapter 12.pdf" data-page="1">Ch12 p.1–2/14</a></td><td>meaning-search can bury the chunk naming an exact term; keyword search misses paraphrases</td><td class="hit">confirmed: BECCS dense 4th, BM25 1st; D-006 the reverse</td></tr>
+      <tr><td><a data-book="chapter 12.pdf" data-page="5">Ch12 p.5/14</a></td><td>BM25 uses no embeddings, only frequency, rarity and length</td><td>correct, but gives no formula, k1 or b</td></tr>
+      <tr><td><a data-book="chapter 12.pdf" data-page="5">Ch12 p.5/14</a></td><td>more mentions, higher score</td><td>true, but it flattens: 5 mentions give 1.92 times one</td></tr>
+      <tr><td><a data-book="chapter 12.pdf" data-page="5">Ch12 p.5/14</a></td><td>a common word like "the" scores almost nothing</td><td class="miss">not in <code>rank_bm25</code>: "the" (80 of 91) gets the floor, 0.838</td></tr>
+      <tr><td><a data-book="chapter 12.pdf" data-page="5">Ch12 p.5/14</a></td><td>length normalisation stops long chunks dominating</td><td>it also lifts short chunks (1.290 at half length)</td></tr>
+      <tr><td><a data-book="chapter 12.pdf" data-page="6">Ch12 p.6/14</a></td><td>the question is tokenized into words</td><td>never says how; <code>split()</code> matches nothing for BECCS or IPCC</td></tr>
+      <tr><td>whole book</td><td>(no TF-IDF, k1, saturation, stemming, lower-casing, stop words or inverted index)</td><td>checked by searching all 25 chapter files</td></tr>
+    </tbody></table></div>
+</section>
+
+<!-- VERIFY -->
+<section class="s" id="verify" aria-labelledby="h-verify">
+  <div class="num">PRACTISE · VERIFY IT YOURSELF</div>
+  <h2 id="h-verify">Rebuild every number and chart in a notebook</h2>
+  <p>Nothing on this page needs to be taken on trust. The notebook <code>study/notebooks/P3_bm25_verify.ipynb</code> recomputes every number above from the real code and the real PDF, checks each one against the value shown here, and redraws every chart as an interactive Plotly chart: hover to read exact values, drag the sliders for k1, b and n.</p>
+  <ol>
+    <li>Open the notebook in VS Code (or from the P3 page of the study kit).</li>
+    <li>Choose the kernel: <b>Select Kernel → .venv (Python 3.12)</b> of <code>rag_learning</code>.</li>
+    <li><b>Run All</b>. Each step prints its checks (✓ or ✗); the last cell prints the total.</li>
+  </ol>
+  <div class="card" id="nbSummary"><b>What it rebuilds</b> <span class="badge m">127 checks · 16 interactive charts · about 50 seconds</span>
+    <ul style="margin-top:6px;font-size:.92rem">
+      <li><b>Step 1</b> recomputes the dense and BM25 ranks of the five queries, running the local MiniLM model offline.</li>
+      <li><b>Step 2</b> builds a real sparse vector: a window uses a median of 89 of its 1,870 slots.</li>
+      <li><b>Steps 3–8</b> rebuild the toy index, the counts, TF-IDF, the tf-part curves (sliders for k1 and b) and the BECCS breakdown. The idf chart also plots <b>every word of the 91 windows</b> as a dot you can hover to see its name.</li>
+      <li><b>Steps 9–13</b> rerun the tokenizer comparison, the overlap check, the vague question, and the Hit@k and MRR table, including the draft-seed metrics.</li>
+    </ul>
+    <p style="margin-top:6px;font-size:.9rem;color:var(--muted)">A ✗ anywhere means the page and the code disagree: tell the tutor. Rebuild the notebook from scratch with <code>uv run python sources/verification/P3/p3_verify_nb_run.py</code>.</p></div>
+</section>
+
+<!-- APPLY -->
+<section class="s" id="apply" aria-labelledby="h-apply">
+  <div class="num">APPLY · USE IT ON YOUR OWN DATA</div>
+  <h2 id="h-apply">Does BM25 suit your documents? Check it, then tick the list</h2>
+  <p>The tool <code>study/tools/bm25_fit_check.py</code> runs everything this lesson taught on <b>your</b> files and questions, and says what it found. Run it from <code>rag_learning/</code>:</p>
+  <pre>uv run python study/tools/bm25_fit_check.py --docs "D:\my-project\docs" --questions my_questions.jsonl --report bm25_report.md
+# optional: --dense (compare with MiniLM) · --tokenizer norm|split|code · --identifiers "ERR_CONN_RESET,v2.10.3" · --k 4</pre>
+  <p>Questions go one per line in a <code>.txt</code>, or as JSON lines when you know the answer, which turns on the measuring part:</p>
+  <pre>{"q": "What does BECCS stand for?", "expect": "bioenergy with carbon capture", "type": "exact-term"}</pre>
+  <div class="tw"><table>
+    <thead><tr><th>Report part</th><th>What it tells you</th><th>Lesson step</th></tr></thead>
+    <tbody>
+      <tr><td>1 Collection</td><td>chunks, average length, vocabulary, the idf floor, how many words are floored, the "valley", overlap doubling</td><td>3, 7, 10</td></tr>
+      <tr><td>2 Tokenizer audit</td><td>identifier-like strings found in your text, and which tokenizer cuts or mangles them</td><td>9</td></tr>
+      <tr><td>3 Per question</td><td>tokens, unknown words, the rarest word, top-k with scores, zero-score and vague-question warnings</td><td>4, 8, 11</td></tr>
+      <tr><td>4 Measuring</td><td>rank of the right chunk, Hit@1, Hit@k and MRR per question type (and dense, with <code>--dense</code>)</td><td>12</td></tr>
+      <tr><td>5 Checklist</td><td>the 12 checks below, ticked ✓ / ✗ / ? with evidence where the tool can tell</td><td>all</td></tr>
+      <tr><td>6 Recommendation</td><td>BM25 alone · hybrid · fix the tokenizer first · not enough data</td><td>13</td></tr>
+    </tbody></table></div>
+  <h3>The real-world checklist</h3>
+  <p style="font-size:.92rem;color:var(--muted)">Tick each one for your own project. Your ticks stay in this browser only.</p>
+  <div class="check" id="checklist"></div>
+  <div class="card" id="example" style="display:grid;gap:10px"><div><b>Example: the tool on the course's climate PDF</b> <span class="badge m">measured · 91 windows · 6 labelled questions</span></div>
+    <p style="font-size:.92rem">Command: <code>uv run python study/tools/bm25_fit_check.py --docs "../upstream/RAG_Techniques/data/Understanding_Climate_Change.pdf" --questions study/tools/examples/climate_questions.jsonl --dense</code></p>
+    <div class="tw"><table>
+      <thead><tr><th>Question type</th><th class="n">BM25 MRR</th><th class="n">Dense MRR</th><th>What happened</th></tr></thead>
+      <tbody><tr><td>exact-term (5)</td><td class="n hit">1.000</td><td class="n">0.500</td><td>BM25 puts every naming window first; dense puts them 1st to 3rd</td></tr>
+      <tr><td>paraphrase (1, draft seed D-006)</td><td class="n miss">0.200</td><td class="n hit">1.000</td><td>BM25 ranks the evidence 5th, behind windows sharing "solar" and common words; dense ranks it 1st</td></tr></tbody></table></div>
+    <ul style="font-size:.92rem">
+      <li><b>Tokenizer audit:</b> 20 identifier-like strings in the PDF. under <code>split()</code>, 17 of them carry stuck-on punctuation in at least one place (<code>(IPCC)</code>, <code>(BECCS),</code>, <code>CO2.</code>…), and for 10 the bare name never occurs at all. <code>tok_norm</code> keeps all 20 whole.</li>
+      <li><b>Checklist:</b> ✓ C2, C5, C8, C10 · ✗ C4 (paraphrases), C6 (the vague question is 100% common words), C7 (IPCC has only 1 chunk above 0), C9 · ? C1, C3, C11, C12 (only you can answer).</li>
+      <li><b>Recommendation: use hybrid (BM25 + dense).</b> That is exactly where R1 picks up.</li>
+    </ul>
+    <p style="font-size:.86rem;color:var(--muted)">These dense ranks are on the 91 windows, so they differ from step 1's, which use the 97-chunk index: same PDF, different chunking. Six questions demonstrate the tool; they do not evaluate anything. Full report: <a data-kit="#/read/study/tools/examples/climate_report.md" data-path="rag_learning/study/tools/examples/climate_report.md">climate_report.md</a>.</p></div>
+</section>
+
+<!-- CHECK -->
+<section class="s" id="check" aria-labelledby="h-check">
+  <div class="num">CHECK YOURSELF</div>
+  <h2 id="h-check">Can you use it on something new?</h2>
+  <p>Answer without scrolling back; then take the full quiz the next day.</p>
+  <div class="q" id="quick"></div>
+  <p>All 18 questions, with hints, model answers and key points: <a data-kit="#/quiz/P3/next" data-path="rag_learning/study/questions/P3_questions.md">open the P3 quiz</a>. Text versions: <a data-kit="#/read/study/reading/P3_bm25.md" data-path="rag_learning/study/reading/P3_bm25.md">short</a> · <a data-kit="#/read/concepts/P3_bm25.md" data-path="rag_learning/concepts/P3_bm25.md">full, with the lab</a>. Next topic: <a data-kit="#/c/R1" data-path="rag_learning/concepts/R1_hybrid_fusion.md">hybrid search (R1)</a>.</p>
+</section>
+
+<footer>
+  <p><b>Where every number comes from.</b> <span class="badge m">measured</span> numbers come from the course's local runs on the repo's climate PDF (<code>sources/verification/P3/P3_FACTS.md</code>, and R1's run in <code>sources/verification/R1/R1_FACTS.md</code>); the notebook recomputes them. <span class="badge t">toy</span> numbers come from six made-up documents; <span class="badge f">formula</span> values are computed on this page. No API was called.</p>
+  <p><b>Added background</b> (not in the book or the measurements): the Okapi name, how search engines store word lists, and the "sparse vector" description. <b>UNVERIFIED:</b> Lucene's idf, real stemmers. Book text is paraphrased, never copied; book pages open the PDF when this page is opened from the study kit.</p>
+</footer>
+</main>
+</div>
+<button type="button" class="totop" id="totop" aria-label="Back to top">↑</button>
+
+<script>
+"use strict";
+(function () {
+  const $ = (s, el = document) => el.querySelector(s);
+  const $$ = (s, el = document) => [...el.querySelectorAll(s)];
+  const root = document.documentElement;
+  const store = { get(k, d) { try { return localStorage.getItem(k) ?? d; } catch { return d; } },
+                  set(k, v) { try { localStorage.setItem(k, v); } catch { /* private window */ } } };
+  const fmt = (x, d = 3) => Number.isFinite(x) ? x.toFixed(d) : "—";
+  const KIT = location.protocol.startsWith("http") && location.pathname.startsWith("/lesson/");
+
+  /* ---------- depth, colour, theme ---------- */
+  function setDepth(m) {
+    root.dataset.depth = m;
+    $$(".seg button").forEach(b => b.setAttribute("aria-pressed", String(b.dataset.depth === m)));
+    store.set("lesson-depth", m);
+    spy();
+  }
+  $$(".seg button").forEach(b => b.addEventListener("click", () => setDepth(b.dataset.depth)));
+  function paintColor() {
+    const dark = root.dataset.theme === "dark";
+    $("#color").innerHTML = `<span aria-hidden="true">${dark ? "☀" : "☾"}</span><span class="lbl"> ${dark ? "Light" : "Dark"}</span>`;
+    $("#color").setAttribute("aria-label", dark ? "Switch to light" : "Switch to dark");
+  }
+  $("#color").addEventListener("click", () => { root.dataset.theme = root.dataset.theme === "dark" ? "light" : "dark"; store.set("lesson-color", root.dataset.theme); paintColor(); });
+  paintColor();
+  $("#style").value = root.dataset.style;
+  $("#style").addEventListener("change", e => { root.dataset.style = e.target.value; store.set("lesson-style", e.target.value); });
+
+  /* ---------- contents panel: where am I, hide/show, left/right, back to top ---------- */
+  const links = $$("#toc a");
+  const targets = links.map(a => document.getElementById(a.getAttribute("href").slice(1)));
+  const narrow = () => !!(window.matchMedia && window.matchMedia("(max-width: 980px)").matches);
+  let lastCur = -1;
+  function spy() {
+    const y = window.scrollY + 90;
+    let cur = 0;
+    targets.forEach((t, i) => { if (t && t.offsetParent !== null && t.getBoundingClientRect().top + window.scrollY <= y) cur = i; });
+    links.forEach((a, i) => a.classList.toggle("on", i === cur));
+    const visible = targets.filter(t => t && t.offsetParent !== null);
+    const pos = visible.indexOf(targets[cur]) + 1;
+    const name = links[cur].textContent.replace(/Full$/, "").replace(/^[^A-Za-z]+/, "").trim();
+    $("#where").textContent = `${name} · ${pos} of ${visible.length}`;
+    $("#crumb").textContent = ` › ${links[cur].querySelector(".n").textContent.trim()} ${name}`;
+    const h = document.documentElement.scrollHeight - innerHeight;
+    const pct = (h > 0 ? Math.min(100, 100 * window.scrollY / h) : 0) + "%";
+    $("#bar").style.width = pct; $("#topprog").style.width = pct;
+    $("#totop").classList.toggle("show", window.scrollY > 500);
+    if (cur !== lastCur) {                       // keep the current step visible inside a long panel
+      lastCur = cur;
+      const side = $("#side"), a = links[cur];
+      if (side.scrollHeight > side.clientHeight && (a.offsetTop < side.scrollTop + 40 || a.offsetTop + a.offsetHeight > side.scrollTop + side.clientHeight - 20))
+        side.scrollTop = Math.max(0, a.offsetTop - side.clientHeight / 3);
+    }
+  }
+  addEventListener("scroll", spy, { passive: true });
+  addEventListener("resize", spy);
+  function closeDrawer() { document.body.classList.remove("side-open"); if (narrow()) $("#menu").setAttribute("aria-expanded", "false"); }
+  links.forEach(a => a.addEventListener("click", () => {
+    const t = document.getElementById(a.getAttribute("href").slice(1));
+    if (t && t.closest(".full") && root.dataset.depth === "short") setDepth("full");
+    closeDrawer();
+  }));
+  function setToc(v) { root.dataset.toc = v; store.set("lesson-toc", v); $("#menu").setAttribute("aria-expanded", String(v === "shown")); spy(); }
+  $("#menu").addEventListener("click", () => {
+    if (narrow()) { const open = document.body.classList.toggle("side-open"); $("#menu").setAttribute("aria-expanded", String(open)); }
+    else setToc(root.dataset.toc === "hidden" ? "shown" : "hidden");
+  });
+  $("#main").addEventListener("click", () => { if (document.body.classList.contains("side-open")) closeDrawer(); });
+  function paintSide() { $("#sidepos").textContent = root.dataset.side === "right" ? "⇆ Left" : "⇆ Right"; }
+  $("#sidepos").addEventListener("click", () => { root.dataset.side = root.dataset.side === "right" ? "left" : "right"; store.set("lesson-side", root.dataset.side); paintSide(); });
+  paintSide();
+  $("#menu").setAttribute("aria-expanded", String(!narrow() && root.dataset.toc === "shown"));
+  addEventListener("keydown", e => {
+    if (e.key && e.key.toLowerCase() === "t" && !e.ctrlKey && !e.metaKey && !e.altKey && !/^(INPUT|TEXTAREA|SELECT)$/.test((document.activeElement || {}).tagName || "")) $("#menu").click();
+  });
+  $("#totop").addEventListener("click", () => { window.scrollTo({ top: 0, behavior: "smooth" }); $(".top .t").focus?.(); });
+  const qd = new URLSearchParams(location.search).get("mode");
+  setDepth(qd === "full" || location.hash === "#full" ? "full" : qd === "short" ? "short" : store.get("lesson-depth", "short"));
+
+  /* ---------- way back: all phases (kit Route page, or the offline route map) ---------- */
+  const HOME = KIT ? "/#/" : "../../RAG_ROUTE_MAP.html";
+  ["#home", "#toRoute"].forEach(s => { const a = $(s); if (a) a.href = HOME; });
+  $$(".kitonly").forEach(a => { if (KIT) a.href = "/" + a.dataset.route; else a.remove(); });
+
+  /* ---------- links: study kit routes, book PDFs ---------- */
+  $$("a[data-kit]").forEach(a => {
+    if (KIT) { a.href = "/" + a.dataset.kit; return; }
+    const c = document.createElement("code");
+    c.textContent = a.dataset.path; c.title = "Open from the study kit to get a link";
+    a.replaceWith(c);
+  });
+  $$("a[data-book]").forEach(a => {
+    a.href = (KIT ? "/book/" : "../../../RAG_Made_Simple_The_Complete_Visual_Guide/") + encodeURIComponent(a.dataset.book) + "#page=" + a.dataset.page;
+    a.target = "_blank"; a.rel = "noopener"; a.title = "Open the book at this page";
+  });
+
+  /* ---------- BM25 exactly as rank_bm25 0.2.2 computes it ---------- */
+  function buildIndex(docs, k1 = 1.5, b = 0.75, eps = 0.25) {
+    const N = docs.length, dl = docs.map(d => d.length), avgdl = dl.reduce((s, x) => s + x, 0) / N;
+    const tf = docs.map(d => { const m = new Map(); d.forEach(t => m.set(t, (m.get(t) || 0) + 1)); return m; });
+    const df = new Map();
+    tf.forEach(m => m.forEach((_, t) => df.set(t, (df.get(t) || 0) + 1)));
+    const raw = new Map(); let sum = 0;
+    df.forEach((n, t) => { const v = Math.log(N - n + 0.5) - Math.log(n + 0.5); raw.set(t, v); sum += v; });
+    const mean = sum / df.size, floor = eps * mean, idf = new Map();
+    raw.forEach((v, t) => idf.set(t, v < 0 ? floor : v));
+    return { N, dl, avgdl, tf, df, raw, idf, mean, floor, k1, b };
+  }
+  function scores(ix, query) {
+    return ix.tf.map((m, i) => query.reduce((s, t) => {
+      const f = m.get(t) || 0, w = ix.idf.get(t) || 0;
+      return s + w * (f * (ix.k1 + 1) / (f + ix.k1 * (1 - ix.b + ix.b * ix.dl[i] / ix.avgdl)));
+    }, 0));
+  }
+  const tfPart = (f, r, k1, b) => f * (k1 + 1) / (f + k1 * (1 - b + b * r));
+
+  /* ---------- step 3: index explorer (toy) ---------- */
+  const TOY = [
+    "bpa regulation 2019 the eu limits bpa in food contact plastics",
+    "climate policy and plastics a review of chemical safety regulation",
+    "the 2019 bpa ban covers baby bottles bpa bps and bpf are bisphenols",
+    "climate change raises sea levels and flood risks for coastal cities",
+    "greenhouse gas emissions and climate targets under the paris agreement",
+    "plastics manufacturing adds climate emissions"].map(s => s.split(" "));
+  const IX = buildIndex(TOY);
+  window.__p3 = { IX, scores, buildIndex, tfPart };
+  const WORDS = ["bpa", "regulation", "2019", "eu", "climate", "plastics", "the", "ban"];
+  const picked = new Set(["bpa", "regulation", "2019"]);
+  function drawIndex() {
+    $("#ix-words").innerHTML = WORDS.map(w => `<button type="button" class="chip" data-w="${w}" aria-pressed="${picked.has(w)}">${w}</button>`).join("");
+    $$("#ix-words .chip").forEach(c => c.addEventListener("click", () => { picked.has(c.dataset.w) ? picked.delete(c.dataset.w) : picked.add(c.dataset.w); drawIndex(); }));
+    const q = [...picked];
+    $("#ix-cards").innerHTML = q.length ? q.map(w => {
+      const post = IX.tf.map((m, i) => m.get(w) ? `d${i}×${m.get(w)}` : null).filter(Boolean);
+      const raw = IX.raw.get(w), note = raw < 0 ? ` (raw ${fmt(raw)} → floor)` : "";
+      return `<div class="icard"><h4>${w}</h4><p>${post.join(", ")}</p><p class="meta">df ${post.length} of 6 · idf ${fmt(IX.idf.get(w))}${note}</p></div>`;
+    }).join("") : `<p style="color:var(--muted)">Pick at least one word.</p>`;
+    const sc = scores(IX, q);
+    $("#ix-docs").innerHTML = TOY.map((d, i) => `<div class="doc ${d.some(t => picked.has(t)) ? "cand" : ""}"><span class="id">d${i}</span><span>${d.map(t => `<span class="tok ${picked.has(t) ? "on" : ""}">${t}</span>`).join(" ")}</span></div>`).join("");
+    const order = sc.map((s, i) => [s, i]).sort((a, b) => b[0] - a[0] || a[1] - b[1]);
+    $("#ix-rank").innerHTML = q.length ? `<b>Ranking for "${q.join(" ")}":</b> ` + order.map(([s, i]) => `d${i} <b>${fmt(s)}</b>`).join(" · ") + `<br><span style="color:var(--muted)">Documents with no shared word score exactly 0.</span>` : "";
+  }
+  drawIndex();
+
+  /* ---------- tiny SVG line-chart helper ---------- */
+  function chart(svg, c) {
+    const W = 640, H = c.h || 300, L = 58, R = 18, T = 18, B = 46;
+    const X = x => L + (x - c.x[0]) / (c.x[1] - c.x[0]) * (W - L - R);
+    const Y = y => T + (1 - (y - c.y[0]) / (c.y[1] - c.y[0])) * (H - T - B);
+    const cy = y => Math.max(c.y[0], Math.min(c.y[1], y));
+    let s = "";
+    c.yt.forEach(v => { s += `<line class="grid" x1="${L}" x2="${W - R}" y1="${Y(v)}" y2="${Y(v)}"/><text x="${L - 8}" y="${Y(v) + 4}" text-anchor="end">${v}</text>`; });
+    c.xt.forEach(v => { s += `<text x="${X(v)}" y="${H - B + 18}" text-anchor="middle">${v}</text>`; });
+    s += `<line class="ax" x1="${L}" x2="${W - R}" y1="${H - B}" y2="${H - B}"/><line class="ax" x1="${L}" x2="${L}" y1="${T}" y2="${H - B}"/>`;
+    if (c.y[0] < 0) s += `<line class="zero" x1="${L}" x2="${W - R}" y1="${Y(0)}" y2="${Y(0)}"/>`;
+    s += `<text x="${(L + W - R) / 2}" y="${H - 8}" text-anchor="middle">${c.xl}</text><text transform="translate(14 ${(T + H - B) / 2}) rotate(-90)" text-anchor="middle">${c.yl}</text>`;
+    (c.h_lines || []).forEach(h => { s += `<line class="${h.cls}" x1="${L}" x2="${W - R}" y1="${Y(h.y)}" y2="${Y(h.y)}"/><text class="lab" x="${W - R - 4}" y="${Y(h.y) - 6}" text-anchor="end">${h.label}</text>`; });
+    c.series.forEach(se => { s += `<polyline class="${se.cls}" points="${se.pts.map(([x, y]) => `${X(x).toFixed(1)},${Y(cy(y)).toFixed(1)}`).join(" ")}"/>`; });
+    (c.marks || []).forEach(m => {
+      s += `<circle class="${m.cls || "dot"}" cx="${X(m.x)}" cy="${Y(cy(m.y))}" r="${m.r || 5}"/>`;
+      if (m.label) s += `<text class="lab" x="${X(m.x) + (m.dx ?? 8)}" y="${Y(cy(m.y)) + (m.dy ?? -8)}" text-anchor="${m.anchor || "start"}">${m.label}</text>`;
+    });
+    (c.notes || []).forEach(n => { s += `<text class="lab" x="${X(n.x)}" y="${Y(n.y)}" text-anchor="${n.anchor || "start"}">${n.t}</text>`; });
+    svg.innerHTML = $$("title,desc", svg).map(e => e.outerHTML).join("") + s;
+  }
+
+  /* ---------- step 6: saturation, length, calculator ---------- */
+  function drawSat() {
+    const k1 = Number($("#k1").value);
+    $("#k1o").textContent = k1.toFixed(2);
+    const fs = Array.from({ length: 41 }, (_, i) => i / 2);
+    chart($("#satChart"), {
+      x: [0, 20], y: [0, 6], xt: [0, 2, 5, 10, 15, 20], yt: [0, 1, 2, 3, 4, 5, 6],
+      xl: "mentions of the word in the chunk (f)", yl: "× the one-mention value",
+      h_lines: [{ y: k1 + 1, cls: "s-ceil", label: `BM25 ceiling k1 + 1 = ${fmt(k1 + 1, 2)}` }],
+      series: [{ cls: "s-tfidf", pts: fs.filter(f => f <= 6).map(f => [f, f]) }]
+        .concat(k1 === 1.5 ? [] : [{ cls: "s-ref", pts: fs.map(f => [f, tfPart(f, 1, 1.5, 0.75)]) }])
+        .concat([{ cls: "s-bm25", pts: fs.map(f => [f, tfPart(f, 1, k1, 0.75)]) }]),
+      marks: [{ x: 10, y: tfPart(10, 1, k1, 0.75), label: `BM25, 10 mentions: ${fmt(tfPart(10, 1, k1, 0.75))}`, dy: 22 }],
+      notes: [{ x: 6.3, y: 5.55, t: "TF-IDF: a straight line, off the chart (10 mentions = 10)" }]
+        .concat(k1 === 1.5 ? [] : [{ x: 20, y: 0.4, t: "faint line: BM25 at the default k1 = 1.5", anchor: "end" }]),
+    });
+    $("#satRead").innerHTML = `At k1 = <b>${k1.toFixed(2)}</b>: 2 mentions give <b>${fmt(tfPart(2, 1, k1, .75))}</b>, 10 give <b>${fmt(tfPart(10, 1, k1, .75))}</b>, and no number of mentions passes <b>${fmt(k1 + 1, 2)}</b>. One mention is always exactly 1 at average length. TF-IDF at 10 mentions: <b>10</b>.`;
+  }
+  $("#k1").addEventListener("input", drawSat); drawSat();
+  function drawLen() {
+    const b = Number($("#bb").value);
+    $("#bbo").textContent = b.toFixed(2);
+    const rs = Array.from({ length: 77 }, (_, i) => 0.2 + i * 0.05);
+    chart($("#lenChart"), {
+      h: 280, x: [0, 4], y: [0, 1.6], xt: [0, 0.5, 1, 2, 3, 4], yt: [0, 0.5, 1, 1.5],
+      xl: "chunk length ÷ average length", yl: "tf part, one mention",
+      series: [{ cls: "s-bm25", pts: rs.map(r => [r, tfPart(1, r, 1.5, b)]) }],
+      marks: [0.5, 1, 2].map(r => ({ x: r, y: tfPart(1, r, 1.5, b), label: fmt(tfPart(1, r, 1.5, b)), dy: -10 })),
+    });
+  }
+  $("#bb").addEventListener("input", drawLen); drawLen();
+  const AVGDL = 129.6703;
+  const PRE = { beccs83: { w: "3.577948", f: 1, dl: 124 }, for16: { w: "0.838237", f: 6, dl: 132 }, ipcc1: { w: "4.099885", f: 1, dl: 145 } };
+  function calc() {
+    const idf = Number($("#cw").value), f = Number($("#cf").value), dl = Number($("#cdl").value), k1 = Number($("#ck1").value), b = Number($("#cb").value);
+    $("#cfo").textContent = f; $("#cdlo").textContent = dl; $("#ck1o").textContent = k1.toFixed(2); $("#cbo").textContent = b.toFixed(2);
+    const K = k1 * (1 - b + b * dl / AVGDL), tp = f * (k1 + 1) / (f + K);
+    $("#calcRead").innerHTML = `K = ${k1.toFixed(2)} × (1 − ${b.toFixed(2)} + ${b.toFixed(2)} × ${dl}/129.67) = <b>${fmt(K, 6)}</b> · tf part = <b>${fmt(tp, 6)}</b> · score = idf × tf part = <b>${fmt(idf * tp, 6)}</b> · ceiling idf × (k1 + 1) = ${fmt(idf * (k1 + 1), 4)}` + (f === 0 ? `<br>f = 0: the word is not in this chunk, so it adds 0.` : "");
+  }
+  ["#cw", "#cf", "#cdl", "#ck1", "#cb"].forEach(s => $(s).addEventListener("input", calc));
+  $$("[data-pre]").forEach(btn => btn.addEventListener("click", () => {
+    const p = PRE[btn.dataset.pre];
+    $("#cw").value = p.w; $("#cf").value = p.f; $("#cdl").value = p.dl; $("#ck1").value = 1.5; $("#cb").value = 0.75; calc();
+  }));
+  calc();
+
+  /* ---------- step 7: idf on 91 windows ---------- */
+  const N91 = 91, FLOOR = 0.838237;
+  const rawIdf = n => Math.log((N91 - n + 0.5) / (n + 0.5));
+  const usedIdf = n => { const r = rawIdf(n); return r < 0 ? FLOOR : r; };
+  function drawIdf() {
+    const n = Number($("#nn").value);
+    $("#nno").textContent = n;
+    const ns = Array.from({ length: 91 }, (_, i) => i + 1);
+    chart($("#idfChart"), {
+      h: 320, x: [0, 91], y: [-3, 5], xt: [1, 10, 20, 30, 45, 60, 77, 91], yt: [-3, -2, -1, 0, 1, 2, 3, 4, 5],
+      xl: "n = windows (of 91) that contain the word", yl: "idf",
+      h_lines: [{ y: FLOOR, cls: "s-ceil", label: "floor 0.838" }],
+      series: [{ cls: "s-tfidf", pts: ns.map(x => [x, Math.log(N91 / x)]) },
+               { cls: "s-raw", pts: ns.filter(x => rawIdf(x) >= -3).map(x => [x, rawIdf(x)]) },
+               { cls: "s-bm25", pts: ns.map(x => [x, usedIdf(x)]) }],
+      marks: [{ x: 1, y: 4.099885, label: "ipcc 4.10" }, { x: 2, y: 3.577948, label: "beccs 3.58", dy: 16 },
+              { x: 34, y: 0.510826, label: "emissions 0.51", dy: 20, dx: -6, anchor: "end" }, { x: 77, y: FLOOR, label: "climate", dy: -10, anchor: "end", dx: -6 },
+              { x: 80, y: FLOOR, label: "for, the", dy: 18 }, { x: n, y: usedIdf(n), cls: "dot2", r: 6 }],
+      notes: [{ x: 58, y: -2.4, t: "raw value (dotted) goes negative", anchor: "middle" }, { x: 30, y: 4.4, t: "dashed grey: textbook ln(N/n) · thick: value rank_bm25 uses" }],
+    });
+    const r = rawIdf(n), u = usedIdf(n);
+    $("#idfRead").innerHTML = `A word in <b>${n}</b> of 91 windows: textbook ln(91/${n}) = ${fmt(Math.log(91 / n))} · rank_bm25 raw = ${fmt(r)} · <b>used = ${fmt(u)}</b>` +
+      (r < 0 ? " (negative, so the floor is used)" : u < FLOOR ? " (below the floor that the most common words get)" : "");
+  }
+  $("#nn").addEventListener("input", drawIdf); drawIdf();
+
+  /* ---------- stacked bars ---------- */
+  function bars(el, rows, max) {
+    el.innerHTML = rows.map(r => `<div class="sbar"><span>${r.label}</span><span class="track" role="img" aria-label="${r.aria}">` +
+      r.parts.map(p => `<span class="${p.cls}" style="width:${(100 * p.v / max).toFixed(2)}%"></span>`).join("") + `</span><span class="v">${r.total}</span></div>`).join("");
+  }
+  bars($("#walkBars"), [
+    { label: "#1 window 83", parts: [{ cls: "p1", v: 3.649768 }, { cls: "p2", v: 1.412504 }], total: "5.062", aria: "beccs 3.650 plus for 1.413 equals 5.062" },
+    { label: "#2 window 82", parts: [{ cls: "p1", v: 3.662734 }, { cls: "p2", v: 1.217614 }], total: "4.880", aria: "beccs 3.663 plus for 1.218 equals 4.880" },
+    { label: "#3 window 16", parts: [{ cls: "p2", v: 1.671968 }], total: "1.672", aria: "no beccs; for 1.672" }], 5.062271);
+  bars($("#scoreBars"), [
+    { label: "vague question", parts: [{ cls: "p2", v: 5.7608 }], total: "5.761", aria: "What can be done about this, top score 5.761" },
+    { label: "BECCS question", parts: [{ cls: "p1", v: 5.062271 }], total: "5.062", aria: "What does BECCS stand for, top score 5.062, the true match" }], 5.7608);
+
+  /* ---------- step 9: tokenizer playground ---------- */
+  const tokSplit = s => s.split(/\s+/).filter(Boolean);
+  const tokNorm = s => s.toLowerCase().match(/[a-z0-9]+(?:[.,][0-9]+)*/g) || [];
+  function tokCode(s) {
+    const out = [];
+    for (const w of s.match(/[A-Za-z0-9_]+(?:[.,][0-9]+)*/g) || []) {
+      const parts = w.split(/_+/).flatMap(p => p.split(/(?<=[a-z0-9])(?=[A-Z])/)).map(p => p.toLowerCase()).filter(Boolean);
+      out.push(...parts);
+      if (parts.length > 1) out.push(w.toLowerCase());
+    }
+    return out;
+  }
+  window.__p3.tok = { tokSplit, tokNorm, tokCode };
+  const EX = {
+    beccs: ["bioenergy with carbon capture and storage (BECCS), which", "What does BECCS stand for?"],
+    ipcc: ["the Intergovernmental Panel on Climate Change (IPCC)", "IPCC"],
+    syn: ["Press the button and the display turns off", "my screen goes dark"],
+    ver: ["Upgrade to v2.10.3 if you see ERR_CONN_RESET.", "ERR_CONN_RESET v2.10.3"],
+    code: ["def getUserId(request) and get_user_id(row)", "user id"],
+  };
+  const esc = t => t.replace(/&/g, "&amp;").replace(/</g, "&lt;");
+  function drawTok() {
+    const text = $("#ptext").value, q = $("#pq").value;
+    const rows = [["split()", "the repo: cut at spaces only", tokSplit], ["tok_norm", "the course: lower-case, letters and digits", tokNorm],
+                  ["code-aware", "also split at _ and case changes, keep the whole name", tokCode]];
+    $("#ptoks").innerHTML = rows.map(([name, how, fn]) => {
+      const tt = fn(text), qt = fn(q), shared = new Set(qt.filter(t => tt.includes(t)));
+      const chipsOf = arr => arr.map(t => `<span class="tk ${shared.has(t) ? "sh" : ""}">${esc(t)}</span>`).join("") || "<i>(none)</i>";
+      const v = shared.size ? `<span class="verdict yes">shared: ${[...shared].map(esc).join(", ")}</span>` : `<span class="verdict no">no shared token → score 0</span>`;
+      return `<div class="tokrow"><div class="h"><b>${name}</b><span style="color:var(--muted);font-size:.82rem">${how}</span>${v}</div>
+        <div><span style="font-size:.78rem;color:var(--muted)">question </span>${chipsOf(qt)}</div><div><span style="font-size:.78rem;color:var(--muted)">text </span>${chipsOf(tt)}</div></div>`;
+    }).join("");
+  }
+  function setEx(k) { [$("#ptext").value, $("#pq").value] = EX[k]; $$("[data-ex]").forEach(b => b.setAttribute("aria-pressed", String(b.dataset.ex === k))); drawTok(); }
+  $$("[data-ex]").forEach(b => b.addEventListener("click", () => setEx(b.dataset.ex)));
+  ["#ptext", "#pq"].forEach(s => $(s).addEventListener("input", () => { $$("[data-ex]").forEach(b => b.setAttribute("aria-pressed", "false")); drawTok(); }));
+  setEx("beccs");
+
+  /* ---------- apply: the real-world checklist ---------- */
+  const CHECKS = [
+    ["Your users search exact identifiers: codes, names, versions, years.", "Look at real questions. The tool counts identifier-like strings in your documents (report part 2)."],
+    ["Those identifiers survive your tokenizer: not cut apart, no punctuation stuck on.", "Report part 2 flags each identifier per tokenizer (step 9)."],
+    ["Documents and questions go through the same tokenizer.", "Read your indexing and query code (step 3)."],
+    ["Some users ask in their own words, so you also need dense or hybrid search.", "Label a few questions 'paraphrase' and compare with --dense (steps 2, 12)."],
+    ["The collection is large and varied enough: 3+ chunks, mean idf above 0, floor above 0.", "Report part 1 (step 7). Near-duplicates and tiny tests give odd scores."],
+    ["Common words do not decide your rankings.", "Report part 3 warns when a question matches only floored or common words (steps 7, 11)."],
+    ["Your code returns only chunks that scored above 0.", "Report part 3 shows zero-score questions; check your top-k code (step 9)."],
+    ["You have labelled questions to measure with.", "Use the JSON-lines format with \"expect\" (report part 4, step 12)."],
+    ["BM25 helps your exact-term questions without hurting paraphrase questions.", "Run with --dense and compare Hit@k and MRR per type (step 12)."],
+    ["k1 and b stay at 1.5 and 0.75 unless an experiment justified a change.", "The report prints the settings used (step 6)."],
+    ["Your chunking is fixed and recorded with the index.", "Report part 1 shows how many words overlap counts twice (step 10)."],
+    ["You never use a fixed threshold on raw BM25 scores.", "Report part 3 lists score ranges per question: they vary a lot (step 11)."],
+  ];
+  const saved = JSON.parse(store.get("p3-checklist", "[]") || "[]");
+  $("#checklist").innerHTML = CHECKS.map(([t, how], i) => `<label><input type="checkbox" data-i="${i}" ${saved.includes(i) ? "checked" : ""}><span><b>C${i + 1}.</b> ${t}<span class="how">How to check: ${how}</span></span></label>`).join("");
+  $$("#checklist input").forEach(c => c.addEventListener("change", () => store.set("p3-checklist", JSON.stringify($$("#checklist input:checked").map(x => Number(x.dataset.i))))));
+
+  /* ---------- check yourself ---------- */
+  const QS = [
+    { q: "A word occurs in 80 of 91 windows. In rank_bm25, what idf does it get?", a: ["0, because common words are worthless", "a negative number", "the floor, 0.838"], ok: 2,
+      why: ["Only a word in exactly half the windows gets 0.", "The raw value is negative, but the library replaces it.", "Right: above half, the raw idf is negative and the floor (0.25 × the mean idf) is used."] },
+    { q: "The chunk contains \"(IPCC)\", the query is \"IPCC\", and the tokenizer is split(). What does BM25 return?", a: ["the IPCC chunk at rank 1", "every score is 0, yet k chunks may still come back", "an error"], ok: 1,
+      why: ["Not with split(): \"(IPCC)\" and \"IPCC\" are different strings.", "Right: no shared token, so every score is 0, and code like the repo's still returns k chunks.", "Nothing errors: an unknown word just adds 0."] },
+    { q: "Dense puts the right chunk at rank 4 and BM25 at rank 1. Hit@4 is equal. Which metric shows the difference?", a: ["MRR (1 ÷ rank)", "Hit@4", "the raw BM25 score"], ok: 0,
+      why: ["Right: 0.25 against 1.0.", "Both are hits at k = 4.", "A raw score cannot be compared with dense scores, or across questions."] },
+  ];
+  $("#quick").innerHTML = QS.map((x, i) => `<fieldset><legend>${i + 1}. ${x.q}</legend>` + x.a.map((a, j) => `<label><input type="radio" name="q${i}" value="${j}"> ${a}</label>`).join("") + `<div class="fb" id="fb${i}" aria-live="polite"></div></fieldset>`).join("");
+  QS.forEach((x, i) => $$(`input[name=q${i}]`).forEach(r => r.addEventListener("change", () => {
+    const j = Number(r.value), fb = $("#fb" + i);
+    fb.className = "fb show " + (j === x.ok ? "ok" : "no"); fb.textContent = x.why[j];
+  })));
+  spy();
+})();
+</script>
+</body>
+</html>

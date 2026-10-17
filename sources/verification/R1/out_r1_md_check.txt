@@ -1,0 +1,109 @@
+PASS kit.lint_questions: no problems
+PASS question file header line
+     items: 17; pre 3; main 12 (R 5, A 4, T 3); interview 2
+PASS 14-18 items (17)
+PASS 3 set=pre items
+PASS 10-12 set=main items with >= 4 R, >= 4 A, >= 2 T
+PASS 1-2 set=interview items
+PASS ids unique
+PASS ids follow <concept>-<type>-<nn> / R1-PRE-<nn>
+PASS id letter = type
+PASS the R1 review item (O1-Q09 lists -> A, C, B, D) is present
+PASS a main T item asks when NOT to use hybrid
+PASS R1-PRE-01: reread links to short AND full file, plus a book page
+PASS R1-PRE-01: 2+ hints, 2-5 keys, 1-2 'for a 4', 1-3 wrong answers
+PASS R1-PRE-01: one short question sentence (15 words)
+PASS R1-PRE-02: reread links to short AND full file, plus a book page
+PASS R1-PRE-02: 2+ hints, 2-5 keys, 1-2 'for a 4', 1-3 wrong answers
+PASS R1-PRE-02: one short question sentence (17 words)
+PASS R1-PRE-03: reread links to short AND full file, plus a book page
+PASS R1-PRE-03: 2+ hints, 2-5 keys, 1-2 'for a 4', 1-3 wrong answers
+PASS R1-PRE-03: one short question sentence (23 words)
+PASS R1-R-01: reread links to short AND full file, plus a book page
+PASS R1-R-01: 2+ hints, 2-5 keys, 1-2 'for a 4', 1-3 wrong answers
+PASS R1-R-01: one short question sentence (10 words)
+PASS R1-R-02: reread links to short AND full file, plus a book page
+PASS R1-R-02: 2+ hints, 2-5 keys, 1-2 'for a 4', 1-3 wrong answers
+PASS R1-R-02: one short question sentence (12 words)
+PASS R1-R-03: reread links to short AND full file, plus a book page
+PASS R1-R-03: 2+ hints, 2-5 keys, 1-2 'for a 4', 1-3 wrong answers
+PASS R1-R-03: one short question sentence (15 words)
+PASS R1-R-04: reread links to short AND full file, plus a book page
+PASS R1-R-04: 2+ hints, 2-5 keys, 1-2 'for a 4', 1-3 wrong answers
+PASS R1-R-04: one short question sentence (11 words)
+PASS R1-R-05: reread links to short AND full file, plus a book page
+PASS R1-R-05: 2+ hints, 2-5 keys, 1-2 'for a 4', 1-3 wrong answers
+PASS R1-R-05: one short question sentence (18 words)
+PASS R1-A-01: reread links to short AND full file, plus a book page
+PASS R1-A-01: 2+ hints, 2-5 keys, 1-2 'for a 4', 1-3 wrong answers
+PASS R1-A-01: Hint 3 only on an A item
+PASS R1-A-01: one short question sentence (22 words)
+PASS R1-A-02: reread links to short AND full file, plus a book page
+PASS R1-A-02: 2+ hints, 2-5 keys, 1-2 'for a 4', 1-3 wrong answers
+PASS R1-A-02: Hint 3 only on an A item
+PASS R1-A-02: one short question sentence (31 words)
+PASS R1-A-03: reread links to short AND full file, plus a book page
+PASS R1-A-03: 2+ hints, 2-5 keys, 1-2 'for a 4', 1-3 wrong answers
+PASS R1-A-03: one short question sentence (29 words)
+PASS R1-A-04: reread links to short AND full file, plus a book page
+PASS R1-A-04: 2+ hints, 2-5 keys, 1-2 'for a 4', 1-3 wrong answers
+PASS R1-A-04: one short question sentence (26 words)
+PASS R1-T-01: reread links to short AND full file, plus a book page
+PASS R1-T-01: 2+ hints, 2-5 keys, 1-2 'for a 4', 1-3 wrong answers
+PASS R1-T-01: one short question sentence (31 words)
+PASS R1-T-02: reread links to short AND full file, plus a book page
+PASS R1-T-02: 2+ hints, 2-5 keys, 1-2 'for a 4', 1-3 wrong answers
+PASS R1-T-02: one short question sentence (21 words)
+PASS R1-T-03: reread links to short AND full file, plus a book page
+PASS R1-T-03: 2+ hints, 2-5 keys, 1-2 'for a 4', 1-3 wrong answers
+PASS R1-T-03: one short question sentence (23 words)
+PASS R1-R-06: reread links to short AND full file, plus a book page
+PASS R1-R-06: 2+ hints, 2-5 keys, 1-2 'for a 4', 1-3 wrong answers
+PASS R1-R-06: one short question sentence (15 words)
+PASS R1-A-06: reread links to short AND full file, plus a book page
+PASS R1-A-06: 2+ hints, 2-5 keys, 1-2 'for a 4', 1-3 wrong answers
+PASS R1-A-06: one short question sentence (16 words)
+PASS R1-R-06: MIT notice with the verbatim question
+PASS R1-A-06: MIT notice with the verbatim question
+PASS R1-R-06: the quoted question is verbatim in the repo
+PASS R1-R-06: the quoted repo answer (80 words) is verbatim, with the MIT notice
+PASS R1-A-06: the quoted question is verbatim in the repo
+PASS Part A ids = set=pre ids (['R1-PRE-01', 'R1-PRE-02', 'R1-PRE-03'])
+PASS Part L ids = main + interview ids (14)
+PASS Part A R1-PRE-01: same wording as the question file
+PASS Part A R1-PRE-02: same wording as the question file
+PASS Part A R1-PRE-03: same wording as the question file
+PASS Part L R1-R-01: same wording as the question file
+PASS Part L R1-R-02: same wording as the question file
+PASS Part L R1-R-03: same wording as the question file
+PASS Part L R1-R-04: same wording as the question file
+PASS Part L R1-R-05: same wording as the question file
+PASS Part L R1-A-01: same wording as the question file
+PASS Part L R1-A-02: same wording as the question file
+PASS Part L R1-A-03: same wording as the question file
+PASS Part L R1-A-04: same wording as the question file
+PASS Part L R1-T-01: same wording as the question file
+PASS Part L R1-T-02: same wording as the question file
+PASS Part L R1-T-03: same wording as the question file
+PASS Part L R1-R-06: same wording as the question file
+PASS Part L R1-A-06: same wording as the question file
+PASS question file: 44 links resolve (files and anchors)
+PASS short file: 4 links resolve (files and anchors)
+PASS full file: 50 links resolve (files and anchors)
+PASS lab notebook: 3 links resolve (files and anchors)
+     word count: short 2829 (prose only, code blocks removed: 2410); full 12267 (prose only: 11202); question file 6647
+PASS short file within 1,800-3,000 words (2829)
+PASS short file header line
+PASS short file has What this is / is not, the book box and Check yourself (FORMAT §3)
+PASS short file has a 'When not to use' section
+     book: 320 pages, 58,223 words (held in memory only)
+PASS question file: no 15-word run shared with the book (longest shared run: 7 words)
+PASS short file: no 15-word run shared with the book (longest shared run: 7 words)
+PASS full file: no 15-word run shared with the book (longest shared run: <6 words)
+PASS lab notebook text: no 15-word run shared with the book (longest shared run: <6 words)
+PASS short file: one python snippet of <= 10 lines (1 block(s), 8 lines)
+PASS short file: the snippet prints ['c69', 'c28', 'c0', 'c1', 'c58'] (comment says ['c69', 'c28', 'c0', 'c1', 'c58'])
+PASS 97 key numbers found in out_r1_measure.txt
+
+103 checks
+ALL PASS

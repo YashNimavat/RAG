@@ -1,0 +1,7 @@
+{"id": "IPCC", "q": "IPCC", "expect": "Climate Change (IPCC)", "type": "exact-term"}
+{"id": "BECCS", "q": "What does BECCS stand for?", "expect": "storage (BECCS), direct air capture", "type": "exact-term"}
+{"id": "CH4", "q": "methane CH4", "expect": "methane (CH4)", "type": "exact-term"}
+{"id": "Kyoto", "q": "Kyoto Protocol 1997", "expect": "The Kyoto Protocol, adopted in 1997", "type": "exact-term"}
+{"id": "1.5C", "q": "limit warming to 1.5 degrees", "expect": "1.5 degrees", "type": "exact-term"}
+{"id": "D-006", "q": "What are the advantages of putting solar panels on lakes or reservoirs?", "expect": "Floating solar farms, installed on water bodies, offer a way to generate solar power without using valuable land space.", "type": "paraphrase"}
+{"id": "vague", "q": "What can be done about this?", "type": "other"}

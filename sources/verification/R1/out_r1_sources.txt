@@ -1,0 +1,176 @@
+PASS RAG_Techniques HEAD 009adba2be1bef49780ef73b6dd3c18fd24b035b
+PASS AI-Engineer-Interview-Questions HEAD e080df282aaf14c128ade55c177a20c38d82df1d
+PASS all_rag_techniques/fusion_retrieval.ipynb cell 0 is a markdown cell
+PASS all_rag_techniques/fusion_retrieval.ipynb cell 0: Scores from both methods are normalized to a common scale
+PASS all_rag_techniques/fusion_retrieval.ipynb cell 0: A weighted combination of these scores is computed (controlled by the `alpha` parameter)
+PASS all_rag_techniques/fusion_retrieval.ipynb cell 10 is a code cell
+PASS all_rag_techniques/fusion_retrieval.ipynb cell 10: FAISS.from_documents(cleaned_texts, embeddings)
+PASS all_rag_techniques/fusion_retrieval.ipynb cell 10: return vectorstore, cleaned_texts
+PASS all_rag_techniques/fusion_retrieval.ipynb cell 10: chunk_size=1000, chunk_overlap=200
+PASS all_rag_techniques/fusion_retrieval.ipynb cell 14 is a code cell
+PASS all_rag_techniques/fusion_retrieval.ipynb cell 14: tokenized_docs = [doc.page_content.split() for doc in documents]
+PASS all_rag_techniques/fusion_retrieval.ipynb cell 14: return BM25Okapi(tokenized_docs)
+PASS all_rag_techniques/fusion_retrieval.ipynb cell 15 is a code cell
+PASS all_rag_techniques/fusion_retrieval.ipynb cell 15: bm25 = create_bm25_index(cleaned_texts)
+PASS all_rag_techniques/fusion_retrieval.ipynb cell 17 is a code cell
+PASS all_rag_techniques/fusion_retrieval.ipynb cell 17: epsilon = 1e-8
+PASS all_rag_techniques/fusion_retrieval.ipynb cell 17: all_docs = vectorstore.similarity_search("", k=vectorstore.index.ntotal)
+PASS all_rag_techniques/fusion_retrieval.ipynb cell 17: bm25_scores = bm25.get_scores(query.split())
+PASS all_rag_techniques/fusion_retrieval.ipynb cell 17: vector_results = vectorstore.similarity_search_with_score(query, k=len(all_docs))
+PASS all_rag_techniques/fusion_retrieval.ipynb cell 17: vector_scores = np.array([score for _, score in vector_results])
+PASS all_rag_techniques/fusion_retrieval.ipynb cell 17: vector_scores = 1 - (vector_scores - np.min(vector_scores)) / (np.max(vector_scores) - np.min(vector_scores) + epsilon)
+PASS all_rag_techniques/fusion_retrieval.ipynb cell 17: combined_scores = alpha * vector_scores + (1 - alpha) * bm25_scores
+PASS all_rag_techniques/fusion_retrieval.ipynb cell 17: sorted_indices = np.argsort(combined_scores)[::-1]
+PASS all_rag_techniques/fusion_retrieval.ipynb cell 17: return [all_docs[i] for i in sorted_indices[:k]]
+PASS all_rag_techniques/fusion_retrieval.ipynb cell 17: # Step 1: Get all documents from the vectorstore
+PASS all_rag_techniques/fusion_retrieval.ipynb cell 19 is a code cell
+PASS all_rag_techniques/fusion_retrieval.ipynb cell 19: query = "What are the impacts of climate change on the environment?"
+PASS all_rag_techniques/fusion_retrieval.ipynb cell 19: k=5, alpha=0.5
+PASS all_rag_techniques/fusion_retrieval_with_llamaindex.ipynb cell 3 is a code cell
+PASS all_rag_techniques/fusion_retrieval_with_llamaindex.ipynb cell 3: from llama_index.legacy.retrievers.bm25_retriever import BM25Retriever
+PASS all_rag_techniques/fusion_retrieval_with_llamaindex.ipynb cell 3: from llama_index.core.retrievers import QueryFusionRetriever
+PASS all_rag_techniques/fusion_retrieval_with_llamaindex.ipynb cell 3: OpenAIEmbedding(model="text-embedding-3-small", dimensions=EMBED_DIMENSION)
+PASS all_rag_techniques/fusion_retrieval_with_llamaindex.ipynb cell 8 is a code cell
+PASS all_rag_techniques/fusion_retrieval_with_llamaindex.ipynb cell 8: faiss.IndexFlatL2(EMBED_DIMENSION)
+PASS all_rag_techniques/fusion_retrieval_with_llamaindex.ipynb cell 15 is a code cell
+PASS all_rag_techniques/fusion_retrieval_with_llamaindex.ipynb cell 15: BM25Retriever.from_defaults(
+PASS all_rag_techniques/fusion_retrieval_with_llamaindex.ipynb cell 15: similarity_top_k=2
+PASS all_rag_techniques/fusion_retrieval_with_llamaindex.ipynb cell 17 is a code cell
+PASS all_rag_techniques/fusion_retrieval_with_llamaindex.ipynb cell 17: vector_retriever = index.as_retriever(similarity_top_k=2)
+PASS all_rag_techniques/fusion_retrieval_with_llamaindex.ipynb cell 19 is a code cell
+PASS all_rag_techniques/fusion_retrieval_with_llamaindex.ipynb cell 19: QueryFusionRetriever(
+PASS all_rag_techniques/fusion_retrieval_with_llamaindex.ipynb cell 19: retriever_weights=[
+PASS all_rag_techniques/fusion_retrieval_with_llamaindex.ipynb cell 19: 0.6, # vector retriever weight
+PASS all_rag_techniques/fusion_retrieval_with_llamaindex.ipynb cell 19: 0.4 # BM25 retriever weight
+PASS all_rag_techniques/fusion_retrieval_with_llamaindex.ipynb cell 19: num_queries=1
+PASS all_rag_techniques/fusion_retrieval_with_llamaindex.ipynb cell 19: mode='dist_based_score'
+PASS all_rag_techniques/fusion_retrieval_with_llamaindex.ipynb cell 20 is a markdown cell
+PASS all_rag_techniques/fusion_retrieval_with_llamaindex.ipynb cell 20: **reciprocal_rerank**
+PASS all_rag_techniques/fusion_retrieval_with_llamaindex.ipynb cell 20: Since there is no normalization, this method is not suitable
+PASS all_rag_techniques/fusion_retrieval_with_llamaindex.ipynb cell 20: **relative_score**
+PASS all_rag_techniques/fusion_retrieval_with_llamaindex.ipynb cell 20: **dist_based_score**
+PASS all_rag_techniques/fusion_retrieval_with_llamaindex.ipynb cell 20: min\_score = mean\_score - 3 * std\_dev
+PASS all_rag_techniques/fusion_retrieval_with_llamaindex.ipynb cell 20: max\_score = mean\_score + 3 * std\_dev
+PASS all_rag_techniques/fusion_retrieval_with_llamaindex.ipynb cell 20: **simple**
+PASS all_rag_techniques/fusion_retrieval_with_llamaindex.ipynb cell 20: setting it to 1 disables query generation
+PASS all_rag_techniques/fusion_retrieval_with_llamaindex.ipynb cell 22 is a code cell
+PASS all_rag_techniques/fusion_retrieval_with_llamaindex.ipynb cell 22: response = retriever.retrieve(query)
+PASS all_rag_techniques/fusion_retrieval.ipynb cell 17: no document-id alignment step
+PASS all_rag_techniques_runnable_scripts/fusion_retrieval.py:L40: vectorstore = FAISS.from_documents(cleaned_texts, embeddings)
+PASS all_rag_techniques_runnable_scripts/fusion_retrieval.py:L56: tokenized_docs = [doc.page_content.split() for doc in documents]
+PASS all_rag_techniques_runnable_scripts/fusion_retrieval.py:L61: def fusion_retrieval(vectorstore, bm25, query: str, k: int = 5, alpha: float = 0.5) -> List[Document]:
+PASS all_rag_techniques_runnable_scripts/fusion_retrieval.py:L75: all_docs = vectorstore.similarity_search("", k=vectorstore.index.ntotal)
+PASS all_rag_techniques_runnable_scripts/fusion_retrieval.py:L76: bm25_scores = bm25.get_scores(query.split())
+PASS all_rag_techniques_runnable_scripts/fusion_retrieval.py:L77: vector_results = vectorstore.similarity_search_with_score(query, k=len(all_docs))
+PASS all_rag_techniques_runnable_scripts/fusion_retrieval.py:L79: vector_scores = np.array([score for _, score in vector_results])
+PASS all_rag_techniques_runnable_scripts/fusion_retrieval.py:L80: vector_scores = 1 - (vector_scores - np.min(vector_scores)) / (np.max(vector_scores) - np.min(vector_scores))
+PASS all_rag_techniques_runnable_scripts/fusion_retrieval.py:L81: bm25_scores = (bm25_scores - np.min(bm25_scores)) / (np.max(bm25_scores) - np.min(bm25_scores))
+PASS all_rag_techniques_runnable_scripts/fusion_retrieval.py:L83: combined_scores = alpha * vector_scores + (1 - alpha) * bm25_scores
+PASS all_rag_techniques_runnable_scripts/fusion_retrieval.py:L84: sorted_indices = np.argsort(combined_scores)[::-1]
+PASS all_rag_techniques_runnable_scripts/fusion_retrieval.py:L86: return [all_docs[i] for i in sorted_indices[:k]]
+PASS all_rag_techniques_runnable_scripts/fusion_retrieval.py:L100: self.bm25 = create_bm25_index(self.cleaned_texts)
+PASS all_rag_techniques_runnable_scripts/fusion_retrieval.py:L135: parser.add_argument('--alpha', type=float, default=0.5, help='Weight for vector search vs. BM25.')
+PASS all_rag_techniques_runnable_scripts/fusion_retrieval.py:L75-L86 has no epsilon
+PASS repo: RRF is named only in a markdown description, never implemented: ['all_rag_techniques/fusion_retrieval_with_llamaindex.ipynb cell 20']
+PASS chapter 12.pdf p.1/14: 'BPA regulation 2019'
+PASS chapter 12.pdf p.1/14: 'ranks fourth'
+PASS chapter 12.pdf p.1/14: 'blind spot'
+PASS chapter 12.pdf p.2/14: 'The words are not.'
+PASS chapter 12.pdf p.2/14: 'Neither retrieval method alone covers'
+PASS chapter 12.pdf p.3/14: 'Each retriever returns its own ranked list'
+PASS chapter 12.pdf p.3/14: 'normalizes the scores from both lists'
+PASS chapter 12.pdf p.3/14: 'flip to the index at the back of each book'
+PASS chapter 12.pdf p.4/14: 'complementary blind spots'
+PASS chapter 12.pdf p.5/14: 'Build Two Indexes from the Same Chunks'
+PASS chapter 12.pdf p.5/14: 'indexed twice'
+PASS chapter 12.pdf p.6/14: 'The chunks are identical.'
+PASS chapter 12.pdf p.6/14: 'Query Both Retrievers in Parallel'
+PASS chapter 12.pdf p.6/14: 'tokenizes the query into individual words'
+PASS chapter 12.pdf p.7/14: 'overlap partially'
+PASS chapter 12.pdf p.7/14: 'Normalize the Scores'
+PASS chapter 12.pdf p.8/14: 'unbounded, based on term statistics'
+PASS chapter 12.pdf p.8/14: 'would dominate by sheer magnitude'
+PASS chapter 12.pdf p.8/14: 'three standard deviations below the mean'
+PASS chapter 12.pdf p.8/14: 'This method is robust'
+PASS chapter 12.pdf p.8/14: 'distorted by a single outlier score'
+PASS chapter 12.pdf p.9/14: 'represent the same thing'
+PASS chapter 12.pdf p.9/14: 'assign 0.6 to the vector'
+PASS chapter 12.pdf p.9/14: 'only that retriever's weighted score contributes'
+PASS chapter 12.pdf p.10/14: 'might weight BM25 higher'
+PASS chapter 12.pdf p.10/14: 'Normalize both score sets to 0-1 range'
+PASS chapter 12.pdf p.10/14: 'Rank all chunks by final_score'
+PASS chapter 12.pdf p.10/14: 'tokenize each chunk, build term'
+PASS chapter 12.pdf p.11/14: 'A 50/50 split gives equal say'
+PASS chapter 12.pdf p.11/14: '60/40 or 70/30'
+PASS chapter 12.pdf p.12/14: 'measure retrieval quality at different weight settings'
+PASS chapter 12.pdf p.12/14: 'adapt the weights dynamically'
+PASS chapter 12.pdf p.12/14: 'Multi-Query Expansion'
+PASS chapter 12.pdf p.12/14: 'Overkill when'
+PASS chapter 12.pdf p.12/14: 'small enough that vector search alone'
+PASS chapter 12.pdf p.13/14: 'Latency is extremely constrained'
+PASS chapter 12.pdf p.13/14: 'Significant improvement when queries'
+PASS chapter 12.pdf p.13/14: 'the improvement in recall'
+PASS chapter 12.pdf p.14/14: 'Score normalization is essential'
+PASS chapter 12.pdf p.14/14: 'Typical configurations range from 50/50 to 70/30'
+PASS chapter 13.pdf p.5/13: 'Vector search, BM25, or the'
+PASS Appendix.pdf p.14/23: 'Best Match 25'
+PASS Appendix.pdf p.16/23: 'Fusion Retrieval Running two different retrievers'
+PASS Appendix.pdf p.17/23: 'weighted scores into a single ranked list'
+PASS Appendix.pdf p.19/23: 'Min-Max Normalization'
+PASS Appendix.pdf p.19/23: 'distorted by a single outlier'
+PASS Appendix.pdf p.21/23: 'Score Normalization'
+PASS book (all files): pattern 'reciprocal rank fusion' occurs nowhere ([])
+PASS book (all files): pattern '\\bRRF\\b' occurs nowhere ([])
+PASS book (all files): pattern 'rank fusion' occurs nowhere ([])
+PASS book (all files): pattern 'Cormack' occurs nowhere ([])
+PASS book (all files): pattern 'z-score' occurs nowhere ([])
+PASS book (all files): pattern 'misalign' occurs nowhere ([])
+PASS book chapter 12: pattern 'reciprocal' occurs nowhere ([])
+PASS book chapter 12: pattern '\\brank\\w* (?:position|based)' occurs nowhere ([])
+PASS book chapter 12: pattern '\\bclip' occurs nowhere ([])
+PASS book chapter 12: pattern 'alignment|aligned' occurs nowhere ([])
+PASS chapter 12: 'standard deviation' only on p.8 ([8])
+PASS AIQ 04-rag-and-retrieval/questions.md: ### 9. What is hybrid search, and why does pure vector search fail on some queries?
+PASS AIQ 04-rag-and-retrieval/questions.md: ### 24. How does reciprocal rank fusion work, and why fuse by rank instead of by score?
+PASS AIQ 04-rag-and-retrieval/questions.md: def rrf(rankings: list[list[str]], k: int = 60) -> list[str]:
+PASS AIQ 04-rag-and-retrieval/questions.md: return sorted(scores, key=scores.get, reverse=True)
+PASS AIQ 04-rag-and-retrieval/questions.md: Ranks are invariant to all of that.
+PASS AIQ 04-rag-and-retrieval/questions.md: It's famously insensitive - nobody meaningfully tunes it.
+PASS AIQ 04-rag-and-retrieval/questions.md: If a doc appears in the dense list only, what's its ceiling in the fused ranking?
+PASS AIQ 04-rag-and-retrieval/questions.md: When would weighted fusion beat RRF, and what data do you need to tune it?
+PASS AIQ 04-rag-and-retrieval/questions.md: BM25 scores zero on perfect paraphrases with no shared vocabulary
+PASS AIQ 04-rag-and-retrieval/questions.md: A document ranked 1st contributes 1/(60+1) ≈ 0.016 per list; rank 50 contributes ≈ 0.009.
+PASS AIQ 12-coding-challenges/17_hybrid_search_and_rerank.py:L131: return sorted(fused, key=lambda doc_id: (-fused[doc_id], doc_id))
+PASS AIQ 12-coding-challenges/17_hybrid_search_and_rerank.py:L245: lists = [[0, 1, 2, 3, 4], [4, 1, 3, 2, 0]]
+PASS AIQ 12-coding-challenges/17_hybrid_search_and_rerank.py:L246: assert reciprocal_rank_fusion(lists) == [1, 0, 4, 2, 3]
+PASS AIQ 12-coding-challenges/17_hybrid_search_and_rerank.py:L247: assert reciprocal_rank_fusion(lists, k=0)[0] == 0
+PASS AIQ 12-coding-challenges/17_hybrid_search_and_rerank.py:L241: assert int(np.argmax(lex + 100 * dense)) == DECOY
+PASS AIQ LICENSE: MIT, Copyright (c) 2026 Om
+PASS O1 bank Q9: rankings dense [A, B, C], BM25 [C, A, D]; key order A > C > B > D
+PASS session_log 2026-10-08 #1: O1-Q09 scored 2 at confidence 3; order A, C, B, D (the R1 review item)
+PASS review_queue (updated 2026-10-17): the R1 review is paused until the lesson is read
+PASS 02 R1 card: Ch12 p.1–2/14 (blind spots), p.5–6/14 (two indexes), p.7–9/14 (normalisation), p
+PASS 02 R1 card: The book does not cover RRF
+PASS 02 R1 card: fusion_retrieval.py:L75-L86
+PASS 02 R1 card: cell 19 (`dist_based_score`)
+PASS 02 R1 card: cell 20 (rejects RRF on incorrect grounds
+PASS 02 R1 card: C#33 (Cormack et al. 2009, RRF k=60)
+PASS 04 R1 row: p.4/14–p.12/14 (sketch p.10/14)
+PASS 04 R1 row: `fusion_retrieval.ipynb cells 10-19`
+PASS 04 R1 row: `rs/fusion_retrieval.py:L20-L116`
+PASS 04 R1 row: `fusion_retrieval_with_llamaindex.ipynb cells 15-22`
+PASS 04 R1 row: RRF absent from the book (DV-28)
+PASS 04 DV-27 (alignment bug)
+PASS 06 v2.0 card: RRF over dense and BM25 top-50 lists raises CE@4 on exact-term and table/numeric
+PASS 06 v2.0 card: `k_rrf = 60`
+PASS 06 v2.0 card: Weighted score fusion is a second arm
+PASS 06 v2.0 card: three arms (dense, BM25 alone, hybrid)
+PASS 06 v2.0 card: write a unit test that fusion preserves chunk identity
+PASS 06 v2.0 card: if the question set has no exact-term needs
+PASS P3 H.2 / G.2: cell 17 with all-zero BM25 becomes vector-only (consistent with R1)
+PASS C4_FACTS S9: first_rel fp a8aa456e76ccea3b and D-002 top-4 fp 78ebfed94d0021da (R1 S4/S14 reproduce both)
+PASS AE Ch2 'Retrieval Fundamentals': keyword search recommended first (short phrase)
+PASS misconception log: MC-001..MC-006 exist
+
+173 checks
+ALL PASS

@@ -1,0 +1,292 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="theme-color" content="#f8f9fd">
+<title>BM25, made understandable · Visual Learning Lesson</title>
+<style>
+:root { --bg:#f7f8fc; --paper:#fff; --ink:#1d2943; --muted:#60718c; --line:#e4e9f2; --blue:#4356d8; --blue-light:#e8edff; --purple:#7053cb; --teal:#087e83; --teal-light:#def6f0; --amber:#b36b10; --amber-light:#fff4dc; --rose:#bc4e69; --shadow:0 18px 45px rgba(42,56,91,.07); }
+*{box-sizing:border-box} html{scroll-behavior:smooth} body{margin:0;background:var(--bg);font:16px/1.74 Inter,ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;color:var(--ink);-webkit-font-smoothing:antialiased} a{color:var(--blue);text-decoration:none} a:hover{text-decoration:underline} button,input,select{font:inherit} button{cursor:pointer} button:focus-visible,input:focus-visible{outline:3px solid #8bb2ff;outline-offset:3px} ::selection{background:#c7d7ff}
+#progress-track{position:fixed;z-index:100;top:0;left:0;width:100%;height:4px;background:transparent}#progress-bar{height:100%;width:0;background:linear-gradient(90deg,#485dde,#12a7a1);transition:width .1s linear}
+.topbar{max-width:1240px;margin:0 auto;padding:29px 32px 20px;display:flex;justify-content:space-between;align-items:center;gap:16px}.brand{display:flex;gap:9px;align-items:center;font-size:12px;letter-spacing:2.4px;font-weight:800;text-transform:uppercase;color:#44536d}.brand-logo{background:#4557d9;color:white;padding:3px 9px;border-radius:8px;letter-spacing:0;font-size:16px}.top-pill{font-size:12px;color:#64758f;letter-spacing:.3px;border:1px solid var(--line);background:white;border-radius:99px;padding:5px 14px}
+.hero{max-width:1180px;margin:0 auto;background:linear-gradient(122deg,#18264b 0%,#303b80 63%,#4757a8 100%);border-radius:28px;padding:62px 72px 55px;color:white;position:relative;overflow:hidden;box-shadow:0 24px 55px rgba(32,45,91,.14)}.hero:before{content:"";width:530px;height:530px;border:1px solid #ffffff22;border-radius:50%;position:absolute;right:-110px;top:-260px;box-shadow:0 0 0 85px #ffffff07,0 0 0 170px #ffffff06;pointer-events:none}.hero>*{position:relative}.eyebrow{display:inline-flex;gap:9px;align-items:center;color:#bcd4ff;font-size:12px;letter-spacing:2.1px;font-weight:750;text-transform:uppercase}.eyebrow i{width:7px;height:7px;display:inline-block;background:#64dcc6;border-radius:100%}.hero h1{font-size:clamp(43px,6vw,71px);letter-spacing:-3px;line-height:1.07;margin:21px 0 15px;font-weight:800}.hero .sub{font-size:19px;max-width:680px;color:#e1e8ff;line-height:1.6;margin:0 0 25px}.hero-stats{display:flex;gap:10px 14px;flex-wrap:wrap}.hero-stats span{border:1px solid #ffffff3c;background:#ffffff12;border-radius:50px;padding:7px 15px;font-size:12px;color:#e9eeff}.modebox{margin-top:31px;display:flex;align-items:center;flex-wrap:wrap;gap:13px}.mode-switch{display:inline-flex;background:#ffffff1d;padding:5px;border:1px solid #ffffff35;border-radius:13px;gap:3px}.mode-switch button{background:transparent;color:#dbe4ff;border:0;padding:9px 21px;border-radius:9px;font-weight:750;font-size:13px}.mode-switch button.active{background:white;color:#293e85;box-shadow:0 5px 16px #14234c26}.modehint{font-size:12px;color:#d2ddff;max-width:370px;line-height:1.4}
+.layout{max-width:1180px;margin:30px auto 90px;display:grid;grid-template-columns:230px minmax(0,1fr);gap:28px;align-items:start}.sidebar{position:sticky;top:32px;padding:22px 14px 16px}.navhead{font-size:11px;color:#8a98ae;font-weight:800;letter-spacing:1.5px;padding-left:12px;text-transform:uppercase;margin:3px 0 15px}.sidebar a{display:block;font-size:13px;color:#61728d;border-radius:10px;padding:9px 12px;margin:2px 0;font-weight:600}.sidebar a:hover{background:#eaeeff;color:#324bb5;text-decoration:none}.side-note{margin:32px 10px;background:#e8ecf9;border-radius:14px;padding:15px;color:#4b5f85;font-size:12px;line-height:1.55}.side-note strong{display:block;color:#334783;margin-bottom:6px;font-size:12px}.content{min-width:0}.section{background:white;border:1px solid #e7ebf3;border-radius:23px;padding:38px 46px;margin-bottom:24px;box-shadow:var(--shadow);scroll-margin-top:25px}.section-kicker{font-size:11px;letter-spacing:2px;text-transform:uppercase;color:var(--blue);font-weight:850;margin:0 0 9px}.section h2{font-size:clamp(24px,3vw,33px);letter-spacing:-.9px;line-height:1.3;margin:0 0 21px;font-weight:800}.section h3{font-size:19px;line-height:1.36;margin:28px 0 8px;letter-spacing:-.3px}.section p{margin:12px 0;color:#394862}.section strong{color:#172b49}.lead{font-size:18px;line-height:1.72!important;color:#273958!important}.section hr{border:0;border-top:1px solid #e9edf3;margin:28px 0}.muted{font-size:13px;color:#6d7e98!important}.ink{color:var(--ink)}.narrow{max-width:660px}
+.quote-query{display:flex;align-items:center;gap:15px;background:#f5f7fe;border:1px solid #e7ecfc;border-radius:15px;padding:18px 20px;margin:21px 0}.query-ico{font-size:20px;background:#e3eafb;border-radius:11px;display:grid;place-items:center;width:42px;height:42px;flex-shrink:0}.query-text{font-size:19px;font-weight:800;color:#25395d}.mini-label{font-size:11px;font-weight:800;letter-spacing:1px;text-transform:uppercase;color:#8492aa;line-height:1.5}.compare{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin:22px 0 8px}.result-card{border:1px solid #e1e6f1;padding:21px;border-radius:16px;background:#fafbff}.result-card.keyword{background:#f1faf8;border-color:#cbece5}.result-card .result-title{font-size:13px;font-weight:800;letter-spacing:.1px}.rank{font-weight:850;font-size:39px;line-height:1.2;letter-spacing:-1.5px;margin:10px 0 3px}.result-card:not(.keyword) .rank{color:#75639e}.result-card.keyword .rank{color:var(--teal)}.result-foot{color:#63738a;font-size:12px;line-height:1.55}.explain-line{background:#f3f7ff;border-left:4px solid #5264da;border-radius:0 11px 11px 0;padding:15px 19px;margin:21px 0;color:#3c4c66;font-size:14px}.explain-line.teal{border-color:#13a79e;background:#effaf8}.explain-line.amber{border-color:#daa53a;background:#fffbf1}
+.concept-map{position:relative;border:1px solid #e2e8f3;background:radial-gradient(circle at 50% 40%,#edf2ff,white 65%);border-radius:18px;margin:23px 0;padding:23px 18px 21px}.center-node{max-width:200px;margin:0 auto;text-align:center;background:linear-gradient(125deg,#3f58cf,#6751cd);color:white;border-radius:14px;padding:14px 12px;font-weight:850;box-shadow:0 9px 22px #464fbc30;font-size:16px}.branches{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px;margin-top:35px;position:relative}.branches:before{content:"";position:absolute;left:50%;width:1px;height:20px;background:#c0cbdf;top:-34px}.branches:after{content:"";position:absolute;left:17%;width:66%;height:1px;background:#c0cbdf;top:-15px}.branch{padding:15px 12px 14px;border:1px solid #e3e9f5;background:white;border-radius:13px;position:relative;text-align:center;min-height:103px;display:flex;flex-direction:column;justify-content:center}.branch:before{content:"";width:1px;height:15px;background:#c0cbdf;position:absolute;left:50%;top:-16px}.branch b{font-size:15px;display:block}.branch small{font-size:12px;color:#61738e;line-height:1.45;margin-top:4px}.branch:nth-child(1){border-top:4px solid #5164da}.branch:nth-child(2){border-top:4px solid #1ba2a3}.branch:nth-child(3){border-top:4px solid #dd9a3f}.map-caption{font-size:12px;color:#70809b;text-align:center;margin:16px 4px 0}
+.terms{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin:18px 0}.term{border:1px solid var(--line);border-radius:12px;padding:16px;background:#fcfdff}.term .chip{font-weight:850;font-size:11px;letter-spacing:1px;display:inline-block;padding:2px 8px;background:#e8edff;color:#495bcc;border-radius:6px}.term b{display:block;font-size:15px;margin-top:9px}.term p{font-size:12px;line-height:1.5;margin:5px 0 0}
+.table-wrap{overflow-x:auto;border:1px solid #e5eaf3;border-radius:13px;margin:18px 0}table{width:100%;border-collapse:collapse;font-size:14px;min-width:430px} th,td{text-align:left;padding:12px 17px;border-bottom:1px solid #e9edf4}th{background:#f5f7fd;color:#586886;font-size:11px;letter-spacing:.4px;text-transform:uppercase;font-weight:800}tr:last-child td{border-bottom:0}td:first-child{font-weight:670;color:#263b59}.win{color:var(--teal);font-weight:800}.lose{color:#ba5464;font-weight:800}
+.metric-demo{border-radius:17px;border:1px solid #e4eaf4;background:#fbfcff;padding:24px;margin:23px 0}.metric-top{display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap}.metric-top h3{margin:0!important}.slider-pair{display:grid;grid-template-columns:1fr 1fr;gap:24px;margin-top:20px}.slider-item label{display:flex;align-items:center;justify-content:space-between;font-size:13px;font-weight:770;color:#42516b}.slider-item output{font-variant-numeric:tabular-nums;background:#e9edff;color:#3b50aa;padding:2px 9px;border-radius:8px;font-size:12px}input[type=range]{width:100%;accent-color:#4c61cf;cursor:pointer;margin:13px 0 4px}.slider-hint{font-size:11px;color:#7485a0;line-height:1.5}.chart-grid{display:grid;grid-template-columns:1fr 1fr;gap:15px;margin-top:21px}.chart-panel{padding:12px;border:1px solid #e7ecf6;border-radius:13px;background:white;min-width:0}.chart-panel h4{margin:2px 4px 1px;font-size:13px}.chart-panel p{font-size:11px;color:#7c8ba0;margin:0 4px 9px;line-height:1.4}.chart-panel svg{width:100%;height:auto;display:block;overflow:visible}.legend{display:flex;gap:12px;flex-wrap:wrap;font-size:11px;color:#677995;padding:0 7px 5px}.legend span{display:inline-flex;align-items:center;gap:5px}.legend i{width:11px;height:3px;background:#4e5ee0;display:inline-block;border-radius:2px}.statline{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin:16px 0 3px}.stat{background:#edf2fc;border-radius:10px;padding:11px;text-align:center}.stat b{display:block;font-size:21px;letter-spacing:-.5px;font-variant-numeric:tabular-nums;color:#2f4fa8}.stat small{font-size:10px;color:#667b9d;display:block;line-height:1.4}
+.formula{background:#1e2b4b;color:#eff4ff;border-radius:15px;padding:19px 22px;font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;line-height:1.8;font-size:13px;overflow:auto;margin:18px 0}.formula small{font-size:11px;color:#b5c7ec}.step-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:9px;margin:15px 0}.step-grid>div{background:#f1f5ff;padding:14px;border-radius:12px;border:1px solid #e0e8fa}.step-grid b{font-size:12px;color:#4351a2}.step-grid .value{font-size:19px;color:#1b316c;font-weight:800;margin:5px 0;font-variant-numeric:tabular-nums}.step-grid p{font-size:11px;line-height:1.4;margin:0}
+.playground{border:1px solid #dce7f2;border-radius:18px;margin:20px 0;background:#f9fbff;padding:22px}.playground-head{display:flex;align-items:center;justify-content:space-between;gap:8px;margin-bottom:13px}.playground-head h3{margin:0!important}.live{font-size:11px;background:#e0f5ed;color:#117b68;border-radius:99px;padding:3px 9px;font-weight:800}.field-label{display:block;color:#64748b;font-size:12px;font-weight:800;margin:12px 0 5px}.text-field{display:block;width:100%;border:1px solid #d7e0ef;border-radius:10px;padding:11px 13px;font-size:14px;color:#253958;background:white}.tokens-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:16px}.tokens-column{background:white;border:1px solid #e0e8f4;border-radius:12px;padding:14px;min-width:0}.tokens-column h4{margin:0 0 3px;font-size:13px}.tokens-column p{font-size:11px;color:#7a8ca5;margin:0 0 10px}.token-bag{display:flex;gap:5px;flex-wrap:wrap;min-height:40px}.token{display:inline-block;border-radius:7px;background:#eff2f8;padding:3px 7px;font:12px ui-monospace,monospace;overflow-wrap:anywhere;color:#63758e;border:1px solid #e3e7ef}.token.hit{background:#dcf6ef;color:#117b68;border-color:#a7e6d4;font-weight:800}.match-message{font-size:12px!important;line-height:1.5!important;padding-top:10px;margin-bottom:0!important}.match-message b{font-size:13px;color:#137669}
+.example-strip{display:flex;gap:10px;flex-wrap:wrap;align-items:center;margin-top:12px}.example-strip button{padding:4px 10px;font-size:11px;background:white;border:1px solid #cbd5e8;border-radius:100px;color:#536586}.example-strip button:hover{background:#eef2ff}
+.flow-row{display:flex;align-items:center;flex-wrap:wrap;gap:8px;justify-content:center;margin:20px 0}.flow-node{border:1px solid #d9e3f3;padding:12px 16px;border-radius:11px;font-weight:750;font-size:12px;text-align:center;background:#f4f7ff;min-width:100px}.flow-arrow{font-size:23px;color:#8ea0be}.flow-node.accent{background:#ecf9f6;color:#0b8279;border-color:#bce8db}
+.callout{border-radius:13px;padding:19px 20px;background:#fff8e9;border:1px solid #f2e0b7;margin:24px 0}.callout b{color:#855a13;display:block;margin-bottom:5px}.callout p{font-size:13px;line-height:1.65;margin:0}
+.question{margin:21px 0 0;padding:19px 20px;border-radius:14px;border:1px solid #e3eaf4;background:#fafcff}.question .qnum{font-size:11px;letter-spacing:1px;font-weight:850;text-transform:uppercase;color:#7b8aa2}.question h3{font-size:16px;margin:5px 0 14px}.choices{display:grid;gap:8px}.choice{display:block;text-align:left;border:1px solid #dce4f0;background:white;border-radius:9px;padding:10px 13px;font-size:13px;color:#3f4e69}.choice:hover{background:#eff3ff;border-color:#adbaee}.choice.correct{border-color:#77cdb5;background:#e7f8f1;color:#0c755f}.choice.wrong{border-color:#ebaaa6;background:#fff0ef;color:#a24242}.feedback{font-size:13px;line-height:1.6;margin:13px 0 0;display:none;color:#415673}.feedback.visible{display:block}
+.summary{background:linear-gradient(125deg,#eff5ff,#f0fbf8);border-radius:18px;border:1px solid #dbe8f7;padding:22px 24px;margin-top:22px}.summary b{font-size:18px;color:#254381}.summary p{color:#405877;margin:6px 0 0}.refs{font-size:12px;color:#6b7d98;line-height:1.7;padding:15px 4px 25px}.refs strong{color:#4b5d7b}.footer{max-width:1180px;margin:0 auto 50px;padding:0 25px;color:#8491a6;font-size:12px;display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap}
+body.mode-short .extended{display:none!important}body.mode-short .chart-grid{grid-template-columns:1fr}body.mode-full .short-only{display:none!important}
+.full-flag{display:inline-flex;background:#eaeafe;color:#5551b0;padding:3px 8px;border-radius:7px;font-size:10px;letter-spacing:.3px;font-weight:850;text-transform:uppercase;vertical-align:middle;margin-left:8px}
+@media(max-width:950px){.hero{border-radius:20px;margin:0 16px;padding:48px 34px}.layout{grid-template-columns:1fr;margin:24px 16px 70px}.sidebar{position:static;padding:0;display:none}.section{padding:32px 28px}}@media(max-width:640px){.topbar{padding:18px 18px}.top-pill{display:none}.hero{padding:38px 25px}.hero h1{letter-spacing:-2px}.hero .sub{font-size:16px}.section{padding:26px 21px;border-radius:17px}.compare,.tokens-grid,.chart-grid,.terms,.slider-pair,.step-grid{grid-template-columns:1fr}.branches{gap:6px}.branch{padding:12px 5px}.branch b{font-size:12px}.branch small{font-size:10px}.metric-demo,.playground{padding:17px}.statline{gap:6px}.stat{padding:9px 5px}.stat b{font-size:17px}.flow-arrow{font-size:15px}.flow-node{min-width:74px;padding:9px}}
+@media print{*{-webkit-print-color-adjust:exact!important;print-color-adjust:exact!important}body{background:white!important;font-size:13px}#progress-track,.topbar,.sidebar,.modebox,.modehint,.question,.example-strip{display:none!important}body.mode-short .extended{display:block!important} .hero{max-width:none;padding:25px 35px;color:white;box-shadow:none;border-radius:12px;margin:0}.hero h1{font-size:38px}.hero .sub{font-size:15px}.layout{display:block;margin:14px auto}.section{box-shadow:none;border:1px solid #eee;break-inside:avoid;margin-bottom:12px;padding:24px} .extended{display:block!important}.content{max-width:100%} .metric-demo{break-inside:avoid} .refs{font-size:10px} .footer{display:none}}
+@media(prefers-reduced-motion:reduce){html{scroll-behavior:auto}*{transition:none!important}}
+
+/* Prerequisite bridge: calm visuals that teach the relationship, not decorative boxes. */
+.prereq-chain{display:flex;gap:9px;align-items:stretch;justify-content:space-between;margin:22px 0 28px;flex-wrap:wrap}
+.prereq-step{flex:1 1 120px;min-width:0;border:1px solid #dce5f4;background:#f5f8ff;border-radius:13px;padding:12px 11px;text-align:center}
+.prereq-step strong{display:block;color:#4859bc;font-size:16px}
+.prereq-step small{display:block;font-size:11px;line-height:1.4;color:#5c7193;margin-top:5px}
+.prereq-step.mid{background:#f0f2ff;border-color:#cfd7ff}.prereq-step.final{background:#e9faf7;border-color:#b7e5d8}.prereq-step.final strong{color:#067b79}
+.prereq-arrow{align-self:center;color:#7586a6;font-size:21px;font-weight:800}
+.two-example-cards{display:grid;grid-template-columns:1fr 1fr;gap:13px;margin:18px 0}
+.two-example-cards>div{background:#fcfdff;border:1px solid #e6eaf2;border-radius:15px;padding:15px 17px}
+.two-example-cards strong{font-size:14px;display:block;margin:8px 0}
+.two-example-cards p{font-size:13px;line-height:1.6;margin:5px 0}
+.small-tag{font-size:10px;font-weight:800;border-radius:6px;display:inline-block;padding:2px 9px;letter-spacing:.6px}
+.tag-purple{background:#eeecff;color:#574ac6}.tag-teal{background:#d8f4f0;color:#077e78}
+.bridge-chart{background:#fbfcff;border:1px solid #e5eaf3;border-radius:17px;padding:15px 19px;margin:22px 0}
+.bridge-chart .chart-panel{background:white}
+.bridge-chart svg{display:block;width:100%;max-width:660px;margin:10px auto 0;height:auto}
+.curve-legend{display:flex;gap:20px;justify-content:center;flex-wrap:wrap;font-size:12px;font-weight:700;color:#51627e;margin:12px 0}
+.curve-legend span{display:inline-flex;align-items:center;gap:7px}.curve-legend i{width:20px;height:4px;border-radius:5px;display:inline-block}
+.curve-legend .legend-tfidf{background:#d79827}.curve-legend .legend-bm25{background:#4b61d9}
+@media(max-width:640px){.two-example-cards{grid-template-columns:1fr}.prereq-chain{gap:5px}.prereq-step{flex-basis:38%;padding:9px 6px}.prereq-arrow{font-size:16px}.bridge-chart{padding:10px 7px}.curve-legend{gap:10px}}
+</style>
+</head>
+<body class="mode-short">
+<div id="progress-track" aria-hidden="true"><div id="progress-bar"></div></div>
+<div class="topbar"><div class="brand"><span class="brand-logo">L</span> LEARNING NOTES <span style="color:#b4becd;font-weight:500">/ CONCEPT P3</span></div><span class="top-pill">Standalone · works offline · no setup</span></div>
+<header class="hero">
+ <div class="eyebrow"><i></i> RAG fundamentals · concept P3</div>
+ <h1>BM25, made<br>understandable.</h1>
+ <p class="sub">Why keyword search finds things that vector search can miss—and how BM25 actually decides what ranks first.</p>
+ <div class="hero-stats"><span>Prerequisites explained: TF → IDF → TF-IDF</span><span>One running example: BECCS</span><span>Graphs you can change</span><span>Real results clearly labeled</span></div>
+ <div class="modebox" role="group" aria-label="Choose explanation depth">
+   <div class="mode-switch"><button type="button" class="active" id="btn-short" aria-pressed="true">Short explanation</button><button type="button" id="btn-full" aria-pressed="false">Full concept</button></div>
+   <div class="modehint" id="modehint">Start with the idea. No formula required. Switch to Full whenever you want the mechanism.</div>
+ </div>
+</header>
+<div class="layout">
+ <aside class="sidebar" aria-label="On this page"><div class="navhead">The learning path</div><nav>
+  <a href="#problem">01 · Why it exists</a><a href="#ingredients">02 · Three ingredients</a><a href="#tfidf">03 · The TF-IDF bridge</a><a href="#repeats">04 · Why repeats flatten</a><a href="#math" class="extended">05 · Formula explained</a><a href="#tokens">06 · The tokenizer trap</a><a href="#chunking" class="extended">07 · What chunks change</a><a href="#decisions">08 · When to use it</a><a href="#check">09 · Check yourself</a></nav>
+  <div class="side-note"><strong>A reading rule</strong>New ideas build on older ones. This lesson refreshes TF, DF, IDF and TF-IDF before using them to explain BM25.</div>
+ </aside>
+ <main class="content">
+  <section class="section" id="problem">
+   <div class="section-kicker">01 / The problem</div><h2>One document. One exact term. The wrong result can still win.</h2>
+   <p class="lead">Imagine you upload a climate-change PDF into a RAG system. A user wants to know what a particular acronym stands for.</p>
+   <div class="quote-query"><div class="query-ico" aria-hidden="true">⌕</div><div><div class="mini-label">User asks</div><div class="query-text">“What does BECCS stand for?”</div></div></div>
+   <p>The PDF contains the expansion <strong>bioenergy with carbon capture and storage (BECCS)</strong>. You need the passage that actually <em>names</em> BECCS—not just another passage about climate solutions.</p>
+   <div class="compare">
+     <div class="result-card"><div class="result-title">Dense (vector) search</div><div class="rank">#4</div><div class="result-foot">The passage containing BECCS ranked fourth, behind more general passages.</div></div>
+     <div class="result-card keyword"><div class="result-title">BM25 · normalized tokens</div><div class="rank">#1</div><div class="result-foot">The passage naming BECCS ranked first because the rare token matched.</div></div>
+   </div>
+   <p class="muted">Measured demonstration from your P3 source, using the same 97-chunk climate PDF index. This is one hand-picked query, not a general benchmark.</p>
+   <div class="explain-line"><strong>Why the difference?</strong> Dense search compares meaning in an embedding space. BM25 compares matching tokens and how informative they are. The two systems notice different kinds of evidence.</div>
+  </section>
+
+  <section class="section" id="ingredients">
+   <div class="section-kicker">02 / The intuition</div><h2>BM25 is keyword search with three sensible adjustments.</h2>
+   <p>Not every word match deserves the same score. A rare name carries more information than a common word; repeated mentions help, but less each time; and a match in a short chunk often matters more than the same match in a long one.</p>
+   <div class="concept-map" role="img" aria-label="Mind map: BM25 ranking combines word rarity, diminishing reward for word repetition, and chunk length adjustment">
+     <div class="center-node">BM25<br><span style="font-weight:500;font-size:11px;color:#d7deff">relevance score</span></div>
+     <div class="branches"><div class="branch"><b>Rarity</b><small>Rare query words carry more weight</small></div><div class="branch"><b>Repetition</b><small>More mentions help, then flatten out</small></div><div class="branch"><b>Length</b><small>Shorter chunks get an adjustment</small></div></div>
+     <div class="map-caption">The scores from all matching query words are added to rank the chunks.</div>
+   </div>
+   <p>Take three words from a <strong>six-document toy collection</strong>. If <code>eu</code> appears in just one document, it is more distinctive than <code>climate</code>, which appears in four.</p>
+   <div class="terms">
+     <div class="term"><span class="chip">TF</span><b>Term frequency</b><p>How often this word occurs in this one chunk.</p></div>
+     <div class="term"><span class="chip">DF</span><b>Document frequency</b><p>How many chunks contain the word at least once.</p></div>
+     <div class="term"><span class="chip">IDF</span><b>Inverse document frequency</b><p>A weight derived from DF: rarer words generally matter more.</p></div>
+   </div>
+   <div class="explain-line teal"><strong>Don't mix them up.</strong> TF counts within one chunk. DF counts across all chunks. IDF turns the across-chunk count into a weight. Your chunking strategy therefore changes BM25's statistics.</div>
+   <div class="extended">
+     <div class="table-wrap"><table><thead><tr><th>Word</th><th>TF inside example chunk</th><th>DF across 6</th><th>What this tells you</th></tr></thead><tbody><tr><td>eu</td><td>1</td><td>1</td><td>Most distinctive here</td></tr><tr><td>bpa</td><td>2</td><td>2</td><td>Somewhat distinctive</td></tr><tr><td>climate</td><td>0</td><td>4</td><td>Common across the collection</td></tr></tbody></table></div>
+     <p class="muted">Toy values taken from the six-document worked example. The example chunk does not contain “climate”, so its contribution there is zero regardless of IDF.</p>
+   </div>
+  </section>
+
+
+  <section class="section" id="tfidf">
+    <div class="section-kicker">03 / Connect what you know</div>
+    <h2>Before BM25, understand TF-IDF. BM25 builds on the same idea.</h2>
+    <p class="lead">Think about searching for <strong>“BPA ban”</strong>. We already have the three counts that describe a word. The next question is: <strong>how do we turn those counts into a score?</strong> That's what TF-IDF does first.</p>
+    <div class="prereq-chain" aria-label="Learning path: term frequency and document frequency lead to inverse document frequency and TF-IDF, which leads to BM25">
+      <div class="prereq-step"><strong>TF</strong><small>How many times in this chunk?</small></div><span class="prereq-arrow" aria-hidden="true">+</span>
+      <div class="prereq-step"><strong>IDF</strong><small>How distinctive across chunks?</small></div><span class="prereq-arrow" aria-hidden="true">→</span>
+      <div class="prereq-step mid"><strong>TF-IDF</strong><small>Frequency × rarity</small></div><span class="prereq-arrow" aria-hidden="true">→</span>
+      <div class="prereq-step final"><strong>BM25</strong><small>Add saturation &amp; length</small></div>
+    </div>
+    <h3>What TF-IDF means in ordinary words</h3>
+    <p><strong>TF-IDF</strong> stands for <em>term frequency–inverse document frequency</em>. It rewards a word when it occurs often <strong>in this chunk</strong>, but gives that word more importance if it occurs in <strong>few chunks overall</strong>.</p>
+    <div class="two-example-cards">
+      <div><span class="small-tag tag-purple">TF</span><strong>Frequency inside a chunk</strong><p>If <code>bpa</code> appears <b>twice</b> in one passage, its term frequency there is <b>2</b>.</p></div>
+      <div><span class="small-tag tag-teal">IDF</span><strong>How rare across the collection?</strong><p>If <code>bpa</code> occurs in only <b>2 of 6</b> passages, a match is more informative than a word appearing almost everywhere.</p></div>
+    </div>
+    <p><strong>TF-IDF combines them.</strong> One more mention increases the score; matching a rare word increases it more than matching an ordinary word. This is why it is better than counting words alone.</p>
+    <div class="explain-line teal"><strong>Now the reason BM25 exists:</strong> simple raw-count TF-IDF keeps giving <em>full credit</em> for every repetition. A passage saying “BPA BPA BPA...” can get a large score even if another passage better covers the complete question. BM25 makes repeats count less and adjusts for chunk length.</div>
+
+    <div class="extended">
+      <h3>Work through a tiny TF-IDF calculation</h3>
+      <p>The textbook <strong>raw-count</strong> version in your P3 file uses the following formula. Other TF-IDF implementations may add smoothing or vector normalization.</p>
+      <div class="formula"><small>For one query word in one chunk</small><br>TF-IDF(t, d) = TF(t, d) × ln(N / DF(t))<br><small>N = total chunks · DF(t) = chunks containing the word · ln = natural logarithm</small></div>
+      <p>Take the same toy collection: <strong>6 documents</strong>, of which <strong>2 contain <code>bpa</code></strong>. In our example chunk, <code>bpa</code> appears <strong>twice</strong>.</p>
+      <div class="step-grid">
+        <div><b>1 · TF</b><div class="value">2</div><p>Two mentions in this chunk</p></div>
+        <div><b>2 · IDF</b><div class="value">1.099</div><p>ln(6 / 2) = ln(3)</p></div>
+        <div><b>3 · TF-IDF</b><div class="value">2.197</div><p>2 × ln(3)</p></div>
+      </div>
+      <p>For a multi-word query, you add the term contributions. Notice that <strong>DF is about chunks containing the word</strong>, not how many times it repeats inside one chunk—that repeated count is TF.</p>
+
+      <h3>See why BM25 adds saturation</h3>
+      <p>This graph holds the chunk at average length and compares how much the <em>same word</em> benefits from repetition. Both lines start at 1 for a single mention, so you're comparing <strong>relative growth</strong>, not two incomparable raw scores.</p>
+      <div class="bridge-chart"><div class="chart-panel">
+        <div class="metric-top"><strong>Score growth relative to one mention</strong><span class="live">Derived · toy model</span></div>
+        <svg id="tfidf-chart" role="img" aria-label="Normalized TF-IDF grows linearly with word repetitions, while normalized BM25 term frequency grows more slowly and approaches a ceiling" viewBox="0 0 660 270" preserveAspectRatio="xMidYMid meet"></svg>
+        <div class="curve-legend"><span><i class="legend-tfidf"></i>Simple TF-IDF · linear</span><span><i class="legend-bm25"></i>BM25 · saturating</span></div>
+        <p class="muted">At 8 mentions: simple TF-IDF grows 8× its one-mention score; BM25 grows only about 2.11× (k₁ = 1.5, average chunk length).</p>
+      </div></div>
+      <p><strong>Important distinction:</strong> the raw IDF in this textbook TF-IDF formula is <code>ln(N / DF)</code>. The specific <code>rank_bm25</code> library uses a different IDF formula and an additional adjustment for negative values. They are related ideas but <strong>not identical numeric weights</strong>; we cover the library's formula below.</p>
+      <div class="explain-line amber"><strong>Common misconception:</strong> “BM25 and TF-IDF are the same except for length.” Not quite. BM25 also replaces the linear repetition reward with diminishing returns, and its IDF implementation can differ.</div>
+    </div>
+    <p class="muted">Next: the <em>“BPA ban”</em> example shows a situation where simple TF-IDF and BM25 produce different rankings.</p>
+  </section>
+
+  <section class="section" id="repeats">
+   <div class="section-kicker">04 / From TF-IDF to BM25</div><h2>TF-IDF keeps growing. BM25 makes repetition flatten out.</h2>
+   <p>Suppose someone searches for <strong>“BPA ban”</strong>. Passage A mentions each word once. Passage B repeats “BPA” six times but never mentions “ban”. As we just saw, raw-count TF-IDF gives every repetition full credit. Passage B can therefore win for the wrong reason.</p>
+   <div class="table-wrap"><table><thead><tr><th>Method · 6-document toy</th><th>Passage A</th><th>Passage B</th><th>Ranks first</th></tr></thead><tbody><tr><td>Raw-count TF-IDF</td><td>2.8904</td><td>6.5917</td><td class="lose">B (repetition)</td></tr><tr><td>BM25 (`rank_bm25`)</td><td>1.8871</td><td>1.1756</td><td class="win">A (both terms)</td></tr></tbody></table></div>
+   <p>BM25 uses <strong>saturation</strong>: the first few matches help the most. Later repetitions add smaller and smaller increments. This does not prevent every bad ranking, but it helps avoid blindly rewarding repeated words.</p>
+   <div class="metric-demo">
+    <div class="metric-top"><h3>See the curve yourself</h3><span class="live">Interactive · calculated locally</span></div>
+    <p class="muted">Graph shows the BM25 term-frequency factor, without IDF. At average chunk length, one mention = 1.0.</p>
+    <div class="slider-pair extended">
+      <div class="slider-item"><label for="k1-slider">k₁ — effect of repetition <output id="k1-val">1.50</output></label><input id="k1-slider" type="range" min="0.5" max="3.0" value="1.5" step="0.25"><div class="slider-hint">Higher k₁ lets repeated words matter more.</div></div>
+      <div class="slider-item"><label for="b-slider">b — effect of chunk length <output id="b-val">0.75</output></label><input id="b-slider" type="range" min="0" max="1" value="0.75" step="0.05"><div class="slider-hint">At b = 0, length has no effect.</div></div>
+    </div>
+    <div class="chart-grid">
+      <div class="chart-panel"><h4>Repetition flattens out</h4><p>Mentions of one word → frequency factor</p><svg id="freq-chart" viewBox="0 0 360 220" role="img" aria-label="BM25 frequency contribution grows with repetitions but eventually levels off"></svg><div class="legend"><span><i></i>BM25 factor</span></div></div>
+      <div class="chart-panel extended"><h4>Length changes the weight</h4><p>Chunk length relative to average → frequency factor</p><svg id="len-chart" viewBox="0 0 360 220" role="img" aria-label="BM25 scores shorter chunks higher when b is above zero"></svg><div class="legend"><span><i style="background:#159c98"></i>One word match · f = 1</span></div></div>
+    </div>
+    <div class="statline"><div class="stat"><b id="factor-one">1.000</b><small>1 mention</small></div><div class="stat"><b id="factor-ten">2.174</b><small>10 mentions</small></div><div class="stat"><b id="factor-ceiling">2.500</b><small>Limit as repeats grow</small></div></div>
+    <p class="muted extended">In the full graph, moving b changes the length curve; the frequency curve assumes an average-length chunk, so b does not change it. The displayed lines are illustrative formula values, not measurements from the PDF.</p>
+   </div>
+  </section>
+
+  <section class="section extended" id="math">
+   <div class="section-kicker">05 / The actual mechanism</div><h2>The formula is just those three ideas multiplied together.</h2>
+   <p>The book explains BM25 in words. Your P3 lesson verifies the specific implementation in <code>rank_bm25</code> version 0.2.2, which we use here. For each query token <em>t</em> and document <em>d</em>:</p>
+   <div class="formula"><small>Per-token score (sum this over all query tokens)</small><br>score(t,d) = IDF(t) × [ f × (k₁ + 1) / ( f + K ) ]<br>K = k₁ × (1 − b + b × L / avgL)<br><small>f = frequency in chunk · L = chunk length · avgL = average chunk length</small></div>
+   <p>The <strong>IDF</strong> handles rarity. The <strong>fraction</strong> handles diminishing reward for repeats. Inside that fraction, <strong>K</strong> handles chunk length. Nothing in the formula represents semantic meaning.</p>
+   <h3>Calculate one real toy score—not ten disconnected equations</h3>
+   <p>For <code>bpa</code>, use six documents: it appears in two documents, twice in the one we're scoring. That chunk is 11 tokens long, against an average of 10. Keep the library defaults k₁ = 1.5 and b = 0.75.</p>
+   <div class="step-grid">
+      <div><b>1 · Rarity</b><div class="value">0.5878</div><p>IDF = ln(4.5 / 2.5)</p></div>
+      <div><b>2 · Frequency + length</b><div class="value">1.3841</div><p>2 × 2.5 / (2 + 1.6125)</p></div>
+      <div><b>3 · This word's score</b><div class="value">0.8135</div><p>0.5878 × 1.3841</p></div>
+   </div>
+   <p>Other query words each contribute their own value. BM25 adds those contributions to get the document score and then ranks documents by that score.</p>
+   <h3>A library detail worth remembering</h3>
+   <p><code>rank_bm25</code> computes raw IDF as <strong>ln((N − n + 0.5)/(n + 0.5))</strong>, with <em>N</em> total chunks and <em>n</em> containing the word. If raw IDF is negative, the library replaces it with <strong>0.25 × the mean raw IDF</strong> across its vocabulary. That replacement is called its <em>floor</em>.</p>
+   <div class="callout"><b>Why this matters</b><p>“Common words have zero score” is not always true in this implementation. A term occurring in exactly half the documents has raw IDF zero; a term occurring in more than half is floored and can receive a nonzero score. The mean, and therefore the floor, can even be negative on unusual tiny or repetitive collections. Don't interpret BM25 scores as confidence percentages.</p></div>
+  </section>
+
+  <section class="section" id="tokens">
+   <div class="section-kicker">06 / The easy-to-miss failure</div><h2>A perfect formula cannot match a broken token.</h2>
+   <p>Before scoring, BM25 turns the query and each passage into tokens. With Python's basic <code>split()</code>, punctuation and capitalization stay attached: <code>BECCS</code> and <code>(BECCS),</code> are different strings.</p>
+   <div class="playground">
+    <div class="playground-head"><h3>Tokenizer playground</h3><span class="live">Try changing the words</span></div>
+    <label for="query-input" class="field-label">The user's question</label><input class="text-field" id="query-input" value="What does BECCS stand for?" spellcheck="false">
+    <label for="doc-input" class="field-label">Text inside a retrieved chunk</label><input class="text-field" id="doc-input" value="bioenergy with carbon capture and storage (BECCS)," spellcheck="false">
+    <div class="tokens-grid">
+     <div class="tokens-column"><h4>Raw split() tokens</h4><p>Spaces only. Case and punctuation remain.</p><div class="mini-label">Question</div><div id="raw-query" class="token-bag"></div><div class="mini-label" style="margin-top:12px">Document</div><div id="raw-doc" class="token-bag"></div><p class="match-message" id="raw-result"></p></div>
+     <div class="tokens-column"><h4>Normalized tokens</h4><p>Lowercase, separate surrounding punctuation.</p><div class="mini-label">Question</div><div id="norm-query" class="token-bag"></div><div class="mini-label" style="margin-top:12px">Document</div><div id="norm-doc" class="token-bag"></div><p class="match-message" id="norm-result"></p></div>
+    </div>
+    <div class="example-strip"><span class="muted" style="margin:0">Try another:</span><button type="button" id="example-ipcc">IPCC in brackets</button><button type="button" id="example-synonym">Different wording</button><button type="button" id="example-reset">Reset BECCS</button></div>
+   </div>
+   <p>The P3 demonstration is particularly striking: with the repo's unnormalized <code>split()</code>, the BECCS question matched <strong>zero of 91 overlapping windows</strong>. With normalized tokens, the windows containing BECCS ranked at the top.</p>
+   <div class="explain-line amber"><strong>What this means for your code:</strong> tokenize the index and query consistently. Test codes, acronyms, punctuation and numbers explicitly. Even a zero-score retriever may still return arbitrary top-k chunks unless your application filters them.</div>
+   <div class="extended"><p>Normalization itself needs care. A tokenizer that splits <code>1.5</code> into <code>1</code> and <code>5</code>, or breaks <code>ERR_CONN_RESET</code> into pieces, may harm identifier search. Your source uses a regex that preserves decimal numbers and comma-separated digits; that is still only one choice, not a universal tokenizer for every domain.</p></div>
+  </section>
+
+  <section class="section extended" id="chunking">
+   <div class="section-kicker">07 / How the index changes the math</div><h2>One mention can count as two documents.</h2>
+   <p>The climate PDF mentions “BECCS” once, yet in the <strong>91-window</strong> version of the document its DF is <strong>2</strong>. This isn't a contradiction. The windows overlap by 200 characters, and the mention sits inside the overlap between windows 82 and 83.</p>
+   <div class="flow-row" aria-label="One source mention appears in two overlapping chunks"><div class="flow-node">PDF: one<br><strong>BECCS</strong></div><span class="flow-arrow" aria-hidden="true">→</span><div class="flow-node">Window 82<br><strong>BECCS</strong></div><span class="flow-arrow" aria-hidden="true">+</span><div class="flow-node">Window 83<br><strong>BECCS</strong></div><span class="flow-arrow" aria-hidden="true">→</span><div class="flow-node accent">DF = 2<br>of 91</div></div>
+   <p>Because IDF depends on how many indexed chunks contain a token, <strong>chunking and overlap affect BM25 scores</strong>. Two indexes over the same PDF can give different BM25 statistics.</p>
+   <div class="table-wrap"><table><thead><tr><th>BECCS query · 91 windows</th><th>Score</th><th>Why</th></tr></thead><tbody><tr><td>Window 83</td><td>5.0623</td><td>BECCS + three occurrences of “for”</td></tr><tr><td>Window 82</td><td>4.8803</td><td>BECCS + two occurrences of “for”</td></tr><tr><td>Window 16</td><td>1.6720</td><td>No BECCS; matches “for”</td></tr></tbody></table></div>
+   <p class="muted">Source-derived measured demonstration, not illustrative scores. The ranking is specific to the 91-window index and the source's normalized tokenizer. “For” receives a nonzero floor in that library.</p>
+  </section>
+
+  <section class="section" id="decisions">
+   <div class="section-kicker">08 / Apply the idea</div><h2>Use BM25 for exact names. Use dense retrieval for meaning. Test both.</h2>
+   <p>BM25 has no built-in understanding that two different words can mean the same thing. Dense retrieval can bridge wording differences, but it may under-rank a rare identifier. That is why a hybrid retriever can be useful.</p>
+   <div class="table-wrap"><table><thead><tr><th>If your users ask…</th><th>A sensible retrieval experiment</th></tr></thead><tbody><tr><td>“Where is ERR_CONN_RESET documented?”</td><td>BM25, with tokenizer tests for codes</td></tr><tr><td>“How can we reduce carbon from energy?”</td><td>Dense retrieval for paraphrases</td></tr><tr><td>Mixed exact terms and natural-language questions</td><td>Compare BM25, dense, and hybrid</td></tr></tbody></table></div>
+   <div class="extended"><h3>What can still go wrong?</h3><p>A high BM25 score means strong <em>lexical overlap under that scoring system</em>, not that the passage actually answers the question. A vague question can match many chunks and receive a higher raw score than a more useful passage. Very small or near-duplicate indexes can also behave oddly with the specific IDF floor used by <code>rank_bm25</code>. And hybrid search is not automatically better: it needs evaluation on real queries.</p><p>For your RAG project, build evaluation groups for <strong>exact identifiers</strong>, <strong>paraphrases</strong>, and <strong>mixed questions</strong>. Track whether each method retrieves supporting evidence in the top-k, rather than comparing raw BM25 scores to vector similarities.</p></div>
+   <div class="summary"><b>The idea to remember</b><p><strong>BM25 ranks matching tokens</strong> by rarity, repetition (with diminishing returns), and document length. <strong>Dense retrieval ranks semantic similarity.</strong> The tokenizer decides whether BM25 gets to match a word in the first place.</p></div>
+  </section>
+
+  <section class="section" id="check">
+   <div class="section-kicker">09 / One-minute understanding check</div><h2>Can you use the idea in a new situation?</h2>
+   <p>No need to memorize the formula. Try these without looking back—including the TF-IDF idea that leads into BM25.</p>
+   <div class="question" data-answer="1"><div class="qnum">Question 1 · Concept</div><h3>In BM25, a word appears in just 2 out of 100 chunks. What does that usually mean?</h3><div class="choices"><button type="button" class="choice" data-choice="0">It is common and should carry little weight.</button><button type="button" class="choice" data-choice="1">It is distinctive, so a match can carry more weight.</button><button type="button" class="choice" data-choice="2">It must appear twice inside every matching chunk.</button></div><p class="feedback">IDF uses how many chunks contain the term. A word found in only a few chunks is often a strong locator.</p></div>
+   <div class="question" data-answer="2"><div class="qnum">Question 2 · Debugging</div><h3>Your PDF contains <code>(IPCC)</code> but the query <code>IPCC</code> retrieves no keyword match. What should you check first?</h3><div class="choices"><button type="button" class="choice" data-choice="0">Increase k₁ immediately.</button><button type="button" class="choice" data-choice="1">Assume the PDF has no relevant passage.</button><button type="button" class="choice" data-choice="2">Inspect the tokenization of the query and documents.</button></div><p class="feedback">If query and document create different tokens, adjusting the BM25 formula can't create a match.</p></div>
+   
+   <div class="question" data-answer="1"><div class="qnum">Question 3 · Connecting prior concepts</div><h3>Why does the raw-count TF-IDF score keep growing when a word repeats, while BM25's frequency contribution flattens?</h3>
+    <div class="choices"><button type="button" class="choice" data-choice="0">TF-IDF ignores how often a word appears.</button><button type="button" class="choice" data-choice="1">Raw-count TF-IDF multiplies by term frequency directly; BM25 saturates the frequency reward.</button><button type="button" class="choice" data-choice="2">BM25 never counts repeated words.</button></div>
+    <p class="feedback">The simple TF-IDF formula uses raw TF as a direct multiplier; BM25 still rewards a repeated query term but each extra mention contributes less.</p>
+   </div>
+   <div class="extended">
+   <div class="question" data-answer="0"><div class="qnum">Question 4 · Mechanism</div><h3>With b = 0, what happens to BM25's chunk-length adjustment?</h3><div class="choices"><button type="button" class="choice" data-choice="0">Length is ignored.</button><button type="button" class="choice" data-choice="1">Long chunks get the maximum penalty.</button><button type="button" class="choice" data-choice="2">Every BM25 score becomes zero.</button></div><p class="feedback">At b = 0, the length multiplier becomes 1. Repetition and IDF still matter.</p></div></div>
+  </section>
+  <div class="refs"><strong>Source and evidence notes.</strong> This prototype lesson is adapted from your attached <em>P3_bm25.md</em> (short version) and <em>P3_bm25(1).md</em> (full version), not from a fresh external study. The <strong>97-chunk</strong> BECCS comparison is a measured demonstration; the <strong>91-window</strong> tokenizer failure and window scores are a different measured setup; the six-document TF-IDF/BM25 comparison and parameter graphs are <strong>toy/formula examples</strong>. The exact IDF-floor behavior described here applies to <code>rank_bm25</code> 0.2.2 as documented in your source. Results should not be treated as a validated retrieval benchmark.</div>
+ </main>
+</div>
+<footer class="footer"><span>BM25 visual lesson · Self-contained HTML · Designed for understanding first</span><span>No internet · No libraries · No tracking</span></footer>
+<script>
+(function(){
+ 'use strict';
+ const $=id=>document.getElementById(id);
+ const btnShort=$('btn-short'),btnFull=$('btn-full'),modehint=$('modehint');
+ function setMode(mode){document.body.classList.toggle('mode-short',mode==='short');document.body.classList.toggle('mode-full',mode==='full');btnShort.classList.toggle('active',mode==='short');btnFull.classList.toggle('active',mode==='full');btnShort.setAttribute('aria-pressed',mode==='short'?'true':'false');btnFull.setAttribute('aria-pressed',mode==='full'?'true':'false');modehint.textContent=mode==='short'?'Start with the idea. No formula required. Switch to Full whenever you want the mechanism.':'Extra depth unlocked: formula, length normalization, chunking, edge cases, and an additional check.';renderCharts();updateProgress();}
+ btnShort.addEventListener('click',()=>setMode('short'));btnFull.addEventListener('click',()=>setMode('full'));
+ // All graph coordinates are deterministic calculations using the formula, not fetched data.
+ const NS='http://www.w3.org/2000/svg';
+ function E(tag,attrs,txt){let e=document.createElementNS(NS,tag);Object.entries(attrs||{}).forEach(([k,v])=>e.setAttribute(k,String(v)));if(txt!==undefined)e.textContent=String(txt);return e;}
+ function curve(svgId,func,opts){const svg=$(svgId);svg.replaceChildren();const W=360,H=220,left=42,right=14,top=15,bottom=34;const PW=W-left-right,PH=H-top-bottom;const X=x=>left+(x-opts.x0)/(opts.x1-opts.x0)*PW;const Y=y=>top+(opts.ymax-y)/(opts.ymax-opts.ymin)*PH;
+  for(let i=0;i<=4;i++){const v=opts.ymin+(opts.ymax-opts.ymin)*i/4,y=Y(v);svg.appendChild(E('line',{x1:left,y1:y,x2:W-right,y2:y,stroke:'#e6ecf6','stroke-width':1}));svg.appendChild(E('text',{x:left-8,y:y+4,fill:'#8494ad','font-size':10,'text-anchor':'end'},v.toFixed(1)));}
+  opts.xticks.forEach(v=>{let x=X(v);svg.appendChild(E('text',{x,y:H-bottom+18,fill:'#8392a9','font-size':10,'text-anchor':'middle'},String(v)));});
+  svg.appendChild(E('line',{x1:left,y1:top,x2:left,y2:H-bottom,stroke:'#b4c1d5'}));svg.appendChild(E('line',{x1:left,y1:H-bottom,x2:W-right,y2:H-bottom,stroke:'#b4c1d5'}));
+  let d='';for(let i=0;i<=140;i++){let x=opts.x0+(opts.x1-opts.x0)*i/140;let y=func(x);d+=(i===0?'M':'L')+X(x).toFixed(2)+' '+Y(y).toFixed(2)+' ';}svg.appendChild(E('path',{d,fill:'none',stroke:opts.color,'stroke-width':3.5,'stroke-linecap':'round','stroke-linejoin':'round'}));
+  (opts.dots||[]).forEach(v=>{let y=func(v);svg.appendChild(E('circle',{cx:X(v),cy:Y(y),r:4.5,fill:opts.color,stroke:'#fff','stroke-width':2}));});
+ }
+
+ function renderPrereqChart(){
+  const svg=$('tfidf-chart');if(!svg)return;svg.replaceChildren();
+  const W=660,H=270,left=46,right=16,top=14,bottom=39, x0=1,x1=8,ymin=0,ymax=9;
+  const X=x=>left+(x-x0)/(x1-x0)*(W-left-right),Y=y=>top+(ymax-y)/(ymax-ymin)*(H-top-bottom);
+  for(let y=0;y<=8;y+=2){svg.appendChild(E('line',{x1:left,y1:Y(y),x2:W-right,y2:Y(y),stroke:'#e8ecf5'}));svg.appendChild(E('text',{x:left-9,y:Y(y)+4,'text-anchor':'end',fill:'#8494ad','font-size':12},y+'×'));}
+  for(let x=1;x<=8;x++){svg.appendChild(E('text',{x:X(x),y:H-bottom+21,'text-anchor':'middle',fill:'#8494ad','font-size':12},x));}
+  svg.appendChild(E('text',{x:(W+left-right)/2,y:H-4,'text-anchor':'middle',fill:'#72819a','font-size':12},'Mentions of the same word'));
+  svg.appendChild(E('line',{x1:left,y1:top,x2:left,y2:H-bottom,stroke:'#a9b6ca'}));
+  svg.appendChild(E('line',{x1:left,y1:H-bottom,x2:W-right,y2:H-bottom,stroke:'#a9b6ca'}));
+  const path=(f,color)=>{let d='';for(let i=0;i<=140;i++){let x=1+(7*i/140);d+=(i?'L':'M')+X(x).toFixed(1)+' '+Y(f(x)).toFixed(1)+' ';}svg.appendChild(E('path',{d,fill:'none',stroke:color,'stroke-width':4,'stroke-linecap':'round'}));};
+  path(x=>x,'#d79827');path(x=>x*2.5/(x+1.5),'#4b61d9');
+  for(const [fn,color] of [[x=>x,'#d79827'],[x=>x*2.5/(x+1.5),'#4b61d9']]){for(const x of [1,2,4,8])svg.appendChild(E('circle',{cx:X(x),cy:Y(fn(x)),r:4,fill:color,stroke:'white','stroke-width':2}));}
+ }
+ function tf(f,k1,b,lenRatio){return f*(k1+1)/(f+k1*(1-b+b*lenRatio));}
+ function renderCharts(){const k1=+$('k1-slider').value,b=+$('b-slider').value;$('k1-val').textContent=k1.toFixed(2);$('b-val').textContent=b.toFixed(2);const ymax=Math.max(3.5,k1+1.35);curve('freq-chart',f=>tf(f,k1,b,1),{x0:1,x1:20,ymin:0,ymax,xticks:[1,5,10,15,20],dots:[1,5,10,20],color:'#4b61d9'});curve('len-chart',ratio=>tf(1,k1,b,ratio),{x0:0.5,x1:2,ymin:0,ymax:1.75,xticks:[0.5,1,1.5,2],dots:[0.5,1,2],color:'#149f99'});$('factor-one').textContent=tf(1,k1,b,1).toFixed(3);$('factor-ten').textContent=tf(10,k1,b,1).toFixed(3);$('factor-ceiling').textContent=(k1+1).toFixed(3);}
+ $('k1-slider').addEventListener('input',renderCharts);$('b-slider').addEventListener('input',renderCharts);
+ const data={beccs:['What does BECCS stand for?','bioenergy with carbon capture and storage (BECCS),'],ipcc:['What is IPCC?','Intergovernmental Panel on Climate Change (IPCC)'],synonym:['How can solar farms on lakes help?','Floating photovoltaic installations generate power over reservoirs.']};
+ function tokenize(s,normalized){return normalized?(s.toLowerCase().match(/[a-z0-9]+(?:[.,][0-9]+)*/g)||[]):s.trim()?s.trim().split(/\s+/):[];}
+ function fillTokens(id,tokens,matches){$(id).replaceChildren(...tokens.map(token=>{let span=document.createElement('span');span.className='token'+(matches.has(token)?' hit':'');span.textContent=token;return span;}));}
+ function renderTokens(){const query=$('query-input').value,doc=$('doc-input').value;for(const normalized of [false,true]){const prefix=normalized?'norm':'raw';const q=tokenize(query,normalized),d=tokenize(doc,normalized);const shared=new Set(q.filter(t=>d.includes(t)));fillTokens(prefix+'-query',q,shared);fillTokens(prefix+'-doc',d,shared);const el=$(prefix+'-result');el.replaceChildren();const bold=document.createElement('b');bold.textContent=shared.size?shared.size+' shared token'+(shared.size===1?'':'s'):'No shared tokens';el.appendChild(bold,document.createTextNode(shared.size?'. BM25 can score those matches.':'. BM25 gets no token match here.'));}}
+ $('query-input').addEventListener('input',renderTokens);$('doc-input').addEventListener('input',renderTokens);
+ function useExample(key){$('query-input').value=data[key][0];$('doc-input').value=data[key][1];renderTokens();}
+ $('example-ipcc').addEventListener('click',()=>useExample('ipcc'));$('example-synonym').addEventListener('click',()=>useExample('synonym'));$('example-reset').addEventListener('click',()=>useExample('beccs'));
+ document.querySelectorAll('.question').forEach(box=>{box.querySelectorAll('.choice').forEach(button=>button.addEventListener('click',()=>{const selected=button.getAttribute('data-choice'),correct=box.getAttribute('data-answer');box.querySelectorAll('.choice').forEach(b=>{b.classList.remove('correct','wrong');b.setAttribute('aria-pressed','false');});button.classList.add(selected===correct?'correct':'wrong');button.setAttribute('aria-pressed','true');const right=box.querySelector('.choice[data-choice="'+correct+'"]');right.classList.add('correct');let f=box.querySelector('.feedback');f.classList.add('visible');const prior=f.querySelector('.answer-status');if(prior)prior.remove();const status=document.createElement('strong');status.className='answer-status';status.textContent=selected===correct?'✓ Correct. ':'Not quite. ';f.prepend(status);}));});
+ function updateProgress(){const doc=document.documentElement;const max=Math.max(1,doc.scrollHeight-doc.clientHeight);$('progress-bar').style.width=Math.min(100,Math.max(0,scrollY/max*100))+'%';}
+ addEventListener('scroll',updateProgress,{passive:true});addEventListener('resize',updateProgress);renderPrereqChart();renderCharts();renderTokens();updateProgress();
+})();
+</script>
+</body>
+</html>

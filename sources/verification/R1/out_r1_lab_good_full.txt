@@ -1,0 +1,61 @@
+--- cell 2 [given] import os
+    numpy 2.5.3 | pymupdf 1.26.7
+--- cell 4 [given] INDEX_DIR = None        # e.g. Path(r"...\index\ea07572562ac\1ca9c5a3b
+    index: 97 chunks, V (97, 384) float32, chunks.jsonl sha256 d4108b89... OK
+--- cell 6 [given] md06 = (WS / "06_RAG_PROJECT_AND_EVALUATION_PLAN.md").read_text(encodi
+    10 seeds, 8 answerable: [('D-001', 'exact-term'), ('D-002', 'factual-single-span'), ('D-003', 'factual-single-span'), ('D-004', 'exact-term'), ('D-005', 'multi-span'), ('D-006', 'vocabulary-mismatch'), ('D-007', 'multi-hop'), ('D-008', 'exact-term'), ('D-009', 'unanswerable'), ('D-010', 'unanswerable')]
+--- cell 8 [prediction/t1_pred] my_prediction_first = "A"
+--- cell 10 [learner/t1] toy_fused = {"A": 1 / 61 + 1 / 62, "B": 1 / 62, "C": 1 / 63 + 1 / 61, 
+--- cell 11 [CHECK] # CHECK Task 1 (do not edit)
+    Task 1 OK. {'A': 0.03252, 'B': 0.01613, 'C': 0.03227, 'D': 0.01587} order ['A', 'C', 'B', 'D'] | you predicted first A and last D
+--- cell 13 [learner/t2] def rrf(ranked_lists, k=60):
+--- cell 14 [CHECK] # CHECK Task 2 (do not edit)
+    Task 2 OK. AIQ lists: k=60 -> [1, 0, 4, 2, 3] | k=0 -> [0, 4, 1, 2, 3]
+--- cell 17 [learner/t3] def minmax(scores):
+--- cell 18 [CHECK] # CHECK Task 3 (do not edit)
+    Task 3 OK. min-max 0.5/0.5: ['A', 'C', 'B', 'D'] | 0.6/0.4: ['A', 'B', 'C', 'D'] | zscore3 0.6/0.4: ['A', 'C', 'B', 'D']
+--- cell 21 [given] toy_all_docs = ["d2", "d0", "d1"]                          # L75: near
+--- cell 22 [learner/t4a] def repo_style(all_docs, vector_results, bm25_scores, alpha=0.5, k=3):
+--- cell 23 [CHECK] # CHECK Task 4a (do not edit)
+    Task 4a OK. Repo-style order: ['d2', 'd0', 'd1'] | aligned order: ['d0', 'd1', 'd2']
+--- cell 25 [learner/t4b] def test_fusion_preserves_identity(fuse):
+--- cell 26 [CHECK] # CHECK Task 4b (do not edit)
+    Task 4b OK: your test passes on aligned fusion and fails on the repo's logic.
+--- cell 28 [prediction/t5_pred] my_prediction_bm25_better = 3
+--- cell 30 [learner/t5] bm25 = BM25Okapi([tok_norm(c["text"]) for c in chunks])
+--- cell 31 [CHECK] # CHECK Task 5 (do not edit)
+    dense   Hit@4 8/8  CE@4 8/8  first_rel {'D-001': 3, 'D-002': 3, 'D-003': 1, 'D-004': 1, 'D-005': 1, 'D-006': 1, 'D-007': 2, 'D-008': 2}
+    bm25    Hit@4 8/8  CE@4 8/8  first_rel {'D-001': 1, 'D-002': 1, 'D-003': 1, 'D-004': 1, 'D-005': 1, 'D-006': 2, 'D-007': 1, 'D-008': 1}
+    rrf60   Hit@4 8/8  CE@4 8/8  first_rel {'D-001': 1, 'D-002': 1, 'D-003': 1, 'D-004': 1, 'D-005': 1, 'D-006': 1, 'D-007': 1, 'D-008': 1}
+    mm_0.5  Hit@4 8/8  CE@4 8/8  first_rel {'D-001': 1, 'D-002': 1, 'D-003': 1, 'D-004': 1, 'D-005': 1, 'D-006': 2, 'D-007': 1, 'D-008': 1}
+    Task 5 OK. You predicted BM25 better on 3 and worse on 1
+--- cell 33 [learner/t6] for qid in ("D-008", "D-006"):
+    D-008 [(24, 0.03252), (19, 0.02885), (5, 0.02845), (10, 0.0284), (3, 0.02837), (19, 0.02683)]
+    D-006 [(8, 0.03252), (22, 0.03252), (5, 0.0315), (8, 0.03054), (8, 0.02991), (4, 0.02879)]
+--- cell 34 [CHECK] # CHECK Task 6 (do not edit)
+    Task 6 OK (format). D-006 RRF ranks 1 and 2: 0.03252247488101534 vs 0.03252247488101534; equal: True.
+    If they are equal, what decided the order? Add one sentence about it to your D-006 diagnosis.
+--- cell 36 [prediction/t7_pred] my_prediction_k0 = 3      # rank 1 dominates at k=0, so near-ties in t
+--- cell 38 [learner/t7] n_changed_k0 = n_changed_w07 = 0
+--- cell 39 [CHECK] # CHECK Task 7 (do not edit)
+    Task 7 OK. k_rrf 60 -> 0 changed 5/10 top-4 lists (you predicted 3); dense weight 0.5 -> 0.7 changed 5/10 (you predicted 2).
+--- cell 41 [prediction/t8_pred] my_prediction_rescale = {"raw_sum": "changes", "mm": "x100 no, exp may
+--- cell 43 [learner/t8] def _top4(dl, bl, method):
+--- cell 44 [CHECK] # CHECK Task 8 (do not edit)
+    Task 8 OK. {'raw_sum|x100': 8, 'raw_sum|exp': 10, 'mm|x100': 0, 'mm|exp': 4, 'rrf|x100': 0, 'rrf|exp': 0}
+--- cell 46 [prediction/t9] my_fusion_decision = ("I would make RRF with k = 60 over the two top-5
+--- cell 47 [CHECK] # CHECK Task 9 (do not edit)
+    Task 9 OK (format). The tutor grades the content.
+
+=== CHECK summary
+PASS cell 11: # CHECK Task 1 (do not edit)
+PASS cell 14: # CHECK Task 2 (do not edit)
+PASS cell 18: # CHECK Task 3 (do not edit)
+PASS cell 23: # CHECK Task 4a (do not edit)
+PASS cell 26: # CHECK Task 4b (do not edit)
+PASS cell 31: # CHECK Task 5 (do not edit)
+PASS cell 34: # CHECK Task 6 (do not edit)
+PASS cell 39: # CHECK Task 7 (do not edit)
+PASS cell 44: # CHECK Task 8 (do not edit)
+PASS cell 47: # CHECK Task 9 (do not edit)
+10/10 CHECK cells passed

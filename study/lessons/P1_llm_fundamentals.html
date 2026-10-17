@@ -1,0 +1,1176 @@
+<!doctype html>
+<html lang="en" data-style="notebook" data-theme="light">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Tokens and Context</title>
+<meta name="description" content="P1: tokens, the context window, reasoning budgets, temperature, cost and rate limits for RAG. Short and full depths, seven themes, light and dark. Works offline.">
+<script>
+/* Apply saved choices before the page paints (no flash). Shared by every lesson. */
+(function () {
+  var d = document.documentElement, get = function (k) { try { return localStorage.getItem(k); } catch (e) { return null; } };
+  var p = new URLSearchParams(location.search), styles = ["reader", "hyper", "notebook", "textbook", "editor", "minimal", "catalogue"];
+  var dark = !!(window.matchMedia && window.matchMedia("(prefers-color-scheme: dark)").matches);
+  var pick = function (key, allowed, stored, dflt) { var v = p.get(key); return allowed.indexOf(v) >= 0 ? v : (allowed.indexOf(stored) >= 0 ? stored : dflt); };
+  d.dataset.style = pick("style", styles, get("lesson-style"), "notebook");
+  d.dataset.theme = pick("color", ["light", "dark"], get("lesson-color"), dark ? "dark" : "light");
+  d.dataset.toc = pick("toc", ["shown", "hidden"], get("lesson-toc"), "shown");
+  d.dataset.side = pick("side", ["left", "right"], get("lesson-side"), "left");
+})();
+</script>
+<style>
+/* ---------- themes: five styles, each light and dark. Colours and fonts live in variables. ---------- */
+:root{--content-w:800px;--f-mono:"Cascadia Mono",Consolas,ui-monospace,monospace;--radius:8px;--body-size:16.5px;--h-weight:650;--sec-pad:40px}
+:root[data-style="notebook"]{--f-head:"Segoe UI Variable Display","Segoe UI",system-ui,sans-serif;--f-body:"Segoe UI Variable Text","Segoe UI",system-ui,sans-serif;
+  --paper:#FFFFFF;--card:#F6F8FA;--side:#F6F8FA;--ink:#1F2328;--muted:#59636E;--line:#D1D9E0;--rule:#BFC8D2;--code:#F2F4F7;
+  --accent:#0969DA;--accent-soft:#DDF4FF;--dense:#8250DF;--dense-soft:#F4EDFF;--good:#1A7F37;--good-soft:#DAFBE1;--warn:#9A6700;--warn-soft:#FFF8C5;--bad:#CF222E;--bad-soft:#FFEBE9}
+:root[data-style="notebook"][data-theme="dark"]{--paper:#0D1117;--card:#161B22;--side:#010409;--ink:#E6EDF3;--muted:#9198A1;--line:#30363D;--rule:#3D444D;--code:#1B2129;
+  --accent:#4493F8;--accent-soft:#0C2D6B;--dense:#AB7DF8;--dense-soft:#2A1F45;--good:#3FB950;--good-soft:#12261E;--warn:#D29922;--warn-soft:#2E2410;--bad:#F85149;--bad-soft:#3A1418}
+:root[data-style="textbook"]{--f-head:Cambria,"Palatino Linotype",Georgia,serif;--f-body:Cambria,"Palatino Linotype",Georgia,serif;--body-size:17.5px;--radius:3px;--h-weight:700;
+  --paper:#FFFDF8;--card:#FFFFFF;--side:#FAF6EE;--ink:#1B1B1B;--muted:#5E5A55;--line:#E4DED3;--rule:#CFC6B6;--code:#F5F1E8;
+  --accent:#9E1B32;--accent-soft:#F7E4E7;--dense:#1F4E79;--dense-soft:#E3ECF5;--good:#2E6B3A;--good-soft:#E3F0E5;--warn:#8A5A00;--warn-soft:#FAF0D7;--bad:#9E1B32;--bad-soft:#F7E4E7}
+:root[data-style="textbook"][data-theme="dark"]{--paper:#1A1917;--card:#22201D;--side:#1F1D1A;--ink:#ECE7DE;--muted:#A8A196;--line:#3A3631;--rule:#4E4840;--code:#2A2723;
+  --accent:#E26D7E;--accent-soft:#3D1C22;--dense:#8DB4DE;--dense-soft:#1B2A3A;--good:#86C48F;--good-soft:#1C2D1F;--warn:#E0B65A;--warn-soft:#33290F;--bad:#E26D7E;--bad-soft:#3D1C22}
+:root[data-style="editor"]{--f-head:"Cascadia Code","Cascadia Mono",Consolas,monospace;--f-body:"Segoe UI",system-ui,sans-serif;--radius:4px;--h-weight:600;
+  --paper:#FFFFFF;--card:#F3F3F3;--side:#F3F3F3;--ink:#1E1E1E;--muted:#6E6E6E;--line:#E0E0E0;--rule:#CCCCCC;--code:#F8F8F8;
+  --accent:#005FB8;--accent-soft:#E5F0FB;--dense:#AF00DB;--dense-soft:#F7E6FB;--good:#008000;--good-soft:#E8F5E8;--warn:#795E26;--warn-soft:#FBF4E2;--bad:#A31515;--bad-soft:#FBE9E9}
+:root[data-style="editor"][data-theme="dark"]{--paper:#1E1E1E;--card:#252526;--side:#181818;--ink:#D4D4D4;--muted:#9D9D9D;--line:#3C3C3C;--rule:#4A4A4A;--code:#1A1A1A;
+  --accent:#569CD6;--accent-soft:#1B2B3A;--dense:#C586C0;--dense-soft:#33243A;--good:#6A9955;--good-soft:#1F2A1C;--warn:#DCDCAA;--warn-soft:#2E2E22;--bad:#CE9178;--bad-soft:#3A2820}
+:root[data-style="minimal"]{--f-head:"Segoe UI Variable Display","Segoe UI",system-ui,sans-serif;--f-body:Charter,"Bitstream Charter",Georgia,serif;--body-size:19px;--radius:12px;--h-weight:700;--sec-pad:60px;
+  --paper:#FFFFFF;--card:#FAFAFA;--side:#FFFFFF;--ink:#242424;--muted:#6B6B6B;--line:#EEEEEE;--rule:#E2E2E2;--code:#F6F6F6;
+  --accent:#1A8917;--accent-soft:#E9F5E9;--dense:#2F6FDB;--dense-soft:#EAF1FD;--good:#1A8917;--good-soft:#E9F5E9;--warn:#B26B00;--warn-soft:#FFF4E0;--bad:#C94A4A;--bad-soft:#FBECEC}
+:root[data-style="minimal"][data-theme="dark"]{--paper:#191919;--card:#202020;--side:#191919;--ink:#E6E6E6;--muted:#9B9B9B;--line:#2E2E2E;--rule:#3A3A3A;--code:#252525;
+  --accent:#5DBB63;--accent-soft:#1E2E20;--dense:#6EA8FE;--dense-soft:#1C2638;--good:#5DBB63;--good-soft:#1E2E20;--warn:#E3A33B;--warn-soft:#33270F;--bad:#E57373;--bad-soft:#3A1F1F}
+:root[data-style="catalogue"]{--f-head:"Iowan Old Style","Palatino Linotype","Book Antiqua",Palatino,Georgia,serif;--f-body:"Segoe UI",system-ui,sans-serif;--h-weight:700;
+  --paper:#FBF7EF;--card:#FFFDF8;--side:#F6F0E3;--ink:#231F18;--muted:#6B6457;--line:#E2D9C7;--rule:#C9BBA0;--code:#F1EBDD;
+  --accent:#B0431A;--accent-soft:#F6E2D6;--dense:#355C8C;--dense-soft:#E0E8F2;--good:#2D7549;--good-soft:#DDEFE2;--warn:#8F6200;--warn-soft:#F6EBCB;--bad:#B0431A;--bad-soft:#F6E2D6}
+:root[data-style="catalogue"][data-theme="dark"]{--paper:#16140F;--card:#1F1C16;--side:#1B1813;--ink:#EDE6D6;--muted:#A99F8D;--line:#38322A;--rule:#5A5040;--code:#29251D;
+  --accent:#F08B5E;--accent-soft:#3B2318;--dense:#8DB2E3;--dense-soft:#1C2939;--good:#7BCB97;--good-soft:#18301F;--warn:#E3B653;--warn-soft:#352A12;--bad:#F08B5E;--bad-soft:#3B2318}
+/* Reader themes: research-based reading typography (bundled OFL fonts, so they work offline).
+   Lines about 68 characters, line height about 1.7, off-white paper; dark mode on dark grey with off-white text (no pure black or white). */
+@font-face{font-family:"Literata";src:url("fonts/literata-latin-opsz-normal.woff2") format("woff2");font-weight:200 900;font-style:normal;font-display:swap}
+@font-face{font-family:"Literata";src:url("fonts/literata-latin-opsz-italic.woff2") format("woff2");font-weight:200 900;font-style:italic;font-display:swap}
+@font-face{font-family:"Atkinson Hyperlegible";src:url("fonts/atkinson-hyperlegible-latin-400-normal.woff2") format("woff2");font-weight:400;font-style:normal;font-display:swap}
+@font-face{font-family:"Atkinson Hyperlegible";src:url("fonts/atkinson-hyperlegible-latin-400-italic.woff2") format("woff2");font-weight:400;font-style:italic;font-display:swap}
+@font-face{font-family:"Atkinson Hyperlegible";src:url("fonts/atkinson-hyperlegible-latin-700-normal.woff2") format("woff2");font-weight:700;font-style:normal;font-display:swap}
+@font-face{font-family:"Atkinson Hyperlegible";src:url("fonts/atkinson-hyperlegible-latin-700-italic.woff2") format("woff2");font-weight:700;font-style:italic;font-display:swap}
+:root[data-style="reader"],:root[data-style="hyper"]{
+  --paper:#FBF8F1;--card:#F5F1E8;--side:#F3EEE3;--ink:#2A2723;--muted:#6B655B;--line:#E4DCCD;--rule:#CFC4AF;--code:#F0EADF;
+  --accent:#8C3A12;--accent-soft:#F5E3D6;--dense:#24588A;--dense-soft:#E2ECF6;--good:#2F6B3B;--good-soft:#E3F0E3;--warn:#8A5B00;--warn-soft:#F8EDCF;--bad:#A1271B;--bad-soft:#F8E1DD;
+  --radius:6px;--sec-pad:56px}
+:root[data-style="reader"][data-theme="dark"],:root[data-style="hyper"][data-theme="dark"]{
+  --paper:#1C1B19;--card:#24221F;--side:#191816;--ink:#DEDAD2;--muted:#A39E93;--line:#36332E;--rule:#4A463F;--code:#2A2825;
+  --accent:#E3A178;--accent-soft:#3A2A20;--dense:#94BCE6;--dense-soft:#1F2B38;--good:#8CC79A;--good-soft:#1F2D22;--warn:#E2BD6A;--warn-soft:#352B14;--bad:#EE8E80;--bad-soft:#3B2420}
+:root[data-style="reader"]{--f-head:"Literata",Cambria,Georgia,serif;--f-body:"Literata",Cambria,Georgia,serif;--body-size:19px;--h-weight:650}
+:root[data-style="hyper"]{--f-head:"Atkinson Hyperlegible","Segoe UI",system-ui,sans-serif;--f-body:"Atkinson Hyperlegible","Segoe UI",system-ui,sans-serif;--body-size:18.5px;--h-weight:700}
+:root[data-theme="dark"]{color-scheme:dark}
+
+/* ---------- base ---------- */
+*{box-sizing:border-box}
+html{scroll-behavior:smooth;scroll-padding-top:72px}
+body{margin:0;background:var(--paper);color:var(--ink);font:var(--body-size)/1.62 var(--f-body)}
+a{color:var(--accent)}
+a:focus-visible,button:focus-visible,input:focus-visible,select:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+h1,h2,h3{font-family:var(--f-head);font-weight:var(--h-weight);line-height:1.2;margin:0;text-wrap:balance}
+h1{font-size:clamp(1.8rem,4.2vw,2.6rem);letter-spacing:-.01em}
+h2{font-size:clamp(1.3rem,2.8vw,1.65rem)}
+h3{font-size:1.06rem}
+p{margin:0}
+code,.mono{font-family:var(--f-mono);font-size:.86em}
+:not(pre)>code{background:var(--code);padding:.08em .35em;border-radius:4px}
+pre{font-family:var(--f-mono);font-size:.84rem;background:var(--code);padding:12px 14px;border-radius:var(--radius);overflow-x:auto;margin:0;line-height:1.5;border:1px solid var(--line)}
+ul,ol{margin:0;padding-left:1.25em}
+li+li{margin-top:4px}
+
+/* ---------- top bar, sidebar, layout ---------- */
+.top{position:sticky;top:0;z-index:30;height:56px;display:flex;align-items:center;gap:10px;padding:0 16px;background:color-mix(in srgb,var(--paper) 92%,transparent);backdrop-filter:blur(8px);border-bottom:1px solid var(--line)}
+.top .t{font-family:var(--f-head);font-weight:var(--h-weight);margin-right:auto;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;min-width:0}
+.menu,.home{display:inline-flex;gap:4px;align-items:center;flex:none}
+.home{text-decoration:none}
+.side .course a{display:grid;grid-template-columns:26px minmax(0,1fr);gap:4px;padding:5px 8px;border-radius:6px;color:var(--ink);text-decoration:none;font-size:.88rem;line-height:1.35}
+.side .course a .n{font-family:var(--f-mono);font-size:.74rem;color:var(--muted)}
+.side .course a:hover{background:color-mix(in srgb,var(--accent) 10%,transparent)}
+.top .btn,.top .seg{flex:none;white-space:nowrap}
+.crumb{display:none;color:var(--muted);font-weight:400;font-family:var(--f-body)}
+html[data-toc="hidden"] .crumb{display:inline}
+.topprog{position:absolute;left:0;bottom:-1px;height:3px;width:0;background:var(--accent);transition:width .15s}
+html:not([data-toc="hidden"]) .topprog{display:none}
+.seg{display:inline-flex;border:1px solid var(--rule);border-radius:999px;overflow:hidden;flex:none}
+.seg button{font:inherit;font-family:var(--f-body);font-size:.88rem;border:0;background:transparent;color:var(--ink);padding:5px 12px;cursor:pointer}
+.seg button[aria-pressed="true"]{background:var(--ink);color:var(--paper)}
+.btn,select.btn{font:inherit;font-family:var(--f-body);font-size:.88rem;border:1px solid var(--rule);background:var(--card);color:var(--ink);border-radius:8px;padding:5px 10px;cursor:pointer}
+.btn:hover{border-color:var(--ink)}
+/* Panel docked to the window edge (like VS Code); the text starts right beside it; spare space goes to the far side only. */
+.shell{--side-w:260px;display:grid;grid-template-columns:var(--side-w) minmax(0,var(--content-w));justify-content:start;column-gap:48px;padding:0 24px 0 0}
+aside.side{position:sticky;top:56px;height:calc(100vh - 56px);overflow:auto;background:var(--side);border-right:1px solid var(--line);padding:20px 12px 24px;font-family:var(--f-body)}
+.side .lab{font-size:.72rem;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);margin:14px 8px 6px}
+.side .head{display:flex;justify-content:space-between;align-items:center;gap:8px;margin:0 8px 8px}
+.side .head .lab{margin:0}
+.side .head button{font:inherit;font-family:var(--f-body);font-size:.74rem;border:1px solid var(--rule);background:var(--paper);color:var(--muted);border-radius:6px;padding:2px 7px;cursor:pointer}
+.side .head button:hover{color:var(--ink);border-color:var(--ink)}
+html[data-side="right"] .shell{grid-template-columns:minmax(0,var(--content-w)) var(--side-w);justify-content:end;padding:0 0 0 24px}
+html[data-side="right"] aside.side{order:2;border-right:0;border-left:1px solid var(--line)}
+html[data-toc="hidden"] .shell{grid-template-columns:minmax(0,var(--content-w));justify-content:center;padding:0 24px}
+html[data-toc="hidden"] aside.side{display:none}
+.prog{margin:0 8px 6px;display:grid;gap:4px;font-size:.8rem;color:var(--muted)}
+.prog .track{height:5px;border-radius:3px;background:var(--line);overflow:hidden}
+.prog .track i{display:block;height:100%;width:0;background:var(--accent);transition:width .15s}
+.side nav a{display:grid;grid-template-columns:26px minmax(0,1fr) auto;gap:4px;align-items:baseline;padding:5px 8px;border-radius:6px;color:var(--ink);text-decoration:none;font-size:.88rem;line-height:1.35}
+.side nav a .n{font-family:var(--f-mono);font-size:.74rem;color:var(--muted)}
+.side nav a:hover{background:color-mix(in srgb,var(--accent) 10%,transparent)}
+.side nav a.on{background:var(--accent-soft);color:var(--accent);font-weight:600}
+.side nav a.on .n{color:var(--accent)}
+.side nav a .fo{font-size:.66rem;font-family:var(--f-mono);color:var(--dense);border:1px solid var(--dense);border-radius:4px;padding:0 4px}
+html[data-depth="short"] .side nav a.fullonly{opacity:.55}
+main{padding:8px 0 90px;min-width:0;width:100%}
+@media (max-width:980px){
+  .shell,html[data-side="right"] .shell,html[data-toc="hidden"] .shell{grid-template-columns:minmax(0,1fr);padding:0}
+  aside.side,html[data-toc="hidden"] aside.side,html[data-side="right"] aside.side{display:block;position:fixed;left:0;top:56px;bottom:0;height:auto;width:min(300px,86vw);z-index:25;transform:translateX(-104%);transition:transform .2s;box-shadow:0 10px 30px rgba(0,0,0,.25);background:var(--side);padding:16px 12px 24px}
+  html[data-side="right"] aside.side{left:auto;right:0;transform:translateX(104%)}
+  body.side-open aside.side{transform:none!important}
+  .topprog{display:block!important}
+  .crumb{display:inline}
+  main{padding:8px 16px 90px}
+}
+@media (max-width:620px){.top .t{display:none}.top .seg{margin-left:auto}.top select.btn{max-width:118px}}
+@media (max-width:480px){.top{gap:6px;padding:0 10px}.top .lbl{display:none}.top select.btn{max-width:100px}.seg button{padding:5px 10px}}
+.totop{position:fixed;right:20px;bottom:20px;width:46px;height:46px;border-radius:50%;border:1px solid var(--rule);background:var(--ink);color:var(--paper);font-size:1.3rem;line-height:1;cursor:pointer;box-shadow:0 4px 14px rgba(0,0,0,.2);opacity:0;pointer-events:none;transform:translateY(8px);transition:opacity .2s,transform .2s;z-index:20}
+.totop.show{opacity:1;pointer-events:auto;transform:none}
+
+/* ---------- content blocks ---------- */
+header.hero{padding:28px 0 4px;display:grid;gap:10px}
+.eyebrow{font-family:var(--f-mono);font-size:.72rem;letter-spacing:.08em;text-transform:uppercase;color:var(--muted)}
+.sub{color:var(--muted);font-size:1.05rem}
+section.s{padding-top:var(--sec-pad);display:grid;gap:14px}
+section.s>.num{font-family:var(--f-mono);font-size:.74rem;letter-spacing:.08em;color:var(--accent)}
+.lede{font-size:1.1rem}
+.badge{font-size:.72rem;font-family:var(--f-mono);padding:1px 7px;border-radius:999px;border:1px solid var(--rule);color:var(--muted);background:var(--card);white-space:nowrap;vertical-align:1px}
+.badge.m{border-color:var(--good);color:var(--good)}
+.badge.t{border-color:var(--warn);color:var(--warn)}
+.badge.f{border-color:var(--dense);color:var(--dense)}
+.card{background:var(--card);border:1px solid var(--line);border-radius:var(--radius);padding:14px 16px}
+.call{padding:10px 14px;border-radius:0 var(--radius) var(--radius) 0;border-left:4px solid}
+.call.proj{border-color:var(--good);background:var(--good-soft)}
+.call.wrong{border-color:var(--bad);background:var(--bad-soft)}
+.call.wrong>b:first-child{color:var(--bad)}
+.call.note{border-color:var(--warn);background:var(--warn-soft)}
+.full{border:1px dashed var(--dense);border-radius:var(--radius);padding:14px 16px;display:grid;gap:12px;background:color-mix(in srgb,var(--dense-soft) 50%,transparent)}
+.full>.tag{font-family:var(--f-mono);font-size:.7rem;letter-spacing:.08em;text-transform:uppercase;color:var(--dense)}
+html[data-depth="short"] .full{display:none}
+.two{display:grid;gap:12px}
+@media (min-width:760px){.two{grid-template-columns:1fr 1fr}}
+.three{display:grid;gap:10px}
+@media (min-width:760px){.three{grid-template-columns:repeat(3,1fr)}}
+table{border-collapse:collapse;width:100%;font-size:.92rem;font-family:var(--f-body)}
+th,td{text-align:left;padding:7px 9px;border-bottom:1px solid var(--line);vertical-align:top}
+th{font-size:.78rem;color:var(--muted);font-weight:600}
+td.n,th.n{text-align:right;font-variant-numeric:tabular-nums;font-family:var(--f-mono);font-size:.84rem}
+.tw{overflow-x:auto}
+caption,figcaption{caption-side:bottom;text-align:left;color:var(--muted);font-size:.84rem;padding-top:6px;font-family:var(--f-body)}
+figure{margin:0;display:grid;gap:8px}
+.hit{color:var(--good);font-weight:700}
+.miss{color:var(--bad);font-weight:700}
+.formula{font-family:var(--f-mono);font-size:.92rem;background:var(--code);padding:12px 14px;border-radius:var(--radius);overflow-x:auto;line-height:1.75;border:1px solid var(--line)}
+.formula .w{color:var(--accent);font-weight:700}
+.formula .c{color:var(--muted)}
+
+/* at a glance */
+.glance{display:grid;gap:10px;grid-template-columns:repeat(auto-fill,minmax(240px,1fr))}
+.g{background:var(--card);border:1px solid var(--line);border-radius:var(--radius);padding:10px 12px;display:grid;gap:5px;align-content:start}
+.g h3{font-size:.95rem;display:flex;justify-content:space-between;gap:8px;align-items:baseline}
+.g h3 a{font-family:var(--f-mono);font-size:.72rem;font-weight:400;text-decoration:none}
+.g .fx{font-family:var(--f-mono);font-size:.8rem;background:var(--code);border:1px solid var(--line);padding:5px 8px;border-radius:6px;white-space:normal;overflow-wrap:anywhere;line-height:1.45}
+.g p{font-size:.88rem}
+.g .ex{font-size:.8rem;color:var(--muted)}
+.key{font-size:.86rem;color:var(--muted)}
+.key code{color:var(--ink)}
+
+/* rank cards, index explorer */
+.ranks{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.rank{border-radius:var(--radius);padding:14px;border:1px solid var(--line);background:var(--card);display:grid;gap:4px}
+.rank .big{font-family:var(--f-head);font-size:2.5rem;line-height:1;font-weight:700}
+.rank.d .big{color:var(--dense)}
+.rank.k .big{color:var(--accent)}
+.idx-docs{display:grid;gap:6px}
+.doc{font-family:var(--f-mono);font-size:.8rem;padding:6px 10px;border:1px solid var(--line);border-radius:8px;background:var(--paper);display:flex;gap:10px;align-items:baseline}
+.doc .id{font-weight:700;min-width:2.2em}
+.doc .tok{padding:0 2px;border-radius:3px}
+.doc .tok.on{background:var(--accent-soft);color:var(--accent);font-weight:700}
+.doc.cand{border-color:var(--accent)}
+.chips{display:flex;flex-wrap:wrap;gap:6px}
+.chip{font:inherit;font-family:var(--f-mono);font-size:.82rem;border:1px solid var(--rule);background:var(--paper);color:var(--ink);border-radius:999px;padding:3px 10px;cursor:pointer}
+.chip[aria-pressed="true"]{background:var(--accent);border-color:var(--accent);color:var(--paper)}
+.cards{display:grid;gap:8px;grid-template-columns:repeat(auto-fill,minmax(190px,1fr))}
+.icard{background:var(--paper);border:1px solid var(--rule);border-radius:4px;padding:8px 10px 10px;position:relative}
+.icard::before{content:"";position:absolute;left:0;right:0;top:28px;border-top:1px solid var(--accent);opacity:.55}
+.icard h4{margin:0 0 10px;font-family:var(--f-mono);font-size:.92rem}
+.icard p{font-size:.82rem;font-family:var(--f-mono)}
+.icard .meta{color:var(--muted);font-family:var(--f-body);font-size:.78rem;margin-top:4px}
+
+/* controls and charts */
+.ctl{display:grid;grid-template-columns:160px minmax(0,1fr) 64px;gap:10px;align-items:center;font-size:.9rem;font-family:var(--f-body)}
+.ctl input[type=range]{width:100%;accent-color:var(--accent)}
+.ctl output{font-family:var(--f-mono);text-align:right}
+@media (max-width:560px){.ctl{grid-template-columns:110px minmax(0,1fr) 54px}}
+svg.chart{width:100%;height:auto;display:block;background:var(--card);border:1px solid var(--line);border-radius:var(--radius)}
+svg .ax{stroke:var(--rule);stroke-width:1}
+svg .grid{stroke:var(--line);stroke-width:1}
+svg text{fill:var(--muted);font-family:"Segoe UI",system-ui,sans-serif;font-size:12px}
+svg .lab{fill:var(--ink);font-size:12.5px}
+svg .s-bm25{stroke:var(--accent);stroke-width:3;fill:none}
+svg .s-tfidf{stroke:var(--muted);stroke-width:2;fill:none;stroke-dasharray:6 5}
+svg .s-raw{stroke:var(--accent);stroke-width:1.5;fill:none;stroke-dasharray:2 4;opacity:.8}
+svg .s-ceil{stroke:var(--warn);stroke-width:1.5;stroke-dasharray:5 4}
+svg .s-ref{stroke:var(--dense);stroke-width:2;fill:none;opacity:.55}
+svg .dot{fill:var(--accent);stroke:var(--card);stroke-width:2}
+svg .dot2{fill:var(--dense);stroke:var(--card);stroke-width:2}
+svg .zero{stroke:var(--ink);stroke-width:1;opacity:.45}
+.readout{font-size:.9rem;background:var(--card);border:1px solid var(--line);border-radius:8px;padding:8px 12px;font-family:var(--f-body)}
+.readout b{font-family:var(--f-mono)}
+.sbars{display:grid;gap:8px}
+.sbar{display:grid;grid-template-columns:130px minmax(0,1fr) 64px;gap:10px;align-items:center;font-size:.88rem;font-family:var(--f-body)}
+.sbar .track{display:flex;height:22px;background:var(--paper);border:1px solid var(--line);border-radius:4px;overflow:hidden}
+.sbar .p1{background:var(--accent)}
+.sbar .p2{background:var(--warn);opacity:.75}
+.sbar .v{font-family:var(--f-mono);text-align:right}
+@media (max-width:560px){.sbar{grid-template-columns:92px minmax(0,1fr) 54px}}
+.legend{display:flex;flex-wrap:wrap;gap:12px;font-size:.82rem;color:var(--muted);font-family:var(--f-body)}
+.legend i{display:inline-block;width:12px;height:12px;border-radius:2px;margin-right:5px;vertical-align:-1px}
+.play{display:grid;gap:10px}
+.play label{display:grid;gap:4px;font-size:.88rem;font-family:var(--f-body)}
+.play input[type=text]{font:inherit;font-family:var(--f-mono);font-size:.86rem;padding:8px 10px;border:1px solid var(--rule);border-radius:8px;background:var(--paper);color:var(--ink);width:100%}
+.toks{display:grid;gap:8px}
+.tokrow{border:1px solid var(--line);border-radius:10px;padding:8px 10px;background:var(--paper);display:grid;gap:6px}
+.tokrow .h{display:flex;flex-wrap:wrap;gap:8px;align-items:baseline;justify-content:space-between;font-family:var(--f-body)}
+.tokrow .h b{font-family:var(--f-mono);font-size:.84rem}
+.tk{display:inline-block;font-family:var(--f-mono);font-size:.78rem;padding:1px 6px;margin:2px 3px 2px 0;border:1px solid var(--line);border-radius:4px;background:var(--card)}
+.tk.sh{border-color:var(--good);background:var(--good-soft);color:var(--good);font-weight:700}
+.verdict{font-size:.86rem;font-weight:600}
+.verdict.yes{color:var(--good)}
+.verdict.no{color:var(--bad)}
+.ov{position:relative;height:84px;border:1px solid var(--line);border-radius:var(--radius);background:var(--card);overflow:hidden}
+.ov .w{position:absolute;height:24px;border-radius:4px;font-size:.76rem;font-family:var(--f-mono);display:flex;align-items:center;justify-content:center;color:var(--ink);background:var(--dense-soft);border:1px solid var(--dense)}
+.ov .w82{top:12px;left:4%;width:56%}
+.ov .w83{top:46px;left:40%;width:56%}
+.ov .pin{position:absolute;top:4px;bottom:4px;left:44.1%;width:3px;background:var(--accent)}
+.ov .pinl{position:absolute;top:2px;left:45.3%;font-size:.74rem;font-family:var(--f-mono);color:var(--accent);font-weight:700}
+.q{display:grid;gap:8px}
+.q fieldset{border:1px solid var(--line);border-radius:var(--radius);padding:10px 14px;background:var(--card);margin:0;display:grid;gap:6px}
+.q legend{font-weight:600;padding:0 4px}
+.q label{display:flex;gap:8px;align-items:flex-start;font-size:.94rem;cursor:pointer}
+.q .fb{font-size:.9rem;padding:6px 10px;border-radius:6px;display:none}
+.q .fb.show{display:block}
+.q .fb.ok{background:var(--good-soft);color:var(--good)}
+.q .fb.no{background:var(--bad-soft);color:var(--bad)}
+.check{display:grid;gap:6px}
+.check label{display:grid;grid-template-columns:22px minmax(0,1fr);gap:8px;align-items:start;padding:8px 10px;border:1px solid var(--line);border-radius:8px;background:var(--card);cursor:pointer;font-size:.92rem}
+.check label:has(input:checked){border-color:var(--good);background:var(--good-soft)}
+.check input{width:17px;height:17px;margin-top:3px;accent-color:var(--good)}
+.check .how{display:block;color:var(--muted);font-size:.84rem;margin-top:2px}
+footer{margin-top:48px;padding:22px 0 0;border-top:1px solid var(--line);color:var(--muted);font-size:.86rem;display:grid;gap:8px}
+
+
+/* the theory in one read: a numbered chain of ideas */
+.chain{list-style:none;counter-reset:idea;margin:0;padding:0;display:grid;gap:0}
+.chain>li{counter-increment:idea;position:relative;padding:0 0 22px 52px;display:grid;gap:7px;margin:0}
+.chain>li::before{content:counter(idea);position:absolute;left:0;top:-2px;width:34px;height:34px;border-radius:50%;display:grid;place-items:center;
+  background:var(--accent-soft);color:var(--accent);border:1px solid var(--accent);font:600 .9rem/1 var(--f-body);font-variant-numeric:lining-nums}
+.chain>li::after{content:"";position:absolute;left:16.5px;top:36px;bottom:4px;width:1px;background:var(--rule)}
+.chain>li:last-child::after{display:none}
+.chain h3{font-size:1.08rem}
+.chain .formula{font-size:.86rem;padding:8px 12px;line-height:1.65}
+.chain .go{justify-self:start;font-size:.86rem;font-family:var(--f-body);text-decoration:none;border:1px solid var(--rule);border-radius:999px;padding:1px 10px;color:var(--accent)}
+.chain .go:hover{border-color:var(--accent)}
+
+/* ---------- small per-theme touches ---------- */
+[data-style="textbook"] section.s>.num{font-family:var(--f-head);font-size:.95rem;letter-spacing:.02em;font-style:italic;text-transform:none}
+[data-style="textbook"] #answer .lede::first-letter{float:left;font-size:3.1em;line-height:.9;padding:5px 8px 0 0;color:var(--accent);font-family:var(--f-head)}
+[data-style="textbook"] .call{border-left-width:2px;font-style:italic}
+[data-style="textbook"] .call b{font-style:normal}
+[data-style="editor"] h2::before{content:"## ";color:var(--muted)}
+[data-style="editor"] h1::before{content:"# ";color:var(--muted)}
+[data-style="editor"] .formula,[data-style="editor"] pre{border-left:3px solid var(--accent)}
+[data-style="minimal"] .card,[data-style="minimal"] .g,[data-style="minimal"] .rank,[data-style="minimal"] svg.chart{border-color:transparent}
+[data-style="minimal"] aside.side{border-right-color:transparent}
+[data-style="minimal"] .call{border-left-width:3px}
+[data-style="catalogue"] .g,[data-style="catalogue"] .card{box-shadow:0 1px 0 var(--line)}
+/* Reader themes: the rich typographic details */
+:is([data-style="reader"],[data-style="hyper"]){--content-w:720px}
+:is([data-style="reader"],[data-style="hyper"]) body{line-height:1.72;font-variant-numeric:lining-nums;text-rendering:optimizeLegibility;-webkit-font-smoothing:antialiased}
+:is([data-style="reader"],[data-style="hyper"]) :is(p,li){text-wrap:pretty;hanging-punctuation:first}
+:is([data-style="reader"],[data-style="hyper"]) section.s{border-top:1px solid var(--line);margin-top:30px}
+:is([data-style="reader"],[data-style="hyper"]) section.s>.num{font-family:var(--f-body);font-variant-caps:all-small-caps;font-size:1rem;letter-spacing:.09em;color:var(--accent)}
+:is([data-style="reader"],[data-style="hyper"]) .eyebrow{font-family:var(--f-body);font-variant-caps:all-small-caps;font-size:.95rem;text-transform:none;letter-spacing:.08em}
+:is([data-style="reader"],[data-style="hyper"]) h2{font-size:clamp(1.5rem,3vw,1.9rem);letter-spacing:-.005em}
+[data-style="reader"] h1{font-weight:720;font-size:clamp(2rem,5vw,3rem);letter-spacing:-.015em}
+:is([data-style="reader"],[data-style="hyper"]) #answer .lede{font-size:1.2em;line-height:1.62}
+[data-style="reader"] #answer .lede::first-letter{float:left;font-size:3.5em;line-height:.84;padding:6px 10px 0 0;color:var(--accent);font-weight:700}
+:is([data-style="reader"],[data-style="hyper"]) .call{border-left-width:3px;border-radius:0 8px 8px 0;padding:12px 16px}
+:is([data-style="reader"],[data-style="hyper"]) .call.proj::before{content:"✦ ";color:var(--good)}
+:is([data-style="reader"],[data-style="hyper"]) a{text-underline-offset:.18em;text-decoration-thickness:1px}
+:is([data-style="reader"],[data-style="hyper"]) ::selection{background:var(--accent-soft)}
+:is([data-style="reader"],[data-style="hyper"]) table{font-variant-numeric:lining-nums tabular-nums}
+:is([data-style="reader"],[data-style="hyper"]) :is(.g,.card,.rank){box-shadow:0 1px 2px rgba(0,0,0,.05)}
+:is([data-style="reader"],[data-style="hyper"]) .side nav a{font-size:.9rem}
+@media print{.top,aside.side,.totop,.ctl,.btn,.play input{display:none!important} html[data-depth] .full{display:grid!important} .shell{display:block} main{padding:0}}
+
+/* ---------- P1 additions ---------- */
+.tk.mk{color:var(--muted);border-style:dashed}
+svg .fbox{fill:var(--paper);stroke:var(--rule);stroke-width:1.2}
+svg .fbox.hl{fill:var(--accent-soft);stroke:var(--accent);stroke-width:2}
+svg .farr{stroke:var(--muted);stroke-width:1.6}
+svg .fhead{fill:var(--muted)}
+svg .rb1{fill:var(--muted);opacity:.55}
+svg .rb2{fill:var(--accent)}
+svg .tbar{fill:var(--accent)}
+.sbar .pm{background:var(--muted);opacity:.55}
+.sbar .p3{background:var(--dense)}
+.sbar .ph,.legend i.hatch{background:repeating-linear-gradient(45deg,var(--warn) 0 3px,transparent 3px 7px);opacity:.8}
+.sbar .p4{background:var(--dense);opacity:.8}
+.sbar .p5{background:var(--good)}
+.sbar .pe{background:transparent}
+pre .c{color:var(--muted)}
+</style>
+</head>
+<body>
+<div class="top">
+  <a class="btn home" id="home" href="../../RAG_ROUTE_MAP.html" title="Back to all phases"><span aria-hidden="true">⌂</span><span class="lbl">All phases</span></a>
+  <button type="button" class="btn menu" id="menu" aria-expanded="true" aria-controls="side" title="Show or hide the contents (key: T)"><span aria-hidden="true">☰</span><span class="lbl">Contents</span></button>
+  <span class="t">P1 · Tokens, the context window, sampling and cost<span class="crumb" id="crumb" aria-live="polite"></span></span>
+  <i class="topprog" id="topprog" aria-hidden="true"></i>
+  <div class="seg" role="group" aria-label="Reading depth">
+    <button type="button" data-depth="short" aria-pressed="true">Short</button>
+    <button type="button" data-depth="full" aria-pressed="false">Full</button>
+  </div>
+  <select class="btn" id="style" aria-label="Theme">
+    <option value="reader">Reader · Literata (new)</option>
+    <option value="hyper">Reader · Atkinson Hyperlegible (new)</option>
+    <option value="notebook">Clean notebook</option>
+    <option value="textbook">Textbook</option>
+    <option value="editor">Editor (VS Code)</option>
+    <option value="minimal">Minimal reading</option>
+    <option value="catalogue">Card catalogue (first version)</option>
+  </select>
+  <button type="button" class="btn" id="color" aria-label="Switch light or dark">☾ Dark</button>
+</div>
+
+<div class="shell">
+<aside class="side" id="side" aria-label="Sections">
+  <div class="head"><div class="lab">On this page</div><button type="button" id="sidepos" title="Move the contents to the other side">⇆ Right</button></div>
+  <div class="prog"><span id="where">The answer first</span><span class="track" aria-hidden="true"><i id="bar"></i></span></div>
+  <nav id="toc">
+    <a href="#answer"><span class="n">→</span><span>The answer first</span></a>
+    <a href="#theory"><span class="n">◆</span><span>The theory in one read</span></a>
+    <a href="#glance"><span class="n">★</span><span>Formula sheet</span></a>
+    <div class="lab">Step by step</div>
+    <a href="#cut"><span class="n">1</span><span>The tokenizer cuts</span></a>
+    <a href="#bpe"><span class="n">2</span><span>Where the pieces come from</span></a>
+    <a href="#ratio"><span class="n">3</span><span>Characters per token</span></a>
+    <a href="#traps"><span class="n">4</span><span>Count with the right tokenizer</span></a>
+    <a href="#truncate"><span class="n">5</span><span>The embedder's limit</span></a>
+    <a href="#window"><span class="n">6</span><span>One call's budget</span></a>
+    <a href="#reasoning"><span class="n">7</span><span>Reasoning spends the cap</span></a>
+    <a href="#temperature"><span class="n">8</span><span>Temperature</span></a>
+    <a href="#providers"><span class="n">9</span><span>Each provider is different</span></a>
+    <a href="#cost"><span class="n">10</span><span>Price it</span></a>
+    <a href="#time"><span class="n">11</span><span>Time it</span></a>
+    <a href="#decide"><span class="n">12</span><span>Decisions</span></a>
+    <a href="#repo" class="fullonly"><span class="n">13</span><span>The repo's units</span><span class="fo">Full</span></a>
+    <a href="#book" class="fullonly"><span class="n">14</span><span>The book, checked</span><span class="fo">Full</span></a>
+    <div class="lab">Practise and apply</div>
+    <a href="#verify"><span class="n">✓</span><span>Verify it: the notebook</span></a>
+    <a href="#apply"><span class="n">⚙</span><span>Use it on your data</span></a>
+    <a href="#check"><span class="n">?</span><span>Check yourself</span></a>
+  </nav>
+  <div class="lab">Course</div>
+  <div class="course">
+    <a id="toRoute" href="../../RAG_ROUTE_MAP.html"><span class="n">⌂</span><span>All phases (the route)</span></a>
+    <a class="kitonly" data-route="#/c/P1" href="#"><span class="n">≡</span><span>P1 page: steps, lab, quiz</span></a>
+    <a class="kitonly" data-route="#/c/P2" href="#"><span class="n">→</span><span>Next topic: P2 retrieval framing</span></a>
+  </div>
+</aside>
+
+<main id="main">
+<header class="hero" id="top">
+  <div class="eyebrow">RAG study kit · Phase 1 · concept P1</div>
+  <h1>Tokens, the context window, sampling and cost</h1>
+  <p class="sub">What an LLM actually reads, how much fits in one call, why the same prompt can give two answers, and what a run costs in money and minutes.</p>
+  <p class="key"><span class="badge m">measured</span> from the course's climate PDF and local tokenizers (no API call) · <span class="badge t">toy</span> made-up values that show a mechanism · <span class="badge f">formula</span> computed on this page · provider facts are external, read on 2026-10-17</p>
+</header>
+
+<!-- ======================= ANSWER FIRST ======================= -->
+<section class="s" id="answer" aria-labelledby="h-answer">
+  <div class="num">THE ANSWER FIRST</div>
+  <h2 id="h-answer">LLM basics for RAG in five sentences</h2>
+  <p class="lede"><b>A model never reads characters: its own tokenizer, fixed before training, cuts your text into pieces from a learned vocabulary, and the model sees only their ID numbers.</b> So every limit and every bill is counted in <i>that model's</i> tokens, and how many characters make a token depends on the text: about 5.6 on our climate PDF, 4.6 on Python code, under 1.5 on a line of numbers. One call's input (rules, hidden template, chunks, question) plus its output (reasoning <i>and</i> answer) must fit the context window, and the output cap must leave room for the reasoning, or the answer comes back empty. The model picks each next token by chance from scores sharpened or flattened by the temperature; a low temperature makes the top token win more often, but no hosted API promises identical outputs, so the course replays recorded calls instead. Cost per call is input tokens × input price plus output tokens × output price, and on Groq output (reasoning included) costs four times as much as input.</p>
+  <p>Next comes <b>the whole theory in one read</b>, then a <b>formula sheet</b>, then the <b>step-by-step</b> part. It follows one real thing all the way: the course's v0 prompt, built from the climate PDF and the question <b>"By how much have global temperatures risen since the late 19th century?"</b> (seed item D-001). <b>Short</b> gives a complete first understanding. <b>Full</b> adds the tokenizer families, the hidden chat format, more sampling knobs, a cost calculator and the checks against the repo and the book; its parts have a dashed border.</p>
+</section>
+
+<!-- ======================= THEORY IN ONE READ ======================= -->
+<section class="s" id="theory" aria-labelledby="h-theory">
+  <div class="num">THE THEORY IN ONE READ</div>
+  <h2 id="h-theory">The whole topic, idea by idea</h2>
+  <p>Twelve ideas, in the order they build on each other. This part is theory only, with no measurements. Each idea links to its step below, where the v0 prompt and real counts show it working.</p>
+  <ol class="chain">
+    <li><h3>Text becomes pieces, pieces become IDs</h3>
+      <p>A <b>tokenizer</b> cuts text into <b>tokens</b>: whole words, parts of words, spaces with letters, punctuation. Each token is an entry in a fixed list called the <b>vocabulary</b>, and the model receives only the entry numbers (token IDs). An embedding model or an LLM then looks up a vector for each ID. It never decides the cut.</p>
+      <div class="formula">ids = tokenizer(text)&nbsp;&nbsp;<span class="c">every id is a row number in the vocabulary (o200k_harmony: 201,088 rows)</span></div>
+      <a class="go" href="#cut">Step 1 →</a></li>
+    <li><h3>The pieces are learned from text frequency</h3>
+      <p>The vocabulary is built before the model is trained. <b>BPE</b> (byte-pair encoding) starts from single characters and repeatedly glues together the pair that occurs most often in a training text. Frequent words end up as one token; rare words stay in several pieces. A space and capital letters are part of what was learned.</p>
+      <div class="formula">repeat: merge the most frequent neighbouring pair (a, b) → ab</div>
+      <a class="go" href="#bpe">Step 2 →</a></li>
+    <li><h3>Characters per token is a measured ratio</h3>
+      <p>How many characters make one token depends on the tokenizer and the text: English prose packs many characters into each token, code and numbers far fewer, many non-Latin scripts fewer still. "Divide by 4" comes from an average of about 4 <i>bytes</i> per token on typical English; it is a habit, not a law.</p>
+      <div class="formula">r = characters / tokens&nbsp;&nbsp;→&nbsp;&nbsp;tokens ≈ characters / r<sub>your corpus</sub></div>
+      <a class="go" href="#ratio">Step 3 →</a></li>
+    <li><h3>Every model has its own tokenizer, so count with the right one</h3>
+      <p>Each limit is enforced in the tokens of the model that enforces it. The embedding model's tokenizer decides truncation; the generator's tokenizer decides whether the prompt fits; the provider's <code>usage</code> report decides the bill. Look an encoding up by its name, and expect special marker strings in user text.</p>
+      <a class="go" href="#traps">Step 4 →</a></li>
+    <li><h3>An embedding model reads only its first few hundred tokens</h3>
+      <p>An embedding model has a maximum input length. Tokens past it are dropped without any warning, so text late in a long chunk never shapes the chunk's vector. This belongs to P4; here it is the reason the embedder's own tokenizer must count chunk sizes.</p>
+      <div class="formula">tokens past max_seq_length are ignored&nbsp;&nbsp;<span class="c">MiniLM: 256 IDs including two markers → 254 text tokens</span></div>
+      <a class="go" href="#truncate">Step 5 →</a></li>
+    <li><h3>The context window holds the input and the output</h3>
+      <p>The <b>context window</b> is the most tokens one call can handle, and the prompt and the reply share it. The input you count is not the whole input: the provider wraps your messages in a <b>chat template</b> with its own marker tokens and system text.</p>
+      <div class="formula">input + output ≤ W&nbsp;&nbsp;&nbsp;billed input = your counted text + template overhead</div>
+      <a class="go" href="#window">Step 6 →</a></li>
+    <li><h3>A reasoning model spends the output cap before it answers</h3>
+      <p><code>max_completion_tokens</code> caps the <b>output</b> only. A reasoning model writes hidden reasoning tokens first, and they count against that cap, the bill and the wait. If the cap is used up, the visible answer is empty and <code>finish_reason</code> says <code>length</code> instead of <code>stop</code>.</p>
+      <div class="formula">reasoning + visible answer ≤ max_completion_tokens</div>
+      <a class="go" href="#reasoning">Step 7 →</a></li>
+    <li><h3>Effort sets how much it reasons</h3>
+      <p>On Groq, <code>reasoning_effort</code> is <code>low</code>, <code>medium</code> or <code>high</code> for gpt-oss, and the server uses <code>medium</code> when you send nothing. More effort means more reasoning tokens: more cost, more time, more risk of hitting the cap.</p>
+      <div class="formula">low &lt; medium (server default) &lt; high</div>
+      <a class="go" href="#reasoning">Step 7 →</a></li>
+    <li><h3>Sampling: temperature reshapes the odds</h3>
+      <p>For every next token the model gives each vocabulary entry a score (a <b>logit</b>). Softmax turns the scores into probabilities after dividing them by the temperature T, and one token is drawn. A small T makes the top token win almost always; a large T spreads the chances.</p>
+      <div class="formula">p<sub>i</sub> = exp(z<sub>i</sub> / T) / Σ<sub>j</sub> exp(z<sub>j</sub> / T)</div>
+      <a class="go" href="#temperature">Step 8 →</a></li>
+    <li><h3>Temperature 0 is a request, not a guarantee</h3>
+      <p>Hosted APIs do not promise identical replies. Groq replaces a temperature of 0 with a tiny positive number and calls its <code>seed</code> best effort; servers that batch many requests can change the arithmetic. Current Claude models refuse a temperature setting and use an <b>effort</b> setting instead. Only replaying a stored reply repeats it exactly.</p>
+      <div class="formula">same request → same reply&nbsp;&nbsp;only when the reply is replayed from a cache</div>
+      <a class="go" href="#providers">Steps 8–9 →</a></li>
+    <li><h3>Cost is tokens times price, and output costs more</h3>
+      <p>Providers price input and output tokens separately, per million. Output includes reasoning and costs several times more than input (4× on Groq for gpt-oss). In the book's technique tables the real unit of cost is the number of LLM calls each technique adds.</p>
+      <div class="formula">C = [ in × p<sub>in</sub> + out × p<sub>out</sub> ] / 1,000,000&nbsp;&nbsp;&nbsp;per run: C × calls</div>
+      <a class="go" href="#cost">Step 10 →</a></li>
+    <li><h3>Rate limits turn tokens into minutes</h3>
+      <p>Providers cap tokens per minute and per day. A run's shortest possible time is its total tokens divided by the per-minute limit, so on a free tier the clock, not the money, usually stops you.</p>
+      <div class="formula">run time ≥ total tokens / tokens-per-minute limit</div>
+      <a class="go" href="#time">Step 11 →</a></li>
+  </ol>
+</section>
+
+<!-- ======================= FORMULA SHEET ======================= -->
+<section class="s" id="glance" aria-labelledby="h-glance">
+  <div class="num">FORMULA SHEET</div>
+  <h2 id="h-glance">Every term and formula, on one screen</h2>
+  <div class="glance">
+    <div class="g"><h3>Token · vocabulary · ID <a href="#cut">§1</a></h3><p>The pieces a tokenizer cuts; the fixed list they come from; their row numbers.</p><div class="fx">"·emissions" → 1 token in cl100k</div></div>
+    <div class="g"><h3>BPE <a href="#bpe">§2</a></h3><div class="fx">merge the most frequent pair, repeat</div><p class="ex">tiny BPE on our PDF: first merge i + n</p></div>
+    <div class="g"><h3>Chars per token <a href="#ratio">§3</a></h3><div class="fx">r = chars / tokens</div><p class="ex">climate PDF 5.57 (cl100k) · code 4.61 · numbers 1.49</p></div>
+    <div class="g"><h3>Which tokenizer counts <a href="#traps">§4</a></h3><p>embedder → truncation · generator → prompt fit · provider <code>usage</code> → the bill</p></div>
+    <div class="g"><h3>Embedder cap <a href="#truncate">§5</a></h3><div class="fx">MiniLM: 256 IDs = 254 text + [CLS] + [SEP]</div><p>The rest is dropped silently.</p></div>
+    <div class="g"><h3>Context window <a href="#window">§6</a></h3><div class="fx">in + out ≤ W</div><p class="ex">gpt-oss-20b on Groq: W = 131,072</p></div>
+    <div class="g"><h3>Billed vs counted <a href="#window">§6</a></h3><div class="fx">billed in = counted + template overhead</div><p class="ex">O2 call: 7 counted, 78 billed</p></div>
+    <div class="g"><h3>Output cap <a href="#reasoning">§7</a></h3><div class="fx">reasoning + answer ≤ max_completion_tokens</div><p class="ex">Groq default 1,024 · v0 uses 512</p></div>
+    <div class="g"><h3>finish_reason <a href="#reasoning">§7</a></h3><p><code>stop</code>: ended on its own · <code>length</code>: hit the cap. Read it before the text.</p></div>
+    <div class="g"><h3>Softmax with temperature <a href="#temperature">§8</a></h3><div class="fx">p<sub>i</sub> = e^(z<sub>i</sub>/T) / Σ e^(z<sub>j</sub>/T)</div><p class="ex">toy: p(YES) 0.704 at T 0.5 · 0.532 at T 1</p></div>
+    <div class="g"><h3>Providers <a href="#providers">§9</a></h3><p>Groq: T 0–2, 0 → 1e-8 · Claude: no temperature, effort instead, <code>count_tokens</code> · Cohere chat: T default 0.3</p></div>
+    <div class="g"><h3>Cost <a href="#cost">§10</a></h3><div class="fx">C = (in × p_in + out × p_out) / 10⁶</div><p class="ex">one v0 call on Groq ≤ $0.000227</p></div>
+    <div class="g"><h3>Run time <a href="#time">§11</a></h3><div class="fx">time ≥ tokens / TPM</div><p class="ex">100 v0 calls ≥ 19.5 min at 8,000 TPM</p></div>
+  </div>
+  <p class="key"><b>Symbols:</b> <code>W</code> context window in tokens · <code>z</code> a token's score (logit) · <code>T</code> temperature · <code>p_in</code>, <code>p_out</code> price per 1M input and output tokens · <code>TPM</code> tokens per minute · <code>·</code> in a token means a leading space.</p>
+</section>
+
+<!-- 1 -->
+<section class="s" id="cut" aria-labelledby="h-cut">
+  <div class="num">STEP 1 · WHAT THE MODEL READS</div>
+  <h2 id="h-cut">The tokenizer cuts; the model only sees numbers</h2>
+  <p>Take one sentence from a climate text and give it to three tokenizers: two used by OpenAI-family models (<code>cl100k_base</code>, <code>o200k_base</code>) and the one inside the course's local embedding model, MiniLM (WordPiece). Each cuts it differently:</p>
+  <figure class="card" style="display:grid;gap:10px">
+    <div><b>"Anthropogenic emissions are accelerating deglaciation in Greenland."</b> <span class="badge m">measured · 67 characters</span></div>
+    <div class="toks" id="cutStrip"></div>
+    <figcaption>What to notice: common words ("are", "in") are one token everywhere; the rare words split, and each tokenizer splits them its own way. <code>·</code> marks a space that belongs to the next token. WordPiece also lower-cases, marks word continuations with <code>##</code>, and adds two markers, <code>[CLS]</code> and <code>[SEP]</code>.</figcaption>
+  </figure>
+  <p>Each piece is a row of a fixed vocabulary: 100,277 rows for <code>cl100k_base</code>, 201,088 for <code>o200k_harmony</code> (the encoding of gpt-oss, the course's generator), 30,522 for MiniLM. What the model receives is the list of row numbers, the <b>token IDs</b>.</p>
+  <figure>
+    <svg class="chart" id="flowChart" viewBox="0 0 640 170" role="img" aria-labelledby="flowTitle flowDesc"><title id="flowTitle">From text to model</title><desc id="flowDesc">Text goes into the tokenizer, which outputs token IDs. The IDs go either to an embedding model, which looks up vectors and makes one chunk vector, or to an LLM, which scores the next token.</desc></svg>
+    <figcaption>What to notice: the cut happens in one place, the tokenizer. The embedding model and the LLM only look up IDs; they cannot change where the text was cut.</figcaption>
+  </figure>
+  <p class="call wrong"><b>Common mistake (MC-001):</b> "the embedding decides the tokens", or "a 1,000-character chunk is 1,000 tokens". The tokenizer decides the cut; the embedding model only turns IDs into vectors. And a token is usually several characters, not one.</p>
+  <p class="call proj"><b>In your project:</b> the course uses at least three tokenizers at once: MiniLM's (the local embedder), Cohere's (the default embedder) and <code>o200k_harmony</code> (the Groq generator). A token count without the tokenizer's name is meaningless.</p>
+</section>
+
+<!-- 2 -->
+<section class="s" id="bpe" aria-labelledby="h-bpe">
+  <div class="num">STEP 2 · WHERE THE PIECES COME FROM</div>
+  <h2 id="h-bpe">Frequent text becomes one piece; rare text stays in bits</h2>
+  <p>The vocabulary is learned from text before the model is trained. <b>BPE</b> (byte-pair encoding) starts with single characters, finds the pair of neighbours that occurs most often in the training text, glues it into a new piece, and repeats until the vocabulary is the size it wants. To see it, we trained a tiny BPE with only 300 pieces on the climate PDF itself:</p>
+  <figure class="card" style="display:grid;gap:10px">
+    <div><b>The first 12 merges it learned, in order</b> <span class="badge m">measured · tiny BPE, vocab 300</span></div>
+    <div class="chips" id="mergeChips" aria-label="First twelve merges"></div>
+    <div class="tw"><table>
+      <thead><tr><th>Word</th><th>Tiny BPE (300 pieces, climate PDF)</th><th>o200k_harmony (201,088 pieces), after a space</th></tr></thead>
+      <tbody id="bpeRows"></tbody>
+    </table></div>
+    <figcaption>What to notice: "climate" and "emissions" are so frequent in this PDF that even 300 pieces include them whole. "deglaciation" is rare, so it stays in 6 bits. The big real vocabulary keeps "greenhouse" whole but still cuts "deglaciation" into 4.</figcaption>
+  </figure>
+  <p>Two consequences follow from "learned from frequency":</p>
+  <ul>
+    <li><b>The space and the case are part of the piece.</b> In <code>cl100k_base</code>, <code>" Greenland"</code> (with its space) is 1 token, while <code>"Greenland"</code> and <code>"GREENLAND"</code> are 2 each. In <code>o200k_harmony</code>, <code>"strawberry"</code> on its own is 3 tokens (<code>st</code> <code>raw</code> <code>berry</code>) but <code>" strawberry"</code> after a space is 1.</li>
+    <li><b>The pieces mirror the training text.</b> A tokenizer trained on lots of English packs English tightly and other scripts loosely, which step 3 measures.</li>
+  </ul>
+  <p class="call wrong"><b>Common mistake:</b> "a model reads letters, so it can count the r's in strawberry." It sees <code>·strawberry</code> as one ID with no letters inside. Spelling questions are hard for it for exactly this reason.</p>
+  <div class="full"><span class="tag">Full · the tokenizer families</span>
+    <div class="tw"><table>
+      <thead><tr><th>Family</th><th>How it builds pieces</th><th>Seen in</th></tr></thead>
+      <tbody>
+        <tr><td><b>Byte-level BPE</b></td><td>BPE over raw bytes, so any text can be written with the 256 single bytes; no "unknown" token ever appears</td><td>tiktoken (<code>cl100k_base</code>, <code>o200k_*</code>), GPT-2</td></tr>
+        <tr><td><b>WordPiece</b></td><td>Splits at spaces and punctuation first; merges pairs by how much more often they occur together than apart; marks continuations with <code>##</code>; has an <code>[UNK]</code> token</td><td>BERT, MiniLM (0 <code>[UNK]</code> on every sample we measured)</td></tr>
+        <tr><td><b>Unigram</b></td><td>Starts from a large candidate list and prunes the pieces that help least</td><td>many SentencePiece models</td></tr>
+        <tr><td><b>SentencePiece</b></td><td>A library that trains BPE or Unigram on raw text, writing the space as <code>▁</code>, so no word splitting is needed first</td><td>many multilingual models</td></tr>
+      </tbody></table></div>
+    <p>Sources (external): Sennrich et al. 2016 introduced BPE for translation; Kudo and Richardson 2018 (SentencePiece) trained it from raw sentences; the Hugging Face tokenizer guide describes all four. These are translation and library results, not LLM measurements.</p>
+  </div>
+  <p class="call proj"><b>In your project:</b> technical terms, acronyms and identifiers are exactly the rare text that splits into many pieces. Expect your own technical PDFs to cost more tokens per character than plain prose.</p>
+</section>
+
+<!-- 3 -->
+<section class="s" id="ratio" aria-labelledby="h-ratio">
+  <div class="num">STEP 3 · HOW BIG IS A TOKEN</div>
+  <h2 id="h-ratio">Characters per token is measured, not 4</h2>
+  <p>"One token is about four characters" is the rule everyone quotes. It comes from an average of about 4 <b>bytes</b> per token on typical English text (tiktoken's documentation). On our climate PDF it is wrong in one direction, and on numbers and Hindi in the other:</p>
+  <figure>
+    <svg class="chart" id="ratioChart" viewBox="0 0 640 348" role="img" aria-labelledby="ratioTitle ratioDesc"><title id="ratioTitle">Characters per token by kind of text</title><desc id="ratioDesc">Horizontal bars for cl100k and o200k on the climate PDF, Python code, German, Hindi and a numbers line, with a dashed line at 4.</desc></svg>
+    <figcaption><span class="badge m">measured · local tokenizers</span> Right of the dashed line, "÷ 4" over-counts tokens; left of it, "÷ 4" under-counts. The Hindi and German sentences were written for P1; the numbers line is made up.</figcaption>
+  </figure>
+  <div class="tw"><table>
+    <thead><tr><th>Sample</th><th class="n">Characters</th><th class="n">cl100k tokens</th><th class="n">chars ÷ 4 says</th><th class="n">÷ 4 error</th></tr></thead>
+    <tbody>
+      <tr><td>Whole climate PDF</td><td class="n">72,593</td><td class="n">13,026</td><td class="n">18,148</td><td class="n miss">+39%</td></tr>
+      <tr><td>One 1,000-character window (window 0)</td><td class="n">1,000</td><td class="n">201</td><td class="n">250</td><td class="n miss">+24%</td></tr>
+      <tr><td>Numbers line (toy)</td><td class="n">94</td><td class="n">63</td><td class="n">24</td><td class="n miss">−63%</td></tr>
+      <tr><td>Hindi sentence</td><td class="n">61</td><td class="n">62</td><td class="n">15</td><td class="n miss">−75%</td></tr>
+    </tbody>
+    <caption><span class="badge m">measured</span> Across all 91 windows of 1,000 characters, cl100k ranges from 4.61 to 6.37 characters per token (median 5.52).</caption>
+  </table></div>
+  <p>Three things move the ratio. <b>Content:</b> numbers are cut into groups of up to three digits (<code>1234567</code> → <code>123</code> <code>456</code> <code>7</code>; <code>1,234,567</code> is five tokens), so data lines are expensive. <b>Language:</b> the same Hindi sentence is 62 tokens in <code>cl100k_base</code> but 18 in <code>o200k_base</code>, whose larger vocabulary learned more Hindi pieces. A script the tokenizer rarely saw in training is cut into short pieces, in the worst case single bytes (these BPE tokenizers work on bytes, so nothing is ever "unknown"); that is why it costs more tokens per character. <b>Bytes:</b> each Hindi character takes 2 to 3 bytes in UTF-8, so "4 bytes per token" is far fewer than 4 characters there.</p>
+  <p class="call wrong"><b>Common mistake:</b> "1,000 characters is 250 tokens." On this PDF a 1,000-character window is 157 to 217 cl100k tokens. Use your corpus's measured ratio, and count exactly when it matters.</p>
+  <div class="full"><span class="tag">Full · more measured ratios</span>
+    <pre>o200k_harmony (gpt-oss's encoding), chars per token
+whole climate PDF                     5.65   (72,593 chars, 72,595 bytes, 12,840 tokens)
+repo helper_functions.py (real code)  4.61   (11,847 chars, 2,570 tokens)
+repo evaluation/evalute_rag.py        4.58
+Hindi sentence                        3.39   (61 chars, 161 bytes, 18 tokens)
+                                      → 8.94 bytes per token
+2023-11-07                            6 tokens: 202 | 3 | - | 11 | - | 07
+1.5                                   3 tokens: 1 | . | 5</pre>
+    <p>An external study (Petrov et al., NeurIPS 2023) tokenised the same text translated into many languages and found up to 15 times more tokens for some languages, even with multilingual tokenizers. The consequence is real money and a smaller usable window for those languages.</p>
+  </div>
+  <p class="call proj"><b>In your project:</b> measure the ratio on each corpus once (the apply-it tool does it), and size chunks in tokens of the model that enforces the limit (steps 4–5).</p>
+</section>
+
+<!-- 4 -->
+<section class="s" id="traps" aria-labelledby="h-traps">
+  <div class="num">STEP 4 · COUNTING CORRECTLY</div>
+  <h2 id="h-traps">Count with the tokenizer that enforces the limit, and avoid two traps</h2>
+  <p>Three different numbers matter in a RAG system, and each one belongs to a different tokenizer:</p>
+  <div class="tw"><table>
+    <thead><tr><th>What you need to know</th><th>Count with</th><th>In this course</th></tr></thead>
+    <tbody>
+      <tr><td>Will the embedder read the whole chunk?</td><td>the <b>embedder's</b> tokenizer</td><td>MiniLM WordPiece; Cohere's own for <code>embed-v4.0</code></td></tr>
+      <tr><td>Will the prompt fit the window, and leave room for output?</td><td>the <b>generator's</b> tokenizer, plus a margin for the template</td><td><code>o200k_harmony</code> for gpt-oss</td></tr>
+      <tr><td>What will I pay?</td><td>the provider's <b><code>usage</code></b> numbers in each reply</td><td>Groq returns them with every call</td></tr>
+    </tbody></table></div>
+  <p>Two traps catch almost everyone the first time they count:</p>
+  <div class="two">
+    <div class="card"><h3>Trap 1 · the model id is not an encoding name</h3>
+      <pre style="margin-top:8px">tiktoken.encoding_for_model("gpt-oss-20b")         → o200k_harmony
+tiktoken.encoding_for_model("openai/gpt-oss-20b")  → KeyError</pre>
+      <p style="margin-top:8px">The course's <code>.env</code> id has a provider prefix, which tiktoken does not know. <b>Fix:</b> <code>tiktoken.get_encoding("o200k_harmony")</code>, or strip the prefix first.</p></div>
+    <div class="card"><h3>Trap 2 · marker strings inside documents</h3>
+      <pre style="margin-top:8px">enc.encode("&lt;|endoftext|&gt;")                       → ValueError
+enc.encode("&lt;|endoftext|&gt;", disallowed_special=())  → 7 tokens</pre>
+      <p style="margin-top:8px">Strings like <code>&lt;|endoftext|&gt;</code> are reserved marker tokens (<code>o200k_harmony</code> has 1,091 of them). A document that happens to contain one crashes a default counter. <b>Fix:</b> count document text with <code>disallowed_special=()</code>.</p></div>
+  </div>
+  <p class="call wrong"><b>Common mistake:</b> counting a gpt-4o-mini budget with the gpt-3.5-turbo encoding. The repo does this in <code>contextual_chunk_headers.ipynb</code> cell 11. On English the two counts are close (13,026 vs 12,840 on the whole PDF); on Hindi they differ more than threefold (62 vs 18).</p>
+  <p class="call proj"><b>In your project:</b> resolve every encoding by name, count document text with <code>disallowed_special=()</code>, and treat your own count as an estimate until a real <code>usage</code> report confirms it.</p>
+</section>
+
+<!-- 5 -->
+<section class="s" id="truncate" aria-labelledby="h-truncate">
+  <div class="num">STEP 5 · A BRIDGE TO EMBEDDINGS (P4)</div>
+  <h2 id="h-truncate">The embedder stops reading at 254 tokens, without a word</h2>
+  <p>An embedding model turns a chunk into one vector, but it reads only a fixed number of tokens. MiniLM, the course's local embedder, takes 256 IDs, and two of them are the markers <code>[CLS]</code> and <code>[SEP]</code>. So <b>254 text tokens</b> shape the vector. We gave it a 400-token passage and compared vectors:</p>
+  <div class="tw"><table>
+    <thead><tr><th>Compared with the 400-token passage</th><th class="n">Cosine similarity</th></tr></thead>
+    <tbody>
+      <tr><td>its first 254 tokens only</td><td class="n">1.000000</td></tr>
+      <tr><td>the same 254 tokens + a completely different tail</td><td class="n">1.000000</td></tr>
+      <tr><td>its first 200 tokens</td><td class="n">0.988245</td></tr>
+      <tr><td>its own tail (tokens 255–400) alone</td><td class="n">0.350182</td></tr>
+    </tbody>
+    <caption><span class="badge m">measured · MiniLM, offline</span> No warning and no log message appeared during encoding.</caption>
+  </table></div>
+  <p>The tail has no effect at all: you could rewrite it freely and the vector would not change. The course's default embedder, Cohere <code>embed-v4.0</code>, reads far more: Cohere's documentation says 128k tokens, although the course's O2 check of Cohere's model list reported 8,192, so the effective limit is <b>UNVERIFIED</b> until C3 records two test calls. Unless told otherwise, it also cuts long input from the end (its <code>truncate</code> default is <code>END</code>).</p>
+  <p class="call wrong"><b>Common mistake:</b> "a too-long chunk causes an error." It does not; it silently loses its end, so an answer that sits late in a long chunk is never found.</p>
+  <p>For text in another language there is a question before any chunk size: <b>does the embedder support that language at all?</b> MiniLM was trained on English; a multilingual model may be needed, and no chunk size fixes a model that cannot represent the text. Then measure the characters per token on real documents with the embedder's tokenizer, and check two numbers on a few labelled examples: the truncation rate, and whether all the needed evidence lands in the top k (CE@k, P6).</p>
+  <p class="call proj"><b>In your project:</b> at 1,000 characters the longest v0 chunk is 182 MiniLM tokens, so nothing is cut. Larger chunk sizes in Phase 4 must check this first.</p>
+</section>
+
+<!-- 6 -->
+<section class="s" id="window" aria-labelledby="h-window">
+  <div class="num">STEP 6 · ONE CALL'S BUDGET</div>
+  <h2 id="h-window">The prompt and the reply share one window</h2>
+  <p>Now build the real thing: the v0 prompt (06 §3.3) with four 1,000-character sources and the D-001 question, counted in <code>o200k_harmony</code>:</p>
+  <figure class="card">
+    <div class="legend"><span><i style="background:var(--muted)"></i>system rules 107</span><span><i style="background:var(--accent)"></i>4 sources 842</span><span><i style="background:var(--dense)"></i>question 20</span><span><i class="hatch"></i>template ~71 (inferred)</span><span><i style="background:var(--warn);opacity:.75"></i>output cap 512</span></div>
+    <div class="sbars" id="budgetBars" style="margin-top:10px"></div>
+    <figcaption><span class="badge m">measured counts</span> <span class="badge f">sum</span> 976 counted input tokens; the sources are 86% of them. With the output cap, one call can use about 1,559 tokens, 1.19% of gpt-oss-20b's 131,072-token window on Groq.</figcaption>
+  </figure>
+  <p>Notice two things. First, <b>the sources dominate the input</b>: k and chunk size drive the budget, not your instructions. Second, <b>your count is not the whole input</b>. The course's first Groq call (the O2 smoke test) sent a message that counts as 7 tokens; Groq billed 78 prompt tokens. The difference is a chat template wrapped around your messages before the model sees them.</p>
+  <div class="tw"><table>
+    <thead><tr><th>gpt-oss-20b on Groq</th><th class="n">Tokens</th></tr></thead>
+    <tbody><tr><td>Context window (input + output)</td><td class="n">131,072</td></tr>
+    <tr><td>Most output one call may produce</td><td class="n">65,536</td></tr>
+    <tr><td>Default output cap if you send none</td><td class="n">1,024</td></tr></tbody>
+    <caption>Groq model page and API reference, read 2026-10-17 (external). Limits change; the lab has you look them up again.</caption>
+  </table></div>
+  <p class="call wrong"><b>Common mistake:</b> "the output cap is the context window." The cap limits the reply only; the window limits prompt and reply together.</p>
+  <div class="full"><span class="tag">Full · where the hidden input tokens come from</span>
+    <p>gpt-oss must be used with OpenAI's <b>harmony</b> chat format. Every turn is wrapped in marker tokens (<code>&lt;|start|&gt;</code>, <code>&lt;|message|&gt;</code>, <code>&lt;|end|&gt;</code>, all present in <code>o200k_harmony</code>), and the system message carries the knowledge cutoff, the current date, the reasoning level and the list of output channels. That is the most likely source of the ~71 extra prompt tokens. How Groq renders it exactly is not published, so the composition stays <b>UNVERIFIED</b>; the fix does not depend on it: calibrate the overhead from recorded <code>usage</code>.</p>
+    <p>The book makes the same budget point in words: chunks are kept moderate so one call can read a chunk without overflowing the window (<a data-book="chapter 4.pdf" data-page="5">Ch4 p.5/15</a>), and variable chunk lengths change how many fit (<a data-book="chapter 9.pdf" data-page="9">Ch9 p.9/14</a>).</p>
+  </div>
+  <p class="call proj"><b>In your project:</b> budget the input with the generator's tokenizer plus an overhead margin, and replace the estimate with real <code>usage</code> after the first few recorded calls.</p>
+</section>
+
+<!-- 7 -->
+<section class="s" id="reasoning" aria-labelledby="h-reasoning">
+  <div class="num">STEP 7 · THE FAILURE THAT LOOKS LIKE SUCCESS</div>
+  <h2 id="h-reasoning">A reasoning model spends the output cap before it answers</h2>
+  <p>gpt-oss-20b is a <b>reasoning model</b>: before the visible answer it writes reasoning tokens, and those come out of the same output cap. The course saw this on day one. The O2 smoke test asked for a three-word reply ("smoke test ok", 4 tokens) with an output cap of 12 tokens, and the reply was <b>empty</b>, yet the first version of the check passed because it only tested that the call returned.</p>
+  <figure class="card" style="display:grid;gap:10px">
+    <div><b>Try it</b> <span class="badge t">toy · how the cap is shared</span></div>
+    <div class="ctl"><label for="capR">output cap</label><input id="capR" type="range" min="16" max="1024" step="8" value="512"><output id="capRo" for="capR">512</output></div>
+    <div class="ctl"><label for="reaR">reasoning tokens used</label><input id="reaR" type="range" min="0" max="900" step="10" value="150"><output id="reaRo" for="reaR">150</output></div>
+    <div class="ctl"><label for="ansR">tokens the answer needs</label><input id="ansR" type="range" min="10" max="300" step="5" value="120"><output id="ansRo" for="ansR">120</output></div>
+    <div class="legend"><span><i style="background:var(--dense);opacity:.8"></i>reasoning (hidden)</span><span><i style="background:var(--good)"></i>visible answer</span><span><i style="border:1px solid var(--line)"></i>unused</span></div>
+    <div class="sbars" id="capBars"></div>
+    <div class="readout" id="capRead" aria-live="polite"></div>
+    <figcaption>What to notice: once reasoning fills the cap, the visible answer gets nothing, and <code>finish_reason</code> reports <code>length</code>. The cap and the answer size are inputs you choose; the reasoning size is a toy, because the model decides it per call.</figcaption>
+  </figure>
+  <p>The reply tells you what happened, if you read it. In Groq's OpenAI-style response, <code>usage</code> splits the tokens and <code>finish_reason</code> says why the output stopped:</p>
+  <pre>"usage": {
+  "prompt_tokens": 78,                  <span class="c">← billed input: your text + the template</span>
+  "completion_tokens": 23,              <span class="c">← billed output: reasoning + visible answer</span>
+  "completion_tokens_details": {
+    "reasoning_tokens": …               <span class="c">← the hidden part of the output</span>
+  },
+  "prompt_tokens_details": {
+    "cached_tokens": …                  <span class="c">← input reused from a recent prompt, billed cheaper</span>
+  },
+  "total_tokens": 101                   <span class="c">← prompt + completion</span>
+}
+"finish_reason": "stop" | "length"      <span class="c">← length = the cap was hit</span></pre>
+  <p style="font-size:.9rem;color:var(--muted)">Field names from the Groq Python SDK's usage type (external, read 2026-10-17). The 78 / 23 are the O2 call's logged values (cap 256, effort low, 4 visible tokens), so about 19 output tokens were not in the answer. That reasoning tokens sit <i>inside</i> <code>completion_tokens</code> is an inference from <code>total = prompt + completion</code>; one recorded reply will confirm it. Which value Groq puts in <code>finish_reason</code> at the cap is also still to be seen in a recorded call (UNVERIFIED).</p>
+  <h3>Three settings control it</h3>
+  <ul>
+    <li><b><code>max_completion_tokens</code></b> is the output cap. Groq has <b>deprecated</b> the older name <code>max_tokens</code> for it; its default of 1,024 may be too low for reasoning, Groq's guide warns. v0 uses 512.</li>
+    <li><b><code>reasoning_effort</code></b> sets how much the model reasons: <code>low</code>, <code>medium</code> or <code>high</code>. If you send nothing, the server uses <code>medium</code>. The course pins <code>low</code>.</li>
+    <li><b>The reasoning text</b> itself comes back in a separate <code>reasoning</code> field unless you ask Groq to leave it out (<code>include_reasoning=false</code>). It is never part of the answer.</li>
+  </ul>
+  <pre>r = client.chat.completions.create(model=MODEL, messages=msgs,
+        max_completion_tokens=512, reasoning_effort="low", temperature=0)
+choice = r.choices[0]
+assert choice.finish_reason == "stop", choice.finish_reason      <span class="c"># cut off?</span>
+assert (choice.message.content or "").strip(), "empty answer"   <span class="c"># content, not just a reply</span></pre>
+  <h3>One action per stop reason</h3>
+  <div class="tw"><table>
+    <thead><tr><th>Stop reason</th><th>Meaning</th><th>What your code does</th></tr></thead>
+    <tbody>
+      <tr><td><code>stop</code></td><td>the model ended on its own</td><td>use the answer (after the non-empty check)</td></tr>
+      <tr><td><code>length</code></td><td>the output cap was hit</td><td>never treat it as complete: raise the cap or lower the effort</td></tr>
+      <tr><td>a tool call</td><td>the model asked to run a tool</td><td>run the tool; there is no answer yet</td></tr>
+      <tr><td>a refusal or content filter</td><td>the provider blocked or the model declined</td><td>handle it as its own outcome</td></tr>
+      <tr><td>anything else</td><td>unknown</td><td>treat as an error</td></tr>
+    </tbody>
+    <caption>Log the stop reason on every call and watch the share of <code>length</code> stops over time. Because Groq's value at the cap is not yet seen in a recorded call, the course accepts only <code>stop</code>.</caption>
+  </table></div>
+  <h3>Choosing the effort, and reading a surprising bill</h3>
+  <p>Effort trades answer quality against output tokens, cost and time. Choose it <b>per task with a small evaluation</b>: run the same questions at each level and compare quality next to cost and latency, rather than guessing. gpt-oss has no "off": <code>low</code> is the least it reasons. If a dashboard shows completion tokens many times longer than the visible answers, that difference is reasoning: read <code>reasoning_tokens</code> to confirm it, check whether <code>reasoning_effort</code> was sent at all (otherwise the server uses <code>medium</code>), and chart the reasoning share at the median and the 95th percentile per effort level. A large share alone is not a bug; lower the effort only if quality holds.</p>
+  <p class="call wrong"><b>Common mistake:</b> "the call succeeded, so the answer is fine." Read <code>finish_reason</code> before the text, and assert that the text is not empty. A cut-off answer can also look like a citation failure later, because its last sentence is missing.</p>
+  <p class="call proj"><b>In your project:</b> every generation call sends <code>max_completion_tokens</code> and <code>reasoning_effort</code> explicitly and logs <code>finish_reason</code> and <code>reasoning_tokens</code>; the C5 and C6 traces count cut-off and empty answers.</p>
+</section>
+
+<!-- 8 -->
+<section class="s" id="temperature" aria-labelledby="h-temperature">
+  <div class="num">STEP 8 · HOW THE NEXT TOKEN IS CHOSEN</div>
+  <h2 id="h-temperature">Temperature sharpens or flattens the odds</h2>
+  <p>At every step the model gives each token in its vocabulary a score (a <b>logit</b>). Softmax turns scores into probabilities, and one token is drawn. The temperature T divides the scores first: a small T stretches the gaps between them, a large T shrinks them. Here are four made-up scores for the next token of a yes/no verdict:</p>
+  <figure>
+    <div class="ctl"><label for="tT">temperature T</label><input id="tT" type="range" min="0.05" max="4" step="0.05" value="1"><output id="tTo" for="tT">1.00</output></div>
+    <svg class="chart" id="tempChart" viewBox="0 0 640 280" role="img" aria-labelledby="tempTitle tempDesc"><title id="tempTitle">Probabilities of four next tokens at temperature T</title><desc id="tempDesc">Bars for YES, NO, PARTIAL and MAYBE. Lower T makes YES taller; higher T makes the bars more equal.</desc></svg>
+    <div class="readout" id="tempRead" aria-live="polite"></div>
+    <figcaption><span class="badge t">toy logits 2.0, 1.5, 0.5, −1.0</span> <span class="badge f">softmax computed here</span> What to notice: at T = 0.5 YES has 0.704; at T = 2 only 0.404. As T approaches 0 the top token always wins (greedy).</figcaption>
+  </figure>
+  <pre>one value by hand, T = 1:  e^2 = 7.389, e^1.5 = 4.482, e^0.5 = 1.649, e^-1 = 0.368;  sum 13.888
+                           p(YES) = 7.389 / 13.888 = 0.532</pre>
+  <p>So a low temperature makes the reply more repeatable, which is why the course sends T = 0 to Groq for generation. But <b>repeatable is not guaranteed</b>:</p>
+  <ul>
+    <li>Groq converts T = 0 into a tiny positive value (1e-8), and calls its <code>seed</code> parameter best effort, with determinism not guaranteed; a changed <code>system_fingerprint</code> in the reply signals a backend change.</li>
+    <li>On servers that batch many requests together, the arithmetic for your request can depend on what else is in the batch. A study on GPU servers (Thinking Machines Lab, 2025) sent one prompt 1,000 times at T = 0 and got 80 different completions. It has not been shown for Groq's hardware.</li>
+  </ul>
+  <p class="call wrong"><b>Common mistake:</b> "temperature 0 means the same answer every time, and the right one." Neither holds: hosted APIs do not promise it, and a repeatable answer can still be wrong. The course gets repeatable notebooks by <b>replaying stored replies</b> from a cache, never by trusting T = 0.</p>
+  <div class="full"><span class="tag">Full · other sampling knobs, and an honest limit</span>
+    <ul>
+      <li><b>top_p (nucleus sampling):</b> keep only the smallest set of top tokens whose probabilities add up to p, then draw among them. It came from work showing that always taking the likeliest words gives bland, repetitive text (Holtzman et al., ICLR 2020, external). Groq offers it (default 1); change it or temperature, not both.</li>
+      <li><b>top_k:</b> keep only the k likeliest tokens. Its weakness is that k stays fixed while the model's confidence varies from step to step (AI-Engineer-Interview-Questions, 02 Q12, MIT). Groq has no top_k parameter.</li>
+      <li><b>No logprobs and one reply per call on Groq:</b> Groq rejects <code>logprobs</code> and needs <code>n</code> = 1, so you cannot read the model's real probabilities, and checks that compare several samples (for example the book's consistency checks with different random seeds, <a data-book="chapter 22.pdf" data-page="8">Ch22 p.8/19</a>) need several separate calls.</li>
+      <li><b>The honest limit:</b> the gpt-oss authors recommend sampling at T = 1.0 and top_p = 1.0 (gpt-oss README, external). The course pins T = 0 for repeatability; whether that costs quality is not measured. M4's repeated-generation run measures how often answers flip.</li>
+    </ul>
+  </div>
+  <p class="call proj"><b>In your project:</b> T = 0 on Groq for generation, recorded and replayed through the cache; T &gt; 0 only where different samples are the point (consistency checks, varied query rewrites).</p>
+</section>
+
+<!-- 9 -->
+<section class="s" id="providers" aria-labelledby="h-providers">
+  <div class="num">STEP 9 · NOT ALL APIS ARE THE SAME</div>
+  <h2 id="h-providers">Each provider counts and samples its own way</h2>
+  <p>The course may use three providers (Groq by default, Claude when you have credits, Cohere for embeddings and the final judge). The same code does not fit all three:</p>
+  <div class="tw"><table>
+    <thead><tr><th></th><th>Groq · gpt-oss-20b</th><th>Claude (current models)</th><th>Cohere chat</th></tr></thead>
+    <tbody>
+      <tr><td>Temperature</td><td>0–2, default 1; 0 becomes 1e-8</td><td><b>not accepted</b>: sending it gives an error (400)</td><td>default 0.3</td></tr>
+      <tr><td>How much to think</td><td><code>reasoning_effort</code> low / medium / high (default medium)</td><td>an <code>effort</code> setting instead (Haiku 5.5: thinking on by default)</td><td>model-dependent</td></tr>
+      <tr><td>Tokenizer to count with</td><td><code>o200k_harmony</code> (tiktoken)</td><td>its own; use the free <code>count_tokens</code> call</td><td>its own, per model</td></tr>
+      <tr><td>Output cap name</td><td><code>max_completion_tokens</code></td><td><code>max_tokens</code></td><td>per endpoint</td></tr>
+      <tr><td>Why the output stopped</td><td><code>finish_reason</code></td><td><code>stop_reason</code> (<code>max_tokens</code> when the cap is hit)</td><td>per endpoint</td></tr>
+      <tr><td>Output price ÷ input price</td><td>4×</td><td>5× (Haiku 5.5)</td><td>not checked here</td></tr>
+    </tbody>
+    <caption>Provider documentation, read 2026-10-17 (external); Claude facts from the claude-api reference used by the course. Settings change; record the date you checked.</caption>
+  </table></div>
+  <p>Claude's <code>count_tokens</code> is free but rate-limited, and its result is an <b>estimate</b>. Newer Claude models use a newer tokenizer that gives roughly 30% more tokens for the same text, so a count is only valid for the model you counted with.</p>
+  <p class="call wrong"><b>Common mistake:</b> "a token is a token." The same text has a different count, price and sampling behaviour on each provider. A Claude cost estimated with <code>o200k_harmony</code> counts is a rough proxy, nothing more.</p>
+  <p class="call proj"><b>In your project:</b> when a Claude arm is added (D-32), it gets its own counts from <code>count_tokens</code>, its own dated prices, sends <code>effort</code> instead of temperature, and budgets its output cap for thinking. Record a few calls first and compare estimated with billed tokens, empty answers and the stop reason. It is a new experiment arm, never a silent swap.</p>
+</section>
+
+<!-- 10 -->
+<section class="s" id="cost" aria-labelledby="h-cost">
+  <div class="num">STEP 10 · WHAT IT COSTS</div>
+  <h2 id="h-cost">Price the v0 call: output costs four times input</h2>
+  <p>Providers charge per million tokens, with separate prices for input and output. Price one v0 call at its upper bound (976 input tokens, the full 512-token output cap), on the price sheets read on 2026-10-17:</p>
+  <div class="formula">Groq gpt-oss-20b: ( 976 × $0.075 + 512 × $0.30 ) / 1,000,000 = <span class="w">$0.000227</span> per call<br><span class="c">100 calls ≤ $0.0227, and 67.7% of it is output</span></div>
+  <figure class="card">
+    <div class="legend"><span><i style="background:var(--accent)"></i>input</span><span><i style="background:var(--warn);opacity:.75"></i>output (reasoning + answer)</span></div>
+    <div class="sbars" id="costBars" style="margin-top:10px"></div>
+    <figcaption><span class="badge f">computed · upper bound for 100 v0 calls</span> Prices per 1M tokens: Groq $0.075 in / $0.30 out; Claude Haiku 5.5 $0.10 in / $0.50 out (read 2026-10-17, external). The Haiku bar uses o200k counts as a proxy.</figcaption>
+  </figure>
+  <p>Output is about a third of the tokens (512 of 1,488) but two thirds of the bill, because its price is 4 times higher on Groq (5 times on Claude Haiku). And reasoning tokens are output: a higher effort level makes every call dearer. Input that repeats a recent prompt's beginning can be cheaper still on Groq ($0.037 per 1M for cached input).</p>
+  <p>The book never gives a price method; its technique tables rate cost only as Low, Medium or High (<a data-book="Appendix.pdf" data-page="10">App p.10/23</a>), and often describes a technique's cost as one extra LLM call per chunk, query or document (for example <a data-book="chapter 10.pdf" data-page="12">Ch10 p.12/13</a>). That is the useful habit: <b>count the extra calls a technique adds, then multiply by tokens per call</b>. Simple RAG itself is cheap because it makes one LLM call per question and embedding is cheap (<a data-book="chapter 1.pdf" data-page="13">Ch1 p.13/14</a>); embedding is billed per token too, but once, at indexing time (<a data-book="chapter 2.pdf" data-page="9">Ch2 p.9/11</a>).</p>
+  <p class="call wrong"><b>Common mistake:</b> pricing only the prompt. The cap, reasoning included, is usually the larger part of the bill.</p>
+  <div class="full"><span class="tag">Full · a cost and time calculator</span>
+    <div class="card" style="display:grid;gap:10px">
+      <div class="ctl"><label for="ccModel">model</label><select id="ccModel" class="btn"><option value="0.075,0.30">Groq gpt-oss-20b · $0.075 / $0.30</option><option value="0.10,0.50">Claude Haiku 5.5 · $0.10 / $0.50</option><option value="2,10">Claude Sonnet 5.5 · $2 / $10</option></select><span></span></div>
+      <div class="ctl"><label for="ccIn">input tokens per call</label><input id="ccIn" type="range" min="200" max="6000" step="1" value="976"><output id="ccIno">976</output></div>
+      <div class="ctl"><label for="ccOut">output tokens per call</label><input id="ccOut" type="range" min="16" max="4096" step="8" value="512"><output id="ccOuto">512</output></div>
+      <div class="ctl"><label for="ccN">calls</label><input id="ccN" type="range" min="1" max="1000" step="1" value="100"><output id="ccNo">100</output></div>
+      <div class="readout" id="ccRead" aria-live="polite"></div>
+    </div>
+    <p style="font-size:.9rem;color:var(--muted)"><span class="badge f">formula</span> Prices read 2026-10-17 (Groq model page; Claude prices from the course's claude-api reference). Claude counts would come from <code>count_tokens</code>, so its rows are proxies. The time line assumes Groq's listed 8,000 tokens per minute and adds the ~71-token template to each call.</p>
+  </div>
+  <p class="call proj"><b>In your project:</b> each run states its budget from a dated price sheet, and reports both "cost if called" and "cost paid", which is 0 when replies are replayed from the cache.</p>
+</section>
+
+<!-- 11 -->
+<section class="s" id="time" aria-labelledby="h-time">
+  <div class="num">STEP 11 · HOW LONG IT TAKES</div>
+  <h2 id="h-time">Rate limits are in tokens per minute, so tokens become minutes</h2>
+  <p>Providers also cap how fast you may spend. For gpt-oss-20b, Groq lists 30 requests and 8,000 tokens per minute, and 1,000 requests and 200,000 tokens per day. Which account plan that row applies to is not stated clearly (UNVERIFIED). Turn the v0 call into a run:</p>
+  <div class="formula">100 calls × (976 input + ~71 template + 512 output cap) = 155,900 tokens<br>155,900 ÷ 8,000 tokens per minute ≥ <span class="w">19.5 minutes</span>, about three quarters of a day's 200,000 tokens</div>
+  <p>The money is about two cents; the clock and the daily quota are what stop you. So a run must be planned before it starts, throttled while it runs, and able to <b>resume</b> where it stopped, skipping calls it already made.</p>
+  <p class="call wrong"><b>Common mistake:</b> "it's cheap, so I can rerun everything any time." On a free tier you cannot; a rerun of recorded calls should come from the cache, in seconds and for free.</p>
+  <p class="call proj"><b>In your project:</b> every LLMOps notebook is recorded once and then replayed; the shared cache layer plans each run's calls and tokens and refuses a run that would exceed the day's quota.</p>
+</section>
+
+<!-- 12 -->
+<section class="s" id="decide" aria-labelledby="h-decide">
+  <div class="num">STEP 12 · DECISIONS</div>
+  <h2 id="h-decide">The settings this course uses, and why</h2>
+  <div class="tw"><table>
+    <thead><tr><th>Question</th><th>Decision</th><th>Why</th></tr></thead>
+    <tbody>
+      <tr><td>Which tokenizer for chunk limits?</td><td>the embedder's own</td><td>it enforces truncation (step 5)</td></tr>
+      <tr><td>Which tokenizer for prompt budgets?</td><td><code>get_encoding("o200k_harmony")</code> + a template margin</td><td>the generator enforces the window (steps 4, 6)</td></tr>
+      <tr><td>Which number for cost?</td><td>estimate from counts, then replace with <code>usage</code> from recorded calls</td><td>the bill includes hidden tokens (step 6)</td></tr>
+      <tr><td>Output cap and effort for gpt-oss</td><td><code>max_completion_tokens=512</code>, <code>reasoning_effort="low"</code>, both sent every time</td><td>room for reasoning; the server default is medium (step 7)</td></tr>
+      <tr><td>Checks on every reply</td><td><code>finish_reason == "stop"</code> and a non-empty answer</td><td>the empty answer passes a "call returned" check (step 7)</td></tr>
+      <tr><td>Temperature</td><td>0 on Groq; never sent to Claude</td><td>more repeatable; Claude rejects it (steps 8–9)</td></tr>
+      <tr><td>Repeatable results</td><td>replay recorded replies from the cache</td><td>no hosted API promises identical replies (step 8)</td></tr>
+      <tr><td>When T &gt; 0</td><td>consistency checks, varied rewrites</td><td>they need different samples</td></tr>
+    </tbody></table></div>
+  <p><b>When not to count exactly:</b> a one-off rough size where a 40% error would not change the decision. Even then, use your corpus's ratio (about 5.5 here), not 4, and say it is an estimate.</p>
+  <p><b>One more point from the book:</b> it calls simple RAG overkill when your documents fit inside the model's window (<a data-book="chapter 1.pdf" data-page="12">Ch1 p.12/14</a>). Weighing that choice belongs to P7.</p>
+</section>
+
+<!-- 13 -->
+<section class="s full" id="repo" aria-labelledby="h-repo">
+  <span class="tag">Full only</span>
+  <div class="num">STEP 13 · READING THE REPO CRITICALLY</div>
+  <h2 id="h-repo">"Size" means four different things in the repo</h2>
+  <div class="tw"><table>
+    <thead><tr><th>Code</th><th>What "size" counts</th><th>Where</th></tr></thead>
+    <tbody>
+      <tr><td><code>encode_pdf(path, chunk_size=1000, …)</code>, <code>length_function=len</code></td><td><b>characters</b></td><td><code>simple_rag.ipynb</code> cell 10</td></tr>
+      <tr><td><code>from_tiktoken_encoder(chunk_size=200, chunk_overlap=50)</code></td><td>tiktoken tokens</td><td><code>proposition_chunking.ipynb</code> cell 9</td></tr>
+      <tr><td><code>CHUNK_SIZE = 200</code> in <code>SentenceSplitter</code></td><td>LlamaIndex tokens</td><td><code>simple_rag_with_llamaindex.ipynb</code> cells 4, 13</td></tr>
+      <tr><td><code>split_document(…)</code>, docstring "number of tokens"</td><td><b>regex words</b> <code>\b\w+\b</code></td><td><code>document_augmentation.ipynb</code> cell 6</td></tr>
+    </tbody></table></div>
+  <p><b>One cell, three issues</b> (<code>contextual_chunk_headers.ipynb</code> cell 11): the constant <code>MAX_CONTENT_TOKENS = 4000</code> truncates the document <i>and</i> is passed as the output cap; the count uses the gpt-3.5-turbo encoding for a gpt-4o-mini call; and the note says "~3000 words", while the first 4,000 cl100k tokens of our PDF are 2,869 words. Read it as a critique target, not a model.</p>
+  <p>The repo's graders and judges use temperature 0 (<code>reliable_rag.ipynb</code> cell 14, <code>choose_chunk_size.ipynb</code> cell 8), the same choice the course makes, with the same limits (step 8).</p>
+</section>
+
+<!-- 14 -->
+<section class="s full" id="book" aria-labelledby="h-book">
+  <span class="tag">Full only</span>
+  <div class="num">STEP 14 · READING THE BOOK CRITICALLY</div>
+  <h2 id="h-book">What the book says, checked</h2>
+  <div class="tw"><table>
+    <thead><tr><th>Book</th><th>Claim (in our words)</th><th>Our check</th></tr></thead>
+    <tbody>
+      <tr><td><a data-book="chapter 1.pdf" data-page="12">Ch1 p.12/14</a></td><td>simple RAG is overkill when the documents fit in the window</td><td>uses "context window" without defining it (step 6 does)</td></tr>
+      <tr><td><a data-book="chapter 1.pdf" data-page="13">Ch1 p.13/14</a></td><td>simple RAG is cheap: cheap embedding, one LLM call per question</td><td>right; step 10 puts a number on one call</td></tr>
+      <tr><td><a data-book="chapter 2.pdf" data-page="9">Ch2 p.9/11</a></td><td>embedding calls are billed per token, so big tables cost more</td><td>right; "token" is never defined</td></tr>
+      <tr><td><a data-book="chapter 22.pdf" data-page="14">Ch22 p.14–15/19</a></td><td>track tokens per query (context in, answer out) and latency; more retrieved chunks raise recall but also cost and latency</td><td>matches steps 6, 10, 11; no price method</td></tr>
+      <tr><td><a data-book="chapter 22.pdf" data-page="8">Ch22 p.8/19</a></td><td>consistency checks regenerate answers with different random seeds</td><td>a use for T &gt; 0 (step 8); on Groq it needs separate calls</td></tr>
+      <tr><td><a data-book="chapter 12.pdf" data-page="6">Ch12 p.6/14</a></td><td>BM25 tokenizes the query into words</td><td>the book's only "tokenize": words, not model tokens (P3)</td></tr>
+      <tr><td>whole book</td><td>(no tokenizer, characters per token, embedding length limit, reasoning tokens or sampling temperature)</td><td>checked by search: all 13 uses of "temperature" are about Earth's climate</td></tr>
+    </tbody></table></div>
+</section>
+
+<!-- VERIFY -->
+<section class="s" id="verify" aria-labelledby="h-verify">
+  <div class="num">PRACTISE · VERIFY IT YOURSELF</div>
+  <h2 id="h-verify">Rebuild every number and chart in a notebook</h2>
+  <p>Nothing on this page needs to be taken on trust. The notebook <code>study/notebooks/P1_tokens_verify.ipynb</code> recomputes every measured number above with the real tokenizers and the real PDF, checks each one against the value shown here, and redraws the charts as interactive Plotly charts. It makes no API call.</p>
+  <ol>
+    <li>Open the notebook in VS Code (or from the P1 page of the study kit).</li>
+    <li>Choose the kernel: <b>Select Kernel → .venv (Python 3.12)</b> of <code>rag_learning</code>.</li>
+    <li><b>Run All</b>. Each step prints its checks (✓ or ✗); the last cell prints the total.</li>
+  </ol>
+  <div class="card" id="nbSummary"><b>What it rebuilds</b> <span class="badge m" id="nbBadge">110 checks · 6 interactive charts · about 15 seconds</span>
+    <ul style="margin-top:6px;font-size:.92rem">
+      <li><b>Steps 1–2</b> recut the example sentence with all three tokenizers, and retrain the tiny BPE on the climate PDF to reproduce its first 12 merges and word splits.</li>
+      <li><b>Steps 3–5</b> recount every characters-per-token number (including all 91 windows, as a strip chart), rerun both counting traps, and rerun MiniLM offline to show the silent truncation.</li>
+      <li><b>Steps 6–7</b> rebuild the v0 budget bar, and read the installed Groq SDK to confirm the <code>usage</code> fields, the <code>finish_reason</code> values and the deprecated <code>max_tokens</code>. A cell for recorded calls skips with a message until the shared cache exists.</li>
+      <li><b>Steps 8–11</b> recompute the softmax table (a slider over T), the provider table, the cost bars and the run time.</li>
+    </ul>
+    <p style="margin-top:6px;font-size:.9rem;color:var(--muted)">A ✗ anywhere means the page and the code disagree: tell the tutor. Rebuild the notebook from scratch with <code>uv run python sources/verification/P1/p1_build_verify_nb.py</code>, then run it with <code>p1_verify_nb_run.py</code>.</p></div>
+</section>
+
+<!-- APPLY -->
+<section class="s" id="apply" aria-labelledby="h-apply">
+  <div class="num">APPLY · USE IT ON YOUR OWN DATA</div>
+  <h2 id="h-apply">Will your calls fit, what will they cost, how long will a run take?</h2>
+  <p>The tool <code>study/tools/token_budget_check.py</code> runs everything this lesson taught on <b>your</b> documents and questions: does each call fit, what will a run cost, and how long will it take? Run it from <code>rag_learning/</code>:</p>
+  <pre>uv run python study/tools/token_budget_check.py --docs "D:\my-project\docs" --questions my_questions.txt --report token_report.md
+# optional: --generator anthropic:claude-haiku-5-5 · --traces results.jsonl · --unit tokens · --prices sheet.json · --runs N --tpm --tpd</pre>
+  <p>It makes <b>no API call</b>. With <code>--traces</code> it reads the <code>usage</code> and <code>finish_reason</code> of calls you already recorded. The options that would call an API (<code>--pilot</code>, <code>--claude-count</code>, <code>--embedder cohere</code>) only print that they need the shared cache package, which is not built yet.</p>
+  <div class="tw"><table>
+    <thead><tr><th>Report part</th><th>What it tells you</th><th>Lesson step</th></tr></thead>
+    <tbody>
+      <tr><td>1 Corpus ratios</td><td>characters per token for each tokenizer, and the error of "÷ 4"</td><td>3</td></tr>
+      <tr><td>2 Content mix</td><td>digits, code-like lines, non-Latin letters, special-token strings</td><td>3, 4</td></tr>
+      <tr><td>3 Chunks</td><td>tokens per chunk, and how many MiniLM would truncate</td><td>5</td></tr>
+      <tr><td>4 Prompt budget</td><td>input tokens per question and the fit in the window</td><td>6</td></tr>
+      <tr><td>5 Output cap</td><td>reasoning share, length stops and empty answers, from your traces</td><td>7</td></tr>
+      <tr><td>6 Cost</td><td>per call and per 100 calls, split input and output, per model</td><td>10</td></tr>
+      <tr><td>7 Run time</td><td>minutes at your tokens-per-minute limit, and the daily quota</td><td>11</td></tr>
+      <tr><td>8 Checklist</td><td>the 12 checks below, ✓ / ✗ / ? with evidence and how to check</td><td>all</td></tr>
+      <tr><td>9 Recommendation</td><td>the first problem to fix, or "budget OK"</td><td>12</td></tr>
+    </tbody></table></div>
+  <h3>The real-world checklist</h3>
+  <p style="font-size:.92rem;color:var(--muted)">Tick each one for your own project. Your ticks stay in this browser only.</p>
+  <div class="check" id="checklist"></div>
+  <div class="card" id="example" style="display:grid;gap:10px"><div><b>Example: the tool on the course's climate PDF</b> <span class="badge m">measured · 91 chunks · 10 seed questions</span></div>
+    <p style="font-size:.92rem">Command: <code>uv run python study/tools/token_budget_check.py --docs "../upstream/RAG_Techniques/data/Understanding_Climate_Change.pdf" --doc-ids climate --questions study/tools/examples/climate_token_questions.txt</code></p>
+    <div class="tw"><table>
+      <thead><tr><th>What it found</th><th>Value</th><th>Same as the lesson?</th></tr></thead>
+      <tbody><tr><td>Characters per token (<code>o200k_harmony</code>)</td><td class="n">5.65 · "÷ 4" over-counts by 41%</td><td>step 3 (+39% is the cl100k figure)</td></tr>
+      <tr><td>Longest chunk, MiniLM</td><td class="n">198 of 254 tokens · 0 truncated</td><td>step 5</td></tr>
+      <tr><td>D-001 prompt</td><td class="n">107 + 842 + 20 = 976</td><td>step 6</td></tr>
+      <tr><td>Worst question (the 4 longest chunks)</td><td class="n">1,585 tokens = 1.21% of the window</td><td>step 6</td></tr>
+      <tr><td>100 calls on Groq</td><td class="n">≤ $0.0227 · output 67.7%</td><td>step 10</td></tr>
+      <tr><td>100 calls at 8,000 tokens/min</td><td class="n">≥ 19.5 min (worst case 19.8)</td><td>step 11</td></tr></tbody></table></div>
+    <ul style="font-size:.92rem">
+      <li><b>Checklist:</b> ✓ C1, C3, C4, C5, C6, C10, C11, C12 · ✗ C2 (÷ 4 is 41% off) · ? C7, C8, C9 (they need recorded calls, which do not exist yet).</li>
+      <li><b>Recommendation: size chunks in tokens, not characters.</b> With a traces file that holds a cut-off empty answer, the tool's test run puts "raise <code>max_completion_tokens</code> or lower the effort" first instead.</li>
+    </ul>
+    <p style="font-size:.86rem;color:var(--muted)">Pass <code>--doc-ids climate</code> to reproduce 976: without it, the source headers use the file name and the count changes. Ten questions demonstrate the tool; they do not evaluate anything. Full report: <a data-kit="#/read/study/tools/examples/climate_token_report.md" data-path="rag_learning/study/tools/examples/climate_token_report.md">climate_token_report.md</a>.</p></div>
+</section>
+
+<!-- CHECK -->
+<section class="s" id="check" aria-labelledby="h-check">
+  <div class="num">CHECK YOURSELF</div>
+  <h2 id="h-check">Can you use it on something new?</h2>
+  <p>Answer without scrolling back; then take the full quiz the next day.</p>
+  <div class="q" id="quick"></div>
+  <p>All questions, with hints, model answers and key points: <a data-kit="#/quiz/P1/next" data-path="rag_learning/study/questions/P1_questions.md">open the P1 quiz</a>. Text versions: <a data-kit="#/read/study/reading/P1_llm_fundamentals.md" data-path="rag_learning/study/reading/P1_llm_fundamentals.md">short</a> · <a data-kit="#/read/concepts/P1_llm_fundamentals.md" data-path="rag_learning/concepts/P1_llm_fundamentals.md">full, with the lab</a>. Next topic: <a data-kit="#/c/P2" data-path="rag_learning/concepts/P2_ir_framing.md">retrieval framing (P2)</a>.</p>
+</section>
+
+<footer>
+  <p><b>Where every number comes from.</b> <span class="badge m">measured</span> numbers come from the course's local tokenizer runs on the repo's climate PDF (<code>sources/verification/P1/P1_FACTS.md</code>, sections S1–S11 and K1–K8); the notebook recomputes them. The O2 numbers (empty reply at a 12-token cap; 78 / 23 billed tokens) are from the logged smoke test of 2026-10-08. <span class="badge t">toy</span> values are made up to show a mechanism; <span class="badge f">formula</span> values are computed on this page. No API was called to build this page.</p>
+  <p><b>External, read 2026-10-17:</b> Groq's model page, API reference, reasoning guide and OpenAI-compatibility notes; the Groq Python SDK usage type; tiktoken's README; OpenAI's harmony and gpt-oss READMEs; Claude's token-counting docs and the course's claude-api reference; Sennrich et al. 2016; Kudo and Richardson 2018; Petrov et al. 2023; Holtzman et al. 2020; Thinking Machines Lab 2025; AI-Engineer-Interview-Questions (MIT). Prices and limits change. <b>UNVERIFIED:</b> the composition of the hidden template tokens; whether reasoning tokens sit inside <code>completion_tokens</code>; Groq's <code>finish_reason</code> value at the cap; which plan the Groq rate limits belong to. Book text is paraphrased, never copied; book pages open the PDF when this page is opened from the study kit.</p>
+</footer>
+</main>
+</div>
+<button type="button" class="totop" id="totop" aria-label="Back to top">↑</button>
+
+<script>
+"use strict";
+(function () {
+  const $ = (s, el = document) => el.querySelector(s);
+  const $$ = (s, el = document) => [...el.querySelectorAll(s)];
+  const root = document.documentElement;
+  const store = { get(k, d) { try { return localStorage.getItem(k) ?? d; } catch { return d; } },
+                  set(k, v) { try { localStorage.setItem(k, v); } catch { /* private window */ } } };
+  const fmt = (x, d = 3) => Number.isFinite(x) ? x.toFixed(d) : "—";
+  const KIT = location.protocol.startsWith("http") && location.pathname.startsWith("/lesson/");
+  const esc = t => String(t).replace(/&/g, "&amp;").replace(/</g, "&lt;");
+
+  /* ---------- depth, colour, theme ---------- */
+  function setDepth(m) {
+    root.dataset.depth = m;
+    $$(".seg button").forEach(b => b.setAttribute("aria-pressed", String(b.dataset.depth === m)));
+    store.set("lesson-depth", m);
+    spy();
+  }
+  $$(".seg button").forEach(b => b.addEventListener("click", () => setDepth(b.dataset.depth)));
+  function paintColor() {
+    const dark = root.dataset.theme === "dark";
+    $("#color").innerHTML = `<span aria-hidden="true">${dark ? "☀" : "☾"}</span><span class="lbl"> ${dark ? "Light" : "Dark"}</span>`;
+    $("#color").setAttribute("aria-label", dark ? "Switch to light" : "Switch to dark");
+  }
+  $("#color").addEventListener("click", () => { root.dataset.theme = root.dataset.theme === "dark" ? "light" : "dark"; store.set("lesson-color", root.dataset.theme); paintColor(); });
+  paintColor();
+  $("#style").value = root.dataset.style;
+  $("#style").addEventListener("change", e => { root.dataset.style = e.target.value; store.set("lesson-style", e.target.value); });
+
+  /* ---------- contents panel: where am I, hide/show, left/right, back to top ---------- */
+  const links = $$("#toc a");
+  const targets = links.map(a => document.getElementById(a.getAttribute("href").slice(1)));
+  const narrow = () => !!(window.matchMedia && window.matchMedia("(max-width: 980px)").matches);
+  let lastCur = -1;
+  function spy() {
+    const y = window.scrollY + 90;
+    let cur = 0;
+    targets.forEach((t, i) => { if (t && t.offsetParent !== null && t.getBoundingClientRect().top + window.scrollY <= y) cur = i; });
+    links.forEach((a, i) => a.classList.toggle("on", i === cur));
+    const visible = targets.filter(t => t && t.offsetParent !== null);
+    const pos = visible.indexOf(targets[cur]) + 1;
+    const name = links[cur].textContent.replace(/Full$/, "").replace(/^[^A-Za-z]+/, "").trim();
+    $("#where").textContent = `${name} · ${pos} of ${visible.length}`;
+    $("#crumb").textContent = ` › ${links[cur].querySelector(".n").textContent.trim()} ${name}`;
+    const h = document.documentElement.scrollHeight - innerHeight;
+    const pct = (h > 0 ? Math.min(100, 100 * window.scrollY / h) : 0) + "%";
+    $("#bar").style.width = pct; $("#topprog").style.width = pct;
+    $("#totop").classList.toggle("show", window.scrollY > 500);
+    if (cur !== lastCur) {                       // keep the current step visible inside a long panel
+      lastCur = cur;
+      const side = $("#side"), a = links[cur];
+      if (side.scrollHeight > side.clientHeight && (a.offsetTop < side.scrollTop + 40 || a.offsetTop + a.offsetHeight > side.scrollTop + side.clientHeight - 20))
+        side.scrollTop = Math.max(0, a.offsetTop - side.clientHeight / 3);
+    }
+  }
+  addEventListener("scroll", spy, { passive: true });
+  addEventListener("resize", spy);
+  function closeDrawer() { document.body.classList.remove("side-open"); if (narrow()) $("#menu").setAttribute("aria-expanded", "false"); }
+  links.forEach(a => a.addEventListener("click", () => {
+    const t = document.getElementById(a.getAttribute("href").slice(1));
+    if (t && t.closest(".full") && root.dataset.depth === "short") setDepth("full");
+    closeDrawer();
+  }));
+  function setToc(v) { root.dataset.toc = v; store.set("lesson-toc", v); $("#menu").setAttribute("aria-expanded", String(v === "shown")); spy(); }
+  $("#menu").addEventListener("click", () => {
+    if (narrow()) { const open = document.body.classList.toggle("side-open"); $("#menu").setAttribute("aria-expanded", String(open)); }
+    else setToc(root.dataset.toc === "hidden" ? "shown" : "hidden");
+  });
+  $("#main").addEventListener("click", () => { if (document.body.classList.contains("side-open")) closeDrawer(); });
+  function paintSide() { $("#sidepos").textContent = root.dataset.side === "right" ? "⇆ Left" : "⇆ Right"; }
+  $("#sidepos").addEventListener("click", () => { root.dataset.side = root.dataset.side === "right" ? "left" : "right"; store.set("lesson-side", root.dataset.side); paintSide(); });
+  paintSide();
+  $("#menu").setAttribute("aria-expanded", String(!narrow() && root.dataset.toc === "shown"));
+  addEventListener("keydown", e => {
+    if (e.key && e.key.toLowerCase() === "t" && !e.ctrlKey && !e.metaKey && !e.altKey && !/^(INPUT|TEXTAREA|SELECT)$/.test((document.activeElement || {}).tagName || "")) $("#menu").click();
+  });
+  $("#totop").addEventListener("click", () => { window.scrollTo({ top: 0, behavior: "smooth" }); $(".top .t").focus?.(); });
+  const qd = new URLSearchParams(location.search).get("mode");
+  setDepth(qd === "full" || location.hash === "#full" ? "full" : qd === "short" ? "short" : store.get("lesson-depth", "short"));
+
+  /* ---------- way back: all phases (kit Route page, or the offline route map) ---------- */
+  const HOME = KIT ? "/#/" : "../../RAG_ROUTE_MAP.html";
+  ["#home", "#toRoute"].forEach(s => { const a = $(s); if (a) a.href = HOME; });
+  $$(".kitonly").forEach(a => { if (KIT) a.href = "/" + a.dataset.route; else a.remove(); });
+
+  /* ---------- links: study kit routes, book PDFs ---------- */
+  $$("a[data-kit]").forEach(a => {
+    if (KIT) { a.href = "/" + a.dataset.kit; return; }
+    const c = document.createElement("code");
+    c.textContent = a.dataset.path; c.title = "Open from the study kit to get a link";
+    a.replaceWith(c);
+  });
+  $$("a[data-book]").forEach(a => {
+    a.href = (KIT ? "/book/" : "../../../RAG_Made_Simple_The_Complete_Visual_Guide/") + encodeURIComponent(a.dataset.book) + "#page=" + a.dataset.page;
+    a.target = "_blank"; a.rel = "noopener"; a.title = "Open the book at this page";
+  });
+
+  /* ---------- tiny SVG chart helpers ---------- */
+  const keepMeta = svg => $$("title,desc", svg).map(e => e.outerHTML).join("");
+
+  /* ---------- step 1: the cut, three ways (measured, P1_FACTS S5) ---------- */
+  const CUT = [
+    ["cl100k_base", "BPE · 12 tokens", ["Anth", "rop", "ogenic", "·emissions", "·are", "·accelerating", "·deg", "lac", "iation", "·in", "·Greenland", "."]],
+    ["o200k_base", "BPE · 13 tokens", ["Anth", "rop", "ogenic", "·emissions", "·are", "·accelerating", "·de", "gl", "aci", "ation", "·in", "·Greenland", "."]],
+    ["MiniLM WordPiece", "16 IDs (14 text + 2 markers)", ["[CLS]", "ant", "##hr", "##op", "##ogenic", "emissions", "are", "accelerating", "de", "##gl", "##ac", "##iation", "in", "greenland", ".", "[SEP]"]],
+  ];
+  $("#cutStrip").innerHTML = CUT.map(([name, how, ps]) => `<div class="tokrow"><div class="h"><b>${name}</b><span style="color:var(--muted);font-size:.82rem">${how}</span></div><div>${ps.map(p => `<span class="tk ${/^\[/.test(p) ? "mk" : ""}">${esc(p)}</span>`).join("")}</div></div>`).join("");
+
+  (function flow() {
+    const svg = $("#flowChart");
+    const box = (x, y, w, h, t, s, cls) => `<rect x="${x}" y="${y}" width="${w}" height="${h}" rx="8" class="${cls || "fbox"}"/><text class="lab" x="${x + w / 2}" y="${y + h / 2 - (s ? 3 : -4)}" text-anchor="middle">${t}</text>` + (s ? `<text x="${x + w / 2}" y="${y + h / 2 + 14}" text-anchor="middle">${s}</text>` : "");
+    const arr = (x1, y1, x2, y2) => `<line class="farr" x1="${x1}" y1="${y1}" x2="${x2}" y2="${y2}" marker-end="url(#ah)"/>`;
+    svg.innerHTML = keepMeta(svg) + `<defs><marker id="ah" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0,0 L10,5 L0,10 z" class="fhead"/></marker></defs>` +
+      box(14, 62, 92, 46, "text") + arr(106, 85, 140, 85) +
+      box(142, 52, 132, 66, "tokenizer", "cuts · fixed per model", "fbox hl") + arr(274, 85, 296, 85) +
+      box(298, 58, 140, 54, "token IDs", "·strawberry = 101830") +
+      arr(438, 76, 462, 44) + arr(438, 94, 462, 126) +
+      box(464, 14, 166, 56, "embedding model", "IDs → one chunk vector") +
+      box(464, 100, 166, 56, "LLM", "IDs → next-token scores");
+  })();
+
+  /* ---------- step 2: tiny BPE (measured, K6; S11) ---------- */
+  const MERGES = ["i + n", "a + n", "e + s", "a + t", "o + n", "e + n", "an + d", "e + r", "i + on", "in + g", "r + e", "a + l"];
+  $("#mergeChips").innerHTML = MERGES.map((m, i) => `<span class="chip" style="cursor:default">${i + 1}. ${m}</span>`).join("");
+  const BPE = [["the", ["the"], ["·the"]], ["climate", ["climate"], ["·climate"]], ["emissions", ["emissions"], ["·emissions"]],
+               ["greenhouse", ["gre", "enh", "ous", "e"], ["·greenhouse"]], ["deglaciation", ["de", "g", "l", "ac", "i", "ation"], ["·de", "gl", "aci", "ation"]]];
+  const chipsOf = ps => `<b>${ps.length}</b> ` + ps.map(p => `<span class="tk">${esc(p)}</span>`).join("");
+  $("#bpeRows").innerHTML = BPE.map(([w, a, b]) => `<tr><td><code>${w}</code></td><td>${chipsOf(a)}</td><td>${chipsOf(b)}</td></tr>`).join("");
+
+  /* ---------- step 3: chars per token (measured, S3, K4) ---------- */
+  (function ratio() {
+    const svg = $("#ratioChart");
+    const rows = [["climate PDF (whole)", 5.57, 5.65], ["one 1,000-char window", 4.98, 5.05], ["Python code (repo)", 4.64, 4.61],
+                  ["German sentence", 3.36, 4.62], ["Hindi sentence", 0.98, 3.39], ["numbers line (toy)", 1.49, 1.49]];
+    const L = 170, R = 24, T = 26, rowH = 46, W = 640, X = v => L + v / 7 * (W - L - R);
+    let s = "";
+    [0, 1, 2, 3, 4, 5, 6, 7].forEach(v => { s += `<line class="grid" x1="${X(v)}" x2="${X(v)}" y1="${T - 6}" y2="${T + rows.length * rowH}"/><text x="${X(v)}" y="${T + rows.length * rowH + 16}" text-anchor="middle">${v}</text>`; });
+    rows.forEach(([lab, a, b], i) => {
+      const y = T + i * rowH;
+      s += `<text class="lab" x="${L - 8}" y="${y + 22}" text-anchor="end">${lab}</text>`;
+      s += `<rect x="${L}" y="${y + 6}" width="${X(a) - L}" height="14" class="rb1"/><text x="${X(a) + 5}" y="${y + 17}">${a.toFixed(2)}</text>`;
+      s += `<rect x="${L}" y="${y + 22}" width="${X(b) - L}" height="14" class="rb2"/><text x="${X(b) + 5}" y="${y + 33}">${b.toFixed(2)}</text>`;
+    });
+    s += `<line class="s-ceil" x1="${X(4)}" x2="${X(4)}" y1="${T - 10}" y2="${T + rows.length * rowH}"/><text class="lab" x="${X(4) + 4}" y="${T - 12}">÷ 4 rule</text>`;
+    s += `<rect x="${L}" y="4" width="12" height="10" class="rb1"/><text x="${L + 16}" y="13">cl100k</text><rect x="${L + 70}" y="4" width="12" height="10" class="rb2"/><text x="${L + 86}" y="13">o200k</text>`;
+    s += `<text x="${(L + W - R) / 2}" y="${T + rows.length * rowH + 34}" text-anchor="middle">characters per token</text>`;
+    svg.innerHTML = keepMeta(svg) + s;
+  })();
+
+  /* ---------- stacked bars ---------- */
+  function bars(el, rows, max) {
+    el.innerHTML = rows.map(r => `<div class="sbar"><span>${r.label}</span><span class="track" role="img" aria-label="${r.aria}">` +
+      r.parts.map(p => `<span class="${p.cls}" style="width:${(100 * Math.max(0, p.v) / max).toFixed(2)}%"></span>`).join("") + `</span><span class="v">${r.total}</span></div>`).join("");
+  }
+
+  /* ---------- step 6: the v0 budget (measured counts S9; overhead inferred B.3) ---------- */
+  bars($("#budgetBars"), [
+    { label: "input, counted", parts: [{ cls: "pm", v: 107 }, { cls: "p1", v: 842 }, { cls: "p3", v: 20 }], total: "976", aria: "system 107, sources 842, question 20, total 976" },
+    { label: "+ template", parts: [{ cls: "pm", v: 107 }, { cls: "p1", v: 842 }, { cls: "p3", v: 20 }, { cls: "ph", v: 71 }], total: "~1,047", aria: "plus about 71 template tokens" },
+    { label: "+ output cap", parts: [{ cls: "pm", v: 107 }, { cls: "p1", v: 842 }, { cls: "p3", v: 20 }, { cls: "ph", v: 71 }, { cls: "p2", v: 512 }], total: "~1,559", aria: "plus the 512 output cap, about 1,559" },
+  ], 1600);
+
+  /* ---------- step 7: the output cap shared by reasoning and answer (toy) ---------- */
+  function drawCap() {
+    const cap = Number($("#capR").value), rea = Number($("#reaR").value), need = Number($("#ansR").value);
+    $("#capRo").textContent = cap; $("#reaRo").textContent = rea; $("#ansRo").textContent = need;
+    const usedR = Math.min(rea, cap), room = Math.max(0, cap - usedR), got = Math.min(need, room);
+    const finish = rea + need > cap ? "length" : "stop";
+    bars($("#capBars"), [
+      { label: "output cap", parts: [{ cls: "p4", v: usedR }, { cls: "p5", v: got }, { cls: "pe", v: cap - usedR - got }], total: String(cap), aria: `reasoning ${usedR}, answer ${got}, unused ${cap - usedR - got}` },
+    ], 1024);
+    const state = got === 0 ? `<span class="miss">empty answer</span>` : got < need ? `<span class="miss">answer cut off after ${got} of ${need} tokens</span>` : `<span class="hit">full answer (${need} tokens)</span>`;
+    $("#capRead").innerHTML = `Reasoning uses <b>${usedR}</b>, leaving <b>${room}</b> for the answer → ${state} · <code>finish_reason</code> = <b>${finish}</b>` +
+      (got === 0 ? `<br><span style="color:var(--muted)">This is the O2 failure: the call "worked", the reply was blank.</span>` : "");
+  }
+  ["#capR", "#reaR", "#ansR"].forEach(s => $(s).addEventListener("input", drawCap)); drawCap();
+
+  /* ---------- step 8: temperature (toy logits, P1_FACTS S7) ---------- */
+  const Z = [2.0, 1.5, 0.5, -1.0], ZL = ["YES", "NO", "PARTIAL", "MAYBE"];
+  const softT = T => { const m = Math.max(...Z.map(z => z / T)), e = Z.map(z => Math.exp(z / T - m)), s = e.reduce((a, b) => a + b, 0); return e.map(x => x / s); };
+  window.__p1 = { softT };
+  function drawTemp() {
+    const T = Number($("#tT").value);
+    $("#tTo").textContent = T.toFixed(2);
+    const p = softT(T), q = softT(1), svg = $("#tempChart");
+    const L = 58, B = 46, Tp = 18, W = 640, H = 280, bw = 70, gap = (W - L - 18 - 4 * bw) / 4;
+    const Y = v => Tp + (1 - v) * (H - Tp - B);
+    let s = "";
+    [0, 0.25, 0.5, 0.75, 1].forEach(v => { s += `<line class="grid" x1="${L}" x2="${W - 18}" y1="${Y(v)}" y2="${Y(v)}"/><text x="${L - 8}" y="${Y(v) + 4}" text-anchor="end">${v}</text>`; });
+    p.forEach((v, i) => {
+      const x = L + gap / 2 + i * (bw + gap);
+      s += `<rect x="${x}" y="${Y(v)}" width="${bw}" height="${Y(0) - Y(v)}" class="tbar"/>`;
+      s += `<line x1="${x - 4}" x2="${x + bw + 4}" y1="${Y(q[i])}" y2="${Y(q[i])}" class="s-ref"/>`;
+      s += `<text class="lab" x="${x + bw / 2}" y="${Y(v) - 6}" text-anchor="middle">${v.toFixed(3)}</text><text x="${x + bw / 2}" y="${H - B + 18}" text-anchor="middle">${ZL[i]} (z ${Z[i]})</text>`;
+    });
+    s += `<line class="ax" x1="${L}" x2="${W - 18}" y1="${Y(0)}" y2="${Y(0)}"/><text transform="translate(14 ${(Tp + H - B) / 2}) rotate(-90)" text-anchor="middle">probability</text>`;
+    s += `<text x="${W - 22}" y="${Tp + 10}" text-anchor="end">faint line: T = 1</text>`;
+    svg.innerHTML = keepMeta(svg) + s;
+    const H2 = -p.reduce((a, v) => a + (v > 0 ? v * Math.log2(v) : 0), 0);
+    $("#tempRead").innerHTML = `At T = <b>${T.toFixed(2)}</b>: p(YES) = <b>${p[0].toFixed(3)}</b>, p(NO) = ${p[1].toFixed(3)}, spread (entropy) = ${H2.toFixed(2)} bits of a possible 2.00.` +
+      (T <= 0.1 ? " Almost greedy: YES nearly always." : T >= 3 ? " Nearly flat: unlikely tokens get drawn often." : "");
+  }
+  $("#tT").addEventListener("input", drawTemp); drawTemp();
+
+  /* ---------- step 10: cost bars (formula, K7) and calculator (Full) ---------- */
+  const callCost = (pin, pout, i, o) => (i * pin + o * pout) / 1e6;
+  window.__p1.callCost = callCost;
+  const G = [0.075, 0.30], HK = [0.10, 0.50], max = 100 * callCost(HK[0], HK[1], 976, 512);
+  bars($("#costBars"), [
+    { label: "Groq gpt-oss-20b", parts: [{ cls: "p1", v: 100 * 976 * G[0] / 1e6 }, { cls: "p2", v: 100 * 512 * G[1] / 1e6 }], total: "$" + (100 * callCost(G[0], G[1], 976, 512)).toFixed(4), aria: "input 0.0073 dollars, output 0.0154 dollars, total 0.0227" },
+    { label: "Claude Haiku 5.5", parts: [{ cls: "p1", v: 100 * 976 * HK[0] / 1e6 }, { cls: "p2", v: 100 * 512 * HK[1] / 1e6 }], total: "$" + max.toFixed(4), aria: "input 0.0098 dollars, output 0.0256 dollars, total 0.0354" },
+  ], max);
+  function calcCost() {
+    const [pin, pout] = $("#ccModel").value.split(",").map(Number), i = Number($("#ccIn").value), o = Number($("#ccOut").value), n = Number($("#ccN").value);
+    $("#ccIno").textContent = i; $("#ccOuto").textContent = o; $("#ccNo").textContent = n;
+    const one = callCost(pin, pout, i, o), share = o * pout / (i * pin + o * pout), toks = n * (i + 71 + o);
+    $("#ccRead").innerHTML = `One call ≤ <b>$${one.toFixed(6)}</b> · ${n} calls ≤ <b>$${(n * one).toFixed(4)}</b> · output share <b>${(100 * share).toFixed(1)}%</b><br>` +
+      `Tokens: ${n} × (${i} + 71 + ${o}) = <b>${toks.toLocaleString("en-US")}</b> → at 8,000 per minute ≥ <b>${(toks / 8000).toFixed(1)} min</b>` + (toks > 200000 ? ` · <span class="miss">over a 200,000-token day</span>` : "");
+  }
+  ["#ccModel", "#ccIn", "#ccOut", "#ccN"].forEach(s => $(s).addEventListener("input", calcCost)); calcCost();
+
+  /* ---------- apply: the real-world checklist ---------- */
+  const CHECKS = [["The generator's tokenizer is resolved by encoding name, not from the provider-prefixed model id.", "Use get_encoding('o200k_harmony') or strip the prefix; for Claude, count with count_tokens. Report check C1 (step 4)."], ["You know your corpus's characters per token, and you do not use \"÷ 4\".", "Report part 1; ✗ when ÷ 4 is more than 20% off (step 3)."], ["You know how much costly content you have: digits, code, non-Latin scripts.", "Report part 2 measures each share and its own ratio (step 3)."], ["Your counter survives special-token strings like \u003c|endoftext|> in documents.", "Report part 2 searches for them; count with disallowed_special=() (step 4)."], ["Your chunks fit the embedder's limit: no silent truncation.", "Report part 3 counts with MiniLM's own tokenizer (254 text tokens); for Cohere, check the truncate setting your code sends (step 5)."], ["Input + template + output cap fits the window with a margin.", "Report part 4 checks the worst question at 90% of the window, and the cap against the model's maximum output (step 6)."], ["The output cap leaves room for the reasoning.", "Read reasoning_tokens from recorded calls (--traces); p95 completion tokens should stay under 80% of the cap (step 7)."], ["Recorded calls have no length stops and no empty answers.", "Count finish_reason == 'length' (Claude: stop_reason 'max_tokens') and empty answers in your traces (step 7)."], ["You have calibrated the hidden template overhead from real usage.", "Compare usage.prompt_tokens with your own count of the same messages (step 6)."], ["Your price sheet is dated, and no more than 30 days old.", "Re-read the provider's price page and update price_table_version (step 10)."], ["The planned run fits the daily token quota in an acceptable time.", "Tokens per run ÷ tokens per minute; compare with the day's quota (step 11)."], ["Your sampling settings are ones the provider accepts.", "Groq: temperature 0–2, reasoning_effort low/medium/high, sent explicitly; Claude: no temperature, effort sent (steps 8–9)."]];
+  const saved = JSON.parse(store.get("p1-checklist", "[]") || "[]");
+  $("#checklist").innerHTML = CHECKS.map(([t, how], i) => `<label><input type="checkbox" data-i="${i}" ${saved.includes(i) ? "checked" : ""}><span><b>C${i + 1}.</b> ${esc(t)}<span class="how">How to check: ${esc(how)}</span></span></label>`).join("");
+  $$("#checklist input").forEach(c => c.addEventListener("change", () => store.set("p1-checklist", JSON.stringify($$("#checklist input:checked").map(x => Number(x.dataset.i))))));
+
+  /* ---------- check yourself ---------- */
+  const QS = [
+    { q: "Your embedder is MiniLM and a chunk is 300 WordPiece text tokens long. What happens?", a: ["an error, because the chunk is too long", "the last 46 tokens are dropped silently", "the vector averages all 300 tokens"], ok: 1,
+      why: ["Nothing errors: encoding is silent.", "Right: 256 IDs include [CLS] and [SEP], so 254 text tokens shape the vector and the rest is ignored.", "Only the first 254 text tokens are read."] },
+    { q: "A gpt-oss call returns an empty answer. finish_reason is \"length\". What is the likeliest cause?", a: ["the context window is full", "reasoning used up the output cap", "temperature 0 gave no tokens"], ok: 1,
+      why: ["The window holds about 131,072 tokens; a v0 call uses about 1,559.", "Right: reasoning tokens come out of max_completion_tokens; raise the cap or lower the effort, and assert a non-empty answer.", "Temperature changes which token is drawn, not whether any are."] },
+    { q: "100 calls of 1,000 input and 300 output tokens on Groq ($0.075 in, $0.30 out per 1M). Which part of the bill is larger?", a: ["input: there are more input tokens", "output: 30,000 × 0.30 beats 100,000 × 0.075", "they are equal"], ok: 1,
+      why: ["More tokens, but a quarter of the price: $0.0075.", "Right: $0.0090 output against $0.0075 input, because output costs 4× as much per token.", "$0.0075 vs $0.0090."] },
+  ];
+  $("#quick").innerHTML = QS.map((x, i) => `<fieldset><legend>${i + 1}. ${x.q}</legend>` + x.a.map((a, j) => `<label><input type="radio" name="q${i}" value="${j}"> ${a}</label>`).join("") + `<div class="fb" id="fb${i}" aria-live="polite"></div></fieldset>`).join("");
+  QS.forEach((x, i) => $$(`input[name=q${i}]`).forEach(r => r.addEventListener("change", () => {
+    const j = Number(r.value), fb = $("#fb" + i);
+    fb.className = "fb show " + (j === x.ok ? "ok" : "no"); fb.textContent = x.why[j];
+  })));
+  spy();
+})();
+</script>
+</body>
+</html>

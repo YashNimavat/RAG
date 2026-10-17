@@ -1,0 +1,136 @@
+PASS kit.lint_questions: no problems
+PASS question file header line
+     items: 18; pre 5; main 11 (R 4, A 4, T 3); review 1; interview 1
+PASS 15-18 items (18)
+PASS 3-5 set=pre items, P3-PRE-01 ... in order
+PASS set=main has >= 4 R, >= 4 A, >= 2 T
+PASS 1-2 set=interview items
+PASS ids unique
+PASS ids follow P3-<type>-<nn> / P3-PRE-<nn>
+PASS id letter = type
+PASS the 2026-10-08 Part L ids P3-R-01..04, P3-A-01..04, P3-T-01 are kept as set=main
+PASS P3-T-02 is the code-identifier scenario (getUserId / get_user_id), written for the kit
+PASS no coach-seed S2 wording in the question, short or full file ({'P3_questions.md/questions': [], 'P3_bm25.md/reading': [], 'P3_bm25.md/concepts': []})
+PASS a main T item asks when NOT to use BM25 alone
+PASS P3-A-01 model answer = 1.243333 (S4)
+PASS P3-PRE-01: reread links to short AND full file, plus a book page
+PASS P3-PRE-01: 2+ hints, 2-5 keys, 1-2 'for a 4', 1-3 wrong answers
+PASS P3-PRE-01: one short question sentence (18 words)
+PASS P3-PRE-02: reread links to short AND full file, plus a book page
+PASS P3-PRE-02: 2+ hints, 2-5 keys, 1-2 'for a 4', 1-3 wrong answers
+PASS P3-PRE-02: one short question sentence (8 words)
+PASS P3-PRE-03: reread links to short AND full file, plus a book page
+PASS P3-PRE-03: 2+ hints, 2-5 keys, 1-2 'for a 4', 1-3 wrong answers
+PASS P3-PRE-03: one short question sentence (19 words)
+PASS P3-PRE-04: reread links to short AND full file, plus a book page
+PASS P3-PRE-04: 2+ hints, 2-5 keys, 1-2 'for a 4', 1-3 wrong answers
+PASS P3-PRE-04: one short question sentence (23 words)
+PASS P3-PRE-05: reread links to short AND full file, plus a book page
+PASS P3-PRE-05: 2+ hints, 2-5 keys, 1-2 'for a 4', 1-3 wrong answers
+PASS P3-PRE-05: one short question sentence (15 words)
+PASS P3-R-01: reread links to short AND full file, plus a book page
+PASS P3-R-01: 2+ hints, 2-5 keys, 1-2 'for a 4', 1-3 wrong answers
+PASS P3-R-01: one short question sentence (4 words)
+PASS P3-R-02: reread links to short AND full file, plus a book page
+PASS P3-R-02: 2+ hints, 2-5 keys, 1-2 'for a 4', 1-3 wrong answers
+PASS P3-R-02: one short question sentence (15 words)
+PASS P3-R-03: reread links to short AND full file, plus a book page
+PASS P3-R-03: 2+ hints, 2-5 keys, 1-2 'for a 4', 1-3 wrong answers
+PASS P3-R-03: one short question sentence (10 words)
+PASS P3-R-04: reread links to short AND full file, plus a book page
+PASS P3-R-04: 2+ hints, 2-5 keys, 1-2 'for a 4', 1-3 wrong answers
+PASS P3-R-04: one short question sentence (12 words)
+PASS P3-A-01: reread links to short AND full file, plus a book page
+PASS P3-A-01: 2+ hints, 2-5 keys, 1-2 'for a 4', 1-3 wrong answers
+PASS P3-A-01: Hint 3 only on an A item
+PASS P3-A-01: one short question sentence (27 words)
+PASS P3-A-02: reread links to short AND full file, plus a book page
+PASS P3-A-02: 2+ hints, 2-5 keys, 1-2 'for a 4', 1-3 wrong answers
+PASS P3-A-02: one short question sentence (25 words)
+PASS P3-A-03: reread links to short AND full file, plus a book page
+PASS P3-A-03: 2+ hints, 2-5 keys, 1-2 'for a 4', 1-3 wrong answers
+PASS P3-A-03: one short question sentence (26 words)
+PASS P3-A-04: reread links to short AND full file, plus a book page
+PASS P3-A-04: 2+ hints, 2-5 keys, 1-2 'for a 4', 1-3 wrong answers
+PASS P3-A-04: Hint 3 only on an A item
+PASS P3-A-04: one short question sentence (15 words)
+PASS P3-T-01: reread links to short AND full file, plus a book page
+PASS P3-T-01: 2+ hints, 2-5 keys, 1-2 'for a 4', 1-3 wrong answers
+PASS P3-T-01: one short question sentence (25 words)
+PASS P3-T-02: reread links to short AND full file, plus a book page
+PASS P3-T-02: 2+ hints, 2-5 keys, 1-2 'for a 4', 1-3 wrong answers
+PASS P3-T-02: one short question sentence (29 words)
+PASS P3-T-03: reread links to short AND full file, plus a book page
+PASS P3-T-03: 2+ hints, 2-5 keys, 1-2 'for a 4', 1-3 wrong answers
+PASS P3-T-03: one short question sentence (27 words)
+PASS P3-A-05: reread links to short AND full file, plus a book page
+PASS P3-A-05: 2+ hints, 2-5 keys, 1-2 'for a 4', 1-3 wrong answers
+PASS P3-A-05: Hint 3 only on an A item
+PASS P3-A-05: one short question sentence (27 words)
+PASS P3-R-05: reread links to short AND full file, plus a book page
+PASS P3-R-05: 2+ hints, 2-5 keys, 1-2 'for a 4', 1-3 wrong answers
+PASS P3-R-05: MIT notice with the verbatim question
+PASS P3-R-05: the quoted question is verbatim in the repo (heading of Q12)
+PASS P3-R-05: the 2 quoted repo paragraphs (122 words) are verbatim, with the MIT notice
+     note: the interview question is verbatim and has two sentences; the one-sentence rule is not applied to it
+PASS Part A ids = set=pre ids (['P3-PRE-01', 'P3-PRE-02', 'P3-PRE-03', 'P3-PRE-04', 'P3-PRE-05'])
+PASS Part L ids = main + review + interview ids (13)
+PASS Part A P3-PRE-01: same wording as the question file
+PASS Part A P3-PRE-02: same wording as the question file
+PASS Part A P3-PRE-03: same wording as the question file
+PASS Part A P3-PRE-04: same wording as the question file
+PASS Part A P3-PRE-05: same wording as the question file
+PASS Part L P3-R-01: same wording as the question file
+PASS Part L P3-R-02: same wording as the question file
+PASS Part L P3-R-03: same wording as the question file
+PASS Part L P3-R-04: same wording as the question file
+PASS Part L P3-A-01: same wording as the question file
+PASS Part L P3-A-02: same wording as the question file
+PASS Part L P3-A-03: same wording as the question file
+PASS Part L P3-A-04: same wording as the question file
+PASS Part L P3-T-01: same wording as the question file
+PASS Part L P3-T-02: same wording as the question file
+PASS Part L P3-T-03: same wording as the question file
+PASS Part L P3-R-05: same wording as the question file
+PASS Part L P3-A-05: same wording as the question file
+PASS no old Part A ids (P3-A1 ... P3-A5) left in the full lesson (the Verification log records the mapping)
+PASS question file: 49 links resolve (files and anchors)
+PASS short file: 5 links resolve (files and anchors)
+PASS full file: 46 links resolve (files and anchors)
+PASS lab notebook: 2 links resolve (files and anchors)
+PASS 9 links from other workspace files into the P3 files resolve
+PASS full lesson keeps '### D.3 BM25 exactly as `rank_bm25` 0.2.2 computes it' (R1 full link #d3-bm25-exactly-as-rank_bm25-022-computes-it)
+PASS full lesson keeps '### H.2 Repo reading guide: `fusion_retrieval.ipynb` cell 17' (R1 full link, r1_sources.py)
+PASS full lesson keeps 'the fused ranking silently becomes vector-only' (r1_sources.py (kept, now with the alignment caveat))
+PASS full lesson keeps 'avgdl over all chunks' (coach_sources.py S2 P3 D.1)
+PASS full lesson keeps 'floor      = epsilon × mean of idf over ALL terms' (coach_sources.py S2 P3 D.3 floor)
+PASS full lesson keeps '### D.4 Saturation (k1) and length normalisation (b)' (coach_sources.py S2 P3 D.4)
+PASS full lesson keeps 'At dl = avgdl and f = 1, the tf part is exactly 1 for **any*' (coach_sources.py P3 reserve)
+PASS full lesson keeps '**J2. Every score is zero on a tiny test corpus.**' (coach_sources.py P3 reserve J2)
+PASS H.2 answer 4 corrected: the repo's fusion returns the chunks nearest to the empty string (R1 S11)
+PASS lab Tasks 2-3 cite 'lesson D.3': D.3 still has the IDF, the floor rule, unknown and repeated terms
+PASS H.1 lists the lab's 7 tasks in the lab's order (7 lab tasks, 7 rows)
+PASS each H.1 row describes the same task as the lab heading
+PASS the lab still points at the lesson's H.1 and D.3
+     word count: short 2934 (prose only, code blocks removed: 2309); full 11743 (prose only: 11136); question file 6801
+PASS short file prose within 1,800-3,000 words (2309)
+PASS short file header line
+PASS short file has What this is / is not, the book box and Check yourself (FORMAT §3)
+PASS short file has a 'When not to use' section
+PASS short file's book box names Ch12, the four glossary pages and Ch13 p.5/13
+PASS house style: four beats in Parts B-K {'**The setup.**': 11, '**The result**': 12, '**What this means.**': 11, '**For your project:**': 11}
+PASS coach notes: 11 (R1 has 11)
+PASS the full lesson and the short file both name the two chunk sets
+     book: 320 pages, 58,223 words (held in memory only)
+PASS question file: no 15-word run shared with the book (longest shared run: <6 words)
+PASS short file: no 15-word run shared with the book (longest shared run: <6 words)
+PASS full file: no 15-word run shared with the book (longest shared run: 7 words)
+PASS lab notebook text: no 15-word run shared with the book (longest shared run: <6 words)
+PASS short file: one python snippet of <= 10 lines (1 block(s), 8 lines)
+PASS short file: the snippet prints ['(IPCC) ipcc', '0.813546'] (its comments say ['(IPCC) ipcc', '0.813546'])
+PASS every number with >= 3 decimals in the 3 files matches a printed value (p3_measure, p3_kit_measure, r1_measure) or the DERIVED list
+PASS 37 key numbers are printed by the measurement scripts
+PASS each key number is quoted in at least one of the three files
+
+129 checks
+ALL PASS

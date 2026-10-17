@@ -1,0 +1,5 @@
+SKIPPED  §7 recorded calls: no recorded pack yet (the llmops helper package is not built): .cache\llmops\calls.sqlite does not exist. Nothing is called; the facts above are the documented layout and the O2 log.
+cells with errors: 0
+Plotly figures saved: 6; runtime 15.0 s; file study\notebooks\P1_tokens_verify.ipynb 113 KiB
+110 checks passed / 0 failed
+SKIPPED lines: 1

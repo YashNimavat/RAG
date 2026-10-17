@@ -1,0 +1,55 @@
+
+=== K1 environment
+python 3.12.8 | {'pymupdf': '1.26.7', 'tiktoken': '0.14.0', 'tokenizers': '0.23.2'}
+pdf chars=72593 pages=33
+
+=== K2 which encoding a model id maps to (tiktoken.encoding_for_model)
+encoding_for_model('gpt-oss-20b') -> o200k_harmony
+encoding_for_model('openai/gpt-oss-20b') -> KeyError: 'Could not automatically map openai/gpt-oss-20b to a tokeniser. Please use `tiktoken.get_e
+encoding_for_model('gpt-4o-mini') -> o200k_base
+encoding_for_model('gpt-3.5-turbo') -> cl100k_base
+fix 1: get_encoding('o200k_harmony') -> o200k_harmony
+fix 2: encoding_for_model('openai/gpt-oss-20b'.split('/')[-1]) -> o200k_harmony
+
+=== K3 special-token strings inside ordinary text
+o200k_harmony n_vocab=201088 special tokens=1091
+harmony chat-format tokens present: ['<|start|>', '<|channel|>', '<|message|>', '<|end|>', '<|return|>', '<|call|>']
+encode('<|endoftext|>') -> ValueError: Encountered text corresponding to disallowed special token '<|endoftext|>'.
+encode('<|endoftext|>', disallowed_special=()) -> 7 ordinary tokens: ['<', '|', 'end', 'of', 'text', '|', '>']
+encode('<|start|>') -> ValueError: Encountered text corresponding to disallowed special token '<|start|>'.
+encode('<|start|>', disallowed_special=()) -> 5 ordinary tokens: ['<', '|', 'start', '|', '>']
+
+=== K4 chars per token on real repo code, and how digits are cut (o200k_harmony / cl100k)
+helper_functions.py          chars= 11847 o200k_harmony= 2570 (4.61 c/t) cl100k= 2553 (4.64 c/t)
+evaluation/evalute_rag.py    chars=  5046 o200k_harmony= 1102 (4.58 c/t) cl100k= 1098 (4.60 c/t)
+'1234567'      o200k_harmony 3 tokens ['123', '456', '7']
+'1,234,567'    o200k_harmony 5 tokens ['1', ',', '234', ',', '567']
+'2023-11-07'   o200k_harmony 6 tokens ['202', '3', '-', '11', '-', '07']
+'650,000'      o200k_harmony 3 tokens ['650', ',', '000']
+'1.5'          o200k_harmony 3 tokens ['1', '.', '5']
+
+=== K5 UTF-8 bytes vs characters per token (o200k_harmony)
+whole climate PDF      chars= 72593 bytes= 72595 tokens= 12840 chars/token=5.65 bytes/token=5.65
+Hindi sentence (S3)    chars=    61 bytes=   161 tokens=    18 chars/token=3.39 bytes/token=8.94
+
+=== K6 a tiny BPE trained on the climate PDF (tokenizers BpeTrainer, whitespace pre-tokenizer, vocab 300)
+vocab=300 merges learned=230
+first 12 merges, in order: ['i + n', 'a + n', 'e + s', 'a + t', 'o + n', 'e + n', 'an + d', 'e + r', 'i + on', 'in + g', 'r + e', 'a + l']
+second training run gives identical merges: True
+the           tiny BPE 1 ['the'] | o200k_harmony (after a space) 1 ['·the']
+climate       tiny BPE 1 ['climate'] | o200k_harmony (after a space) 1 ['·climate']
+greenhouse    tiny BPE 4 ['gre', 'enh', 'ous', 'e'] | o200k_harmony (after a space) 1 ['·greenhouse']
+emissions     tiny BPE 1 ['emissions'] | o200k_harmony (after a space) 1 ['·emissions']
+deglaciation  tiny BPE 6 ['de', 'g', 'l', 'ac', 'i', 'ation'] | o200k_harmony (after a space) 4 ['·de', 'gl', 'aci', 'ation']
+
+=== K7 cost and run time with dated prices (per 1M tokens; LLMOPS_FOUNDATION section 6.2, read 2026-10-17)
+Groq openai/gpt-oss-20b  one call <= $0.000227 ; 100 calls <= $0.0227 ; output share of the bill = 67.7%
+Claude Haiku 5.5         one call <= $0.000354 ; 100 calls <= $0.0354 ; output share of the bill = 72.4%
+output price / input price: Groq 4.0x ; Haiku 5.0x
+100 calls x (976 + 71 + 512 = 1559) tokens = 155,900 tokens ; at 8,000 tokens/min >= 19.5 min
+55 calls x (976 + 71 + 512 = 1559) tokens = 85,745 tokens ; at 8,000 tokens/min >= 10.7 min
+
+=== K8 v0 call inside the gpt-oss-20b window (Groq model page: window 131,072, max output 65,536)
+input 976 + template ~71 + output cap 512 = 1559 tokens = 1.19% of 131,072
+sources share of the counted input: 842 / 976 = 86%
+DONE

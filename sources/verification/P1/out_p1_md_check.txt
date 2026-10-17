@@ -1,0 +1,139 @@
+PASS kit.lint_questions: no problems
+PASS question file header line
+PASS the 21 ids of the build spec, no more, no less (21)
+PASS ids unique
+PASS each id is in the spec's set (pre/main/review/interview)
+PASS ids follow P1-<type>-<nn> / P1-PRE-<nn>
+PASS id letter = type
+PASS the 3 set=pre items come first, in order
+     items: 21; pre 3; main 15 (R 6, A 7, T 2); review 1; interview 2
+PASS the full lesson's Part L ids P1-R-01..04, P1-A-01..04, P1-T-01 are kept as set=main
+PASS P1-A-04 is rewritten with max_completion_tokens (no max_tokens= in its code)
+PASS P1-A-04 keeps the meaning of Part L's item (cap 12, the finish_reason assert)
+PASS P1-PRE-01: 2+ hints, 2-5 keys, 1-2 'for a 4', 1-3 wrong answers
+PASS P1-PRE-01: one short question sentence (14 words)
+PASS P1-PRE-02: 2+ hints, 2-5 keys, 1-2 'for a 4', 1-3 wrong answers
+PASS P1-PRE-02: one short question sentence (10 words)
+PASS P1-PRE-03: 2+ hints, 2-5 keys, 1-2 'for a 4', 1-3 wrong answers
+PASS P1-PRE-03: one short question sentence (10 words)
+PASS P1-R-01: 2+ hints, 2-5 keys, 1-2 'for a 4', 1-3 wrong answers
+PASS P1-R-01: one short question sentence (12 words)
+PASS P1-R-02: 2+ hints, 2-5 keys, 1-2 'for a 4', 1-3 wrong answers
+PASS P1-R-02: one short question sentence (13 words)
+PASS P1-R-03: 2+ hints, 2-5 keys, 1-2 'for a 4', 1-3 wrong answers
+PASS P1-R-03: one short question sentence (10 words)
+PASS P1-R-04: 2+ hints, 2-5 keys, 1-2 'for a 4', 1-3 wrong answers
+PASS P1-R-04: one short question sentence (15 words)
+PASS P1-R-05: 2+ hints, 2-5 keys, 1-2 'for a 4', 1-3 wrong answers
+PASS P1-R-05: one short question sentence (15 words)
+PASS P1-R-06: 2+ hints, 2-5 keys, 1-2 'for a 4', 1-3 wrong answers
+PASS P1-R-06: one short question sentence (13 words)
+PASS P1-A-01: 2+ hints, 2-5 keys, 1-2 'for a 4', 1-3 wrong answers
+PASS P1-A-01: Hint 3 only on an A item
+PASS P1-A-01: one short question sentence (13 words)
+PASS P1-A-02: 2+ hints, 2-5 keys, 1-2 'for a 4', 1-3 wrong answers
+PASS P1-A-02: one short question sentence (21 words)
+PASS P1-A-03: 2+ hints, 2-5 keys, 1-2 'for a 4', 1-3 wrong answers
+PASS P1-A-03: Hint 3 only on an A item
+PASS P1-A-03: one short question sentence (15 words)
+PASS P1-A-04: 2+ hints, 2-5 keys, 1-2 'for a 4', 1-3 wrong answers
+PASS P1-A-04: Hint 3 only on an A item
+PASS P1-A-04: one short question sentence (16 words)
+PASS P1-A-05: 2+ hints, 2-5 keys, 1-2 'for a 4', 1-3 wrong answers
+PASS P1-A-05: Hint 3 only on an A item
+PASS P1-A-05: one short question sentence (21 words)
+PASS P1-A-06: 2+ hints, 2-5 keys, 1-2 'for a 4', 1-3 wrong answers
+PASS P1-A-06: one short question sentence (15 words)
+PASS P1-A-07: 2+ hints, 2-5 keys, 1-2 'for a 4', 1-3 wrong answers
+PASS P1-A-07: one short question sentence (25 words)
+PASS P1-T-01: 2+ hints, 2-5 keys, 1-2 'for a 4', 1-3 wrong answers
+PASS P1-T-01: one short question sentence (22 words)
+PASS P1-T-02: 2+ hints, 2-5 keys, 1-2 'for a 4', 1-3 wrong answers
+PASS P1-T-02: one short question sentence (25 words)
+PASS P1-T-03: 2+ hints, 2-5 keys, 1-2 'for a 4', 1-3 wrong answers
+PASS P1-T-03: one short question sentence (25 words)
+PASS P1-R-07: 2+ hints, 2-5 keys, 1-2 'for a 4', 1-3 wrong answers
+PASS P1-R-08: 2+ hints, 2-5 keys, 1-2 'for a 4', 1-3 wrong answers
+PASS at most 2 external items (2)
+PASS P1-R-07: set=interview, source=AIQ-08-Q14
+PASS P1-R-07: MIT notice with the verbatim question
+PASS P1-R-07: the quoted question is verbatim in the repo (heading of Q14)
+PASS P1-R-07: the 4 quoted repo paragraphs (159 words) are verbatim, with the MIT notice, before our check
+PASS P1-R-07: our own model answer follows the repo's answer
+PASS P1-R-08: set=interview, source=AIQ-02-Q42
+PASS P1-R-08: MIT notice with the verbatim question
+PASS P1-R-08: the quoted question is verbatim in the repo (heading of Q42)
+PASS P1-R-08: the 3 quoted repo paragraphs (112 words) are verbatim, with the MIT notice, before our check
+PASS P1-R-08: our own model answer follows the repo's answer
+     note: the two interview questions are verbatim and longer than one sentence; the one-sentence rule is not applied
+PASS no coach-seed S1 wording (5 words) in the question or reading file ({'P1_questions.md': [], 'P1_llm_fundamentals.md': []})
+PASS no coach-reserve P1 wording (top-token flashcard, the whole-PDF skip-retrieval item)
+PASS P1-PRE-01: reread links to the short AND the full file, plus a book page
+PASS P1-PRE-01: reread names a short section the spec says teaches it (steps [1])
+PASS P1-PRE-02: reread links to the short AND the full file, plus a book page
+PASS P1-PRE-02: reread names a short section the spec says teaches it (steps [3])
+PASS P1-PRE-03: reread links to the short AND the full file, plus a book page
+PASS P1-PRE-03: reread names a short section the spec says teaches it (steps [7])
+PASS P1-R-01: reread links to the short AND the full file, plus a book page
+PASS P1-R-01: reread names a short section the spec says teaches it (steps [1])
+PASS P1-R-02: reread links to the short AND the full file, plus a book page
+PASS P1-R-02: reread names a short section the spec says teaches it (steps [6, 7])
+PASS P1-R-03: reread links to the short AND the full file, plus a book page
+PASS P1-R-03: reread names a short section the spec says teaches it (steps [8])
+PASS P1-R-04: reread links to the short AND the full file, plus a book page
+PASS P1-R-04: reread names a short section the spec says teaches it (steps [5])
+PASS P1-R-05: reread links to the short AND the full file, plus a book page
+PASS P1-R-05: reread names a short section the spec says teaches it (steps [2, 3])
+PASS P1-R-06: reread links to the short AND the full file, plus a book page
+PASS P1-R-06: reread names a short section the spec says teaches it (steps [7])
+PASS P1-A-01: reread links to the short AND the full file, plus a book page
+PASS P1-A-01: reread names a short section the spec says teaches it (steps [3])
+PASS P1-A-02: reread links to the short AND the full file, plus a book page
+PASS P1-A-02: reread names a short section the spec says teaches it (steps [10])
+PASS P1-A-03: reread links to the short AND the full file, plus a book page
+PASS P1-A-03: reread names a short section the spec says teaches it (steps [8])
+PASS P1-A-04: reread links to the short AND the full file, plus a book page
+PASS P1-A-04: reread names a short section the spec says teaches it (steps [7])
+PASS P1-A-05: reread links to the short AND the full file, plus a book page
+PASS P1-A-05: reread names a short section the spec says teaches it (steps [10])
+PASS P1-A-06: reread links to the short AND the full file, plus a book page
+PASS P1-A-06: reread names a short section the spec says teaches it (steps [4])
+PASS P1-A-07: reread links to the short AND the full file, plus a book page
+PASS P1-A-07: reread names a short section the spec says teaches it (steps [11])
+PASS P1-T-01: reread links to the short AND the full file, plus a book page
+PASS P1-T-01: reread names a short section the spec says teaches it (steps [3, 4, 5])
+PASS P1-T-02: reread links to the short AND the full file, plus a book page
+PASS P1-T-02: reread names a short section the spec says teaches it (steps [8, 9, 10])
+PASS P1-T-03: reread links to the short AND the full file, plus a book page
+PASS P1-T-03: reread names a short section the spec says teaches it (steps [7])
+PASS P1-R-07: reread links to the short AND the full file, plus a book page
+PASS P1-R-07: reread names a short section the spec says teaches it (steps [7])
+PASS P1-R-08: reread links to the short AND the full file, plus a book page
+PASS P1-R-08: reread names a short section the spec says teaches it (steps [7])
+PASS question file: 60 links resolve (57 with #anchors)
+PASS reading file: 4 links resolve (0 with #anchors)
+PASS 0 links from other workspace files into the two P1 kit files resolve
+     word count: reading file 3460 (prose only, code blocks removed: 2922); question file 7407
+PASS reading file prose within 1,800-3,000 words (2922)
+PASS reading file header line
+PASS reading file has What this is / is not, the book box and Check yourself (FORMAT §3)
+PASS book box names Ch1 p.12-13/14, Ch2 p.9/11, Ch4 p.5/15, Ch22 p.8/19 and p.14-15/19
+PASS sections ## 1. ... ## 13. in order (13)
+PASS sections 1-12 follow the lesson's step order (each title names its step)
+PASS section 13 is 'When not to count exactly', then 'Check yourself'
+PASS house style beats: setup 11, means 11, project 11
+PASS Check yourself links the question file
+PASS 8 distinct book pages cited; each exists with the right page count
+PASS 12 short phrases found on the cited pages (checked in memory)
+PASS the book uses 'temperature' 13 times (the reading file says 13, all about climate)
+     book: 320 pages, 58,223 words (held in memory only)
+PASS question file: no 15-word run shared with the book (longest shared run: <6 words)
+PASS reading file: no 15-word run shared with the book (longest shared run: <6 words)
+PASS every decimal and every integer >= 10 matches a printed value (p1_measure, p1_strawberry, p1_kit_measure, O2 report) or the DATED / DERIVED list
+PASS 25 key numbers are printed by the measurement scripts
+PASS each key number is quoted in the question or reading file
+     quiz.py --check: OK   P1_questions.md: 21 questions | OK   P3_questions.md: 18 questions | OK   R1_questions.md: 17 questions | 3/3 files pass
+PASS study/quiz.py --check passes for P1 (OK   P1_questions.md: 21 questions)
+
+131 checks
+ALL PASS

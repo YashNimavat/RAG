@@ -133,4 +133,70 @@ for f in sorted(glob.glob(os.path.join(BOOK, "*.pdf"))):
 for pat, hits in absent.items():
     check(not hits, f"book: pattern {pat!r} occurs nowhere ({hits})")
 
+# ---------------------------------------------------------------- added 2026-10-17 (study kit: short file, question file, restyle)
+print("\n--- added 2026-10-17")
+UP = os.path.dirname(os.path.abspath(REPO))                     # <Book RAG>/upstream
+WS = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "..", ".."))   # rag_learning/
+for f, p, total, phrase in [
+    ("chapter 12.pdf", 2, 14, "Keyword search misses"),
+    ("chapter 12.pdf", 3, 14, "The index catches what the chef"),
+    ("chapter 12.pdf", 9, 14, "serving technical queries with"),
+    ("chapter 12.pdf", 12, 14, "all keyword lookups (BM25 alone"),
+    ("chapter 12.pdf", 12, 14, "(vector search alone suffices)"),
+    ("chapter 12.pdf", 12, 14, "Overkill when"),
+    ("Appendix.pdf", 9, 23, "exact method names via keyword search"),
+]:
+    t, n = page(f, p)
+    check(n == total and phrase in t, f"{f} p.{p}/{n}: '{phrase}'")
+
+
+def read(*parts):
+    return open(os.path.join(*parts), encoding="utf-8").read()
+
+
+AIQ = os.path.join(UP, "AI-Engineer-Interview-Questions")
+h = subprocess.run(["git", "-C", AIQ, "rev-parse", "HEAD"], capture_output=True, text=True).stdout.strip()
+check(h == "e080df282aaf14c128ade55c177a20c38d82df1d", f"AI-Engineer-Interview-Questions HEAD {h}")
+check("Copyright (c) 2026 Om\n" in read(AIQ, "LICENSE") and "MIT License" in read(AIQ, "LICENSE"), "AIQ LICENSE: MIT, Copyright (c) 2026 Om")
+q04 = read(AIQ, "04-rag-and-retrieval", "questions.md")
+q12 = q04[q04.index("### 12. "):q04.index("### 13. ")]
+for needle in ["### 12. What does BM25 actually compute? Walk me through the formula's moving parts.",
+               "BM25 pushes TF through `tf / (tf + k1 * (...))`", "20 to 21 barely registers",
+               "`k1` (typically ~1.2 to 2.0)", "**Length normalization** divides by document length",
+               "`b=0` disables it, `b=1` normalizes fully.", "BM25 is purely lexical", "depends heavily on the analyzer"]:
+    check(needle in q12, f"AIQ 04 Q12: {needle[:70]}")
+check("log(" not in q12 and "ln(" not in q12 and "(k1 + 1)" not in q12 and "(k1+1)" not in q12,
+      "AIQ 04 Q12 gives no idf formula and no (k1 + 1) factor (P3-R-05 corrections 1 and 3)")
+ae = next(iter(glob.glob(os.path.join(WS, "AI Eval", "Chapter 2 LLMs and Evaluation Basics*.md"))), None)
+ae_t = read(ae) if ae else ""
+check("## **Retrieval Fundamentals**" in ae_t and "we recommend starting with keyword search" in
+      ae_t[ae_t.index("## **Retrieval Fundamentals**"):][:600] if ae_t else False,
+      "AE Ch2 'Retrieval Fundamentals': keyword search recommended first (short phrase; paraphrased in P3 B.3)")
+r1f = read(WS, "sources", "verification", "R1", "R1_FACTS.md")
+for needle in ["| `IPCC` | seq 1, page 1 | 3 | 1 | none | 1 | 1 |",
+               "| `What does BECCS stand for?` | seq 88, page 30 | 4 | 1 | none | 1 | 1 |",
+               "| `methane CH4` | seq 2, page 1 | 4 | 1 | 2 | 1 | 1 |",
+               "| `Kyoto Protocol 1997` | seq 69, page 24 | 1 | 1 | 1 | 1 | 1 |",
+               "| `limit warming to 1.5 degrees` | seq 27, 68 | 4 | 1 | 1 | 2 | 1 |",
+               "| dense | 8/8 | 8/8 | 0.708 | 3, 3, 1, 1, 1, 1, 2, 2",
+               "| bm25 (`tok_norm`) | 8/8 | 8/8 | 0.938 | 1, 1, 1, 1, 1, 2, 1, 1 |",
+               "| bm25 (`split()`) | 8/8 | 8/8 | 0.875 | 1, 2, 1, 1, 1, 2, 1, 1 |",
+               "BM25 seq 64 13.6205, seq 21 9.2298", "(`panels` idf 4.1641)",
+               "D-009 dense 0.3099 → 1.0, BM25 6.9559 → 1.0; D-010 dense 0.5196 → 1.0, BM25 13.2576 → 1.0",
+               "avgdl 111.23, vocab 1,769", "repo-style (with epsilon) returns [89, 50, 48, 49, 81]", "NaN 97/97",
+               "**P3 H.2 answer 4**: \"vector-only\" holds for aligned arrays"]:
+    check(needle in r1f, f"R1_FACTS: {needle[:80]}")
+md06 = read(WS, "06_RAG_PROJECT_AND_EVALUATION_PLAN.md")
+s62 = md06[md06.index("### 6.2 Categories and target counts"):md06.index("### 6.3")]
+check("| exact-term (acronyms, names, numbers) |" in s62, "06 §6.2: the exact-term category")
+s42 = md06[md06.index("### 4.2 Version cards"):md06.index("### 4.3")]
+check("three arms (dense, BM25 alone, hybrid)" in s42, "06 §4.2 v2.0 card: three arms (dense, BM25 alone, hybrid)")
+md02 = read(WS, "02_RAG_MASTER_LEARNING_PLAN.md")
+card = md02[md02.index("#### P3 — "):md02.index("#### P4 — ")]
+check("Ch12 p.5–6/14" in card and not any(p in card for p in ("p.1–2/14", "p.8/14", "p.10/14", "p.12/14", "p.14/14")),
+      "02 P3 card: book pages Ch12 p.5–6/14 only (P3 G.3 item 5)")
+row04 = next(l for l in read(WS, "04_BOOK_TO_CODE_MAPPING.md").splitlines() if l.startswith("| **P3** "))
+check("`fusion_retrieval.ipynb cells 14-15`" in row04 and "cell 17" not in row04 and "p.5/14–p.6/14" in row04
+      and not any(p in row04 for p in ("p.8/14", "p.10/14", "p.12/14", "App")), "04 P3 row: cells 14-15 only; book p.5–6/14 only (P3 G.3 items 1-2)")
+
 print("\nALL PASS" if fails == 0 else f"\n{fails} FAIL(S)")

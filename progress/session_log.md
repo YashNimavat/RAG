@@ -220,10 +220,181 @@ All items: type R/A/T/X as shown, not scheduled, hint level H0, unassisted. "Con
   4. Apply the six "do now" edits (done; see the [corrections log, round 4](../reviews/CORRECTIONS_LOG_2026-10-08.md)).
   5. Write explanations in the style of the learner's three example documents ([`curriculum/WRITING_STYLE.md`](../curriculum/WRITING_STYLE.md)).
 - **Checks:** acceptance suite 145/145. The P1, C5 and C6 checks all pass.
-- **Not committed.** The next commit needs the learner's OK.
+- **Committed** with the learner's OK as `6d8f4d1` (179 files, including the Batch 1–2 lessons from 2026-10-08). Local only; nothing pushed. This one-line update to the log is not committed yet.
 
 ### Next session (start a **new** Claude Code session)
 1. **Due reviews 2026-10-09:** M2, M3, R1, M5, O3 (short recall).
 2. **P1 day 2:** closed-book Part A re-run → lab Tasks 1–8 → Part L → Part M → log.
    - The P1 lesson changed today (D.6 and J5 temperature-0 wording; new card 14).
    - The P1 seed in `sources/coach/transfer_seed_bank.md` is the scored CR-13 Transfer item for Part L.
+
+## Session 2026-10-14 (reconstructed on 2026-10-17)
+- **Note:** this session wrote no log entry. The lines below come from the tutor's memory notes of that day. No items were scored.
+- **O3 retired at the learner's request.** During the overdue O3 review the learner said these are system questions, not a domain they need to learn. The tutor runs the protocol and explains a rule only when it affects them.
+- **M2, M3, M5 and R1 reviews paused** until each lesson has been read. Their only evidence is the O1 diagnostic.
+- **Learner feedback:** sessions had felt like exams only, and nothing in the system had been read yet. Agreed order for each concept: read the lesson's teaching parts (B–G) and the book pages → lab → a few graded questions.
+- Applied on 2026-10-17: the tracker `next_review` for O3, M2, M3, M5 and R1 was cleared, and review_queue §2 was rewritten.
+
+## Session 2026-10-17 #1: offline study kit (no tutoring)
+- **Tutor:** Claude (claude-opus-5-5). No study items were asked, so nothing is scored or scheduled.
+- **What the learner asked:** an offline set-up for every phase (1–12), to use without a Claude subscription. Reading files, plus questions with answers: they write their own answer, check it against ours, and reread if it falls short. They also asked for a local website like RAG_ROUTE_MAP.html, showing progress ticks and live stats (wrong answers, confidence).
+- **Learner decisions (recorded as D-31 in 08 Part 4, and in CLAUDE.md):**
+  1. Writing beyond the gates is allowed for the kit "for now". Once the kit is complete, the rule returns, and Claude sessions keep the tutor protocol.
+  2. Both a quiz program and Markdown files with hidden answers.
+  3. Depth for Phases 3–12 to be chosen after seeing two samples of one concept (short reading file vs full lesson).
+  4. Electives A3–A5 and S1–S3 included.
+- **Built:** `study/` contains:
+  - `README.md` (how to use) and `FORMAT.md` (the file format);
+  - `kit.py` (parser, scoring from ticks, 05 §5.2 schedule, stats);
+  - `app/server.py` (local website on 127.0.0.1:8765, standard library only; marked.js 12.0.2 vendored, sha256 `15fabce5…`);
+  - `quiz.py` (terminal quiz plus `--check` format lint);
+  - `start_study_kit.bat`.
+- **Tests (scratch fixture, real progress files untouched):**
+  - kit tests: parser, 13 scoring cases, schedule ladder, S-tier cap, question picking, level;
+  - server tests: endpoints, the score recomputed on the server, path-traversal and `.env`/AI Eval blocks;
+  - Chrome headless screenshots of five pages;
+  - a jsdom run through the whole quiz flow: hint caps, the assisted path, the summary, reader folds, book-page links, and all 16 in-page anchors of P2.
+- **R1 samples** (short reading file and full lesson, sharing one question file) were drafted by a helper in the background. Results are below once checked.
+- **R1 samples done and checked by the tutor (re-run):**
+  - `r1_sources.py` 173/173 ALL PASS;
+  - `r1_md_check.py` 103/103 ALL PASS;
+  - `r1_lab_test.py` LAB TEST PASS;
+  - `quiz.py --check` 1/1 file passes;
+  - acceptance suite 145/145;
+  - a jsdom check in the website: all 59 links into the R1 files resolve, and no book link points at a corpus page.
+  - Files:
+    - `study/reading/R1_hybrid_fusion.md` (short, 2,829 words);
+    - `concepts/R1_hybrid_fusion.md` (full Parts A–M, 12,267 words);
+    - `study/questions/R1_questions.md` (17 items: 3 pre, 12 main, 2 interview from AIQ Q24 with the MIT notice);
+    - `labs/R1_hybrid_fusion_lab.ipynb` (9 tasks, 10 CHECK cells, no API calls);
+    - `sources/verification/R1/`.
+  - Key draft-seed observations (`R1_FACTS.md`):
+    - every arm reaches CE@4 = 8/8;
+    - MRR@10: dense 0.708, BM25 0.938, min-max 0.5/0.5 0.938, RRF 1.000 (D-006 settled by the tie rule);
+    - the repo's fusion transcribed onto our chunks: CE@4 0/8.
+  - **02/04 errors reported by the helper (not edited):**
+    - the 02 R1 card misses Ch12 p.3–4/14, p.12–14/14 and the glossary pages App p.16–17/23, p.19/23, p.21/23;
+    - 04 DV-27 names two array orders where there are three;
+    - 04 Ch12 step 6 hides that the vector array is sorted by query before normalising;
+    - P3 H.2 answer 4 ("vector-only when BM25 is all zero") holds only for aligned arrays.
+  - FORMAT.md was clarified from the helper's notes: interview items, item data, parser line rules, page-reference style, the anchor example and word counts. The website now links a bare "p.N" only when it carries "/total".
+- **Next:** the learner compares the short and full R1 samples and picks the depth for Phases 3–12. Then Step 1: question files for P1–P7 and C1–C6.
+- **P3 samples (learner request: "this topic is new for me, write short and full"):**
+  - New: `study/reading/P3_bm25.md` (short, 2,934 words) and `study/questions/P3_questions.md` (18 items: 5 pre, 11 main [4 R, 4 A, 3 T], 1 review, 1 interview from AIQ 04 Q12 with the MIT notice).
+  - `concepts/P3_bm25.md` restyled into the house style: 8,400 → 11,744 words, 0 → 11 "The setup" beats, coach notes 17 → 12. Every old number was kept; the original is backed up in the session scratchpad.
+  - Old → new ids: P3-A1…A5 → P3-PRE-01…05. The main ids were kept; new items are P3-T-02, P3-T-03, P3-A-05 (review) and P3-R-05 (interview).
+  - **Fixes to the old lesson:**
+    - H.2 answer 4: R1's finding applied. With all BM25 scores at 0, the repo returns the chunks nearest the empty string.
+    - The "two-document corpus, every score 0" claim holds only when no word is shared; a shared word scores −0.080472 (measured, K-series in `p3_kit_measure.py`).
+  - **Tutor error, caught by the helper:** my brief asked for transfer seed S2 to go into the kit, against the seed-bank rule the learner approved on 2026-10-09. It was replaced before the learner saw it: P3-T-02 is now a new code-identifier scenario (getUserId / get_user_id). FORMAT.md gained a "Hidden seeds" rule.
+  - **Checks re-run by the tutor:**
+    - `coach_sources.py` 182/0;
+    - `p3_sources.py` ALL PASS;
+    - `p3_md_check.py` ALL PASS;
+    - `r1_md_check.py` ALL PASS;
+    - `quiz.py --check` 2/2;
+    - acceptance suite 145/145;
+    - jsdom: 141 links across the P3/R1 files resolve, and the coach notes fold in the reader.
+  - **02/04 errors reported (not edited):** the 04 P3 row misses cell 17 / `helper_functions.py` L262, the glossary pages, Ch12 p.8, p.9–10 and p.12/14, and the epsilon floor, and it treats LlamaIndex cell 15 as the same BM25. The 02 P3 card misses Ch12 p.1–2, p.8, p.9–10, p.12 and p.14/14.
+- **Website change:** "🧭 Coach:" notes in full lessons are folded into "Tutor note" boxes.
+- **Next:** the learner compares P3 short vs full (and R1) and picks the depth for Phases 3–12.
+- **Visual P3 lesson with the learner's `visual-learning-writer` skill** (installed as a project skill in `Book RAG/.claude/skills/`, copied from `rag_learning/visual-learning-writer/`).
+  - **Learner feedback:** needed theory is not optional. The tutor must find every needed idea itself, never ask whether to include it (saved as a feedback memory).
+  - **Gap audit:** `study/lessons/P3_bm25_gap_audit.md`.
+    - 12 gaps in the old P3 files: inverted index, dense bridge, ln, score vs relevance, measuring (Hit@k, MRR, Recall@k, CE@k), sparse/lexical naming, stop words, stemming, code identifiers, top-k/collection/overlap, BM25 vs LLM tokens, next topics.
+    - The quiz-vs-lesson check found 5 more Short-mode gaps; all fixed. All 18 questions are now answerable from Short.
+  - **Lesson:** `study/lessons/P3_bm25.html`.
+    - One offline page, Short/Full switch, 16 sections.
+    - Interactive: an index explorer, a k1 chart, a b chart, a score calculator, an idf-vs-df chart with the floor "valley", a tokenizer playground and 3 quick checks.
+    - Book pages link to the PDF.
+  - **Checks:**
+    - jsdom tests 36/36: every computed number equals P3_FACTS (toy index, saturation, length, flip, 91-window idf, calculator presets); tokenizers; mode switch; links in kit and file:// modes; quick-check feedback.
+    - No external resources.
+    - Chrome screenshots: Short light, Full dark, phone width, chart sections.
+    - Book pages re-checked: p.13 storage; "inverted" and "stop word" absent from all 25 PDFs.
+    - 15-word check against the whole book: longest shared run 8 words. The extracted text was deleted.
+  - **Website:** a concept with a visual lesson shows it in step 1 (Short/Full, each with its own read tick); the server serves `/lesson/*.html`.
+- **Next:** the learner reviews the P3 visual lesson and the gap audit. If approved, apply the same method to all phases and topics.
+- **Learner feedback on the first visual lesson:**
+  - "Did I order you to write whole lessons, or ask for your approach?" The tutor had built the lesson when only the plan was asked for. Saved as a feedback memory: plan first, then wait.
+  - Agreed changes:
+    - the skill's writing style;
+    - "At a glance" (terms and formulas) at the top, then "The answer first", then step by step;
+    - a sidebar showing where you are, and a round ↑ button;
+    - 4 new themes plus the first one, all with Light/Dark and Short/Full;
+    - the hand-drawn charts kept in the page, and Plotly for the notebook only;
+    - per topic: a verify notebook, an apply-it tool, and a real-world checklist.
+  - The skill gets updated only after the learner's final approval.
+- **P3 pilot built:**
+  - `uv add plotly nbformat`: plotly 7.1.0, nbformat 5.11.1; pymupdf still 1.26.7; acceptance suite 145/145.
+  - Lesson `study/lessons/P3_bm25.html` rewritten:
+    - themes: notebook (default), textbook, editor, minimal, catalogue (v1, backed up in the scratchpad);
+    - jsdom tests 47/47; screenshots of all 10 theme/colour combinations and a 390px frame;
+    - whole-book 15-word check: longest shared run 8 words.
+  - Notebook `study/notebooks/P3_bm25_verify.ipynb` (helper-built, tutor re-run): 127/127 checks, 0 errors, 16 Plotly figures; MiniLM offline; 277 KiB.
+  - Tool `study/tools/bm25_fit_check.py`:
+    - tests 54/54;
+    - the `code` tokenizer was aligned with the lesson playground (keeps `v2.10.3` and `1.5` whole);
+    - example report `study/tools/examples/climate_report.md`: recommendation "use hybrid"; BM25 MRR 1.000 vs dense 0.500 on exact-term; D-006 BM25 rank 5 vs dense 1.
+  - Website: the P3 concept page shows steps 1–6: visual lesson Short/Full → book → lab → verify notebook → apply tool → quiz.
+- **Next:** the learner reviews the pilot and picks a theme; final approval → update the skill → roll out.
+- **Learner feedback on the pilot:**
+  - keep all themes for now (they will try them and decide later);
+  - add a theme that is best for reading, researched online;
+  - the side panel was not right: they want to be able to hide it;
+  - make the theme rich, with the best reading font.
+- **Done:**
+  - **Research:** line length 50–75 characters (WCAG 1.4.8: at most 80), line height about 1.5 or more, no justified text; dark mode on dark grey with off-white text; Literata for long serif reading, Atkinson Hyperlegible for the clearest letters; docs layouts keep the outline collapsible, often on the right, and easy to reopen.
+  - **Fonts** bundled in `study/lessons/fonts/` (OFL, licences included): Literata 5.2.8 (variable, optical sizes) and Atkinson Hyperlegible 5.2.8. The server serves `.woff2` under `/lesson/`.
+  - **Two new themes:** "Reader · Literata" (19px, line height 1.72, about 68-character lines, small caps, drop cap) and "Reader · Atkinson Hyperlegible". Warm paper; dark #1C1B19 with off-white text. The five earlier themes are kept.
+  - **Contents panel:**
+    - a Contents button (or key T) hides and shows it on any width, and remembers the choice;
+    - ⇆ moves it left or right;
+    - when hidden, the top bar shows the current step and a progress line;
+    - the panel scrolls to keep the current step visible;
+    - on phones it is a drawer, which closes when you tap the page.
+  - **Checks:** jsdom 52/52; screenshots of Reader light (left panel), Reader dark (right panel), Hyperlegible with the panel hidden, and the file:// view (fonts load offline).
+- **Learner feedback:** the side panel left a big empty gap before the text.
+- **Fix:** the panel (250px) and the text column (800px; 720px in the Reader themes) form one block, centred together with a 44px gap. The panel background is now transparent, with a thin divider line. Checked by screenshots at 1280px and 1920px (panel left, right and hidden); jsdom 52/52.
+- **Learner: "no, still the same".** The served page was confirmed current (port 8765 serves the new CSS), so the cause was a misunderstanding: on wide screens the centred block still left empty space before the panel. The learner picked "docked to the edge" from three previewed options.
+- **Applied:**
+  - panel on the left: flush to the left edge (260px, with its own background), the text starts 48px beside it, spare space only on the far right;
+  - panel on the right: the mirror image;
+  - panel hidden: the text is centred.
+  - Checked by screenshots at 1280px and 1920px; jsdom 52/52.
+- **Learner request: at the top, the main topic explained with all its relevant theory, not only formulas.** The plan was confirmed first, then applied.
+  - New top order: The answer first → **The theory in one read** (new: 11 linked ideas, from keyword search's job through tokens, the inverted index, tf/df/idf, TF-IDF, BM25 with k1 and b, the library idf floor, tokenizer choices, chunking statistics, score vs relevance with Hit@k/MRR, and when to use it; formulas included, no measurements, each idea linked to its step) → Formula sheet (the former At a glance) → steps.
+  - Checks: jsdom all pass (order, 11 ideas with working links, 21 panel links); whole-book 15-word check: longest shared run 8 words; screenshot checked.
+- **Research brief for all phases** (learner request): `study/research/RESEARCH_PROMPT.md`.
+  - One session per phase (1–12), each started with a one-line paste, plus a session 13 that consolidates.
+  - Each session runs the P3 gap-audit method on every concept in its phase, researches online (primary sources first), plans the four-part lesson, the verify notebook and the apply-it tool with its checklist, and lists the frameworks, libraries, models and LLM features each concept needs, with fit against the project decisions.
+  - Output: `study/research/phase_NN_<name>.md`. Session 13 writes `TOOLS_AND_LIBRARIES.md` and `GAPS_SUMMARY.md`.
+  - Research only: no edits, installs or commits.
+- **Learner decisions (D-32, recorded in 08 Part 4 and CLAUDE.md):**
+  - the Claude API when credits exist, model chosen per task;
+  - LangChain, LangGraph and LangSmith after the mechanism;
+  - an LLMOps notebook for every concept (including each RAG variant from the book), with tracing, datasets, evaluators, cost/latency, prompt versions and monitoring;
+  - the project eval skills in `.claude/skills/` (16 skills, added by the learner) guide that work;
+  - every external call cached for replay without credits;
+  - LLMOps researched first.
+- **RESEARCH_PROMPT.md updated:**
+  - Session 0 (LLMOps foundation → `LLMOPS_FOUNDATION.md`, including the cache-and-replay design and a phase application map);
+  - a skills-to-phase table;
+  - an LLMOps notebook plan per concept (step 9, template section 9);
+  - caching as ground rule 9;
+  - Claude and LangChain rows in the tools table;
+  - consolidation now writes `LLMOPS_TRACK.md` as well.
+- **Portable style guide** (learner request: apply this theme and explanation style in another project): `study/PORTABLE_LESSON_STYLE.md`.
+  - Part A: three ways to use it (point a session at it; copy it plus one line into that project's CLAUDE.md, recommended; or a personal skill after final approval).
+  - Part B: rules for the session (gap audit, page structure, writing style, visual design with all 7 themes and the docked panel).
+  - Part C: template files to copy (the P3 HTML and the fonts), with what to keep and what to replace.
+  - Part D: checks before delivering.
+- **Copied the style kit to the ML project** (learner request): `C:\Yash\New-Work\ML\lesson_style\`.
+  - `LESSON_STYLE.md`, adapted: it defers to that project's AGENTS.md and freight-doc-style on voice, personas, business-first order and evidence labels (🟢📄🎲✏️🧩), and uses an MLOps notebook for classic ML.
+  - `template/P3_bm25_example.html` and `template/fonts/`.
+  - Nothing else in that repo was changed; no commit.
+- **Learner: there is no way back to the main page with all phases.**
+  - Added a **⌂ All phases** button (top bar; icon only on phones) and a "Course" block at the bottom of the contents panel (All phases, the P3 page, the next topic R1).
+  - From the kit these go to `/#/`, `/#/c/P3` and `/#/c/R1`. Opened as a file, ⌂ goes to `RAG_ROUTE_MAP.html` and the kit-only links are removed.
+  - Tests 6/6 for the way-back links; the lesson suite passes; screenshots at 1000px and 390px.
+  - The ML template copy was refreshed, and both guides now require a way back.

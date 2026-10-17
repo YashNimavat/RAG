@@ -1,0 +1,326 @@
+
+=== S1 environment, snapshot, v0 index (the C3/C4 stand-in), BM25 index
+python 3.12.8 | {'pymupdf': '1.26.7', 'numpy': '2.5.3', 'rank-bm25': '0.2.2', 'sentence-transformers': '6.1.0', 'torch': '2.14.1', 'transformers': '5.19.0'}
+pdf sha256 1d58a0fac2435c2ce4129ff84906b93118d731e4a004e7a26f8ab8f749a92669
+pages=33 doc chars=72593 snapshot_id=ea07572562ac (expected ea07572562ac: True)
+chunks=97 params_hash=1ca9c5a3b548 chunks.jsonl sha256 d4108b8936093394c6eb50d4c22e8d4013d9a048fb38d5769281af4aadb3011b (= C2/C3/C4 d4108b89...: True)
+chunk_id string order == row order: True
+V shape=(97, 384) dtype=float32
+BM25Okapi(k1=1.5, b=0.75, epsilon=0.25) over tok_norm: avgdl=111.23 vocab=1769; over split(): avgdl=109.49 vocab=2630
+seeds: 10 (8 answerable) [('D-001', 'exact-term'), ('D-002', 'factual-single-span'), ('D-003', 'factual-single-span'), ('D-004', 'exact-term'), ('D-005', 'multi-span'), ('D-006', 'vocabulary-mismatch'), ('D-007', 'multi-hop'), ('D-008', 'exact-term'), ('D-009', 'unanswerable'), ('D-010', 'unanswerable')]
+
+=== S2 TOY: RRF by hand on the O1-Q09 rankings (dense [A,B,C], BM25 [C,A,D])
+  k= 60: A=0.032522 (123/3782), C=0.032266 (124/3843), B=0.016129 (1/62), D=0.015873 (1/63)  -> order ['A', 'C', 'B', 'D']
+  k=  0: A=1.500000 (3/2), C=1.333333 (4/3), B=0.500000 (1/2), D=0.333333 (1/3)  -> order ['A', 'C', 'B', 'D']
+  k=  1: A=0.833333 (5/6), C=0.750000 (3/4), B=0.333333 (1/3), D=0.250000 (1/4)  -> order ['A', 'C', 'B', 'D']
+  k=120: A=0.016461 (243/14762), C=0.016395 (244/14883), B=0.008197 (1/122), D=0.008130 (1/123)  -> order ['A', 'C', 'B', 'D']
+  gap A - C at k=60 = 0.000256; gap C - B = 0.016137; B - D = 0.000256
+FP toy_rrf_order_k60 e9f2738dc917c073
+FP toy_rrf_scores_k60_r5 8cdd7609a3bc6c9c
+  AIQ lists [0, 1, 2, 3, 4] + [4, 1, 3, 2, 0], k=60: order [1, 0, 4, 2, 3]; scores 1:0.03226, 0:0.03178, 4:0.03178, 2:0.03150, 3:0.03150
+  AIQ lists [0, 1, 2, 3, 4] + [4, 1, 3, 2, 0], k=0: order [0, 4, 1, 2, 3]; scores 0:1.20000, 4:1.20000, 1:1.00000, 2:0.58333, 3:0.58333
+FP aiq_order_k60 faf638d51a9ce013
+FP aiq_order_k0 6e003680ee0fe17e
+  single list, rank 1: 1/61 = 0.016393; both lists at rank 50: 2/110 = 0.018182; both at rank 61: 2/121 = 0.016529; both at rank 62: 2/122 = 0.016393
+  rank-1 vs rank-50 contribution: 1/61 = 0.0164, 1/110 = 0.0091, ratio 1.803; k=0: 1/1 vs 1/50, ratio 50.0
+
+=== S3 TOY: the same lists with made-up scores; min-max, mean +/- 3 sd, weighted sums
+  min-max dense: {'A': 1.0, 'B': 0.8095, 'C': 0.0} | min-max BM25: {'C': 1.0, 'A': 0.0492, 'D': 0.0}
+  min-max weighted dense 0.5/bm25 0.5: A=0.5246, C=0.5000, B=0.4048, D=0.0000 -> ['A', 'C', 'B', 'D']
+  min-max weighted dense 0.6/bm25 0.4: A=0.6197, B=0.4857, C=0.4000, D=0.0000 -> ['A', 'B', 'C', 'D']
+  min-max weighted dense 0.7/bm25 0.3: A=0.7148, B=0.5667, C=0.3000, D=0.0000 -> ['A', 'B', 'C', 'D']
+  min-max weighted dense 0.3/bm25 0.7: C=0.7000, A=0.3344, B=0.2429, D=0.0000 -> ['C', 'A', 'B', 'D']
+FP toy_mm55_order e9f2738dc917c073
+FP toy_mm64_order 55740131bb6a9a21
+FP toy_mm64_scores_r4 8a8029ae4e598a5a
+  +/-3sd dense: {'A': 0.6526, 'B': 0.5793, 'C': 0.2681} | +/-3sd BM25: {'C': 0.7355, 'A': 0.3912, 'D': 0.3734}
+  +/-3sd weighted 0.6/0.4: A=0.5480, C=0.4551, B=0.3476, D=0.1493 -> ['A', 'C', 'B', 'D']
+FP toy_z64_order e9f2738dc917c073
+  raw sum (no normalisation): C=8.31, A=2.72, D=1.80, B=0.58 -> ['C', 'A', 'D', 'B']
+  after BM25 x10: raw-sum order ['C', 'A', 'D', 'B']; min-max 0.6/0.4 order ['A', 'B', 'C', 'D'] (A=0.6197); RRF order ['A', 'C', 'B', 'D']
+  after BM25 sqrt: raw-sum order ['C', 'A', 'D', 'B']; min-max 0.6/0.4 order ['A', 'B', 'C', 'D'] (A=0.6293); RRF order ['A', 'C', 'B', 'D']
+  dense -> exp(10 s): min-max(dense) {'A': 1.0, 'B': 0.6243, 'C': 0.0}; min-max 0.6/0.4 order ['A', 'C', 'B', 'D'] (B=0.3746, C=0.4000); RRF order ['A', 'C', 'B', 'D']
+FP toy_exp_mm64_order e9f2738dc917c073
+  list [2, 4, 6]: min-max [0.0, 0.5, 1.0]; +/-3sd (population sd) [0.2959, 0.5, 0.7041]; +/-3sd (sample sd) [0.3333, 0.5, 0.6667]
+  list [1, 2, 3, 4, 100]: min-max [0.0, 0.0101, 0.0202, 0.0303, 1.0]; +/-3sd (population sd) [0.4103, 0.4146, 0.4188, 0.4231, 0.8332]; +/-3sd (sample sd) [0.4198, 0.4236, 0.4274, 0.4312, 0.798]
+  list [0.46, 0.45]: min-max [1.0, 0.0]; +/-3sd (population sd) [0.6667, 0.3333]; +/-3sd (sample sd) [0.6179, 0.3821]
+FP toy_246_mm 0bb7bce5b429740e
+FP toy_246_z3 b011b0e256228976
+  n=  2: largest possible |z| with population sd = (n-1)/sqrt(n) = 0.707
+  n=  5: largest possible |z| with population sd = (n-1)/sqrt(n) = 1.789
+  n= 10: largest possible |z| with population sd = (n-1)/sqrt(n) = 2.846
+  n= 11: largest possible |z| with population sd = (n-1)/sqrt(n) = 3.015
+  n= 50: largest possible |z| with population sd = (n-1)/sqrt(n) = 6.930
+  n= 97: largest possible |z| with population sd = (n-1)/sqrt(n) = 9.747
+
+=== S4 the 10 draft seeds (draft-seed observations): first relevant rank per arm; Hit@4, CE@4, MRR@10
+  qid    category                   dense       bm25 bm25_split      rrf60     mm_0.5     mm_0.6     z3_0.6
+  D-001  exact-term                    3          1          1          1          1          1          1
+  D-002  factual-single-span           3          1          2          1          1          1          1
+  D-003  factual-single-span           1          1          1          1          1          1          1
+  D-004  exact-term                    1          1          1          1          1          1          1
+  D-005  multi-span                    1          1          1          1          1          1          1
+  D-006  vocabulary-mismatch           1          2          2          1          2          2          2
+  D-007  multi-hop                     2          1          1          1          1          1          1
+  D-008  exact-term                    2          1          1          1          1          1          1
+  dense     : Hit@4 8/8  CE@4 8/8  MRR@10 0.708
+  bm25      : Hit@4 8/8  CE@4 8/8  MRR@10 0.938
+  bm25_split: Hit@4 8/8  CE@4 8/8  MRR@10 0.875
+  rrf60     : Hit@4 8/8  CE@4 8/8  MRR@10 1.000
+  mm_0.5    : Hit@4 8/8  CE@4 8/8  MRR@10 0.938
+  mm_0.6    : Hit@4 8/8  CE@4 8/8  MRR@10 0.938
+  z3_0.6    : Hit@4 8/8  CE@4 8/8  MRR@10 0.938
+  first CE rank per arm:
+    D-001: dense=3, bm25=1, bm25_split=1, rrf60=1, mm_0.5=1, mm_0.6=1, z3_0.6=1
+    D-002: dense=3, bm25=1, bm25_split=2, rrf60=1, mm_0.5=1, mm_0.6=1, z3_0.6=1
+    D-003: dense=1, bm25=1, bm25_split=1, rrf60=1, mm_0.5=1, mm_0.6=1, z3_0.6=1
+    D-004: dense=1, bm25=1, bm25_split=1, rrf60=1, mm_0.5=1, mm_0.6=1, z3_0.6=1
+    D-005: dense=1, bm25=1, bm25_split=3, rrf60=1, mm_0.5=1, mm_0.6=1, z3_0.6=1
+    D-006: dense=1, bm25=2, bm25_split=2, rrf60=1, mm_0.5=2, mm_0.6=2, z3_0.6=2
+    D-007: dense=3, bm25=2, bm25_split=2, rrf60=3, mm_0.5=2, mm_0.6=3, z3_0.6=3
+    D-008: dense=2, bm25=1, bm25_split=1, rrf60=1, mm_0.5=1, mm_0.6=1, z3_0.6=1
+FP seeds_first_rel_dense a8aa456e76ccea3b
+FP seeds_first_rel_bm25 00ad23bf6e441b13
+FP seeds_first_rel_rrf60 0298a7909bfd4cf4
+FP seeds_first_rel_mm05 00ad23bf6e441b13
+FP seeds_first_rel_z306 00ad23bf6e441b13
+FP seeds_hit_ce fee2e5b2a6a7aab9
+  helps / hurts vs dense (first relevant rank):
+    bm25    : better ['D-001', 'D-002', 'D-007', 'D-008']; worse ['D-006']
+    rrf60   : better ['D-001', 'D-002', 'D-007', 'D-008']; worse []
+    mm_0.5  : better ['D-001', 'D-002', 'D-007', 'D-008']; worse ['D-006']
+    mm_0.6  : better ['D-001', 'D-002', 'D-007', 'D-008']; worse ['D-006']
+    z3_0.6  : better ['D-001', 'D-002', 'D-007', 'D-008']; worse ['D-006']
+  top-4 of each arm for every seed (seq numbers; * = relevant):
+    D-001: dense=[1,0,7*,8] bm25=[7*,8,0,1] rrf60=[7*,1,0,8] mm_0.5=[7*,8,0,1]
+    D-002: dense=[69,68,27*,17] bm25=[27*,68,17,69] rrf60=[27*,68,69,17] mm_0.5=[27*,68,17,69]
+    D-003: dense=[68*,27,17,69] bm25=[68*,27,17,70] rrf60=[68*,27,17,70] mm_0.5=[68*,27,17,70]
+    D-004: dense=[67*,23*,68*,27] bm25=[67*,68*,13,23*] rrf60=[67*,68*,23*,71] mm_0.5=[67*,23*,68*,27]
+    D-005: dense=[3*,4*,2,5] bm25=[3*,2,4*,77] rrf60=[3*,2,4*,5] mm_0.5=[3*,2,4*,5]
+    D-006: dense=[21*,64,14,13] bm25=[64,21*,13,23] rrf60=[21*,64,13,22] mm_0.5=[64,21*,13,22]
+    D-007: dense=[69,27*,85*,84] bm25=[27*,85*,17,69] rrf60=[27*,69,85*,17] mm_0.5=[27*,85*,69,17]
+    D-008: dense=[28,69*,58,12] bm25=[69*,0,1,2] rrf60=[69*,56,12,27] mm_0.5=[69*,28,58,12]
+    D-009: dense=[85,27,69,84] bm25=[1,69,50,2] rrf60=[69,1,70,85] mm_0.5=[69,1,85,27]
+    D-010: dense=[2,1,5,85] bm25=[4,2,3,5] rrf60=[2,5,3,4] mm_0.5=[2,4,5,1]
+  overlap of the dense and BM25 top-4 (the Venn diagram, Ch12 p.7/14):
+    D-001: both 4, dense only 0, BM25 only 0
+    D-002: both 4, dense only 0, BM25 only 0
+    D-003: both 3, dense only 1, BM25 only 1
+    D-004: both 3, dense only 1, BM25 only 1
+    D-005: both 3, dense only 1, BM25 only 1
+    D-006: both 3, dense only 1, BM25 only 1
+    D-007: both 3, dense only 1, BM25 only 1
+    D-008: both 1, dense only 3, BM25 only 3
+    D-009: both 1, dense only 3, BM25 only 3
+    D-010: both 2, dense only 2, BM25 only 2
+  shared top-4 chunks over 10 seeds: [4, 4, 3, 3, 3, 3, 3, 1, 1, 2]; total 27 of 40
+FP seeds_top4_overlap d6eec722a37093e5
+  BM25 list lengths (score > 0): D-001=96, D-002=92, D-003=97, D-004=97, D-005=97, D-006=96, D-007=97, D-008=80, D-009=92, D-010=89
+  query tokens (tok_norm): D-001=['according', 'to', 'the', 'document', 'by', 'how', 'much', 'have', 'global', 'temperatures', 'risen', 'since', 'the', 'late', '19th', 'century']; D-002=['in', 'what', 'year', 'was', 'the', 'paris', 'agreement', 'adopted']; D-003=['according', 'to', 'the', 'document', 'what', 'is', 'essential', 'regarding', 'countries', 'nationally', 'determined', 'contributions', 'ndcs', 'for', 'meeting', 'the', 'paris', 'agreement', 's', 'goals']; D-004=['what', 'does', 'dac', 'stand', 'for', 'and', 'what', 'does', 'it', 'do']
+
+=== S5 walk-through seeds: D-008 (exact term), D-006 (paraphrase), D-002 (near-duplicate distractor)
+
+  D-008 'What does the Kigali Amendment target?' tokens=['what', 'does', 'the', 'kigali', 'amendment', 'target']
+    dense top-6: r1 seq28 p.10 0.2598; r2 seq69 p.24 0.2535 REL; r3 seq58 p.20 0.2478; r4 seq12 p.5 0.2041; r5 seq83 p.28 0.2035; r6 seq56 p.19 0.1986
+    bm25 top-6: r1 seq69 p.24 9.4618 REL; r2 seq0 p.1 1.8858; r3 seq1 p.1 1.8377; r4 seq2 p.1 1.7458; r5 seq7 p.3 1.7176; r6 seq85 p.29 1.6841
+    rrf60 top-6: r1 seq69 0.03252 (dense r2, bm25 r1) REL; r2 seq56 0.02885 (dense r6, bm25 r13); r3 seq12 0.02845 (dense r4, bm25 r18); r4 seq27 0.02840 (dense r13, bm25 r8); r5 seq7 0.02837 (dense r17, bm25 r5); r6 seq55 0.02683 (dense r24, bm25 r7)
+    mm_0.5 top-6: r1 seq69 0.98127 (dense r2, bm25 r1) REL; r2 seq28 0.50000 (dense r1, bm25 r-); r3 seq58 0.46434 (dense r3, bm25 r-); r4 seq12 0.35984 (dense r4, bm25 r18); r5 seq56 0.34420 (dense r6, bm25 r13); r6 seq83 0.34076 (dense r5, bm25 r45)
+    idf of the query tokens (OOV = not in any chunk, adds 0): {'what': 'OOV', 'does': 'OOV', 'the': 0.8588, 'kigali': 4.1641, 'amendment': 4.1641, 'target': 'OOV'}
+      dense seq28 p.10: query tokens present []; text 'Carbon Pricing \nCarbon pricing mechanisms, such as carbon taxes and cap-and-trade systems, incentivize \nemissi'
+      dense seq69 p.24: query tokens present ['the', 'kigali', 'amendment']; text 'Kyoto Protocol \nThe Kyoto Protocol, adopted in 1997, set binding emission reduction targets for developed \ncou'
+      bm25 seq69 p.24: query tokens present ['the', 'kigali', 'amendment']; text 'Kyoto Protocol \nThe Kyoto Protocol, adopted in 1997, set binding emission reduction targets for developed \ncou'
+      bm25 seq0 p.1: query tokens present ['the']; text 'Understanding Climate Change \nChapter 1: Introduction to Climate Change \nClimate change refers to significant,'
+    rank of the dense rank-1 chunk (seq28) in rrf60: 31; in mm_0.5: 2; is it in the BM25 top-50: False
+
+  D-006 'What are the advantages of putting solar panels on lakes or reservoirs?' tokens=['what', 'are', 'the', 'advantages', 'of', 'putting', 'solar', 'panels', 'on', 'lakes', 'or', 'reservoirs']
+    dense top-6: r1 seq21 p.8 0.5331 REL; r2 seq64 p.22 0.5004; r3 seq14 p.5 0.4772; r4 seq13 p.5 0.4696; r5 seq22 p.8 0.4458; r6 seq39 p.14 0.3904
+    bm25 top-6: r1 seq64 p.22 13.6205; r2 seq21 p.8 9.2298 REL; r3 seq13 p.5 9.0191; r4 seq23 p.8 9.0173; r5 seq63 p.22 8.1126; r6 seq22 p.8 8.0213
+    rrf60 top-6: r1 seq21 0.03252 (dense r1, bm25 r2) REL; r2 seq64 0.03252 (dense r2, bm25 r1); r3 seq13 0.03150 (dense r4, bm25 r3); r4 seq22 0.03054 (dense r5, bm25 r6); r5 seq23 0.02991 (dense r10, bm25 r4); r6 seq11 0.02879 (dense r8, bm25 r11)
+    mm_0.5 top-6: r1 seq64 0.94827 (dense r2, bm25 r1); r2 seq21 0.79118 (dense r1, bm25 r2) REL; r3 seq13 0.68067 (dense r4, bm25 r3); r4 seq22 0.59564 (dense r5, bm25 r6); r5 seq23 0.46173 (dense r10, bm25 r4); r6 seq14 0.41237 (dense r3, bm25 r49)
+    idf of the query tokens (OOV = not in any chunk, adds 0): {'what': 'OOV', 'are': 0.8588, 'the': 0.8588, 'advantages': 'OOV', 'of': 0.8588, 'putting': 'OOV', 'solar': 2.0178, 'panels': 4.1641, 'on': 1.0986, 'lakes': 4.1641, 'or': 2.3542, 'reservoirs': 3.6428}
+      dense seq21 p.8: query tokens present ['are', 'the', 'of', 'solar', 'on']; text 'New advancements in solar technology, such as perovskite solar cells and solar paint, \npromise higher efficien'
+      dense seq64 p.22: query tokens present ['are', 'the', 'of', 'solar', 'panels', 'or']; text 'Chapter 15: Climate Change and Technology \nClean Energy Technologies \nSolar and Wind Energy \nAdvancements in s'
+      bm25 seq64 p.22: query tokens present ['are', 'the', 'of', 'solar', 'panels', 'or']; text 'Chapter 15: Climate Change and Technology \nClean Energy Technologies \nSolar and Wind Energy \nAdvancements in s'
+      bm25 seq21 p.8: query tokens present ['are', 'the', 'of', 'solar', 'on']; text 'New advancements in solar technology, such as perovskite solar cells and solar paint, \npromise higher efficien'
+    rank of the dense rank-1 chunk (seq21) in rrf60: 1; in mm_0.5: 2; is it in the BM25 top-50: True
+
+  D-002 'In what year was the Paris Agreement adopted?' tokens=['in', 'what', 'year', 'was', 'the', 'paris', 'agreement', 'adopted']
+    dense top-6: r1 seq69 p.24 0.4606; r2 seq68 p.23 0.4513; r3 seq27 p.10 0.4386 REL; r4 seq17 p.6 0.4385; r5 seq84 p.29 0.3387; r6 seq85 p.29 0.3114
+    bm25 top-6: r1 seq27 p.10 15.4470 REL; r2 seq68 p.23 12.3571; r3 seq17 p.6 10.9340; r4 seq69 p.24 10.1330; r5 seq70 p.24 8.7013; r6 seq1 p.1 3.3054
+    rrf60 top-6: r1 seq27 0.03227 (dense r3, bm25 r1) REL; r2 seq68 0.03226 (dense r2, bm25 r2); r3 seq69 0.03202 (dense r1, bm25 r4); r4 seq17 0.03150 (dense r4, bm25 r3); r5 seq70 0.03031 (dense r7, bm25 r5); r6 seq1 0.02706 (dense r24, bm25 r6)
+    mm_0.5 top-6: r1 seq27 0.97456 (dense r3, bm25 r1) REL; r2 seq68 0.87334 (dense r2, bm25 r2); r3 seq17 0.80520 (dense r4, bm25 r3); r4 seq69 0.80069 (dense r1, bm25 r4); r5 seq70 0.51122 (dense r7, bm25 r5); r6 seq84 0.35912 (dense r5, bm25 r-)
+    idf of the query tokens (OOV = not in any chunk, adds 0): {'in': 0.8588, 'what': 'OOV', 'year': 'OOV', 'was': 4.1641, 'the': 0.8588, 'paris': 3.0339, 'agreement': 3.0339, 'adopted': 3.6428}
+      dense seq69 p.24: query tokens present ['in', 'was', 'the', 'adopted']; text 'Kyoto Protocol \nThe Kyoto Protocol, adopted in 1997, set binding emission reduction targets for developed \ncou'
+      dense seq68 p.23: query tokens present ['in', 'the', 'paris', 'agreement']; text 'negative emissions. The captured CO2 can be stored or used in various applications. Scaling \nDAC technology an'
+      bm25 seq27 p.10: query tokens present ['in', 'the', 'paris', 'agreement', 'adopted']; text 'Chapter 6: Global and Local Climate Action \nInternational Collaboration \nUnited Nations Framework Convention o'
+      bm25 seq68 p.23: query tokens present ['in', 'the', 'paris', 'agreement']; text 'negative emissions. The captured CO2 can be stored or used in various applications. Scaling \nDAC technology an'
+    rank of the dense rank-1 chunk (seq69) in rrf60: 3; in mm_0.5: 4; is it in the BM25 top-50: True
+
+  D-004 'What does DAC stand for, and what does it do?' tokens=['what', 'does', 'dac', 'stand', 'for', 'and', 'what', 'does', 'it', 'do']
+    dense top-6: r1 seq67 p.23 0.4210 REL; r2 seq23 p.8 0.4035 REL; r3 seq68 p.23 0.3604 REL; r4 seq27 p.10 0.2136; r5 seq85 p.29 0.2016; r6 seq84 p.29 0.1686
+    bm25 top-6: r1 seq67 p.23 9.9775 REL; r2 seq68 p.23 6.3230 REL; r3 seq13 p.5 6.0584; r4 seq23 p.8 5.8973 REL; r5 seq14 p.5 5.6429; r6 seq71 p.24 5.1891
+    rrf60 top-6: r1 seq67 0.03279 (dense r1, bm25 r1) REL; r2 seq68 0.03200 (dense r3, bm25 r2) REL; r3 seq23 0.03175 (dense r2, bm25 r4) REL; r4 seq71 0.03008 (dense r7, bm25 r6); r5 seq27 0.02951 (dense r4, bm25 r12); r6 seq34 0.02881 (dense r12, bm25 r7)
+    mm_0.5 top-6: r1 seq67 1.00000 (dense r1, bm25 r1) REL; r2 seq23 0.68262 (dense r2, bm25 r4) REL; r3 seq68 0.65538 (dense r3, bm25 r2) REL; r4 seq27 0.32210 (dense r4, bm25 r12); r5 seq71 0.26708 (dense r7, bm25 r6); r6 seq34 0.23245 (dense r12, bm25 r7)
+    idf of the query tokens (OOV = not in any chunk, adds 0): {'what': 'OOV', 'does': 'OOV', 'dac': 3.2958, 'stand': 'OOV', 'for': 0.8588, 'and': 0.8588, 'it': 1.7507, 'do': 'OOV'}
+      dense seq67 p.23: query tokens present ['dac', 'for', 'and', 'it']; text 'support data-driven decision-making. \nCarbon Capture and Utilization \nCarbon Capture and Storage (CCS) \nCCS te'
+      dense seq23 p.8: query tokens present ['dac', 'and']; text 'Pumped hydro storage involves storing energy by moving water between two reservoirs at \ndifferent elevations. '
+      bm25 seq67 p.23: query tokens present ['dac', 'for', 'and', 'it']; text 'support data-driven decision-making. \nCarbon Capture and Utilization \nCarbon Capture and Storage (CCS) \nCCS te'
+      bm25 seq68 p.23: query tokens present ['dac', 'for', 'and']; text 'negative emissions. The captured CO2 can be stored or used in various applications. Scaling \nDAC technology an'
+    rank of the dense rank-1 chunk (seq67) in rrf60: 1; in mm_0.5: 1; is it in the BM25 top-50: True
+
+  D-001 'According to the document, by how much have global temperatures risen since the late 19th century?' tokens=['according', 'to', 'the', 'document', 'by', 'how', 'much', 'have', 'global', 'temperatures', 'risen', 'since', 'the', 'late', '19th', 'century']
+    dense top-6: r1 seq1 p.1 0.4929; r2 seq0 p.1 0.4706; r3 seq7 p.3 0.4692 REL; r4 seq8 p.3 0.4608; r5 seq9 p.4 0.3714; r6 seq68 p.23 0.3691
+    bm25 top-6: r1 seq7 p.3 29.1679 REL; r2 seq8 p.3 16.5763; r3 seq0 p.1 11.4393; r4 seq1 p.1 8.7155; r5 seq5 p.2 8.5567; r6 seq10 p.4 8.1561
+    rrf60 top-6: r1 seq7 0.03227 (dense r3, bm25 r1) REL; r2 seq1 0.03202 (dense r1, bm25 r4); r3 seq0 0.03200 (dense r2, bm25 r3); r4 seq8 0.03175 (dense r4, bm25 r2); r5 seq42 0.02859 (dense r8, bm25 r12); r6 seq27 0.02858 (dense r11, bm25 r9)
+    mm_0.5 top-6: r1 seq7 0.96293 (dense r3, bm25 r1) REL; r2 seq8 0.69592 (dense r4, bm25 r2); r3 seq0 0.60774 (dense r2, bm25 r3); r4 seq1 0.58773 (dense r1, bm25 r4); r5 seq68 0.34403 (dense r6, bm25 r19); r6 seq9 0.34165 (dense r5, bm25 r21)
+    idf of the query tokens (OOV = not in any chunk, adds 0): {'according': 'OOV', 'to': 0.8588, 'the': 0.8588, 'document': 'OOV', 'by': 0.8914, 'how': 4.1641, 'much': 3.6428, 'have': 1.5261, 'global': 0.9414, 'temperatures': 2.6445, 'risen': 3.6428, 'since': 4.1641, 'late': 4.1641, '19th': 4.1641, 'century': 3.2958}
+      dense seq1 p.1: query tokens present ['to', 'the', 'by', 'global', 'temperatures']; text "Most of these climate changes are attributed to very small variations in Earth's orbit that \nchange the amount"
+      dense seq0 p.1: query tokens present ['to', 'the', 'have', 'global', 'century']; text 'Understanding Climate Change \nChapter 1: Introduction to Climate Change \nClimate change refers to significant,'
+      bm25 seq7 p.3: query tokens present ['to', 'the', 'by', 'have', 'global', 'temperatures', 'risen', 'since', 'late', '19th', 'century']; text 'development of eco-friendly fertilizers and farming techniques is essential for reducing the \nagricultural sec'
+      bm25 seq8 p.3: query tokens present ['to', 'the', 'by', 'have', 'temperatures', 'risen', 'century']; text 'Heatwaves can lead to heat-related illnesses and exacerbate existing health conditions. \nChanging Seasons \nCli'
+    rank of the dense rank-1 chunk (seq1) in rrf60: 2; in mm_0.5: 4; is it in the BM25 top-50: True
+
+  D-006 RRF: r1 seq21 0.03252247488101534 and r2 seq64 0.03252247488101534: exactly equal = True (1/61 + 1/62 both ways); the order is decided by the smaller chunk_id
+  D-002 RRF: r1 seq27 0.032266 (1/63 + 1/61) vs r2 seq68 0.032258 (2/62): margin 0.000008
+  document frequency n over 97 chunks: {'kigali': 1, 'amendment': 1, 'the': 80, 'ipcc': 1, 'beccs': 1}; raw idf ln((N-n+0.5)/(n+0.5)): {'kigali': 4.1641, 'amendment': 4.1641, 'the': -1.5261, 'ipcc': 4.1641, 'beccs': 4.1641}; epsilon floor 0.25 x mean idf = 0.8588
+
+=== S5b worked example, D-008 'What does the Kigali Amendment target?' (draft seed; real scores)
+  dense list: 50 chunks, max 0.2598, min (50th) 0.0909; BM25 list: 50 chunks, max 9.4618, min (50th) 1.2000
+  seq 0 p. 1 rel=0: dense raw nan (r-) mm 0.0000 z3 nan | bm25 raw 1.8858 (r2) mm 0.0830 z3 0.5334
+  seq 1 p. 1 rel=0: dense raw nan (r-) mm 0.0000 z3 nan | bm25 raw 1.8377 (r3) mm 0.0772 z3 0.5263
+  seq 2 p. 1 rel=0: dense raw nan (r-) mm 0.0000 z3 nan | bm25 raw 1.7458 (r4) mm 0.0661 z3 0.5127
+  seq12 p. 5 rel=0: dense raw 0.2041 (r4) mm 0.6701 z3 0.7344 | bm25 raw 1.6096 (r18) mm 0.0496 z3 0.4926
+  seq28 p.10 rel=0: dense raw 0.2598 (r1) mm 1.0000 z3 0.9677 | bm25 raw nan (r-) mm 0.0000 z3 nan
+  seq58 p.20 rel=0: dense raw 0.2478 (r3) mm 0.9287 z3 0.9173 | bm25 raw nan (r-) mm 0.0000 z3 nan
+  seq69 p.24 rel=1: dense raw 0.2535 (r2) mm 0.9625 z3 0.9412 | bm25 raw 9.4618 (r1) mm 1.0000 z3 1.6546
+  raw sum          top-4: seq69 9.71528 REL; seq0 1.88582; seq7 1.87304; seq27 1.84030
+  min-max 0.5/0.5  top-4: seq69 0.98127 REL; seq28 0.50000; seq58 0.46434; seq12 0.35984
+  min-max 0.6/0.4  top-4: seq69 0.97753 REL; seq28 0.60000; seq58 0.55721; seq12 0.42190
+  +/-3sd 0.6/0.4   top-4: seq69 1.22658 REL; seq12 0.63767; seq56 0.62449; seq83 0.61923
+  RRF k=60         top-4: seq69 0.03252 REL; seq56 0.02885; seq12 0.02845; seq27 0.02840
+  seq69 RRF = 1/(60+2) + 1/(60+1) = 0.016129 + 0.016393 = 0.032522
+  seq28 (dense r1, not in the BM25 top-50): RRF = 1/61 = 0.016393, fused rank 31; min-max 0.5/0.5 = 0.5000, fused rank 2
+  BM25 gap r1-r2 7.5760 (ratio 5.02); dense gap r1-r2 0.0063
+FP lab_d008_rrf_top4 57c044f3179e7d1a
+FP lab_d008_mm05_top4 351765c47f7c0b30
+
+=== S6 DEMONSTRATION: P3's five exact-term queries on the 97 v0 chunks (target = chunks containing the string)
+  'IPCC': target 'IPCC' in seqs [1] (pages [1]); first target rank: dense=3, bm25=1, bm25_split=None, rrf60=1, mm_0.5=1; BM25(norm) list length 1, BM25(split) list length 0
+  'What does BECCS stand for?': target 'BECCS' in seqs [88] (pages [30]); first target rank: dense=4, bm25=1, bm25_split=None, rrf60=1, mm_0.5=1; BM25(norm) list length 82, BM25(split) list length 0
+  'methane CH4': target 'CH4' in seqs [2] (pages [1]); first target rank: dense=4, bm25=1, bm25_split=2, rrf60=1, mm_0.5=1; BM25(norm) list length 4, BM25(split) list length 3
+  'Kyoto Protocol 1997': target '1997' in seqs [69] (pages [24]); first target rank: dense=1, bm25=1, bm25_split=1, rrf60=1, mm_0.5=1; BM25(norm) list length 3, BM25(split) list length 3
+  'limit warming to 1.5 degrees': target '1.5' in seqs [27, 68] (pages [10, 23]); first target rank: dense=4, bm25=1, bm25_split=1, rrf60=2, mm_0.5=1; BM25(norm) list length 90, BM25(split) list length 90
+FP demo_first_target a6c760232d6d3426
+  paraphrase variant D-002-P1 'When did countries adopt the Paris climate accord?' (06 §6.7 example; D-002 gold): first relevant rank dense=3, bm25=2, rrf60=3, mm_0.5=3; CE@4: dense=1, bm25=1, rrf60=1, mm_0.5=1
+
+=== S7 RRF k=60 over two top-50 lists: does every chunk in BOTH lists outrank every chunk in ONE list?
+  D-001: in both lists 33, in one list 34, union 67; min(both) 0.01926 > max(one) 0.01538: True
+  D-002: in both lists 26, in one list 48, union 74; min(both) 0.02029 > max(one) 0.01538: True
+  D-003: in both lists 33, in one list 34, union 67; min(both) 0.01938 > max(one) 0.01370: True
+  D-004: in both lists 29, in one list 42, union 71; min(both) 0.01835 > max(one) 0.01587: True
+  D-005: in both lists 35, in one list 30, union 65; min(both) 0.01889 > max(one) 0.01562: True
+  D-006: in both lists 28, in one list 44, union 72; min(both) 0.01843 > max(one) 0.01471: True
+  D-007: in both lists 28, in one list 44, union 72; min(both) 0.01957 > max(one) 0.01562: True
+  D-008: in both lists 30, in one list 40, union 70; min(both) 0.01835 > max(one) 0.01639: True
+  D-009: in both lists 24, in one list 52, union 76; min(both) 0.02004 > max(one) 0.01562: True
+  D-010: in both lists 37, in one list 26, union 63; min(both) 0.01952 > max(one) 0.01538: True
+  property holds for 10/10 seeds (theory: always, for list depth <= 61 at k=60)
+FP consensus_in_both cc4c65b29d2d43e7
+
+=== S8 normalisation on the real top-50 lists: ranges, out-of-range +/-3 sd values, what 1.0 means
+  +/-3sd values outside [0, 1] over 10 seeds: dense 9/500, BM25 15/500
+    D-001 dense: raw top 0.4929 2nd 0.4706 50th 0.1739 | min-max top 1.000 2nd 0.930 | z3 top 0.985 2nd 0.939 50th 0.324
+    D-001 bm25 : raw top 29.1679 2nd 16.5763 50th 4.3634 | min-max top 1.000 2nd 0.492 | z3 top 1.493 2nd 0.938 50th 0.399
+    D-002 dense: raw top 0.4606 2nd 0.4513 50th 0.0281 | min-max top 1.000 2nd 0.978 | z3 top 0.974 2nd 0.961 50th 0.349
+    D-002 bm25 : raw top 15.4470 2nd 12.3571 50th 2.1159 | min-max top 1.000 2nd 0.768 | z3 top 1.215 2nd 1.031 50th 0.419
+    D-003 dense: raw top 0.6497 2nd 0.6320 50th 0.1828 | min-max top 1.000 2nd 0.962 | z3 top 1.034 2nd 1.007 50th 0.336
+    D-003 bm25 : raw top 43.6472 2nd 30.8622 50th 5.9549 | min-max top 1.000 2nd 0.661 | z3 top 1.407 2nd 1.070 50th 0.412
+    D-004 dense: raw top 0.4210 2nd 0.4035 50th 0.0485 | min-max top 1.000 2nd 0.953 | z3 top 1.146 2nd 1.110 50th 0.378
+    D-004 bm25 : raw top 9.9775 2nd 6.3230 50th 3.0362 | min-max top 1.000 2nd 0.474 | z3 top 1.318 2nd 0.828 50th 0.388
+    D-005 dense: raw top 0.4272 2nd 0.3581 50th 0.1272 | min-max top 1.000 2nd 0.770 | z3 top 1.092 2nd 0.917 50th 0.334
+    D-005 bm25 : raw top 18.1538 2nd 17.0773 50th 5.1819 | min-max top 1.000 2nd 0.917 | z3 top 1.195 2nd 1.128 50th 0.388
+    D-006 dense: raw top 0.5331 2nd 0.5004 50th 0.2171 | min-max top 1.000 2nd 0.897 | z3 top 1.020 2nd 0.947 50th 0.318
+    D-006 bm25 : raw top 13.6205 2nd 9.2298 50th 3.1074 | min-max top 1.000 2nd 0.582 | z3 top 1.190 2nd 0.837 50th 0.344
+    D-007 dense: raw top 0.7094 2nd 0.6105 50th 0.2178 | min-max top 1.000 2nd 0.799 | z3 top 1.025 2nd 0.883 50th 0.319
+    D-007 bm25 : raw top 42.6533 2nd 31.9874 50th 11.2293 | min-max top 1.000 2nd 0.661 | z3 top 1.322 2nd 1.006 50th 0.390
+    D-008 dense: raw top 0.2598 2nd 0.2535 50th 0.0909 | min-max top 1.000 2nd 0.963 | z3 top 0.968 2nd 0.941 50th 0.261
+    D-008 bm25 : raw top 9.4618 2nd 1.8858 50th 1.2000 | min-max top 1.000 2nd 0.083 | z3 top 1.655 2nd 0.533 50th 0.432
+    D-009 dense: raw top 0.3099 2nd 0.2798 50th 0.0659 | min-max top 1.000 2nd 0.877 | z3 top 0.984 2nd 0.901 50th 0.313
+    D-009 bm25 : raw top 6.9559 2nd 6.8220 50th 2.1159 | min-max top 1.000 2nd 0.972 | z3 top 1.291 2nd 1.266 50th 0.383
+    D-010 dense: raw top 0.5196 2nd 0.4340 50th 0.2496 | min-max top 1.000 2nd 0.683 | z3 top 1.078 2nd 0.818 50th 0.257
+    D-010 bm25 : raw top 13.2576 2nd 7.4602 50th 1.7318 | min-max top 1.000 2nd 0.497 | z3 top 1.256 2nd 0.806 50th 0.362
+  unanswerable seeds: the best chunk still normalises to 1.0 (min-max):
+    D-009: dense raw top 0.3099 -> 1.0; BM25 raw top 6.9559 -> 1.0
+    D-010: dense raw top 0.5196 -> 1.0; BM25 raw top 13.2576 -> 1.0
+  answerable dense raw top-1 min/median/max: 0.2598/0.4767/0.7094
+
+=== S9 rescale ONE scorer: how many of the 10 seeds change their ordered top-4?
+  raw_sum : dense x100 -> 8/10, BM25 x10 -> 3/10, dense exp(10s) -> 10/10, BM25 sqrt -> 4/10
+  mm_0.5  : dense x100 -> 0/10, BM25 x10 -> 0/10, dense exp(10s) -> 4/10, BM25 sqrt -> 2/10
+  z3_0.5  : dense x100 -> 0/10, BM25 x10 -> 0/10, dense exp(10s) -> 5/10, BM25 sqrt -> 1/10
+  rrf60   : dense x100 -> 0/10, BM25 x10 -> 0/10, dense exp(10s) -> 0/10, BM25 sqrt -> 0/10
+FP rescale_changes 7ffc5e27e8663d58
+  raw sum (no normalisation), CE@4 8/8; overlap of raw-sum top-4 with BM25 top-4: 37/40
+
+=== S10 CR-08 probes on the seeds: change k_rrf; change the dense weight (min-max, top-50)
+  k_rrf=   0: Hit@4 8/8 CE@4 8/8 MRR@10 1.000; seeds whose top-4 differs from k=60: 5/10
+  k_rrf=   1: Hit@4 8/8 CE@4 8/8 MRR@10 1.000; seeds whose top-4 differs from k=60: 5/10
+  k_rrf=  10: Hit@4 8/8 CE@4 8/8 MRR@10 1.000; seeds whose top-4 differs from k=60: 3/10
+  k_rrf=  60: Hit@4 8/8 CE@4 8/8 MRR@10 1.000; seeds whose top-4 differs from k=60: 0/10
+  k_rrf= 120: Hit@4 8/8 CE@4 8/8 MRR@10 1.000; seeds whose top-4 differs from k=60: 1/10
+  k_rrf=1000: Hit@4 8/8 CE@4 8/8 MRR@10 1.000; seeds whose top-4 differs from k=60: 1/10
+FP krrf_sweep dc955a8f72e5375f
+  dense weight 0.0 / BM25 1.0: Hit@4 8/8 CE@4 8/8 MRR@10 0.938 first_rel {'D-001': 1, 'D-002': 1, 'D-003': 1, 'D-004': 1, 'D-005': 1, 'D-006': 2, 'D-007': 1, 'D-008': 1}
+  dense weight 0.3 / BM25 0.7: Hit@4 8/8 CE@4 8/8 MRR@10 0.938 first_rel {'D-001': 1, 'D-002': 1, 'D-003': 1, 'D-004': 1, 'D-005': 1, 'D-006': 2, 'D-007': 1, 'D-008': 1}
+  dense weight 0.5 / BM25 0.5: Hit@4 8/8 CE@4 8/8 MRR@10 0.938 first_rel {'D-001': 1, 'D-002': 1, 'D-003': 1, 'D-004': 1, 'D-005': 1, 'D-006': 2, 'D-007': 1, 'D-008': 1}
+  dense weight 0.6 / BM25 0.4: Hit@4 8/8 CE@4 8/8 MRR@10 0.938 first_rel {'D-001': 1, 'D-002': 1, 'D-003': 1, 'D-004': 1, 'D-005': 1, 'D-006': 2, 'D-007': 1, 'D-008': 1}
+  dense weight 0.7 / BM25 0.3: Hit@4 8/8 CE@4 8/8 MRR@10 0.938 first_rel {'D-001': 1, 'D-002': 1, 'D-003': 1, 'D-004': 1, 'D-005': 1, 'D-006': 2, 'D-007': 1, 'D-008': 1}
+  dense weight 1.0 / BM25 0.0: Hit@4 8/8 CE@4 8/8 MRR@10 0.708 first_rel {'D-001': 3, 'D-002': 3, 'D-003': 1, 'D-004': 1, 'D-005': 1, 'D-006': 1, 'D-007': 2, 'D-008': 2}
+FP alpha_sweep aac6e8fd91315873
+  identity test: weight 1.0 top-4 == dense top-4 for all 10 seeds: True; weight 0.0 top-4 == BM25 top-4: True
+
+=== S11 the repo's fusion (cell 17 / runnable script L75-L86) replicated on our chunks with MiniLM
+  ALL_DOCS (order by distance to the empty string) first 5 rows: [89, 50, 48, 49, 81]; vector order first 5 rows: [31, 7, 38, 30, 1]
+  normalised vector array is a ramp, non-increasing by position: True; first 1.000, last 0.000
+  cell-19 query, k=5, alpha=0.5: repo-style rows [50, 28, 89, 48, 29] (seqs [50, 28, 89, 48, 29]); aligned rows [1, 30, 37, 7, 0]; overlap 0/5
+  alpha=1.0 (vector only): distinct repo-style top-5 lists over the 10 seeds = 1 (the list is [89, 50, 48, 49, 81] = ALL_DOCS[:5] for every query)
+  alpha=1.0 repo-style == dense top-5 for any seed: False
+  8 answerable seeds, top-4, alpha=0.5, split() BM25 (as the repo): repo-style Hit@4 0/8 CE@4 0/8; aligned Hit@4 8/8 CE@4 8/8; overlap per seed [0, 0, 0, 0, 0, 0, 0, 0]
+FP repo_bug_seeds 1a779fe9bd3e07e1
+  repo-style with tok_norm BM25 instead (tokenizer fixed, alignment not): Hit@4 0/8 CE@4 0/8
+  'IPCC' under split(): all BM25 zero True; L81 without epsilon -> NaN count 97/97
+  'IPCC' through the repo-style fusion (cell 17, with epsilon): rows [89, 50, 48, 49, 81]; == ALL_DOCS[:5] (nearest to the empty string) True; dense top-5 rows [85, 27, 1, 84, 69]; == dense top-5 False; contains the IPCC chunk (seq 1) False
+  'IPCC' through the aligned formula: rows [85, 27, 1, 84, 69]; == dense top-5 True (all-zero BM25 leaves the vector half)
+  TOY 3 docs: vector array by position [1.0, 0.5714, 0.0], BM25 array by row [1.0, 0.0, 0.3333], combined by position [1.0, 0.2857, 0.1667]; repo-style order ['d2', 'd0', 'd1']; aligned scores {'d0': 0.5, 'd1': 0.5, 'd2': 0.4524} -> order ['d0', 'd1', 'd2']
+FP toy_bug_order 0f760fadd0f08548
+FP toy_aligned_order 2eccf9bac259fefc
+
+=== S12 the BM25 tokenizer inside the hybrid: split() vs tok_norm (RRF k=60, top-50)
+  BM25 tokenizer split: hybrid Hit@4 8/8 CE@4 8/8 MRR@10 0.938 first_rel {'D-001': 1, 'D-002': 2, 'D-003': 1, 'D-004': 1, 'D-005': 1, 'D-006': 1, 'D-007': 1, 'D-008': 1}
+  BM25 tokenizer norm : hybrid Hit@4 8/8 CE@4 8/8 MRR@10 1.000 first_rel {'D-001': 1, 'D-002': 1, 'D-003': 1, 'D-004': 1, 'D-005': 1, 'D-006': 1, 'D-007': 1, 'D-008': 1}
+
+=== S13 llamaindex cells 15/17 keep top-2 per retriever; the cell-20 mean +/- 3 sd formula on two scores
+  scores (0.46, 0.45): population sd -> (0.6667, 0.3333); sample sd -> (0.6179, 0.3821)
+  scores (0.9, 0.1): population sd -> (0.6667, 0.3333); sample sd -> (0.6179, 0.3821)
+  scores (14.2, 3.1): population sd -> (0.6667, 0.3333); sample sd -> (0.6179, 0.3821)
+
+=== S13b list depth n per retriever (RRF k=60 and min-max 0.5/0.5): draft seeds, k=4
+  n=  2: RRF Hit@4 8/8 CE@4 8/8 MRR@10 0.875 | min-max Hit@4 8/8 CE@4 8/8 MRR@10 0.875 | seeds where a one-list chunk ties or beats a both-list chunk: 0/10
+  n=  4: RRF Hit@4 8/8 CE@4 8/8 MRR@10 1.000 | min-max Hit@4 8/8 CE@4 8/8 MRR@10 0.938 | seeds where a one-list chunk ties or beats a both-list chunk: 0/10
+  n= 10: RRF Hit@4 8/8 CE@4 8/8 MRR@10 1.000 | min-max Hit@4 8/8 CE@4 8/8 MRR@10 0.938 | seeds where a one-list chunk ties or beats a both-list chunk: 0/10
+  n= 20: RRF Hit@4 8/8 CE@4 8/8 MRR@10 1.000 | min-max Hit@4 8/8 CE@4 8/8 MRR@10 0.938 | seeds where a one-list chunk ties or beats a both-list chunk: 0/10
+  n= 50: RRF Hit@4 8/8 CE@4 8/8 MRR@10 1.000 | min-max Hit@4 8/8 CE@4 8/8 MRR@10 0.938 | seeds where a one-list chunk ties or beats a both-list chunk: 0/10
+  n= 97: RRF Hit@4 8/8 CE@4 8/8 MRR@10 1.000 | min-max Hit@4 8/8 CE@4 8/8 MRR@10 0.938 | seeds where a one-list chunk ties or beats a both-list chunk: 1/10
+
+=== S14 lab fingerprints (CHECK cells)
+FP lab_d002_dense_top4 78ebfed94d0021da
+FP lab_d002_bm25_top4 5067b1c7fd0084bd
+FP lab_d002_rrf_top4 2e977fa00badc9e4
+FP lab_d002_mm05_top4 5067b1c7fd0084bd
+FP lab_bm25_len 040a1ca95aa9cfa3
+FP lab_hit_ce4 419aa3027ae2f9b5
+FP lab_d006_rrf_top2_r6 3db5d8c64a0e6675
+  CR-08: seeds whose ordered top-4 changes: k_rrf 60 -> 0: 5/10; dense weight 0.5 -> 0.7 (min-max): 5/10
+FP lab_cr08 2904d080a0d1256b
+FP lab_rescale 33bff21ec3c782d0
+DONE

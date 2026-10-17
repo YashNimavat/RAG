@@ -1,0 +1,77 @@
+
+=== K1 environment and corpus
+python 3.12.8 | {'rank-bm25': '0.2.2', 'numpy': '2.5.3', 'pymupdf': '1.26.7'}
+pdf sha256 1d58a0fac2435c2ce4129ff84906b93118d731e4a004e7a26f8ab8f749a92669
+chars=72593 windows=91 avgdl=129.6703 average_idf=3.352948 floor=0.25*average_idf=0.838237
+
+=== K2 running example: 'What does BECCS stand for?' on the 91 windows, tok_norm, k1=1.5, b=0.75
+query tokens: ['what', 'does', 'beccs', 'stand', 'for'] | split() query tokens: ['What', 'does', 'BECCS', 'stand', 'for?']
+  token 'what'   df= 0 of 91  raw idf=+5.209486  idf used=not in the index (adds 0)
+  token 'does'   df= 0 of 91  raw idf=+5.209486  idf used=not in the index (adds 0)
+  token 'beccs'  df= 2 of 91  raw idf=+3.577948  idf used=3.577948
+  token 'stand'  df= 0 of 91  raw idf=+5.209486  idf used=not in the index (adds 0)
+  token 'for'    df=80 of 91  raw idf=-1.945910  idf used=0.838237
+windows with score > 0: 80 of 91
+top 5 (window, score): [(83, 5.0623), (82, 4.8803), (16, 1.672), (53, 1.6156), (45, 1.607)]
+  window 83 (rank 1): dl=124 K=1.450805 | beccs: f=1 tf part=1.020073 x idf 3.577948 = 3.649768 | for: f=3 tf part=1.685088 x idf 0.838237 = 1.412504 | total=5.062271
+  window 82 (rank 2): dl=123 K=1.442129 | beccs: f=1 tf part=1.023697 x idf 3.577948 = 3.662734 | for: f=2 tf part=1.452589 x idf 0.838237 = 1.217614 | total=4.880348
+  window 16 (rank 3): dl=132 K=1.520212 | for: f=6 tf part=1.994625 x idf 0.838237 = 1.671968 | total=1.671968
+character offsets of 'BECCS' in the text: [66441]
+  window 82 covers characters 65600..66600: contains the mention: True
+  window 83 covers characters 66400..67400: contains the mention: True
+  so df('beccs') = 2 counts ONE mention twice: it lies in the 200-character overlap of windows 82 and 83
+  split() tokens of the text that contain BECCS: ['(BECCS),']
+  split() query tokens found in any window: []
+  for alone: window 16 has 'for' x6 (dl 132) -> 1.671968; the largest possible 'for' contribution is idf x (k1 + 1) = 2.095593
+
+=== K3 'IPCC' on the 91 windows
+df('ipcc')=1; idf=4.099885; window 1: f=1 dl=145 K=1.632998 tf part=0.949488 score=3.892792
+  split() token in that window: ['(IPCC)']
+
+=== K4 TOY: why linear tf is a problem. Query 'bpa ban'; six 8-token documents (dl = avgdl for every doc)
+doc lengths: [8, 8, 8, 8, 8, 8]
+textbook TF-IDF  sum of f x ln(N/n): [2.8904, 6.5917, 0.0, 0.0, 0.0, 0.0] -> order [1, 0]
+BM25 (rank_bm25):                    [1.8871, 1.1756, 0.0, 0.0, 0.0, 0.0] -> order [0, 1]
+  idf bpa=0.587787 ban=1.299283; tf part at f=6, dl=avgdl: 2.000000
+
+=== K5 checks for the AIQ 04 Q12 answer (dl = avgdl, k1=1.5, b=0.75)
+tf part: {1: 1.0, 2: 1.428571, 20: 2.325581, 21: 2.333333}
+gain 1 -> 2: 0.428571   gain 20 -> 21: 0.007752
+the repo's written form f/(f + K) at f = 1, 2, 20, 21: {1: 0.4, 2: 0.571429, 20: 0.930233, 21: 0.933333} | tf part / that form: [2.5] (= k1 + 1 for every f)
+
+=== K6 TOY: code identifiers. Ten function signatures; natural-word query 'user id' and exact query 'getUserId'
+  tok_norm    tokens of getUserId: ['getuserid']  of get_user_id: ['get', 'user', 'id']
+    query 'user id'    -> ['user', 'id']: signatures > 0: 2; top: [('delete_user', 2.6276), ('get_user_id', 2.1134)]; getUserId rank: None
+    query 'getUserId'  -> ['getuserid']: signatures > 0: 1; top: [('getUserId', 2.0176)]; getUserId rank: 1
+  parts       tokens of getUserId: ['get', 'user', 'id']  of get_user_id: ['get', 'user', 'id']
+    query 'user id'    -> ['user', 'id']: signatures > 0: 4; top: [('delete_user', 1.4243), ('getUserId', 1.0983), ('get_user_id', 1.0983), ('getOrderId', 0.3575)]; getUserId rank: 2
+    query 'getUserId'  -> ['get', 'user', 'id']: signatures > 0: 4; top: [('getUserId', 1.8392), ('get_user_id', 1.8392), ('delete_user', 1.4243), ('getOrderId', 1.0983)]; getUserId rank: 1
+  parts+whole tokens of getUserId: ['get', 'user', 'id', 'getuserid']  of get_user_id: ['get', 'user', 'id', 'get_user_id']
+    query 'user id'    -> ['user', 'id']: signatures > 0: 4; top: [('delete_user', 1.3573), ('getUserId', 1.1126), ('get_user_id', 1.1126), ('getOrderId', 0.3621)]; getUserId rank: 2
+    query 'getUserId'  -> ['get', 'user', 'id', 'getuserid']: signatures > 0: 4; top: [('getUserId', 3.6807), ('get_user_id', 1.8631), ('delete_user', 1.3573), ('getOrderId', 1.1126)]; getUserId rank: 1
+
+=== K7 a question made of common words only, on the 91 windows
+  token 'what' df= 0 idf used=not in the index
+  token 'can'  df=65 idf used=0.838237
+  token 'be'   df= 8 idf used=2.284780
+  token 'done' df= 0 idf used=not in the index
+  token 'about' df= 8 idf used=2.284780
+  token 'this' df=50 idf used=0.838237
+windows > 0: 81 of 91; rank 1 5.7608, rank 5 4.3718, rank 10 3.6997, rank 40 1.7162
+compare K2: rank 1 5.0623 vs rank 3 1.6720 (the rare word separates the targets)
+
+=== K8 how often the 200-character overlap doubles a document frequency (tok_norm, 91 windows)
+tokens that occur exactly once in the whole text: 799; of these, counted in 2 windows: 184 (23.0%)
+window vocabulary 1870 vs whole-text vocabulary 1769: 101 window tokens are not tokens of the whole text (words cut at a window edge); whole-text tokens missing from every window: 0
+
+=== K9 two-document corpora: no score can be above 0
+  corpus [['bpa', 'ban'], ['climate', 'policy']] query ['bpa']: idf {'bpa': 0.0, 'ban': 0.0, 'climate': 0.0, 'policy': 0.0} scores [0.0, 0.0]
+  corpus [['bpa', 'ban', 'the'], ['climate', 'policy', 'the']] query ['bpa']: idf {'bpa': 0.0, 'ban': 0.0, 'the': -0.080472, 'climate': 0.0, 'policy': 0.0} scores [0.0, 0.0]
+  corpus [['bpa', 'ban', 'the'], ['climate', 'policy', 'the']] query ['the']: idf {'bpa': 0.0, 'ban': 0.0, 'the': -0.080472, 'climate': 0.0, 'policy': 0.0} scores [-0.080472, -0.080472]
+  corpus [['bpa', 'ban', 'the'], ['climate', 'policy', 'the']] query ['bpa', 'the']: idf {'bpa': 0.0, 'ban': 0.0, 'the': -0.080472, 'climate': 0.0, 'policy': 0.0} scores [-0.080472, -0.080472]
+  a word in one of two docs: ln(1.5/1.5) = 0; a word in both: raw ln(0.5/2.5) < 0, floored to 0.25 x mean idf <= 0
+
+=== K10 the intermediate steps of P3-A-01 (eu in d0) and P3-A-05 (emissions in d5), six-document toy
+  eu in d0: dl=11 K=1.612500 tf part=0.956938 idf=1.299283 idf x tf part=1.243333 rank_bm25=1.243333
+  emissions in d5: dl=5 K=0.937500 tf part=1.290323 idf=0.587787 idf x tf part=0.758434 rank_bm25=0.758434
+DONE

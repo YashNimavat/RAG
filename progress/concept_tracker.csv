@@ -1,7 +1,7 @@
 concept_id,title,phase,priority,status,first_studied,exposed_on,last_reviewed,next_review,review_interval_days,recall_score_last,recall_accuracy_rolling,application_score,transfer_score,coding_independence_0_3,debugging_0_3,experiment_status,misconceptions_open,reinforcement_flag,evidence_links
 O1,Prior-knowledge diagnostic,0,E,exposed,2026-10-08,,,,,,,,,,,na,,0,log:2026-10-08#O1-REC;reviews/reconstructions/2026-10-08_phase0.md
 O2,Environment setup lab,0,E,exposed,2026-10-08,,,,,,,,,,,na,,0,log:2026-10-08#O2-ENV;progress/O2_smoke_test_2026-10-08.json;labs/O2_smoke_test.py
-O3,How to use this system,0,E,exposed,2026-10-08,,,2026-10-09,1,,,2,2,,,na,,0,log:2026-10-08#O3-A2b;log:2026-10-08#O3-L1;log:2026-10-08#O3-L2
+O3,How to use this system,0,E,exposed,2026-10-08,,,,,,,2,2,,,na,,0,log:2026-10-08#O3-A2b;log:2026-10-08#O3-L1;log:2026-10-08#O3-L2
 P1,LLM fundamentals for RAG,1,E,exposed,2026-10-08,,,,,,,3,,,,na,MC-001,1,log:2026-10-08#O1-Q01;log:2026-10-08#P1-A1;log:2026-10-08#P1-F1;concepts/P1_llm_fundamentals.md
 P2,Information-retrieval framing,1,E,not_started,,,,,,,,,,,,na,,0,
 P3,Lexical retrieval: TF-IDF & BM25,1,E,not_started,,,,,,,,,,,,na,,1,log:2026-10-08#O1-Q03
@@ -17,10 +17,10 @@ C5,Context construction & answer generation with citations,2,E,not_started,,,,,,
 C6,Baseline pipeline v0 end-to-end + provenance trace,2,E,not_started,,,,,,,,,,,,na,,0,legacy:ch1-selfrated-2.33-weak
 C7,Structured data RAG (CSV/JSON),2,S,not_started,,,,,,,,,,,,na,,0,
 M1,Building an evaluation set,3,E,not_started,,,,,,,,,,,,na,,0,
-M2,Retrieval metrics harness,3,E,exposed,2026-10-08,,,2026-10-09,1,,,,2,,,na,,0,log:2026-10-08#O1-Q08;legacy:vai-L27-L29-L44
-M3,Generation metrics & LLM-as-judge,3,E,exposed,2026-10-08,,,2026-10-09,1,,,,2,,,na,,0,log:2026-10-08#O1-Q08;legacy:vai-L27-L29-L44
+M2,Retrieval metrics harness,3,E,exposed,2026-10-08,,,,,,,,2,,,na,,0,log:2026-10-08#O1-Q08;legacy:vai-L27-L29-L44
+M3,Generation metrics & LLM-as-judge,3,E,exposed,2026-10-08,,,,,,,,2,,,na,,0,log:2026-10-08#O1-Q08;legacy:vai-L27-L29-L44
 M4,Experimental discipline,3,E,not_started,,,,,,,,,,,,na,,0,
-M5,Failure analysis taxonomy,3,E,exposed,2026-10-08,,,2026-10-09,1,,,,2,,,na,,0,log:2026-10-08#O1-Q12
+M5,Failure analysis taxonomy,3,E,exposed,2026-10-08,,,,,,,,2,,,na,,0,log:2026-10-08#O1-Q12
 I1,Chunk size/overlap experiments,4,E,not_started,,,,,,,,,,,,not_planned,,0,
 I2,Structure-aware chunking,4,U,not_started,,,,,,,,,,,,not_planned,,0,
 I3,Semantic chunking,4,U,not_started,,,,,,,,,,,,not_planned,,0,legacy:vai-chunking_lab
@@ -28,7 +28,7 @@ I4,Proposition chunking,4,S,not_started,,,,,,,,,,,,not_planned,,0,
 I5,Contextual chunk headers / contextual retrieval,4,U,not_started,,,,,,,,,,,,not_planned,,0,log:2026-10-08#O1-Q12
 I6,Document augmentation & HyPE,4,S,not_started,,,,,,,,,,,,not_planned,,0,
 I-CMP,Comparative lesson: the granularity family,4,E,not_started,,,,,,,,,,,,not_planned,,0,
-R1,Sparse vs dense vs hybrid; fusion,5,E,exposed,2026-10-08,,,2026-10-09,1,,,2,,,,not_planned,,0,log:2026-10-08#O1-Q09;legacy:vai-L23
+R1,Sparse vs dense vs hybrid; fusion,5,E,exposed,2026-10-08,,,,,,,2,,,,not_planned,,0,log:2026-10-08#O1-Q09;legacy:vai-L23
 R2,Metadata filtering,5,U,not_started,,,,,,,,,,,,not_planned,,0,log:2026-10-08#O1-Q12
 R3,Reranking,5,E,not_started,,,,,,,,,,,,not_planned,,0,log:2026-10-08#O1-Q10;legacy:vai-L22
 R4,Diversity: MMR / Dartboard,5,U,not_started,,,,,,,,,,,,not_planned,,0,

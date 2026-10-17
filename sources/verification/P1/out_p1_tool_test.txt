@@ -1,0 +1,108 @@
+=== 1 climate PDF, defaults (P1_FACTS S1-S9, K5, K7, K8)
+PASS  1 characters (S1: 72,593): got 72593 | expected 72593
+PASS  1 tokenizer resolved by name: got ['o200k_harmony', 'by name: gpt-oss-20b -> o200k_harmony'] | expected ['o200k_harmony', 'by name: gpt-oss-20b -> o200k_harmony']
+PASS  1 o200k_harmony tokens, chars/token (S3, K5: 12,840, 5.65): got [12840, 5.65] | expected [12840, 5.65]
+PASS  1 cl100k tokens, ÷4 error (S3: 13,026, +39%): got [13026, 39] | expected [13026, 39]
+PASS  1 WordPiece tokens, chars/token (S3: 11,694, 6.21): got [11694, 6.21] | expected [11694, 6.21]
+PASS  1 bytes/token (K5: 5.65): got 5.65 | expected 5.65
+PASS  1 windows (S4: 91): got 91 | expected 91
+PASS  1 chars/token per window min/median/max (S4 o200k: 4.59 / 5.62 / 6.49): got [4.59, 5.62, 6.49] | expected [4.59, 5.62, 6.49]
+PASS  1 most tokens in a window: o200k 218, WordPiece 198 (S4): got [218, 198] | expected [218, 198]
+PASS  1 MiniLM limit 254 text tokens = 256 - 2 (S6): got [254, 256] | expected [254, 256]
+PASS  1 MiniLM truncation 0 of 91: got [0, 0.0] | expected [0, 0.0]
+PASS  1 D-001 is the first question, copied from 06 §6.7: got ['D-001', 'According to the document, by how much have global temperatures risen since the late 19th century?'] | expected ['D-001', 'According to the document, by how much have global temperatures risen since the late 19th century?']
+PASS  1 S9: system 107, question 20, sources 842, input 976: got [107, 20, 842, 976] | expected [107, 20, 842, 976]
+PASS  1 S9: system + user = 4,659 characters: got 4659 | expected 4659
+PASS  1 K7: D-001 one call <= $0.000227, 100 calls <= $0.0227: got [0.000227, 0.0227] | expected [0.000227, 0.0227]
+PASS  1 K7: 976 + 71 + 512 = 1,559 tokens; 100 calls >= 19.5 min at 8,000 TPM: got [1559, 19.5] | expected [1559, 19.5]
+PASS  1 K7: Groq output share 67.7%, out/in 4x: got [67.7, 4.0] | expected [67.7, 4.0]
+PASS  1 K7: Haiku one call <= $0.000354, 100 <= $0.0354, output 72.4%, 5x: got [0.000354, 0.0354, 72.4, 5.0] | expected [0.000354, 0.0354, 72.4, 5.0]
+PASS  1 K8 arithmetic: 1,559 / 131,072 = 1.19%: got 1.19 | expected 1.19
+PASS  1 checklist C1..C12: got '✓✗✓✓✓✓???✓✓✓' | expected '✓✗✓✓✓✓???✓✓✓'
+PASS  1 C2 evidence: +41% over-count: got True | expected True
+PASS  1 recommendation (rule 5): got 'size chunks in tokens, not characters' | expected 'size chunks in tokens, not characters'
+PASS  1 report has the 9 parts: got [True, True, True, True, True, True, True, True, True] | expected [True, True, True, True, True, True, True, True, True]
+PASS  1 report shows 976, $0.000227, $0.0227, 19.5, 72,593: got [True, True, True, True, True] | expected [True, True, True, True, True]
+PASS  1 CLI exit 0 and the same report: got [0, True] | expected [0, True]
+PASS  1 CLI summary line: got 'chunks 91, o200k_harmony 5.65 chars/token' | expected 'chunks 91, o200k_harmony 5.65 chars/token'
+PASS  1 the saved example report has the same numbers (date-independent lines): got True | expected True
+
+=== 2 trap K2: provider prefix
+PASS  2 naive encoding_for_model('openai/gpt-oss-20b') -> KeyError: got True | expected True
+PASS  2 resolved by name: got ['o200k_harmony', True, False] | expected ['o200k_harmony', True, False]
+PASS  2 the plain id maps too (fix 2): got 'o200k_harmony' | expected 'o200k_harmony'
+PASS  2 unknown model: C1 fails: got '✗' | expected '✗'
+PASS  2 unknown model: fix the counter first: got 'fix the counter first' | expected 'fix the counter first'
+PASS  2 --encoding override: C1 passes: got '✓' | expected '✓'
+PASS  2 Claude: o200k proxy, C1 '?': got ['o200k_base', True, '?'] | expected ['o200k_base', True, '?']
+PASS  2 Claude: the report says proxy and count_tokens: got [True, True] | expected [True, True]
+
+=== 3 trap K3: special-token strings in a document
+PASS  3 found: <|endoftext|> x3, <|start|> x3: got {'<|endoftext|>': 3, '<|start|>': 3} | expected {'<|endoftext|>': 3, '<|start|>': 3}
+PASS  3 default encode raises ValueError (demonstrated): got True | expected True
+PASS  3 counted as ordinary text: 7 and 5 tokens (K3): got [7, 5] | expected [7, 5]
+PASS  3 C4 fails: got '✗' | expected '✗'
+PASS  3 fix the counter first: got 'fix the counter first' | expected 'fix the counter first'
+PASS  3 [CLS]/[SEP] text: C4 fails: got [{'[CLS]': 3, '[SEP]': 3}, '✗'] | expected [{'[CLS]': 3, '[SEP]': 3}, '✗']
+
+=== 4 window and cap (C6)
+PASS  4 cap 70,000 > max output 65,536: C6 fails: got ['✗', True] | expected ['✗', True]
+PASS  4 recommendation (rule 2): got 'reduce k or chunk size, or raise nothing: the call cannot fit' | expected 'reduce k or chunk size, or raise nothing: the call cannot fit'
+PASS  4 token windows of 40,000: 4 sources > 90% of 131,072: got [True, '✗'] | expected [True, '✗']
+PASS  4 a token-unit chunk holds 40,000 tokens: got 40000 | expected 40000
+PASS  4 recommendation (rule 2): got 'reduce k or chunk size, or raise nothing: the call cannot fit' | expected 'reduce k or chunk size, or raise nothing: the call cannot fit'
+
+=== 5 cost arithmetic and the price sheet
+PASS  5 one call = (976 x 1 + 512 x 2) / 1e6 = $0.002: got [0.002, 0.002] | expected [0.002, 0.002]
+PASS  5 10 calls (upper) = 10 x (max upper input + 1024) / 1e6: got 0.02026 | expected 0.02026
+PASS  5 + overhead adds 10 x 71 x $1 / 1e6: got 0.0007099999999999988 | expected 0.00071
+PASS  5 C10 passes at 17 days: got '✓' | expected '✓'
+PASS  5 C10 fails 45 days after 2026-10-17: got ['✗', True] | expected ['✗', True]
+PASS  5 shipped prices_2026-10-17.json = built-in sheet: got True | expected True
+PASS  5 the sheet's prices (foundation §6.2): got [0.075, 0.3, 0.037, 0.1, 0.5] | expected [0.075, 0.3, 0.037, 0.1, 0.5]
+PASS  5 money format: got ['$0.000227', '$0.0227', '$1.50'] | expected ['$0.000227', '$0.0227', '$1.50']
+
+=== 6 a fake traces file (made up for this test; not a recorded run)
+PASS  6 4 traces: finish stop x3, length x1; empty 1: got [4, {'stop': 3, 'length': 1}, 1, 1] | expected [4, {'stop': 3, 'length': 1}, 1, 1]
+PASS  6 completion p95 (linear) and reasoning p50: got [460.7, 115.0] | expected [460.7, 115.0]
+PASS  6 overhead: median 71, max 72 (billed - counted): got [71.0, 72, 4] | expected [71.0, 72, 4]
+PASS  6 C7 fails (p95 461 > 80% of 512): got '✗' | expected '✗'
+PASS  6 C8 fails (length 1/4, empty 1/4): got ['✗', True] | expected ['✗', True]
+PASS  6 C9 fails with the assumed 71 < measured max 72: got '✗' | expected '✗'
+PASS  6 C9 with --overhead 60 also fails; names --overhead 72: got [True] | expected [True]
+PASS  6 rule 3 comes before C2's rule 5: got ['✗', 'raise `max_completion_tokens` or lower effort'] | expected ['✗', 'raise `max_completion_tokens` or lower effort']
+PASS  6 Claude-shaped usage: max_tokens counts as a cap stop, empty answer: got [900, 512, True, True] | expected [900, 512, True, True]
+PASS  6 clean traces: C7, C8, C9 pass: got ['✓', '✓', '✓'] | expected ['✓', '✓', '✓']
+
+=== 7 recommendation order (first match wins)
+PASS  7 failing ['C2', 'C4', 'C5', 'C6', 'C7', 'C11']: got 'fix the counter first' | expected 'fix the counter first'
+PASS  7 failing ['C1', 'C2']: got 'fix the counter first' | expected 'fix the counter first'
+PASS  7 failing ['C5', 'C6', 'C8']: got 'reduce k or chunk size, or raise nothing: the call cannot fit' | expected 'reduce k or chunk size, or raise nothing: the call cannot fit'
+PASS  7 failing ['C2', 'C5', 'C8']: got 'raise `max_completion_tokens` or lower effort' | expected 'raise `max_completion_tokens` or lower effort'
+PASS  7 failing ['C7']: got 'raise `max_completion_tokens` or lower effort' | expected 'raise `max_completion_tokens` or lower effort'
+PASS  7 failing ['C2', 'C5', 'C11']: got 'chunks are being truncated: shrink chunks or switch embedder (see P4)' | expected 'chunks are being truncated: shrink chunks or switch embedder (see P4)'
+PASS  7 failing ['C2', 'C11']: got 'size chunks in tokens, not characters' | expected 'size chunks in tokens, not characters'
+PASS  7 failing ['C3', 'C9', 'C10', 'C11', 'C12']: got 'split the run or lower volume; check the daily quota' | expected 'split the run or lower volume; check the daily quota'
+PASS  7 failing ['C3', 'C9', 'C10', 'C12']: got 'budget OK' | expected 'budget OK'
+PASS  7 failing []: got 'budget OK' | expected 'budget OK'
+PASS  7 2000-char windows: MiniLM truncation > 5%, C5 fails: got [True, '✗'] | expected [True, '✗']
+PASS  7 C5's rule comes before C2's: got ['✗', 'chunks are being truncated: shrink chunks or switch embedder (see P4)'] | expected ['✗', 'chunks are being truncated: shrink chunks or switch embedder (see P4)']
+PASS  7 200 calls: > 200,000 tokens/day, C11 fails (C2 still wins): got ['✗', 'size chunks in tokens, not characters'] | expected ['✗', 'size chunks in tokens, not characters']
+PASS  7 repo code: 4.61 chars/token (K4), ÷4 error under 20%: C2 passes: got [4.61, '✓'] | expected [4.61, '✓']
+PASS  7 repo code: code-like lines over 20%, C3 fails (not a rule): got '✗' | expected '✗'
+PASS  7 repo code, 500-char chunks: budget OK: got 'budget OK' | expected 'budget OK'
+PASS  7 1,000 calls: C11 fails -> split the run: got 'split the run or lower volume; check the daily quota' | expected 'split the run or lower volume; check the daily quota'
+
+=== 8 external flags call nothing; C12
+PASS  8 three 'not built' notes: got [3, True] | expected [3, True]
+PASS  8 Cohere: C5 '?', no WordPiece counts: got ['?', None, None] | expected ['?', None, None]
+PASS  8 pilot: C7 and C9 stay '?': got ['?', '?'] | expected ['?', '?']
+PASS  8 no WordPiece row in the corpus table: got ['o200k_harmony', 'o200k_base', 'cl100k_base'] | expected ['o200k_harmony', 'o200k_base', 'cl100k_base']
+PASS  8 temperature sent to Claude: C12 fails: got ['✗', True] | expected ['✗', True]
+PASS  8 Claude, temperature auto (not sent), effort low: C12 passes: got [None, '✓'] | expected [None, '✓']
+PASS  8 effort not sent: C12 fails: got '✗' | expected '✗'
+PASS  8 effort 'max' on Groq: C12 fails: got '✗' | expected '✗'
+PASS  8 Groq temperature 2.5: C12 fails: got '✗' | expected '✗'
+PASS  8 CLI: --pilot prints the note on stderr and exits 0: got [0, True] | expected [0, True]
+
+91/91 tool checks passed

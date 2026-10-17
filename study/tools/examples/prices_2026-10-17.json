@@ -1,0 +1,30 @@
+{
+  "price_table_version": "2026-10-17",
+  "unit": "USD per 1M tokens",
+  "source": "LLMOPS_FOUNDATION §6.2; Groq model page openai/gpt-oss-20b [P1-1]; claude-api skill table [P1-16]",
+  "models": {
+    "groq:openai/gpt-oss-20b": {
+      "input": 0.075,
+      "output": 0.3,
+      "cached_input": 0.037,
+      "context_window": 131072,
+      "max_output": 65536,
+      "note": "Groq model page, read 2026-10-17"
+    },
+    "anthropic:claude-haiku-5-5": {
+      "input": 0.1,
+      "output": 0.5,
+      "cached_input": null,
+      "context_window": 1000000,
+      "max_output": null,
+      "note": "prices for prompts up to 100K tokens ($0.50 / $2.50 beyond); max output not recorded"
+    }
+  },
+  "rate_limits": {
+    "groq:openai/gpt-oss-20b": {
+      "tpm": 8000,
+      "tpd": 200000,
+      "note": "plan row UNVERIFIED, foundation §2.5"
+    }
+  }
+}

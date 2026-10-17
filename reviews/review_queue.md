@@ -1,4 +1,4 @@
-# Review queue — generated 2026-10-08 (from progress/concept_tracker.csv after the O1 diagnostic)
+# Review queue — generated 2026-10-08 (from progress/concept_tracker.csv after the O1 diagnostic); §2 updated 2026-10-17
 
 Format: [05 §6.4](../05_LEARNING_AND_RETENTION_SYSTEM.md#64-reviewsreview_queuemd-template).
 
@@ -17,15 +17,13 @@ These are taught in Phase 1. They are not reviewed before they have been taught.
 
 ## 2. Due / overdue
 
-All five are due **2026-10-09**, interval 1 day. Each is a short closed-book recall of what was answered today: 1–2 items, about 5 minutes per concept.
+**Nothing is due (updated 2026-10-17).** Two decisions from the session of 2026-10-14 apply:
+- **O3 is retired.** The learner asked not to be quizzed on the learning system itself (the protocol, intervals and gates). The tutor runs the protocol and explains a rule only when it affects them, never as a graded item.
+- **The M2, M3, M5 and R1 reviews are paused until each concept's lesson has been read.** Their only evidence is the O1 diagnostic, so a review now would test material that was never taught. Each one restarts on the normal schedule once its lesson is read.
 
-| Concept | Recall item |
-|---|---|
-| M2 | Why can a correct answer appear even when retrieval failed? Give a measurement that would expose it. |
-| M3 | Same family as M2: answer quality vs retrieval quality. |
-| R1 | Re-derive the A, C, B, D fused order from the two rankings, and explain your reasoning. |
-| M5 | Name 3 places in the pipeline where a "wrong product version" answer can originate. |
-| O3 | (1) Give the two reasons reviews come first in a session. (2) A concept has interval 3 days, reviewed 2026-10-12, score 2: give the next review date. (Criteria: 05 §2.4, §5.1, §5.2; expected 2026-10-15.) |
+The tracker's `next_review` fields for O3, M2, M3, M5 and R1 were cleared on 2026-10-17.
+
+From now on, the study kit's website (`study/`) works out offline reviews from `progress/study_attempts.jsonl`. This file covers tutor-graded reviews only.
 
 ## 3. Interleaving plan
 - Not yet: there is fewer than one phase of taught material. Interleaving starts after Phase 2 (05 §5.3).

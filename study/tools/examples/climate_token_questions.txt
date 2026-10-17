@@ -1,0 +1,12 @@
+# 06 §6.7 draft seed items for Corpus D (course-authored; questions copied exactly, ids D-001 ... D-010).
+# Format: ID | question. Used by study/tools/examples/climate_token_report.md.
+D-001 | According to the document, by how much have global temperatures risen since the late 19th century?
+D-002 | In what year was the Paris Agreement adopted?
+D-003 | According to the document, what is essential regarding countries' nationally determined contributions (NDCs) for meeting the Paris Agreement's goals?
+D-004 | What does DAC stand for, and what does it do?
+D-005 | How does the document contrast coal and natural gas in terms of carbon intensity?
+D-006 | What are the advantages of putting solar panels on lakes or reservoirs?
+D-007 | What is the supreme decision-making body of the convention that provides the framework for negotiating the Kyoto Protocol and the Paris Agreement?
+D-008 | What does the Kigali Amendment target?
+D-009 | In what year was the IPCC established?
+D-010 | What share of global greenhouse gas emissions comes from aviation?

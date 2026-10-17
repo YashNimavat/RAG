@@ -1,0 +1,67 @@
+=== 1 climate PDF, tokenizer norm (P3_FACTS)
+PASS  1 chunks N (91 windows): got 91 | expected 91
+PASS  1 avgdl (S10: 129.67): got 129.67 | expected 129.67
+PASS  1 vocabulary (S10): got 1870 | expected 1870
+PASS  1 mean idf (S10): got 3.3529482327572473 | expected 3.352948
+PASS  1 floor (S10, K1): got 0.8382370581893118 | expected 0.838237
+PASS  1 floored words (S10: 18): got 18 | expected 18
+PASS  1 the valley n = 28 to 45 (lesson §7): got [28, 45] | expected [28, 45]
+PASS  1 once-only tokens, doubled, % (K8): got [799, 184, 23.0] | expected [799, 184, 23.0]
+PASS  1 fragments (K8): got 101 | expected 101
+PASS  1 right chunks = S9 target windows: got [['#1'], ['#82', '#83'], ['#2'], ['#64'], ['#26', '#63', '#64']] | expected [['#1'], ['#82', '#83'], ['#2'], ['#64'], ['#26', '#63', '#64']]
+PASS  1 ranks under norm (S9: all 1): got [1, 1, 1, 1, 1] | expected [1, 1, 1, 1, 1]
+PASS  1 ranks under split (S9: none, none, 3, 1, 1): got [None, None, 3, 1, 1] | expected [None, None, 3, 1, 1]
+PASS  1 BECCS: windows above 0 (K2): got 80 | expected 80
+PASS  1 BECCS: top 4 chunks (K2): got ['#83', '#82', '#16', '#53'] | expected ['#83', '#82', '#16', '#53']
+PASS  1 BECCS: top 4 scores (K2): got [5.0622714421034996, 4.880348134356333, 1.6719683034929393, 1.615596258711384] | expected [5.0623, 4.8803, 1.672, 1.6156]
+PASS  1 BECCS: not in the index (K2): got ['what', 'does', 'stand'] | expected ['what', 'does', 'stand']
+PASS  1 BECCS: rarest token and idf (K2): got ['beccs', 3.5779478934066544] | expected ['beccs', 3.577948]
+PASS  1 BECCS: matches through 'for' only (lesson §8: 78): got 78 | expected 78
+PASS  1 BECCS: page of window 83: got 30 | expected 30
+PASS  1 IPCC: window 1 at 3.892792 (K3): got ['#1', 3.892791532067594] | expected ['#1', 3.892792]
+PASS  1 vague: windows above 0, top score (K7): got [81, 5.760842762704414] | expected [81, 5.7608]
+PASS  1 vague: not in the index; vague warning (K7): got [['what', 'done'], True] | expected [['what', 'done'], True]
+PASS  1 C2 and C5 pass under norm: got ['✓', '✓'] | expected ['✓', '✓']
+PASS  1 C6 fails on the vague question: got '✗' | expected '✗'
+PASS  1 the report shows the FACTS numbers: got True | expected True
+
+=== 1b the same with split()
+PASS  1b IPCC and BECCS: zero-score (S9: 0 windows above 0): got [True, True] | expected [True, True]
+PASS  1b the argsort fallback (S9: [90, 89, 88, 87, 86], first 4): got ['#90', '#89', '#88', '#87'] | expected ['#90', '#89', '#88', '#87']
+PASS  1b CH4 under split: windows above 0 (S9: 3): got 3 | expected 3
+PASS  1b C2 fails under split: got '✗' | expected '✗'
+PASS  1b recommendation: got 'fix the tokenizer first' | expected 'fix the tokenizer first'
+PASS  1b audit: the forms of IPCC and BECCS under split (S9): got [['(IPCC)'], ['(BECCS),']] | expected [['(IPCC)'], ['(BECCS),']]
+
+=== 1c the command line
+PASS  1c exit code: got 0 | expected 0
+PASS  1c the CLI report = the imported report: got True | expected True
+PASS  1c stdout summary: got True | expected True
+
+=== 2 identifier text
+PASS  2 classes: got ['CamelCase', 'snake_case', 'snake_case', 'version', 'given'] | expected ['CamelCase', 'snake_case', 'snake_case', 'version', 'given']
+PASS  2 norm tokens (S7: ERR_CONN_RESET -> err, conn, reset; v2.10.3 whole): got [['getuserid'], ['get', 'user', 'id'], ['err', 'conn', 'reset'], ['v2.10.3']] | expected [['getuserid'], ['get', 'user', 'id'], ['err', 'conn', 'reset'], ['v2.10.3']]
+PASS  2 norm flags: cut apart for get_user_id and ERR_CONN_RESET only: got [[], ['cut apart'], ['cut apart'], []] | expected [[], ['cut apart'], ['cut apart'], []]
+PASS  2 code tokens of getUserId (the lesson's tokCode: parts + whole): got ['get', 'user', 'id', 'getuserid'] | expected ['get', 'user', 'id', 'getuserid']
+PASS  2 code flags: getUserId case split (whole kept); v2.10.3 whole, no flag: got [['case split, whole name kept'], []] | expected [['case split, whole name kept'], []]
+PASS  2 code keeps v2.10.3 and 1.5 whole; getUserId -> parts + whole; ERR_CONN_RESET -> parts + whole (lesson tokCode): got [['v2.10.3'], ['1.5'], ['get', 'user', 'id', 'getuserid'], ['err', 'conn', 'reset', 'err_conn_reset']] | expected [['v2.10.3'], ['1.5'], ['get', 'user', 'id', 'getuserid'], ['err', 'conn', 'reset', 'err_conn_reset']]
+PASS  2 split flags: ERR_CONN_RESET has a comma attached once: got False | expected False
+PASS  2 the given name is not in the text: got 0 | expected 0
+PASS  2 C2 fails under norm and names both: got ['✗', True, True] | expected ['✗', True, True]
+PASS  2 the report flags them: got 1 | expected 1
+
+=== 3 two-document corpus
+PASS  3 chunks N: got 2 | expected 2
+PASS  3 floor (K9: -0.080472): got -0.08047189562170502 | expected -0.080472
+PASS  3 C5 fails, with the negative-floor reason: got ['✗', True, True] | expected ['✗', True, True]
+PASS  3 'the' scores -0.080472 in both: zero-score warning: got True | expected True
+PASS  3 'bpa' has idf 0 (K9): zero-score warning: got [0.0, True] | expected [0.0, True]
+PASS  3 recommendation: got 'not enough data to judge' | expected 'not enough data to judge'
+
+=== 4 an all-zero question on the climate PDF
+PASS  4 no token in the index, zero-score: got [['zzzz', 'qqqq'], True, 0, []] | expected [['zzzz', 'qqqq'], True, 0, []]
+PASS  4 the fallback k chunks: got ['#90', '#89', '#88', '#87'] | expected ['#90', '#89', '#88', '#87']
+PASS  4 the report warns and names the fallback: got [True, True] | expected [True, True]
+PASS  4 C7 fails: got '✗' | expected '✗'
+
+54/54 tool checks passed

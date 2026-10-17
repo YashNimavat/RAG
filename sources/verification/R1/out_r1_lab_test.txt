@@ -1,0 +1,169 @@
+# R1 lab test. Notebook sha256 02f3cb5714dd9f1c20267f458ed374382e3e574b3bc935a7fc476a1c119f0967; solution sha256 d1165ac8f64ae9ca; runner r1_lab_runner.py (no solution code).
+
+variant=good
+=== CHECK summary
+PASS cell 11: # CHECK Task 1 (do not edit)
+PASS cell 14: # CHECK Task 2 (do not edit)
+PASS cell 18: # CHECK Task 3 (do not edit)
+PASS cell 23: # CHECK Task 4a (do not edit)
+PASS cell 26: # CHECK Task 4b (do not edit)
+PASS cell 31: # CHECK Task 5 (do not edit)
+PASS cell 34: # CHECK Task 6 (do not edit)
+PASS cell 39: # CHECK Task 7 (do not edit)
+PASS cell 44: # CHECK Task 8 (do not edit)
+PASS cell 47: # CHECK Task 9 (do not edit)
+10/10 CHECK cells passed
+
+variant=good_alt_literal_weights
+=== CHECK summary
+PASS cell 11: # CHECK Task 1 (do not edit)
+PASS cell 14: # CHECK Task 2 (do not edit)
+PASS cell 18: # CHECK Task 3 (do not edit)
+PASS cell 23: # CHECK Task 4a (do not edit)
+PASS cell 26: # CHECK Task 4b (do not edit)
+PASS cell 31: # CHECK Task 5 (do not edit)
+PASS cell 34: # CHECK Task 6 (do not edit)
+PASS cell 39: # CHECK Task 7 (do not edit)
+PASS cell 44: # CHECK Task 8 (do not edit)
+PASS cell 47: # CHECK Task 9 (do not edit)
+10/10 CHECK cells passed
+
+variant=blank
+=== CHECK summary
+FAIL cell 11: # CHECK Task 1 (do not edit)  <- AssertionError: write both predictions first
+FAIL cell 14: # CHECK Task 2 (do not edit)  <- NameError: name 'rrf' is not defined | File "<cell 14>", line 2, in <module>
+FAIL cell 18: # CHECK Task 3 (do not edit)  <- NameError: name 'minmax' is not defined | File "<cell 18>", line 5, in <module>
+FAIL cell 23: # CHECK Task 4a (do not edit)  <- NameError: name 'repo_style' is not defined | File "<cell 23>", line 2, in <module>
+FAIL cell 26: # CHECK Task 4b (do not edit)  <- NameError: name 'test_fusion_preserves_identity' is not defined | File "<cell 26>", line 17, in <module>
+FAIL cell 31: # CHECK Task 5 (do not edit)  <- AssertionError: write both predictions first
+FAIL cell 34: # CHECK Task 6 (do not edit)  <- NameError: name 'd006_top2' is not defined | File "<cell 34>", line 2, in <module>
+FAIL cell 39: # CHECK Task 7 (do not edit)  <- AssertionError: write both predictions first
+FAIL cell 44: # CHECK Task 8 (do not edit)  <- AssertionError: write your prediction first
+FAIL cell 47: # CHECK Task 9 (do not edit)  <- AssertionError: write 3-5 sentences (40+ words)
+0/10 CHECK cells passed
+
+variant=rrf_ranks_from_0
+=== CHECK summary
+PASS cell 11: # CHECK Task 1 (do not edit)
+FAIL cell 14: # CHECK Task 2 (do not edit)  <- AssertionError: a list where a document is missing adds nothing; rank 1 gives 1/61
+PASS cell 18: # CHECK Task 3 (do not edit)
+PASS cell 23: # CHECK Task 4a (do not edit)
+PASS cell 26: # CHECK Task 4b (do not edit)
+PASS cell 31: # CHECK Task 5 (do not edit)
+FAIL cell 34: # CHECK Task 6 (do not edit)  <- AssertionError: d006_top2: the RRF scores of fused ranks 1 and 2
+FAIL cell 39: # CHECK Task 7 (do not edit)  <- AssertionError: the change counts are not right yet
+PASS cell 44: # CHECK Task 8 (do not edit)
+PASS cell 47: # CHECK Task 9 (do not edit)
+7/10 CHECK cells passed
+
+variant=no_tie_rule
+=== CHECK summary
+PASS cell 11: # CHECK Task 1 (do not edit)
+FAIL cell 14: # CHECK Task 2 (do not edit)  <- AssertionError: ties must go to the smaller id
+FAIL cell 18: # CHECK Task 3 (do not edit)  <- AssertionError: weight 1.0 on dense must reproduce the dense order
+PASS cell 23: # CHECK Task 4a (do not edit)
+PASS cell 26: # CHECK Task 4b (do not edit)
+PASS cell 31: # CHECK Task 5 (do not edit)
+PASS cell 34: # CHECK Task 6 (do not edit)
+PASS cell 39: # CHECK Task 7 (do not edit)
+PASS cell 44: # CHECK Task 8 (do not edit)
+PASS cell 47: # CHECK Task 9 (do not edit)
+8/10 CHECK cells passed
+
+variant=minmax_constant_is_0
+=== CHECK summary
+PASS cell 11: # CHECK Task 1 (do not edit)
+PASS cell 14: # CHECK Task 2 (do not edit)
+FAIL cell 18: # CHECK Task 3 (do not edit)  <- AssertionError: a constant list: every member is the best, 1.0
+PASS cell 23: # CHECK Task 4a (do not edit)
+PASS cell 26: # CHECK Task 4b (do not edit)
+PASS cell 31: # CHECK Task 5 (do not edit)
+PASS cell 34: # CHECK Task 6 (do not edit)
+PASS cell 39: # CHECK Task 7 (do not edit)
+PASS cell 44: # CHECK Task 8 (do not edit)
+PASS cell 47: # CHECK Task 9 (do not edit)
+9/10 CHECK cells passed
+
+variant=missing_gets_0.5
+=== CHECK summary
+PASS cell 11: # CHECK Task 1 (do not edit)
+PASS cell 14: # CHECK Task 2 (do not edit)
+FAIL cell 18: # CHECK Task 3 (do not edit)  <- AssertionError: B is missing from BM25: it gets only its dense part
+PASS cell 23: # CHECK Task 4a (do not edit)
+PASS cell 26: # CHECK Task 4b (do not edit)
+FAIL cell 31: # CHECK Task 5 (do not edit)  <- AssertionError: D-008 min-max top-4 is not right yet
+PASS cell 34: # CHECK Task 6 (do not edit)
+FAIL cell 39: # CHECK Task 7 (do not edit)  <- AssertionError: the change counts are not right yet
+FAIL cell 44: # CHECK Task 8 (do not edit)  <- AssertionError: a count is not right yet
+PASS cell 47: # CHECK Task 9 (do not edit)
+6/10 CHECK cells passed
+
+variant=zscore_sample_sd
+=== CHECK summary
+PASS cell 11: # CHECK Task 1 (do not edit)
+PASS cell 14: # CHECK Task 2 (do not edit)
+FAIL cell 18: # CHECK Task 3 (do not edit)  <- AssertionError: zscore3([2, 4, 6]) is not right yet (population sd?)
+PASS cell 23: # CHECK Task 4a (do not edit)
+PASS cell 26: # CHECK Task 4b (do not edit)
+PASS cell 31: # CHECK Task 5 (do not edit)
+PASS cell 34: # CHECK Task 6 (do not edit)
+PASS cell 39: # CHECK Task 7 (do not edit)
+PASS cell 44: # CHECK Task 8 (do not edit)
+PASS cell 47: # CHECK Task 9 (do not edit)
+9/10 CHECK cells passed
+
+variant=positional_fusion
+=== CHECK summary
+PASS cell 11: # CHECK Task 1 (do not edit)
+PASS cell 14: # CHECK Task 2 (do not edit)
+FAIL cell 18: # CHECK Task 3 (do not edit)  <- AssertionError: fuse over the UNION of the two lists
+FAIL cell 23: # CHECK Task 4a (do not edit)  <- AssertionError: aligned_style is not right yet (dicts keyed by document; ties by smaller id)
+FAIL cell 26: # CHECK Task 4b (do not edit)  <- AssertionError: alpha=0 must give the BM25 order
+FAIL cell 31: # CHECK Task 5 (do not edit)  <- AssertionError: D-002 min-max top-4 is not right yet
+PASS cell 34: # CHECK Task 6 (do not edit)
+FAIL cell 39: # CHECK Task 7 (do not edit)  <- AssertionError: the change counts are not right yet
+FAIL cell 44: # CHECK Task 8 (do not edit)  <- AssertionError: a count is not right yet
+PASS cell 47: # CHECK Task 9 (do not edit)
+4/10 CHECK cells passed
+
+variant=bm25_split_tokenizer
+=== CHECK summary
+PASS cell 11: # CHECK Task 1 (do not edit)
+PASS cell 14: # CHECK Task 2 (do not edit)
+PASS cell 18: # CHECK Task 3 (do not edit)
+PASS cell 23: # CHECK Task 4a (do not edit)
+PASS cell 26: # CHECK Task 4b (do not edit)
+FAIL cell 31: # CHECK Task 5 (do not edit)  <- AssertionError: D-002 BM25 top-4 is not right yet
+PASS cell 34: # CHECK Task 6 (do not edit)
+FAIL cell 39: # CHECK Task 7 (do not edit)  <- AssertionError: the change counts are not right yet
+FAIL cell 44: # CHECK Task 8 (do not edit)  <- AssertionError: a count is not right yet
+PASS cell 47: # CHECK Task 9 (do not edit)
+7/10 CHECK cells passed
+
+variant=weak_identity_test
+=== CHECK summary
+PASS cell 11: # CHECK Task 1 (do not edit)
+PASS cell 14: # CHECK Task 2 (do not edit)
+PASS cell 18: # CHECK Task 3 (do not edit)
+PASS cell 23: # CHECK Task 4a (do not edit)
+FAIL cell 26: # CHECK Task 4b (do not edit)  <- RuntimeError: your test did NOT catch the repo bug: use 4+ docs and a dense order that differs from the id order | File "<cell 26>", line 20, in <module>
+PASS cell 31: # CHECK Task 5 (do not edit)
+PASS cell 34: # CHECK Task 6 (do not edit)
+PASS cell 39: # CHECK Task 7 (do not edit)
+PASS cell 44: # CHECK Task 8 (do not edit)
+PASS cell 47: # CHECK Task 9 (do not edit)
+9/10 CHECK cells passed
+
+=== SUMMARY
+good                   10/10 CHECK cells passed     fails: -
+good_alt_literal_weights 10/10 CHECK cells passed     fails: -
+blank                  0/10 CHECK cells passed      fails: Task 1, Task 2, Task 3, Task 4a, Task 4b, Task 5, Task 6, Task 7, Task 8, Task 9
+rrf_ranks_from_0       7/10 CHECK cells passed      fails: Task 2, Task 6, Task 7
+no_tie_rule            8/10 CHECK cells passed      fails: Task 2, Task 3
+minmax_constant_is_0   9/10 CHECK cells passed      fails: Task 3
+missing_gets_0.5       6/10 CHECK cells passed      fails: Task 3, Task 5, Task 7, Task 8
+zscore_sample_sd       9/10 CHECK cells passed      fails: Task 3
+positional_fusion      4/10 CHECK cells passed      fails: Task 3, Task 4a, Task 4b, Task 5, Task 7, Task 8
+bm25_split_tokenizer   7/10 CHECK cells passed      fails: Task 5, Task 7, Task 8
+weak_identity_test     9/10 CHECK cells passed      fails: Task 4b
+LAB TEST PASS: the solution passes every CHECK and every broken variant fails at least one

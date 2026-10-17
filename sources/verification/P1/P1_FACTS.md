@@ -17,6 +17,7 @@ Run date: **2026-10-08** (S11 and S-web added **2026-10-09**). Every number in [
   | `p1_measure.py` | Sections S1–S10: extraction, token counts, ratios, pieces, truncation, toy temperature, the repo heuristic, prompt budget, cost arithmetic | `out_p1_measure.txt` (stdout), `out_p1_measure.stderr.txt` (stderr) |
   | `p1_sources.py` | S-src: checks every cited repo cell (0-based) and book page against the files | `out_p1_sources.txt` |
   | `p1_strawberry.py` (2026-10-09) | S11: `o200k_harmony` count and pieces for "strawberry" in four contexts; tokenizer only | `out_p1_strawberry.txt` |
+  | `p1_kit_measure.py` (2026-10-18) | K1–K8 for the HTML lesson: the encoding-name and special-token traps, real code and digits, bytes vs characters, a tiny BPE trained on the PDF, dated cost and run-time arithmetic, the window share. `p1_measure.py` is unchanged | `out_p1_kit_measure.txt`, `out_p1_kit_measure.stderr.txt` (empty) |
 
 - **Re-run** (from `rag_learning/`, Git Bash):
   ```bash
@@ -179,6 +180,24 @@ Read with a web fetch on 2026-10-09. Paraphrased. Pages can change; re-check bef
 | Groq OpenAI compatibility (https://console.groq.com/docs/openai) | A temperature of 0 is converted to `1e-8`; if that causes issues, use a float above 0 and at most 2. `N` must be 1. | D.6, J5 |
 | H. He and Thinking Machines Lab, "Defeating Nondeterminism in LLM Inference", 2025-09-10 (https://thinkingmachines.ai/blog/defeating-nondeterminism-in-llm-inference/) | Main cause of run-to-run differences on inference servers: server load changes the batch size, and the kernels are not batch-invariant, so one request's result depends on what else is in its batch. Experiments used vLLM on GPUs. Groq is not mentioned. Read through a fetch summary. | D.6 (as the GPU-server cause only; UNVERIFIED for Groq) |
 
+## 1b. Added 2026-10-18: K1–K8 (`p1_kit_measure.py`) for the HTML lesson
+
+`K` = `p1_kit_measure.py` (section in `out_p1_kit_measure.txt`). Run from `rag_learning/` with the repo path as the argument:
+`PYTHONIOENCODING=utf-8 uv run python sources/verification/P1/p1_kit_measure.py "C:/Yash/New-Work/Book RAG/upstream/RAG_Techniques"`. A second run was byte-identical (`cmp`). Tokenizers only; no API call, no `.env` read.
+
+| Id | Fact | Value |
+|---|---|---|
+| K1 | Environment | Python 3.12.8; pymupdf 1.26.7, tiktoken 0.14.0, tokenizers 0.23.2; PDF 72,593 chars, 33 pages |
+| K2 | `tiktoken.encoding_for_model` on model ids | `gpt-oss-20b` → `o200k_harmony`; **`openai/gpt-oss-20b` (the `.env` id) → `KeyError`**; `gpt-4o-mini` → `o200k_base`; `gpt-3.5-turbo` → `cl100k_base`. Fixes: `get_encoding("o200k_harmony")`, or strip the provider prefix |
+| K3 | Special tokens | `o200k_harmony`: vocabulary 201,088, 1,091 special tokens, including the chat-format tokens `<|start|>` `<|channel|>` `<|message|>` `<|end|>` `<|return|>` `<|call|>`. `encode("<|endoftext|>")` and `encode("<|start|>")` raise `ValueError` (disallowed special token); with `disallowed_special=()` they become 7 and 5 ordinary tokens |
+| K4 | Real code; digits | `helper_functions.py` 11,847 chars → 2,570 `o200k_harmony` tokens (**4.61** chars/token; cl100k 2,553, 4.64); `evaluation/evalute_rag.py` 5,046 → 1,102 (4.58; cl100k 1,098, 4.60). Pieces: `1234567` → `123` `456` `7`; `1,234,567` → `1` `,` `234` `,` `567`; `2023-11-07` → `202` `3` `-` `11` `-` `07`; `650,000` → `650` `,` `000`; `1.5` → `1` `.` `5` |
+| K5 | Bytes vs characters (`o200k_harmony`) | Whole PDF: 72,593 chars, 72,595 UTF-8 bytes, 12,840 tokens: 5.65 chars/token = 5.65 bytes/token. Hindi sentence (S3): 61 chars, 161 bytes, 18 tokens: 3.39 chars/token, 8.94 bytes/token |
+| K6 | A tiny BPE trained on the PDF (`tokenizers` BpeTrainer, whitespace pre-tokenizer, vocab 300, min frequency 2) | 230 merges learned; first 12: `i+n`, `a+n`, `e+s`, `a+t`, `o+n`, `e+n`, `an+d`, `e+r`, `i+on`, `in+g`, `r+e`, `a+l`; a second training run gives identical merges. Splits: `the` 1, `climate` 1, `emissions` 1, `greenhouse` 4 (`gre` `enh` `ous` `e`), `deglaciation` 6 (`de` `g` `l` `ac` `i` `ation`); `o200k_harmony` after a space: 1, 1, 1, 1, and 4 (`·de` `gl` `aci` `ation`) |
+| K7 | Dated prices (per 1M tokens, read 2026-10-17, LLMOPS_FOUNDATION §6.2; external): Groq `openai/gpt-oss-20b` $0.075 in / $0.30 out; Claude Haiku 5.5 $0.10 / $0.50 | One v0 call (976 in + 512 out cap): Groq ≤ **$0.000227**, 100 calls ≤ **$0.0227**, output = 67.7% of the bill; Haiku ≤ $0.000354, 100 calls ≤ $0.0354, output 72.4%. Output/input price: Groq 4.0×, Haiku 5.0×. Run time: 100 × (976 + 71 + 512 = 1,559) = 155,900 tokens ≥ **19.5 min** at 8,000 tokens/min; 55 calls ≥ 10.7 min |
+| K8 | v0 call in the window (Groq model page, read 2026-10-17: window 131,072, max output 65,536) | 976 + ~71 + 512 = 1,559 tokens = 1.19% of 131,072; sources = 842/976 = 86% of the counted input |
+
+Notes: the Haiku cost uses `o200k_harmony` counts as a **proxy**; Claude's own count comes from its `count_tokens` endpoint (newer Claude tokenizers give more tokens for the same text). The 71-token overhead is the B.3 inference from one logged call. The 8,000 tokens/min limit is Groq's listed limit for this model; which plan that row belongs to is UNVERIFIED (LLMOPS_FOUNDATION finding 5).
+
 ## 2. CITED, DERIVED and UNVERIFIED
 
 | Item | Status |
@@ -190,7 +209,7 @@ Read with a web fetch on 2026-10-09. Paraphrased. Pages can change; re-check bef
 | T = 1 hand computation (e² etc.) | DERIVED; matches S7 |
 | Temperature 0 not bit-identical on hosted APIs | Groq promises no determinism (S-web, read 2026-10-09). Whether our runs actually differ, and why, is UNVERIFIED (08 RK-17; M4's repeated-generation subsample). The batch cause is shown for GPU servers only, not for Groq |
 | A description of top-k sampling | UNVERIFIED (no course source; Groq has no `top_k` parameter, S-web) |
-| Groq context window and prices for `openai/gpt-oss-20b` | Not stated; the learner looks them up (lab Task 8) |
+| Groq context window and prices for `openai/gpt-oss-20b` | Documented (read 2026-10-17, Groq model page; external): window 131,072, max output 65,536, $0.075 in / $0.30 out / $0.037 cached input per 1M (§1b K7–K8). The lab's look-up task stays: prices change |
 | Groq behaviour past the window; `finish_reason` value at the cap | UNVERIFIED |
 | Model context sizes in the `document_augmentation.ipynb` cell 4 comment | UNVERIFIED |
 
