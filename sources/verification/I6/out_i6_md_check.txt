@@ -1,0 +1,72 @@
+PASS kit.lint_questions: no problems
+PASS question file header line
+PASS the 17 ids of the build spec, no more, no less (17)
+PASS ids unique
+PASS each id has the spec's type and set (pre/main/review/interview)
+PASS ids follow I6-<type>-<nn> / I6-PRE-<nn>
+PASS the 2 set=pre items come first, in order
+     items: 17; pre 2; main 11; review 3; interview 1
+PASS FORMAT rules per item: Hint 1+2, Hint 3 only on A, 2-5 keys, 1-2 'for a 4', 1-3 wrong answers, no nested details, one short question sentence (all 17)
+PASS at most 2 external items (1)
+PASS the matching misconception ids are named (MC-002 matrix, MC-003 stages, MC-006 uncalibrated threshold)
+PASS AIQ licence file: MIT, Copyright (c) 2026 Om
+PASS I6-R-06: set=interview, source=AIQ-04-Q45
+PASS I6-R-06: MIT notice with the verbatim question
+PASS I6-R-06: the quoted question is verbatim in the repo (heading of Q45 at line 1178)
+PASS I6-R-06: the 3 quoted repo paragraphs (153 words) are exact substrings of the pinned file, with the MIT notice, before our check
+PASS I6-R-06: the quoted answer includes the 'echo the chunk's vocabulary' point
+PASS I6-R-06: our check names the echo (0.777), the K9 near-copies and the de-leaked result
+PASS I6-R-06: our own model answer follows and names leak(i)
+     note: the interview question is verbatim; the one-sentence rule is not applied to it
+PASS I6-A-02: 8 vectors over 3 parents, in rank order (8)
+PASS I6-A-02: max and sum rankings differ (max ['Y', 'Z', 'X'], sum ['Z', 'X', 'Y'])
+PASS I6-A-02: the model answer equals the recomputed rankings and sums {'Y': 1.18, 'Z': 2.69, 'X': 1.22}
+PASS I6-A-02: the sum winner Z is not the max winner and has the most vectors (4)
+PASS I6-A-02: the table is new, not the lesson's K3 toy
+PASS I6-A-01: 582 / 485 vectors and 3,575,808 / 2,979,840 bytes recomputed and printed by K4
+PASS I6-A-03: 194 and 2,910 recomputed and printed by K10
+PASS I6-A-04: K_vec = 4 x 11 = 44 recomputed; the measured need (max 11) matches K6
+PASS I6-A-05: the five leak_cos values and tau equal K9
+PASS I6-A-05: flagged ['D-002', 'D-003', 'D-007'], not flagged ['D-005', 'D-006'] recomputed
+PASS every reread links the short reading file AND the lesson step and names a book page Ch11 p.x/13 (all 17)
+PASS every reread names the reading section(s) and lesson step(s) the spec says teach it (all 17)
+PASS question file: 52 links resolve (50 with #anchors in all)
+PASS reading file: 1 links resolve (0 with #anchors in all)
+PASS the lesson has the 10 step ids the files link to (['clean', 'cost', 'designs', 'guard', 'lanes', 'leak', 'project', 'score', 'search', 'shape'])
+PASS the lesson's 4 study-kit file links point at existing files
+PENDING lesson links to spec §1 files another helper is still building: ['study/tools/examples/climate_i6_report.md']
+PASS 0 links from other workspace files into the two I6 kit files resolve
+     word count: reading file 2552 (code blocks removed; 3152 with code); question file 6844; lesson text 6905
+PASS reading file prose within 1,800-3,000 words (2552)
+PASS reading file header line
+PASS reading file has What this is / is not and Check yourself (FORMAT §3)
+PASS the book box names Ch11 p.1/13, p.6-11/13, per 04, not re-opened (spec §5)
+PASS sections ## 1. ... ## 12. in order (12)
+PASS sections 1-11 follow the lesson's steps 1-11 (each title names its step)
+PASS section 12 is 'When not to use it' (step 12), then 'Check yourself'
+PASS house-style beats: answer first in all 12 sections; result / what this means / for your project [9, 9, 11]
+PASS Check yourself names and links the question file
+PASS Check yourself states the right item counts per set
+PASS reading file carries the spec §10 labels
+PASS question file carries the spec §10 labels
+PASS 7 distinct book pages cited, all in Ch11 of 13 pages: [1, 6, 7, 8, 9, 10, 11]
+SKIPPED book folder RAG_Made_Simple_The_Complete_Visual_Guide not found under ROOT: page-exists and phrase checks run on Yash's machine
+SKIPPED whole-book 15-word overlap check runs on Yash's machine
+     sources: the climate PDF (33 pages), 2 notebooks, 3 scripts (held in memory only)
+PASS question file: no 15-word run shared with the climate PDF or the upstream notebooks/scripts (longest shared run: <6 words)
+PASS reading file: no 15-word run shared with the climate PDF or the upstream notebooks/scripts (longest shared run: 6 words)
+PASS lesson text: no 15-word run shared with the climate PDF or the upstream notebooks/scripts (longest shared run: <6 words)
+     number sources: out_i6_kit_measure.txt, I6_FACTS.md; for the lesson also: ['verify notebook run']
+PASS question + reading files: every decimal and every integer >= 10 matches a value printed in out_i6_kit_measure.txt or I6_FACTS.md, or the EXTERNAL / DERIVED list
+PASS lesson text: every decimal and every integer >= 10 is traceable the same way
+PASS 22 spec §8 key numbers are printed by the measurement (or written in I6_FACTS)
+PASS each key number is quoted in the lesson, reading or question file
+PASS every number in a key point or 'for a 4' point (25) also appears in the reading file
+PASS none of the 11 spec §9 banned phrases appears ({'question file': [], 'reading file': [], 'lesson text': []})
+PASS no Claude model identifier strings in the files (none)
+     quiz.py --check: OK   C1_questions.md: 15 questions | OK   I6_questions.md: 17 questions | OK   P1_questions.md: 21 questions | OK   P2_questions.md: 17 questions | OK   P3_questions.md: 18 questions | OK   P4_questions.md: 21 questions | OK   R1_questions.md: 17 questions | 7/7 files pass
+PASS study/quiz.py --check passes for I6 (OK   I6_questions.md: 17 questions)
+PASS study/quiz.py --check exits 0 for all files (exit 0)
+
+60/60 checks passed; 0 failed; 1 PENDING; 2 SKIPPED
+ALL PASS (except PENDING/SKIPPED)

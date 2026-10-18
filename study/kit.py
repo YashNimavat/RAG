@@ -89,7 +89,7 @@ def load_tracker() -> dict[str, dict]:
         return {row["concept_id"]: row for row in csv.DictReader(f)}
 
 
-_TOOL_HINT = {"P1": "token_budget", "P2": "qrels", "P3": "bm25", "P4": "embed_fit"}               # apply-it tools are named after the technique, not the concept id
+_TOOL_HINT = {"P1": "token_budget", "P2": "qrels", "P3": "bm25", "P4": "embed_fit", "I6": "question_augment"}               # apply-it tools are named after the technique, not the concept id
 
 
 def concept_files(cid: str) -> dict:

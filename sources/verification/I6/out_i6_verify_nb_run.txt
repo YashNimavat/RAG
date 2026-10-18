@@ -1,0 +1,5 @@
+SKIPPED  §4b optional cross-encoder filter: SKIPPED (model not in cache): cross-encoder/ms-marco-MiniLM-L-6-v2 is not in the local Hugging Face cache; the lesson uses the bi-encoder stand-in, and no lesson number depends on this section
+cells with errors: 0
+Plotly figures saved: 11; runtime 13.2 s; file study/notebooks/I6_doc_augmentation_verify.ipynb 145 KiB
+159 checks passed / 0 failed
+SKIPPED lines: 1

@@ -1,0 +1,17 @@
+You write search questions for one chunk of a longer document.
+
+Write exactly {n_max} questions that a person might type into a search box, each of which THIS chunk answers on its own.
+
+Rules:
+1. Each question must be answerable from the chunk text alone. Do not ask about anything the chunk does not state.
+2. One fact or idea per question. Keep each question under 25 words.
+3. Write the way a user asks, not the way the document is written: plain everyday words are welcome, but keep names, numbers and acronyms when a user would type them.
+4. Never refer to the source itself: no "the text", "the passage", "the author", "this document", "this chunk", "according to the context".
+5. Do not copy a whole sentence from the chunk. Do not include answers, numbering or headers.
+6. Order the questions from the chunk's most central fact to its least central one, so that the first n questions are the best n.
+7. Every question ends with "?". No two questions ask the same thing.
+
+Return only JSON: {"questions": ["...", "..."]} with exactly {n_max} strings.
+
+Chunk:
+{chunk_text}

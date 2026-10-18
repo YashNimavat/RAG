@@ -1,0 +1,156 @@
+
+=== K1 environment, corpus, model, question pack
+python 3.12.3 | {'pymupdf': '1.26.7', 'sentence-transformers': '6.1.0', 'transformers': '5.19.0', 'torch': '2.14.1', 'numpy': '2.5.3', 'tiktoken': '0.14.0'}
+pdf sha256 1d58a0fac2435c2ce4129ff84906b93118d731e4a004e7a26f8ab8f749a92669
+97 chunks: count=97 chunks.jsonl sha256=d4108b8936093394c6eb50d4c22e8d4013d9a048fb38d5769281af4aadb3011b (P4 K1: d4108b89...)
+draft seeds: 10 (8 answerable); relevant chunk seqs per answerable seed: {'D-001': [7], 'D-002': [27], 'D-003': [68], 'D-004': [23, 67, 68], 'D-005': [3, 4], 'D-006': [21], 'D-007': [27, 85], 'D-008': [69]}
+seed categories: {'D-001': 'exact-term', 'D-002': 'factual-single-span', 'D-003': 'factual-single-span', 'D-004': 'exact-term', 'D-005': 'multi-span', 'D-006': 'vocabulary-mismatch', 'D-007': 'multi-hop', 'D-008': 'exact-term', 'D-009': 'unanswerable', 'D-010': 'unanswerable'}
+seed created_by: [('llm-draft', 10)]
+question pack: climate_i6_questions.jsonl sha256=b6d060c7ab3024372d368c7ce4bd5df81f03b62ce249a9cbb21b83cdc25ce2c9 lines=97 questions=970 per chunk min=10 max=10
+prompt: i6_questions_prompt_v1.txt sha256=b44a15ec3beb8f8518e3de237108a036cfeac1edf911a54b82879fff196d6fab; pack prompt_version=['i6_questions_v1']; generator=['stand-in: Claude helpers, 2026-10-18 build session, blind to the eval set']
+sentence-transformers/all-MiniLM-L6-v2: snapshot=onnx-reb max_seq_length=256 dim=384
+vectors: chunks (97, 384), questions (970, 384); max |norm-1| = 1.19e-07
+
+=== K2 the upstream document_augmentation parent on this PDF (read_pdf_to_string + split_document, cells 4, 6, 10)
+characters=72,561 regex words (\b\w+\b)=9,406 whitespace words=9,255
+4000/100 parents: 3; words per parent [4000, 4000, 1606]; share of the PDF's regex words [0.425, 0.425, 0.171]
+128/16 fragments per parent [36, 36, 15]; total 87
+o200k_harmony tokens per parent [4271, 4237, 1687]; characters per parent [28589, 30553, 12537]
+punctuation characters in the PDF text=1,493; in the parents=0
+'1.2 degrees' in PDF text: True; in parent 0: False; '1 2 degrees' in parent 0: True
+v0 chunk tokens (o200k_harmony) min/median/max = 68/162/192; mean 151.7
+
+=== K3 toy multi-vector index: 8 scored vectors over 3 parents (made-up scores)
+vectors per parent: {'A': 2, 'B': 4, 'C': 2}
+max : {'A': 0.81, 'B': 0.74, 'C': 0.66} -> ['A', 'B', 'C']
+sum : {'A': 1.31, 'B': 2.85, 'C': 1.21} -> ['B', 'A', 'C']
+mean: {'A': 0.655, 'B': 0.7125, 'C': 0.605} -> ['B', 'A', 'C']
+RRF (k=60) over the chunk list ['B', 'C', 'A'] and the question list ['A', 'B', 'C']: {'A': 0.032266, 'B': 0.032522, 'C': 0.032002} -> ['B', 'A', 'C']
+parents of the vectors in rank order: ['A', 'B', 'B', 'B', 'B', 'C', 'C', 'A']
+top 3 vectors -> unique parents in rank order ['A', 'B'] (2)
+top 4 vectors -> unique parents in rank order ['A', 'B'] (2)
+top 6 vectors -> unique parents in rank order ['A', 'B', 'C'] (3)
+top 8 vectors -> unique parents in rank order ['A', 'B', 'C'] (3)
+k=3 parents: cut to 3 vectors then dedup = ['A', 'B']; dedup all then cut to 3 = ['A', 'B', 'C']
+set() of the top-4 parents has 2 members; its iteration order is not the rank order (string hashing is randomised per run)
+LangChain default emulation (4 child vectors, no oversampling): parents ['A', 'B'] -> 2 parents for 'k = 4'; with search_kwargs k=8: ['A', 'B', 'C']
+
+=== K4 index size: vectors and float32 bytes (97 chunks)
+C3 baseline (Cohere 1,536-d, .npy): 128 + 97 x 1536 x 4 = 596,096 bytes
+n= 1: chunks+questions   194 vectors = 2x; questions only    97 = 1x | bytes chunks+q at 1536-d 1,191,936, at 384-d 297,984 | q-only at 1536-d 595,968, at 384-d 148,992
+n= 3: chunks+questions   388 vectors = 4x; questions only   291 = 3x | bytes chunks+q at 1536-d 2,383,872, at 384-d 595,968 | q-only at 1536-d 1,787,904, at 384-d 446,976
+n= 5: chunks+questions   582 vectors = 6x; questions only   485 = 5x | bytes chunks+q at 1536-d 3,575,808, at 384-d 893,952 | q-only at 1536-d 2,979,840, at 384-d 744,960
+n=10: chunks+questions 1,067 vectors = 11x; questions only   970 = 10x | bytes chunks+q at 1536-d 6,555,648, at 384-d 1,638,912 | q-only at 1536-d 5,959,680, at 384-d 1,489,920
+third design (questions appended to the chunk text): 97 vectors at any n; 1536-d 595,968 bytes
+
+=== K5 the stand-in pack: cleaning rules, echo, rare tokens, self-retrieval
+rules on 970 questions: empty 0; not ending in '?' 0; numbering prefix 0; deictic/vague 1; duplicates inside a chunk 0; exact duplicates across chunks 6
+words per question min/median/max 3/8/15; tokens per question median 10
+vocabulary echo: share of a question's content words that occur in its own chunk: mean 0.777, median 0.800; questions with every content word in the chunk: 227 of 970
+rare-token retention n= 1: 6 of 91 numbers/acronyms of the chunks appear in at least one of their questions = 0.066
+rare-token retention n= 3: 13 of 91 numbers/acronyms of the chunks appear in at least one of their questions = 0.143
+rare-token retention n= 5: 24 of 91 numbers/acronyms of the chunks appear in at least one of their questions = 0.264
+rare-token retention n=10: 50 of 91 numbers/acronyms of the chunks appear in at least one of their questions = 0.549
+cos(question, its own chunk): min 0.0407 p10 0.4274 median 0.5917 max 0.8464
+own chunk's rank among 97 when the question is the query: rank 1 529, <=4 830, <=10 912, >10 58 (of 970)
+histogram of cos(question, own chunk), bins of 0.1 from 0.0 to 1.0: [5, 8, 20, 45, 132, 314, 322, 114, 10, 0]
+Doc2Query-- style filter (bi-encoder stand-in for the cross-encoder): drop the bottom 30% by cos(question, own chunk): cut 0.5351, drops 291, keeps 679
+three lowest-scoring questions (seq, cos, own rank): [(73, '0.0407', 81), (63, '0.0439', 76), (87, '0.0618', 65)]
+chunk 21 (page 8; D-006's gold) first 3 questions: ['What are perovskite solar cells and solar paint?', 'What are floating solar farms?', 'Why do floating solar panels work more efficiently?']
+chunk 21 echo per question (n=10): [1.0, 1.0, 0.4, 1.0, 1.0, 0.8, 1.0, 0.6, 1.0, 0.67]
+questions closer to a sibling question of the same chunk than to the chunk itself: 859 of 970 = 0.886
+
+=== K6 retrieval on the 8 answerable draft seeds (MiniLM; max per parent; dedup before the cut)
+A0 chunks only (v0)          ranks D-001..D-008=[3, 3, 1, 1, 1, 1, 2, 2] Hit@1=4 Hit@4=8 MRR@10=0.708 CE@1=4 CE@2=5 CE@4=8 (of 8)
+A1 chunks+questions n=1      ranks D-001..D-008=[1, 4, 1, 1, 1, 2, 3, 7] Hit@1=4 Hit@4=7 MRR@10=0.653 CE@1=4 CE@2=5 CE@4=7 (of 8)
+A1 chunks+questions n=3      ranks D-001..D-008=[1, 1, 1, 1, 1, 1, 3, 15] Hit@1=6 Hit@4=7 MRR@10=0.792 CE@1=6 CE@2=6 CE@4=7 (of 8)
+A1 chunks+questions n=5      ranks D-001..D-008=[1, 1, 2, 1, 2, 1, 4, 1] Hit@1=5 Hit@4=8 MRR@10=0.781 CE@1=5 CE@2=7 CE@4=7 (of 8)
+A1 chunks+questions n=10     ranks D-001..D-008=[1, 1, 2, 1, 1, 2, 3, 1] Hit@1=5 Hit@4=8 MRR@10=0.792 CE@1=5 CE@2=7 CE@4=7 (of 8)
+A2 questions only n=1        ranks D-001..D-008=[1, 17, 1, 2, 1, 4, 19, 13] Hit@1=3 Hit@4=5 MRR@10=0.469 CE@1=3 CE@2=4 CE@4=5 (of 8)
+A2 questions only n=3        ranks D-001..D-008=[1, 1, 1, 3, 1, 1, 4, 31] Hit@1=5 Hit@4=7 MRR@10=0.698 CE@1=5 CE@2=5 CE@4=6 (of 8)
+A2 questions only n=5        ranks D-001..D-008=[1, 1, 2, 1, 2, 1, 4, 1] Hit@1=5 Hit@4=8 MRR@10=0.781 CE@1=5 CE@2=7 CE@4=7 (of 8)
+A2 questions only n=10       ranks D-001..D-008=[1, 1, 2, 1, 1, 2, 3, 1] Hit@1=5 Hit@4=8 MRR@10=0.792 CE@1=5 CE@2=7 CE@4=7 (of 8)
+A1 chunks+questions n=5, SUM ranks D-001..D-008=[3, 1, 1, 1, 1, 2, 4, 1] Hit@1=5 Hit@4=8 MRR@10=0.760
+A2 questions only n=5, SUM   ranks D-001..D-008=[3, 1, 1, 1, 1, 3, 4, 1] Hit@1=5 Hit@4=8 MRR@10=0.740
+variant D-002-P1 'When did countries adopt the Paris climate accord?': rank of chunk 27 A0=3 A1 n=5=1 A2 n=5=1
+unique parents among the top 4 vectors, chunks+q n= 1: per seed [4, 3, 3, 4, 3, 4, 3, 4] mean 3.50 min 3 | top K_vec=8: min 5
+unique parents among the top 4 vectors, q-only   n= 1: per seed [4, 4, 4, 4, 4, 4, 4, 4] mean 4.00 min 4 | top K_vec=8: min 8
+unique parents among the top 4 vectors, chunks+q n= 3: per seed [4, 3, 2, 4, 2, 4, 2, 4] mean 3.12 min 2 | top K_vec=16: min 7
+unique parents among the top 4 vectors, q-only   n= 3: per seed [4, 3, 3, 4, 3, 4, 3, 4] mean 3.50 min 3 | top K_vec=16: min 11
+unique parents among the top 4 vectors, chunks+q n= 5: per seed [4, 3, 2, 3, 2, 4, 2, 4] mean 3.00 min 2 | top K_vec=24: min 10
+unique parents among the top 4 vectors, q-only   n= 5: per seed [4, 3, 2, 4, 2, 4, 3, 4] mean 3.25 min 2 | top K_vec=24: min 13
+unique parents among the top 4 vectors, chunks+q n=10: per seed [3, 3, 2, 3, 2, 3, 2, 4] mean 2.75 min 2 | top K_vec=44: min 14
+unique parents among the top 4 vectors, q-only   n=10: per seed [3, 3, 2, 3, 2, 3, 2, 4] mean 2.75 min 2 | top K_vec=44: min 16
+vectors fetched before 4 unique parents appear (chunks+q, n=10), per seed: [5, 5, 11, 10, 8, 5, 7, 4]; max 11; bound k(n+1) = 44
+
+=== K7 D-006 trace: the top 12 vectors (chunks+questions, n=5) and the dedup to 4 parents
+question: 'What are the advantages of putting solar panels on lakes or reservoirs?'; gold chunk seq [21] (page [8])
+A0 chunks only: top 4 [21, 64, 14, 13] pages [8, 22, 5, 5] scores ['0.5331', '0.5004', '0.4772', '0.4696']; gold rank 1
+   1 0.5976 question parent 21 (p.8) Why do floating solar panels work more efficiently?
+   2 0.5869 question parent 64 (p.22) Why is energy storage important for renewable energy?
+   3 0.5752 question parent 19 (p.7) What are the benefits of investing in renewable energy research?
+   4 0.5696 question parent 32 (p.11) What economic benefits come from investing in renewable energy and energy efficiency?
+   5 0.5518 question parent 21 (p.8) What are floating solar farms?
+   6 0.5515 question parent 14 (p.5) What are the environmental downsides of hydroelectric power?
+   7 0.5331 chunk    parent 21 (p.8) 
+   8 0.5283 question parent 74 (p.25) How do green roofs and wetlands help manage stormwater in cities?
+   9 0.5260 question parent 64 (p.22) How have solar and wind energy technologies improved?
+  10 0.5218 question parent 66 (p.23) What benefits do smart grids provide?
+  11 0.5152 question parent 13 (p.5) Why is solar energy becoming more attractive?
+  12 0.5101 question parent 13 (p.5) How does solar power work?
+dedup in rank order -> parents [21, 64, 19, 32] pages [8, 22, 7, 11] scores ['0.5976', '0.5869', '0.5752', '0.5696']
+unique parents in the top 12 vectors: 8; in the top 4: 4
+best question score for chunk 21 vs its chunk score: 0.5976 vs 0.5331
+D-001: gold [7] rank A0 3 A1 1 A2 1; A1 top vector 0.9311 question parent 7 How much have global temperatures risen since the late 19th century?
+D-002: gold [27] rank A0 3 A1 1 A2 1; A1 top vector 0.9869 question parent 27 When was the Paris Agreement adopted?
+D-008: gold [69] rank A0 2 A1 1 A2 1; A1 top vector 0.9368 question parent 69 What is the Kigali Amendment?
+D-002 chunk scores (A0): best chunk 69 0.4606; gold chunk 27 0.4386 at rank 3
+
+=== K8 per category: first relevant rank, A0 vs A1 n=5 vs A2 n=5
+D-001 exact-term           A0 3 A1 1 A2 1
+D-002 factual-single-span  A0 3 A1 1 A2 1
+D-003 factual-single-span  A0 1 A1 2 A2 2
+D-004 exact-term           A0 1 A1 1 A2 1
+D-005 multi-span           A0 1 A1 2 A2 2
+D-006 vocabulary-mismatch  A0 1 A1 1 A2 1
+D-007 multi-hop            A0 2 A1 4 A2 4
+D-008 exact-term           A0 2 A1 1 A2 1
+
+=== K9 leakage: eval questions against the 970 generated questions
+the one paraphrase pair in 06 (D-002 vs D-002-P1): cos = 0.7054; 06 section 6.2 asks for >= 10 pairs, so tau cannot be calibrated as a 10th percentile yet; provisional tau_cos = 0.7054, tau_ngram = 0.5
+D-001     leak_cos=0.9311 (parent 7, q1) max_chunk_cos=0.4929 3gram_containment=0.750 flagged=True | matched: How much have global temperatures risen since the late 19th century?
+D-002     leak_cos=0.9869 (parent 27, q3) max_chunk_cos=0.4606 3gram_containment=0.500 flagged=True | matched: When was the Paris Agreement adopted?
+D-003     leak_cos=0.7101 (parent 27, q4) max_chunk_cos=0.6497 3gram_containment=0.182 flagged=True | matched: What are nationally determined contributions (NDCs)?
+D-004     leak_cos=0.9653 (parent 23, q7) max_chunk_cos=0.4210 3gram_containment=0.000 flagged=True | matched: What does DAC stand for?
+D-005     leak_cos=0.4723 (parent 3, q7) max_chunk_cos=0.4272 3gram_containment=0.000 flagged=False | matched: Which fossil fuel is the least carbon-intensive?
+D-006     leak_cos=0.6007 (parent 64, q9) max_chunk_cos=0.5331 3gram_containment=0.000 flagged=False | matched: What benefits does energy storage give the power grid?
+D-007     leak_cos=0.7565 (parent 17, q5) max_chunk_cos=0.7094 3gram_containment=0.000 flagged=True | matched: What is the Kyoto Protocol?
+D-008     leak_cos=0.9368 (parent 69, q4) max_chunk_cos=0.2598 3gram_containment=0.000 flagged=True | matched: What is the Kigali Amendment?
+D-009     leak_cos=0.7939 (parent 1, q8) max_chunk_cos=0.3099 3gram_containment=0.000 flagged=True | matched: What does IPCC stand for?
+D-010     leak_cos=0.5826 (parent 6, q4) max_chunk_cos=0.5196 3gram_containment=0.200 flagged=False | matched: What greenhouse gases come from manure management?
+D-002-P1  leak_cos=0.7305 (parent 27, q3) max_chunk_cos=0.6028 3gram_containment=0.000 flagged=True | matched: When was the Paris Agreement adopted?
+generated questions with cos >= tau_cos to any of the 10 seeds: 10 of 970; by parent [(1, 1), (7, 1), (17, 1), (23, 1), (27, 2), (68, 1), (69, 3)]
+A4 de-leaked A1 (n=5, flagged questions deleted): ranks [8, 4, 1, 1, 2, 1, 2, 18] Hit@1=3 Hit@4=6 MRR@10=0.547
+
+=== K10 index-build cost and time on the 97 chunks (one call per chunk; tokens measured with o200k_harmony)
+prompt template alone 241 tokens; input per call min/median/max 309/403/433; total 38,095
+n= 3 visible only               output total  3,560 (median visible 37/call) | Groq $0.0039 | Haiku $0.0056 (tokenizer differs: approx) | tokens 41,655 -> TPM floor 5.2 min, 20.8% of a day
+n= 3 +300 reasoning (assumed)   output total 32,660 (median visible 37/call) | Groq $0.0127 | Haiku $0.0201 (tokenizer differs: approx) | tokens 70,755 -> TPM floor 8.8 min, 35.4% of a day
+n= 5 visible only               output total  5,613 (median visible 58/call) | Groq $0.0045 | Haiku $0.0066 (tokenizer differs: approx) | tokens 43,708 -> TPM floor 5.5 min, 21.9% of a day
+n= 5 +300 reasoning (assumed)   output total 34,713 (median visible 58/call) | Groq $0.0133 | Haiku $0.0212 (tokenizer differs: approx) | tokens 72,808 -> TPM floor 9.1 min, 36.4% of a day
+n=10 visible only               output total 10,797 (median visible 111/call) | Groq $0.0061 | Haiku $0.0092 (tokenizer differs: approx) | tokens 48,892 -> TPM floor 6.1 min, 24.4% of a day
+n=10 +300 reasoning (assumed)   output total 39,897 (median visible 111/call) | Groq $0.0148 | Haiku $0.0238 (tokenizer differs: approx) | tokens 77,992 -> TPM floor 9.7 min, 39.0% of a day
+HyDE break-even: rebuilt  1x a month -> index side uses 97 calls a month; HyDE uses one per query, so index side has fewer calls once queries exceed 97 a month
+HyDE break-even: rebuilt  2x a month -> index side uses 194 calls a month; HyDE uses one per query, so index side has fewer calls once queries exceed 194 a month
+HyDE break-even: rebuilt  4x a month -> index side uses 388 calls a month; HyDE uses one per query, so index side has fewer calls once queries exceed 388 a month
+HyDE break-even: rebuilt 30x a month -> index side uses 2,910 calls a month; HyDE uses one per query, so index side has fewer calls once queries exceed 2,910 a month
+
+=== K11 context cost: what reaches the answer model
+k=4 parent chunks (A1 n=5) tokens per seed [696, 625, 553, 522, 660, 633, 644, 690]; mean 627.9
+k=4 chunks (A0) tokens per seed [696, 644, 644, 610, 730, 642, 700, 702]; mean 671.0
+upstream k=1 parent: [4271, 4237, 1687] tokens; the largest is 6.4x A0's mean
+
+=== K12 the shape gap on the seeds: best question score minus best chunk score (n=10)
+{'D-001': '0.4382', 'D-002': '0.5263', 'D-003': '0.0604', 'D-004': '0.5443', 'D-005': '0.0450', 'D-006': '0.0676', 'D-007': '0.0471', 'D-008': '0.6770', 'D-009': '0.4840', 'D-010': '0.0631', 'D-002-P1': '0.1277'}
+mean over the 8 answerable seeds 0.3007; seeds where a question beats every chunk: 8 of 8; unanswerable D-009 0.4840, D-010 0.0631
+best score per seed, chunks vs questions: {'D-001': ('0.4929', '0.9311'), 'D-002': ('0.4606', '0.9869'), 'D-003': ('0.6497', '0.7101'), 'D-004': ('0.4210', '0.9653'), 'D-005': ('0.4272', '0.4723'), 'D-006': ('0.5331', '0.6007'), 'D-007': ('0.7094', '0.7565'), 'D-008': ('0.2598', '0.9368'), 'D-009': ('0.3099', '0.7939'), 'D-010': ('0.5196', '0.5826')}

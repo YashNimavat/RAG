@@ -1,0 +1,49 @@
+PASS document_augmentation.ipynb has 19 cells (19)
+PASS document_augmentation.ipynb: no saved output in any cell
+PASS doc-aug cell 4: DOCUMENT_MAX_TOKENS = 4000
+PASS doc-aug cell 4: DOCUMENT_OVERLAP_TOKENS = 100
+PASS doc-aug cell 4: FRAGMENT_MAX_TOKENS = 128
+PASS doc-aug cell 4: FRAGMENT_OVERLAP_TOKENS = 16
+PASS doc-aug cell 4: QUESTION_GENERATION = QuestionGeneration.DOCUMENT_LEVEL
+PASS doc-aug cell 4: QUESTIONS_PER_DOCUMENT = 40
+PASS doc-aug cell 6: re.sub(r'^\d+\.\s*', ''
+PASS doc-aug cell 6: if cleaned_question.endswith('?')
+PASS doc-aug cell 6: model="gpt-4o-mini", temperature=0
+PASS doc-aug cell 6: at least {num_questions}
+PASS doc-aug cell 6: directly answerable within the context and do not include any answers or headers
+PASS doc-aug cell 6: with_structured_output(QuestionList)
+PASS doc-aug cell 6: return list(set(filtered_questions))
+PASS doc-aug cell 6: re.findall(r'\b\w+\b', document)
+PASS doc-aug cell 6: return [" ".join(chunk) for chunk in chunks]
+PASS doc-aug cell 10: "text": text_document
+PASS doc-aug cell 10: search_kwargs={"k": 1}
+PASS doc-aug cell 10: QuestionGeneration.FRAGMENT_LEVEL
+PASS doc-aug cell 10: "type": "AUGMENTED"
+PASS doc-aug cells 15/17: the parent comes from the loop variable `doc` left over from cell 15
+PASS doc-aug cell 13: read_pdf_to_string on the climate PDF
+PASS helper_functions.read_pdf_to_string: PyMuPDF, pages concatenated with no separator
+PASS document_augmentation.py L65-L66: prompt WITHOUT the notebook's 'directly answerable ... no answers or headers' clause
+PASS HyPE notebook has 23 cells (23)
+PASS HyPE cell 0: claims 'up to' +42 pp precision and +45 pp claim recall, SSRN 5139335
+PASS HyPE cell 7: gpt-4o-mini, text-embedding-3-small, 1000/200
+PASS HyPE cell 9: free-text 'essential questions', split on newlines, no question count
+PASS HyPE cell 11: SyntaxError at cell line 32 (got 32)
+PASS HyPE cell 11: add_embeddings((page_content, vec)) with no metadata
+PASS HyPE cell 13: PyPDFLoader + RecursiveCharacterTextSplitter
+PASS HyPE cell 15: saved output 97/97 (exec 71) after the broken cell 11 (exec 66): outputs predate the edit
+PASS HyPE cell 17: k=3
+PASS HyPE cell 19: list(set(context)); saved output shows 3 distinct contexts for k = 3 (research I6 section 1 said 2: corrected, error I6-E10); set() order is not the rank order
+PASS HyPE script L99: the missing comma is fixed
+PASS HyPE script L152: dedup with set()
+PASS AIQ LICENSE: MIT, Copyright (c) 2026 Om
+PASS AIQ Q45 heading verbatim
+PASS AIQ Q45: synthetic questions echo the chunk's vocabulary
+PASS langchain-classic 1.0.8 multi_vector.py L55: id_key='doc_id'
+PASS L57: search_kwargs={} (no k)
+PASS L60: search_type=similarity
+PASS L107-L113: first-seen parent ids, scores dropped, children without id_key and missing parents dropped
+PASS langchain-core 1.6.6 vectorstores/base.py L361-L362: similarity_search k=4
+PASS llama-index-core 0.14.25 metadata_extractors.py L282-L283: questions default 5
+PASS L253-L265: prompt asks for questions 'unlikely to be found elsewhere'
+PASS L334: stored as metadata questions_this_excerpt_can_answer
+ALL PASS
