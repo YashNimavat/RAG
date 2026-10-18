@@ -1,0 +1,25 @@
+PASS 44 embedded units equal the splitter's units (text, kind, offsets) []
+PASS 40 embedded propositions: spans, parents, align equal K4 []
+PASS 6 planted mistakes: unsupported words equal K5 []
+PASS embedded chunk ranges equal the 97 v0 chunks []
+PASS embedded stop-word list equals i4_kit_measure.STOP
+PASS scoring list D-002: ranks, parents and gold overlap match K7
+PASS scoring list D-007a: ranks, parents and gold overlap match K7
+PASS scoring list D-007b: ranks, parents and gold overlap match K7
+PASS scoring list D-005: ranks, parents and gold overlap match K7
+PASS the notebook count on the page (110) is the saved run's count
+PASS every decimal and every integer >= 10 in the visible text traces to out_i4_kit_measure.txt or a listed reason (170 distinct numbers; untraced: [])
+  numbers allowed as EXTERNAL / structural and present: ['0.075', '0.2.0', '0.30', '0.3888', '0.4', '0.4849', '0.60', '0.85', '06', '07', '1.0.8', '1.6.6', '10', '100', '11', '12', '13', '15', '16', '1969', '2.3', '2.7', '200', '2023', '2024', '2026', '30', '5.5', '6.7', '60', '8']
+PASS all 21 spec anchors exist
+PASS all 48 in-page links resolve
+PASS every data-path target exists on disk (4 links; missing [])
+PASS bundled fonts exist
+PASS none of the 11 coach-banned phrases appears
+PASS the page loads nothing from the network ([])
+PASS label present: 'hand-written'
+PASS label present: 'made-up order'
+PASS label present: 'not re-opened'
+PASS label present: 'assumed'
+PASS label present: 'No LLM has written propositions'
+
+22/22 checks passed

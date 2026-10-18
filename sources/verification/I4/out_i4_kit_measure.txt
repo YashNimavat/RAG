@@ -67,6 +67,8 @@ p.10 units:
   test: heading 'Paris Agreement' is its own unit (10:6): True
   test: lower-case page start is not a heading (29:0): True
   test: 'market-\nbased' kept inside 29:2: True
+pages that start with the end of the previous page's sentence (8): ['13:0', '15:0', '16:0', '17:0', '22:0', '23:0', '25:0', '29:0']
+pages whose last sentence is cut at the page end (8): ['12:26', '14:28', '15:27', '16:27', '21:29', '22:27', '24:27', '28:30']
 known splitter limits (shown, not fixed): page-start fragment 23:0 = 'resources.' (the end of a p.22 sentence); a sentence that continues onto the next page is cut at the page end; 'e.g.' would split a sentence (occurrences of 'e.g.' in the document: 0)
 
 === K4 the tutor-written proposition set (hand-written by the tutor 2026-10-18; NOT an LLM output)
@@ -117,6 +119,7 @@ align: min 1.000; propositions with align < 1: []
 C7 pronoun-initial propositions: []
 parents: span fully inside a chunk for 40/40; 1 parent 34, 2 parents (the 200-char overlap) 6; primary parent = lowest seq
 index units: 40 propositions from 26 source sentences -> 1.54 per sentence (Dense X README: 257M / 114M = 2.25)
+near-duplicate groups (same normalised text): [['p10-08', 'p23-02'], ['p10-09', 'p23-03']]; distinct texts 38/40
   normalised text p10-07: 'the paris agreement was adopted in 2015.'
   normalised text p10-08: 'the paris agreement aims to limit global warming to well below 2 degrees celsius above pre industrial levels.'
   normalised text p23-02: 'the paris agreement aims to limit global warming to well below 2 degrees celsius above pre industrial levels.'

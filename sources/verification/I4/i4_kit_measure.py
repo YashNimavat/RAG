@@ -218,6 +218,13 @@ tests = {
 }
 for k, v in tests.items():
     print(f"  test: {k}: {v}")
+frag = sorted((u for u, x in UNITS.items() if u.endswith(":0") and x["kind"] == "s" and x["text"][0].islower()), key=lambda u: int(u.split(":")[0]))
+lastu = {}
+for u, x in UNITS.items():
+    lastu[x["page"]] = max(lastu.get(x["page"], -1), int(u.split(":")[1]))
+cut = [f"{pg}:{i}" for pg, i in sorted(lastu.items()) if UNITS[f"{pg}:{i}"]["kind"] == "s" and not re.search(r'[.!?]["\u201d)\]]?$', UNITS[f"{pg}:{i}"]["text"])]
+print(f"pages that start with the end of the previous page's sentence ({len(frag)}): {frag}")
+print(f"pages whose last sentence is cut at the page end ({len(cut)}): {cut}")
 print(f"known splitter limits (shown, not fixed): page-start fragment 23:0 = {UNITS['23:0']['text']!r} (the end of a p.22 sentence); "
       f"a sentence that continues onto the next page is cut at the page end; 'e.g.' would split a sentence "
       f"(occurrences of 'e.g.' in the document: {DOC.count('e.g.')})")
@@ -298,6 +305,10 @@ print(f"parents: span fully inside a chunk for {sum(r['contained'] for r in RT.v
       f"1 parent {npar.count(1)}, 2 parents (the 200-char overlap) {npar.count(2)}; primary parent = lowest seq")
 print(f"index units: {len(TUTOR)} propositions from {len({u for p in TUTOR for u in p['source_ids'] if UNITS[u]['kind'] == 's'})} source sentences "
       f"-> {len(TUTOR) / len({u for p in TUTOR for u in p['source_ids'] if UNITS[u]['kind'] == 's'}):.2f} per sentence (Dense X README: 257M / 114M = {257 / 114:.2f})")
+from collections import Counter as _C
+_norm = _C(" ".join(re.findall(r"[a-z0-9.]+", p["text"].lower())) for p in TUTOR)
+_dups = [[q["prop_id"] for q in TUTOR if " ".join(re.findall(r"[a-z0-9.]+", q["text"].lower())) == t] for t, c in _norm.items() if c > 1]
+print(f"near-duplicate groups (same normalised text): {_dups}; distinct texts {len(_norm)}/{len(TUTOR)}")
 for pid in ("p10-07", "p10-08", "p23-02"):
     print(f"  normalised text {pid}: {' '.join(re.findall(r'[a-z0-9.]+', PT[pid]['text'].lower()))!r}")
 

@@ -591,7 +591,7 @@ main :not(pre)>code{overflow-wrap:anywhere}
   <ul>
     <li><b>Whole PDF:</b> 621 sentences and 286 heading lines, 907 units on 33 pages; 6 to 22 sentences per page, median 19. Every unit passes <code>doc_text[a:b] == text</code>.</li>
     <li><b>Tests that pass:</b> "1.5 degrees" stays in one sentence (the full stop is followed by a digit, not a space); "pre-industrial" and the line break inside 10:7 stay put; "Paris Agreement" (10:6) is its own heading unit; a page that starts in lower case (29:0, the end of a p.28 sentence) is not a heading.</li>
-    <li><b>Known limits:</b> unit 23:0 is just <code>resources.</code>, the end of a sentence that began on page 22; a sentence that crosses a page is cut at the page end; "e.g." would split a sentence (it never occurs in this PDF).</li>
+    <li><b>Known limits:</b> a sentence that crosses a page is cut in two. 8 pages end with a cut sentence, and 8 pages start with the rest of one: unit 23:0 is just <code>resources.</code>, the end of a sentence that began on page 22. "e.g." would also split a sentence (it never occurs in this PDF).</li>
   </ul>
   <p>Why bother? The model can now say "this proposition comes from [10:7]" instead of copying text, and code can check the claim. Offsets turn ids into spans (step 6).</p>
   <p class="call wrong"><b>Common mistake:</b> "split the text on every full stop." That breaks "1.5 degrees" into two sentences and glues headings onto the next sentence.</p>
@@ -742,7 +742,7 @@ Example output:
   <ul>
     <li><b>Contrast.</b> D-005 asks how the document contrasts coal and natural gas. Put the four coal propositions first: arm (b) has CE@4 = <b>0</b>, because no natural-gas proposition is in the top 4. Arm (a) returns chunk 3, which holds both sentences, so CE@4 = <b>1</b>. The parent brings the relation back.</li>
     <li><b>Multi-hop.</b> D-007 needs two facts on two pages. With the "UNFCCC frames the Paris Agreement" proposition (p10-05) at rank 4, arm (b) has CE@4 = 1. Move it to rank 5 and CE@4 = <b>0</b>: the gold span on page 10 includes sentence 10:4, and no other proposition in the top 4 points to it. Arm (a) stays at 1, because chunk 27 holds the whole span.</li>
-    <li><b>Near-duplicates.</b> Pages 10 and 23 repeat the Paris paragraph, so p10-08 and p23-02 have the same text. In the D-002 list they fill two of the top 4: <b>distinct-facts@4 = 3</b>. The repo shows the same in cells 28 and 36: 3 of the top 4 hits say "Founder Mode is…". Parent dedup hides this in arm (a); distinct-facts@k shows it.</li>
+    <li><b>Near-duplicates.</b> Pages 10 and 23 repeat the Paris paragraph, so two pairs of propositions have the same text (p10-08 and p23-02, p10-09 and p23-03): 38 distinct texts out of 40. In the D-002 list they fill two of the top 4: <b>distinct-facts@4 = 3</b>. The repo shows the same in cells 28 and 36: 3 of the top 4 hits say "Founder Mode is…". Parent dedup hides this in arm (a); distinct-facts@k shows it.</li>
   </ul>
   <p>Two ceilings limit arm (b) before any ranking happens:</p>
   <div class="formula">sentence_coverage = sentences with ≥ 1 proposition / sentences<br>gold_reachability = gold alternatives overlapped by some span(p) / gold alternatives</div>
@@ -894,7 +894,10 @@ Example output:
   <div class="num">APPLY · USE IT ON YOUR OWN DATA</div>
   <h2 id="h-apply">Would propositions help on your documents?</h2>
   <p>The tool <code>study/tools/proposition_fit_check.py</code> runs this lesson's checks on <b>your</b> documents and propositions: what would a build cost, are the propositions faithful to their sources, and (with questions) do they bring the right chunk up earlier? Run it from <code>rag_learning/</code>:</p>
-  <pre>uv run python study/tools/proposition_fit_check.py --docs my.pdf --props my_props.jsonl --report prop_report.md</pre>
+  <pre>uv run python study/tools/proposition_fit_check.py --docs "D:\my-project\docs\manual.pdf" --props my_props.jsonl --props-origin hand \
+    --questions q.jsonl --report prop_report.md --labels-csv labels.csv
+# see the prompt a model would get for page 10: --render-prompt 10 · rank with local MiniLM: --dense
+# read your filled labelling sheet back (faithfulness with Wilson, keep-good and catch-bad): --labels labels.csv</pre>
   <p>It makes <b>no API call</b>. You write propositions by hand (or export them from a recorded run) in the same format as the tutor's file: <code>prop_id, page, text, source_ids, resolved</code>. <code>--render-prompt</code> prints the <code>prop_gen_v1</code> prompt for one page, so you can see exactly what a model would receive. <code>--provider</code> is reserved for when the course's recorded-call cache exists.</p>
   <div class="tw"><table>
     <thead><tr><th>Report part</th><th>What it tells you</th><th>Lesson step</th></tr></thead>
@@ -912,7 +915,7 @@ Example output:
   <p style="font-size:.92rem;color:var(--muted)">Tick each one for your own project. Your ticks stay in this browser only.</p>
   <div class="check" id="checklist"></div>
   <div class="card" id="example" style="display:grid;gap:10px"><div><b>The example</b> <span class="badge m">measured · climate PDF, the tutor's 40 propositions</span></div>
-    <p style="font-size:.92rem" id="exampleText">(filled in when the tool is finished)</p>
+    <p style="font-size:.92rem" id="exampleText"><b>The climate PDF with the tutor's 40 propositions</b> and four draft seeds (D-002, D-003, D-005, D-007), without <code>--dense</code>: the units, spans, parents and align values match steps 4–7, and the forecast matches step 11. Checklist ✓ on C1, C3, C4, C7, C10 and C11; ✗ on C6 (sentence_coverage 0.347, because the tutor wrote only parts of four pages) and C8 (the two near-duplicate pairs from pages 10 and 23); ? on C2, C5, C9 and C12, which need a recorded run, your labels or your judgement. Recommendation: <b>"not decided yet"</b>: label at least 30 propositions and rank at least 10 labelled questions with <code>--dense</code> first. That is right: nothing here measures whether propositions help.</p>
     <p style="font-size:.86rem;color:var(--muted)">The example demonstrates the tool; it does not evaluate proposition indexing. Full report: <a data-kit="#/read/study/tools/examples/climate_prop_report.md" data-path="rag_learning/study/tools/examples/climate_prop_report.md">climate_prop_report.md</a>.</p></div>
 </section>
 

@@ -1,5 +1,6 @@
+[IPKernelApp] WARNING | Kernel is running over TCP without encryption. All communication (including code and outputs) is sent in plain text and is susceptible to eavesdropping. Use IPC transport or launch with kernel manager-provisioned CurveZMQ keys to enable transport encryption.
 SKIPPED (MiniLM not in the local cache)  §9 MiniLM observation
 cells with errors: 0
-Plotly figures saved: 9; runtime 1.9 s; file study/notebooks/I4_propositions_verify.ipynb 142 KiB
+Plotly figures saved: 9; runtime 1.8 s; file study/notebooks/I4_propositions_verify.ipynb 142 KiB
 110 checks passed / 0 failed
 SKIPPED lines: 1

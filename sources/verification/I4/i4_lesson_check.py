@@ -3,7 +3,7 @@
 1. The embedded data block (units, the 40 tutor propositions, the planted mistakes, chunk ranges) equals what
    i4_kit_measure.py computes: unit texts and offsets, spans, parents, align values, unsupported words.
 2. Numbers: every decimal number and every integer >= 10 in the lesson's visible text is printed in
-   out_i4_kit_measure.txt (after removing thousands separators), or is on the DERIVED / EXTERNAL / STRUCTURAL lists
+   out_i4_kit_measure.txt or the tool's example report climate_prop_report.md (after removing thousands separators), or is on the DERIVED / EXTERNAL / STRUCTURAL lists
    below with its reason. The made-up ranked lists in the script (K7) are compared with the K7 output.
 3. The step anchors of the build spec exist; every in-page #link resolves; every data-kit path exists on disk.
 4. The coach-banned phrases are absent; the page loads nothing from the network (no http(s) src/href except none).
@@ -68,6 +68,8 @@ for key, qid in (("D-002", "D-002"), ("D-007a", "D-007"), ("D-007b", "D-007"), (
 body = src.split("<body>")[1].split("<script>")[0]
 text = H.unescape(re.sub(r"<[^>]+>", " ", re.sub(r"<pre>.*?</pre>", " ", body, flags=re.S)))
 outnums = set(re.findall(r"\d+(?:\.\d+)?", OUT.replace(",", "")))
+REPORT = (WS / "study" / "tools" / "examples" / "climate_prop_report.md").read_text(encoding="utf-8")
+outnums |= set(re.findall(r"\d+(?:\.\d+)?", REPORT.replace(",", "")))      # the tool's example (apply section)
 DERIVED = {"0.267": "1/sqrt(14), the K8 formula at n = 14", "14": "propositions with parent 27 in K4 (p10-01..p10-14); also 'about 14 per chunk' = 1,400 / 97",
            "36": "not used", "20555": "page 10 start = doc offset of unit 10:0 (K3)",
            "951": "length of chunk 27 = 21506 - 20555 (K4 chunk range, embedded data)",

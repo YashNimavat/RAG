@@ -466,3 +466,46 @@ All items: type R/A/T/X as shown, not scheduled, hint level H0, unassisted. "Con
 ### Next session
 1. Read P1, P2, then P4 (Short first), each followed by its lab and, the next day, its quiz. (Recommended study order: P1 → P2 → P6 → P3 → P4 → P5 → P7.)
 2. The next lesson to build: **P5** (vector search), or P6 if you want to follow the study order.
+
+## Session 2026-10-18 #5: the I4 lesson in the P1/P2 format (no tutoring)
+- **Tutor:** Claude, in a Claude Code cloud session (Linux container, not Yash's machine). No study items were asked, so nothing is scored or scheduled.
+- **Learner request:** build the I4 lesson (proposition chunking) from `study/research/phase_04_indexing.md`, Concept I4, with the same pipeline as P1 and P2: facts, spec, three helpers, HTML lesson, gap audit, all checks.
+- **What the container could not do:**
+  - Hugging Face and tiktoken's encoding host are blocked, so no embedding model and no tiktoken encoding could load.
+  - The book and `CLAUDE.md` are not in the repo.
+  - The climate PDF and the repo notebook were fetched from GitHub at `009adba` (sha256 checked) and placed at `../upstream/RAG_Techniques/`, as on Yash's machine.
+  - So: there are no embedding results, book pages are cited from 04 and marked "not re-opened", and the 15-word book check prints SKIPPED.
+- **No LLM has written propositions yet** (that needs the `study/llmops/` cache).
+  - The lesson uses 40 propositions the tutor wrote by hand (pages 2, 10, 23, 29) and 6 planted mistakes.
+  - Every ranked list is a made-up order. All of this is labelled on every page.
+- **Facts:** `sources/verification/I4/i4_kit_measure.py`, K1–K12, offline, byte-identical on rerun → `I4_FACTS.md`. Highlights:
+  - 621 sentences and 286 headings with offsets;
+  - align catches added words (0.400; the repo's "astronaut" 0.667; wrong year 0.750) but not a dropped qualifier or a wrong referent;
+  - D-002: arm (a) RR 1.000, arm (b) RR 1.000, text check RR 0.333;
+  - D-005: arm (a) CE@4 1 vs arm (b) 0;
+  - 66 vs 1,433 index-time calls; ×14.4 vectors;
+  - the 8-gram leakage test gives 0 when clean and 10 with an injected leak.
+  - Also new: the frozen prompt `prop_gen_v1.txt` and `proposition_set_v1.json`.
+- **Built:**
+  - `study/lessons/I4_propositions.html` (Short/Full, the shared shell) and `I4_propositions_gap_audit.md`: the research's 22 ideas plus 6 more found while writing; all 17 questions answerable from Short (2 gaps fixed).
+  - `study/notebooks/I4_propositions_verify.ipynb` (helper-built, tutor re-run): 110 checks pass; the MiniLM observation is SKIPPED here and runs on Yash's machine.
+  - `study/tools/proposition_fit_check.py`: checks C1–C12, labelling sheet, `--render-prompt`, `--dense`; `--provider` refuses until `study/llmops/` exists. `i4_tool_test.py` 107/107. Example report: "not decided yet".
+  - `study/questions/I4_questions.md` (17 items, one AIQ interview item) and `study/reading/I4_proposition_chunking.md`. `i4_md_check.py` 55 pass, 1 skipped (book); `quiz.py --check` 7/7.
+  - `study/kit.py` links the I4 tool.
+- **Checks on the lesson:**
+  - 62/62 browser tests, and the page's align equals Python's for 45 propositions;
+  - no console errors;
+  - no sideways scroll at 390px in 7 themes × light/dark × Short/Full;
+  - loads through the study kit;
+  - `i4_lesson_check.py` 22/22: embedded data = measured data; every number traced; no banned phrases; no network.
+- **Corrections to the research** (in I4_FACTS §3, not edited there):
+  - I4-E5 (stale output) is not reproduced;
+  - gap row 3's p.29 example is not in the PDF;
+  - checklist C4's align < 0.5 misses real errors;
+  - the splitter has 8 page-start fragments and 8 cut page ends (not 1).
+- **Found on the way (not fixed):** in P2 and P4, clicking an in-body toggle (P2's AND/OR, tie rule, pool) sets the reading depth to "undefined" and shows the Full-only parts. Fix: listen on the top bar's buttons only, as I4 does.
+- **Committed and pushed** to branch `claude/dazzling-fermat-m7ps9d`.
+
+### Next session
+1. On Yash's machine: re-run `i4_kit_measure.py` (only the version line should change), the notebook (the MiniLM observation then runs), and open the Ch4 pages to settle the page notes.
+2. Read I4 (Short first) after I1–I3; the quiz the next day.
