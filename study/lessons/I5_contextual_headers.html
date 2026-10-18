@@ -1,0 +1,1183 @@
+<!doctype html>
+<html lang="en" data-style="notebook" data-theme="light">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Contextual Chunk Headers</title>
+<meta name="description" content="I5: contextual chunk headers and contextual retrieval: why chunks lose their context, where a header goes, heading paths and rules, the information test, dilution, truncation, measuring it, LLM-written contexts, caching and cost. Short and full depths, seven themes, light and dark.">
+<script>
+/* Apply saved choices before the page paints (no flash). Shared by every lesson. */
+(function () {
+  var d = document.documentElement, get = function (k) { try { return localStorage.getItem(k); } catch (e) { return null; } };
+  var p = new URLSearchParams(location.search), styles = ["reader", "hyper", "notebook", "textbook", "editor", "minimal", "catalogue"];
+  var dark = !!(window.matchMedia && window.matchMedia("(prefers-color-scheme: dark)").matches);
+  var pick = function (key, allowed, stored, dflt) { var v = p.get(key); return allowed.indexOf(v) >= 0 ? v : (allowed.indexOf(stored) >= 0 ? stored : dflt); };
+  d.dataset.style = pick("style", styles, get("lesson-style"), "notebook");
+  d.dataset.theme = pick("color", ["light", "dark"], get("lesson-color"), dark ? "dark" : "light");
+  d.dataset.toc = pick("toc", ["shown", "hidden"], get("lesson-toc"), "shown");
+  d.dataset.side = pick("side", ["left", "right"], get("lesson-side"), "left");
+})();
+</script>
+<style>
+/* ---------- themes: five styles, each light and dark. Colours and fonts live in variables. ---------- */
+:root{--content-w:800px;--f-mono:"Cascadia Mono",Consolas,ui-monospace,monospace;--radius:8px;--body-size:16.5px;--h-weight:650;--sec-pad:40px}
+:root[data-style="notebook"]{--f-head:"Segoe UI Variable Display","Segoe UI",system-ui,sans-serif;--f-body:"Segoe UI Variable Text","Segoe UI",system-ui,sans-serif;
+  --paper:#FFFFFF;--card:#F6F8FA;--side:#F6F8FA;--ink:#1F2328;--muted:#59636E;--line:#D1D9E0;--rule:#BFC8D2;--code:#F2F4F7;
+  --accent:#0969DA;--accent-soft:#DDF4FF;--dense:#8250DF;--dense-soft:#F4EDFF;--good:#1A7F37;--good-soft:#DAFBE1;--warn:#9A6700;--warn-soft:#FFF8C5;--bad:#CF222E;--bad-soft:#FFEBE9}
+:root[data-style="notebook"][data-theme="dark"]{--paper:#0D1117;--card:#161B22;--side:#010409;--ink:#E6EDF3;--muted:#9198A1;--line:#30363D;--rule:#3D444D;--code:#1B2129;
+  --accent:#4493F8;--accent-soft:#0C2D6B;--dense:#AB7DF8;--dense-soft:#2A1F45;--good:#3FB950;--good-soft:#12261E;--warn:#D29922;--warn-soft:#2E2410;--bad:#F85149;--bad-soft:#3A1418}
+:root[data-style="textbook"]{--f-head:Cambria,"Palatino Linotype",Georgia,serif;--f-body:Cambria,"Palatino Linotype",Georgia,serif;--body-size:17.5px;--radius:3px;--h-weight:700;
+  --paper:#FFFDF8;--card:#FFFFFF;--side:#FAF6EE;--ink:#1B1B1B;--muted:#5E5A55;--line:#E4DED3;--rule:#CFC6B6;--code:#F5F1E8;
+  --accent:#9E1B32;--accent-soft:#F7E4E7;--dense:#1F4E79;--dense-soft:#E3ECF5;--good:#2E6B3A;--good-soft:#E3F0E5;--warn:#8A5A00;--warn-soft:#FAF0D7;--bad:#9E1B32;--bad-soft:#F7E4E7}
+:root[data-style="textbook"][data-theme="dark"]{--paper:#1A1917;--card:#22201D;--side:#1F1D1A;--ink:#ECE7DE;--muted:#A8A196;--line:#3A3631;--rule:#4E4840;--code:#2A2723;
+  --accent:#E26D7E;--accent-soft:#3D1C22;--dense:#8DB4DE;--dense-soft:#1B2A3A;--good:#86C48F;--good-soft:#1C2D1F;--warn:#E0B65A;--warn-soft:#33290F;--bad:#E26D7E;--bad-soft:#3D1C22}
+:root[data-style="editor"]{--f-head:"Cascadia Code","Cascadia Mono",Consolas,monospace;--f-body:"Segoe UI",system-ui,sans-serif;--radius:4px;--h-weight:600;
+  --paper:#FFFFFF;--card:#F3F3F3;--side:#F3F3F3;--ink:#1E1E1E;--muted:#6E6E6E;--line:#E0E0E0;--rule:#CCCCCC;--code:#F8F8F8;
+  --accent:#005FB8;--accent-soft:#E5F0FB;--dense:#AF00DB;--dense-soft:#F7E6FB;--good:#008000;--good-soft:#E8F5E8;--warn:#795E26;--warn-soft:#FBF4E2;--bad:#A31515;--bad-soft:#FBE9E9}
+:root[data-style="editor"][data-theme="dark"]{--paper:#1E1E1E;--card:#252526;--side:#181818;--ink:#D4D4D4;--muted:#9D9D9D;--line:#3C3C3C;--rule:#4A4A4A;--code:#1A1A1A;
+  --accent:#569CD6;--accent-soft:#1B2B3A;--dense:#C586C0;--dense-soft:#33243A;--good:#6A9955;--good-soft:#1F2A1C;--warn:#DCDCAA;--warn-soft:#2E2E22;--bad:#CE9178;--bad-soft:#3A2820}
+:root[data-style="minimal"]{--f-head:"Segoe UI Variable Display","Segoe UI",system-ui,sans-serif;--f-body:Charter,"Bitstream Charter",Georgia,serif;--body-size:19px;--radius:12px;--h-weight:700;--sec-pad:60px;
+  --paper:#FFFFFF;--card:#FAFAFA;--side:#FFFFFF;--ink:#242424;--muted:#6B6B6B;--line:#EEEEEE;--rule:#E2E2E2;--code:#F6F6F6;
+  --accent:#1A8917;--accent-soft:#E9F5E9;--dense:#2F6FDB;--dense-soft:#EAF1FD;--good:#1A8917;--good-soft:#E9F5E9;--warn:#B26B00;--warn-soft:#FFF4E0;--bad:#C94A4A;--bad-soft:#FBECEC}
+:root[data-style="minimal"][data-theme="dark"]{--paper:#191919;--card:#202020;--side:#191919;--ink:#E6E6E6;--muted:#9B9B9B;--line:#2E2E2E;--rule:#3A3A3A;--code:#252525;
+  --accent:#5DBB63;--accent-soft:#1E2E20;--dense:#6EA8FE;--dense-soft:#1C2638;--good:#5DBB63;--good-soft:#1E2E20;--warn:#E3A33B;--warn-soft:#33270F;--bad:#E57373;--bad-soft:#3A1F1F}
+:root[data-style="catalogue"]{--f-head:"Iowan Old Style","Palatino Linotype","Book Antiqua",Palatino,Georgia,serif;--f-body:"Segoe UI",system-ui,sans-serif;--h-weight:700;
+  --paper:#FBF7EF;--card:#FFFDF8;--side:#F6F0E3;--ink:#231F18;--muted:#6B6457;--line:#E2D9C7;--rule:#C9BBA0;--code:#F1EBDD;
+  --accent:#B0431A;--accent-soft:#F6E2D6;--dense:#355C8C;--dense-soft:#E0E8F2;--good:#2D7549;--good-soft:#DDEFE2;--warn:#8F6200;--warn-soft:#F6EBCB;--bad:#B0431A;--bad-soft:#F6E2D6}
+:root[data-style="catalogue"][data-theme="dark"]{--paper:#16140F;--card:#1F1C16;--side:#1B1813;--ink:#EDE6D6;--muted:#A99F8D;--line:#38322A;--rule:#5A5040;--code:#29251D;
+  --accent:#F08B5E;--accent-soft:#3B2318;--dense:#8DB2E3;--dense-soft:#1C2939;--good:#7BCB97;--good-soft:#18301F;--warn:#E3B653;--warn-soft:#352A12;--bad:#F08B5E;--bad-soft:#3B2318}
+/* Reader themes: research-based reading typography (bundled OFL fonts, so they work offline).
+   Lines about 68 characters, line height about 1.7, off-white paper; dark mode on dark grey with off-white text (no pure black or white). */
+@font-face{font-family:"Literata";src:url("fonts/literata-latin-opsz-normal.woff2") format("woff2");font-weight:200 900;font-style:normal;font-display:swap}
+@font-face{font-family:"Literata";src:url("fonts/literata-latin-opsz-italic.woff2") format("woff2");font-weight:200 900;font-style:italic;font-display:swap}
+@font-face{font-family:"Atkinson Hyperlegible";src:url("fonts/atkinson-hyperlegible-latin-400-normal.woff2") format("woff2");font-weight:400;font-style:normal;font-display:swap}
+@font-face{font-family:"Atkinson Hyperlegible";src:url("fonts/atkinson-hyperlegible-latin-400-italic.woff2") format("woff2");font-weight:400;font-style:italic;font-display:swap}
+@font-face{font-family:"Atkinson Hyperlegible";src:url("fonts/atkinson-hyperlegible-latin-700-normal.woff2") format("woff2");font-weight:700;font-style:normal;font-display:swap}
+@font-face{font-family:"Atkinson Hyperlegible";src:url("fonts/atkinson-hyperlegible-latin-700-italic.woff2") format("woff2");font-weight:700;font-style:italic;font-display:swap}
+:root[data-style="reader"],:root[data-style="hyper"]{
+  --paper:#FBF8F1;--card:#F5F1E8;--side:#F3EEE3;--ink:#2A2723;--muted:#6B655B;--line:#E4DCCD;--rule:#CFC4AF;--code:#F0EADF;
+  --accent:#8C3A12;--accent-soft:#F5E3D6;--dense:#24588A;--dense-soft:#E2ECF6;--good:#2F6B3B;--good-soft:#E3F0E3;--warn:#8A5B00;--warn-soft:#F8EDCF;--bad:#A1271B;--bad-soft:#F8E1DD;
+  --radius:6px;--sec-pad:56px}
+:root[data-style="reader"][data-theme="dark"],:root[data-style="hyper"][data-theme="dark"]{
+  --paper:#1C1B19;--card:#24221F;--side:#191816;--ink:#DEDAD2;--muted:#A39E93;--line:#36332E;--rule:#4A463F;--code:#2A2825;
+  --accent:#E3A178;--accent-soft:#3A2A20;--dense:#94BCE6;--dense-soft:#1F2B38;--good:#8CC79A;--good-soft:#1F2D22;--warn:#E2BD6A;--warn-soft:#352B14;--bad:#EE8E80;--bad-soft:#3B2420}
+:root[data-style="reader"]{--f-head:"Literata",Cambria,Georgia,serif;--f-body:"Literata",Cambria,Georgia,serif;--body-size:19px;--h-weight:650}
+:root[data-style="hyper"]{--f-head:"Atkinson Hyperlegible","Segoe UI",system-ui,sans-serif;--f-body:"Atkinson Hyperlegible","Segoe UI",system-ui,sans-serif;--body-size:18.5px;--h-weight:700}
+:root[data-theme="dark"]{color-scheme:dark}
+
+/* ---------- base ---------- */
+*{box-sizing:border-box}
+html{scroll-behavior:smooth;scroll-padding-top:72px}
+body{margin:0;background:var(--paper);color:var(--ink);font:var(--body-size)/1.62 var(--f-body)}
+a{color:var(--accent)}
+a:focus-visible,button:focus-visible,input:focus-visible,select:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+h1,h2,h3{font-family:var(--f-head);font-weight:var(--h-weight);line-height:1.2;margin:0;text-wrap:balance}
+h1{font-size:clamp(1.8rem,4.2vw,2.6rem);letter-spacing:-.01em}
+h2{font-size:clamp(1.3rem,2.8vw,1.65rem)}
+h3{font-size:1.06rem}
+p{margin:0}
+code,.mono{font-family:var(--f-mono);font-size:.86em}
+:not(pre)>code{background:var(--code);padding:.08em .35em;border-radius:4px}
+pre{font-family:var(--f-mono);font-size:.84rem;background:var(--code);padding:12px 14px;border-radius:var(--radius);overflow-x:auto;margin:0;line-height:1.5;border:1px solid var(--line)}
+ul,ol{margin:0;padding-left:1.25em}
+li+li{margin-top:4px}
+
+/* ---------- top bar, sidebar, layout ---------- */
+.top{position:sticky;top:0;z-index:30;height:56px;display:flex;align-items:center;gap:10px;padding:0 16px;background:color-mix(in srgb,var(--paper) 92%,transparent);backdrop-filter:blur(8px);border-bottom:1px solid var(--line)}
+.top .t{font-family:var(--f-head);font-weight:var(--h-weight);margin-right:auto;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;min-width:0}
+.menu,.home{display:inline-flex;gap:4px;align-items:center;flex:none}
+.home{text-decoration:none}
+.side .course a{display:grid;grid-template-columns:26px minmax(0,1fr);gap:4px;padding:5px 8px;border-radius:6px;color:var(--ink);text-decoration:none;font-size:.88rem;line-height:1.35}
+.side .course a .n{font-family:var(--f-mono);font-size:.74rem;color:var(--muted)}
+.side .course a:hover{background:color-mix(in srgb,var(--accent) 10%,transparent)}
+.top .btn,.top .seg{flex:none;white-space:nowrap}
+.crumb{display:none;color:var(--muted);font-weight:400;font-family:var(--f-body)}
+html[data-toc="hidden"] .crumb{display:inline}
+.topprog{position:absolute;left:0;bottom:-1px;height:3px;width:0;background:var(--accent);transition:width .15s}
+html:not([data-toc="hidden"]) .topprog{display:none}
+.seg{display:inline-flex;border:1px solid var(--rule);border-radius:999px;overflow:hidden;flex:none}
+.seg button{font:inherit;font-family:var(--f-body);font-size:.88rem;border:0;background:transparent;color:var(--ink);padding:5px 12px;cursor:pointer}
+.seg button[aria-pressed="true"]{background:var(--ink);color:var(--paper)}
+.btn,select.btn{font:inherit;font-family:var(--f-body);font-size:.88rem;border:1px solid var(--rule);background:var(--card);color:var(--ink);border-radius:8px;padding:5px 10px;cursor:pointer}
+.btn:hover{border-color:var(--ink)}
+/* Panel docked to the window edge (like VS Code); the text starts right beside it; spare space goes to the far side only. */
+.shell{--side-w:260px;display:grid;grid-template-columns:var(--side-w) minmax(0,var(--content-w));justify-content:start;column-gap:48px;padding:0 24px 0 0}
+aside.side{position:sticky;top:56px;height:calc(100vh - 56px);overflow:auto;background:var(--side);border-right:1px solid var(--line);padding:20px 12px 24px;font-family:var(--f-body)}
+.side .lab{font-size:.72rem;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);margin:14px 8px 6px}
+.side .head{display:flex;justify-content:space-between;align-items:center;gap:8px;margin:0 8px 8px}
+.side .head .lab{margin:0}
+.side .head button{font:inherit;font-family:var(--f-body);font-size:.74rem;border:1px solid var(--rule);background:var(--paper);color:var(--muted);border-radius:6px;padding:2px 7px;cursor:pointer}
+.side .head button:hover{color:var(--ink);border-color:var(--ink)}
+html[data-side="right"] .shell{grid-template-columns:minmax(0,var(--content-w)) var(--side-w);justify-content:end;padding:0 0 0 24px}
+html[data-side="right"] aside.side{order:2;border-right:0;border-left:1px solid var(--line)}
+html[data-toc="hidden"] .shell{grid-template-columns:minmax(0,var(--content-w));justify-content:center;padding:0 24px}
+html[data-toc="hidden"] aside.side{display:none}
+.prog{margin:0 8px 6px;display:grid;gap:4px;font-size:.8rem;color:var(--muted)}
+.prog .track{height:5px;border-radius:3px;background:var(--line);overflow:hidden}
+.prog .track i{display:block;height:100%;width:0;background:var(--accent);transition:width .15s}
+.side nav a{display:grid;grid-template-columns:26px minmax(0,1fr) auto;gap:4px;align-items:baseline;padding:5px 8px;border-radius:6px;color:var(--ink);text-decoration:none;font-size:.88rem;line-height:1.35}
+.side nav a .n{font-family:var(--f-mono);font-size:.74rem;color:var(--muted)}
+.side nav a:hover{background:color-mix(in srgb,var(--accent) 10%,transparent)}
+.side nav a.on{background:var(--accent-soft);color:var(--accent);font-weight:600}
+.side nav a.on .n{color:var(--accent)}
+.side nav a .fo{font-size:.66rem;font-family:var(--f-mono);color:var(--dense);border:1px solid var(--dense);border-radius:4px;padding:0 4px}
+html[data-depth="short"] .side nav a.fullonly{opacity:.55}
+main{padding:8px 0 90px;min-width:0;width:100%}
+@media (max-width:980px){
+  .shell,html[data-side="right"] .shell,html[data-toc="hidden"] .shell{grid-template-columns:minmax(0,1fr);padding:0}
+  aside.side,html[data-toc="hidden"] aside.side,html[data-side="right"] aside.side{display:block;position:fixed;left:0;top:56px;bottom:0;height:auto;width:min(300px,86vw);z-index:25;transform:translateX(-104%);transition:transform .2s;box-shadow:0 10px 30px rgba(0,0,0,.25);background:var(--side);padding:16px 12px 24px}
+  html[data-side="right"] aside.side{left:auto;right:0;transform:translateX(104%)}
+  body.side-open aside.side{transform:none!important}
+  .topprog{display:block!important}
+  .crumb{display:inline}
+  main{padding:8px 16px 90px}
+}
+@media (max-width:620px){.top .t{display:none}.top .seg{margin-left:auto}.top select.btn{max-width:118px}}
+@media (max-width:480px){.top{gap:6px;padding:0 10px}.top .lbl{display:none}.top select.btn{max-width:100px}.seg button{padding:5px 10px}}
+.totop{position:fixed;right:20px;bottom:20px;width:46px;height:46px;border-radius:50%;border:1px solid var(--rule);background:var(--ink);color:var(--paper);font-size:1.3rem;line-height:1;cursor:pointer;box-shadow:0 4px 14px rgba(0,0,0,.2);opacity:0;pointer-events:none;transform:translateY(8px);transition:opacity .2s,transform .2s;z-index:20}
+.totop.show{opacity:1;pointer-events:auto;transform:none}
+
+/* ---------- content blocks ---------- */
+header.hero{padding:28px 0 4px;display:grid;gap:10px}
+.eyebrow{font-family:var(--f-mono);font-size:.72rem;letter-spacing:.08em;text-transform:uppercase;color:var(--muted)}
+.sub{color:var(--muted);font-size:1.05rem}
+section.s{padding-top:var(--sec-pad);display:grid;gap:14px}
+section.s>.num{font-family:var(--f-mono);font-size:.74rem;letter-spacing:.08em;color:var(--accent)}
+.lede{font-size:1.1rem}
+.badge{font-size:.72rem;font-family:var(--f-mono);padding:1px 7px;border-radius:999px;border:1px solid var(--rule);color:var(--muted);background:var(--card);white-space:nowrap;vertical-align:1px}
+.badge.m{border-color:var(--good);color:var(--good)}
+.badge.t{border-color:var(--warn);color:var(--warn)}
+.badge.f{border-color:var(--dense);color:var(--dense)}
+.card{background:var(--card);border:1px solid var(--line);border-radius:var(--radius);padding:14px 16px}
+.call{padding:10px 14px;border-radius:0 var(--radius) var(--radius) 0;border-left:4px solid}
+.call.proj{border-color:var(--good);background:var(--good-soft)}
+.call.wrong{border-color:var(--bad);background:var(--bad-soft)}
+.call.wrong>b:first-child{color:var(--bad)}
+.call.note{border-color:var(--warn);background:var(--warn-soft)}
+.full{border:1px dashed var(--dense);border-radius:var(--radius);padding:14px 16px;display:grid;gap:12px;background:color-mix(in srgb,var(--dense-soft) 50%,transparent)}
+.full>.tag{font-family:var(--f-mono);font-size:.7rem;letter-spacing:.08em;text-transform:uppercase;color:var(--dense)}
+html[data-depth="short"] .full{display:none}
+.two{display:grid;gap:12px}
+@media (min-width:760px){.two{grid-template-columns:1fr 1fr}}
+.three{display:grid;gap:10px}
+@media (min-width:760px){.three{grid-template-columns:repeat(3,1fr)}}
+table{border-collapse:collapse;width:100%;font-size:.92rem;font-family:var(--f-body)}
+th,td{text-align:left;padding:7px 9px;border-bottom:1px solid var(--line);vertical-align:top}
+th{font-size:.78rem;color:var(--muted);font-weight:600}
+td.n,th.n{text-align:right;font-variant-numeric:tabular-nums;font-family:var(--f-mono);font-size:.84rem}
+.tw{overflow-x:auto}
+caption,figcaption{caption-side:bottom;text-align:left;color:var(--muted);font-size:.84rem;padding-top:6px;font-family:var(--f-body)}
+figure{margin:0;display:grid;gap:8px}
+.hit{color:var(--good);font-weight:700}
+.miss{color:var(--bad);font-weight:700}
+.formula{font-family:var(--f-mono);font-size:.92rem;background:var(--code);padding:12px 14px;border-radius:var(--radius);overflow-x:auto;line-height:1.75;border:1px solid var(--line)}
+.formula .w{color:var(--accent);font-weight:700}
+.formula .c{color:var(--muted)}
+
+/* at a glance */
+.glance{display:grid;gap:10px;grid-template-columns:repeat(auto-fill,minmax(240px,1fr))}
+.g{background:var(--card);border:1px solid var(--line);border-radius:var(--radius);padding:10px 12px;display:grid;gap:5px;align-content:start}
+.g h3{font-size:.95rem;display:flex;justify-content:space-between;gap:8px;align-items:baseline}
+.g h3 a{font-family:var(--f-mono);font-size:.72rem;font-weight:400;text-decoration:none}
+.g .fx{font-family:var(--f-mono);font-size:.8rem;background:var(--code);border:1px solid var(--line);padding:5px 8px;border-radius:6px;white-space:normal;overflow-wrap:anywhere;line-height:1.45}
+.g p{font-size:.88rem}
+.g .ex{font-size:.8rem;color:var(--muted)}
+.key{font-size:.86rem;color:var(--muted)}
+.key code{color:var(--ink)}
+
+/* rank cards, index explorer */
+.ranks{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.rank{border-radius:var(--radius);padding:14px;border:1px solid var(--line);background:var(--card);display:grid;gap:4px}
+.rank .big{font-family:var(--f-head);font-size:2.5rem;line-height:1;font-weight:700}
+.rank.d .big{color:var(--dense)}
+.rank.k .big{color:var(--accent)}
+.idx-docs{display:grid;gap:6px}
+.doc{font-family:var(--f-mono);font-size:.8rem;padding:6px 10px;border:1px solid var(--line);border-radius:8px;background:var(--paper);display:flex;gap:10px;align-items:baseline}
+.doc .id{font-weight:700;min-width:2.2em}
+.doc .tok{padding:0 2px;border-radius:3px}
+.doc .tok.on{background:var(--accent-soft);color:var(--accent);font-weight:700}
+.doc.cand{border-color:var(--accent)}
+.chips{display:flex;flex-wrap:wrap;gap:6px}
+.chip{font:inherit;font-family:var(--f-mono);font-size:.82rem;border:1px solid var(--rule);background:var(--paper);color:var(--ink);border-radius:999px;padding:3px 10px;cursor:pointer}
+.chip[aria-pressed="true"]{background:var(--accent);border-color:var(--accent);color:var(--paper)}
+.cards{display:grid;gap:8px;grid-template-columns:repeat(auto-fill,minmax(190px,1fr))}
+.icard{background:var(--paper);border:1px solid var(--rule);border-radius:4px;padding:8px 10px 10px;position:relative}
+.icard::before{content:"";position:absolute;left:0;right:0;top:28px;border-top:1px solid var(--accent);opacity:.55}
+.icard h4{margin:0 0 10px;font-family:var(--f-mono);font-size:.92rem}
+.icard p{font-size:.82rem;font-family:var(--f-mono)}
+.icard .meta{color:var(--muted);font-family:var(--f-body);font-size:.78rem;margin-top:4px}
+
+/* controls and charts */
+.ctl{display:grid;grid-template-columns:160px minmax(0,1fr) 64px;gap:10px;align-items:center;font-size:.9rem;font-family:var(--f-body)}
+.ctl input[type=range]{width:100%;accent-color:var(--accent)}
+.ctl output{font-family:var(--f-mono);text-align:right}
+@media (max-width:560px){.ctl{grid-template-columns:110px minmax(0,1fr) 54px}}
+svg.chart{width:100%;height:auto;display:block;background:var(--card);border:1px solid var(--line);border-radius:var(--radius)}
+svg .ax{stroke:var(--rule);stroke-width:1}
+svg .grid{stroke:var(--line);stroke-width:1}
+svg text{fill:var(--muted);font-family:"Segoe UI",system-ui,sans-serif;font-size:12px}
+svg .lab{fill:var(--ink);font-size:12.5px}
+svg .s-bm25{stroke:var(--accent);stroke-width:3;fill:none}
+svg .s-tfidf{stroke:var(--muted);stroke-width:2;fill:none;stroke-dasharray:6 5}
+svg .s-raw{stroke:var(--accent);stroke-width:1.5;fill:none;stroke-dasharray:2 4;opacity:.8}
+svg .s-ceil{stroke:var(--warn);stroke-width:1.5;stroke-dasharray:5 4}
+svg .s-ref{stroke:var(--dense);stroke-width:2;fill:none;opacity:.55}
+svg .dot{fill:var(--accent);stroke:var(--card);stroke-width:2}
+svg .dot2{fill:var(--dense);stroke:var(--card);stroke-width:2}
+svg .zero{stroke:var(--ink);stroke-width:1;opacity:.45}
+.readout{font-size:.9rem;background:var(--card);border:1px solid var(--line);border-radius:8px;padding:8px 12px;font-family:var(--f-body)}
+.readout b{font-family:var(--f-mono)}
+.sbars{display:grid;gap:8px}
+.sbar{display:grid;grid-template-columns:130px minmax(0,1fr) 64px;gap:10px;align-items:center;font-size:.88rem;font-family:var(--f-body)}
+.sbar .track{display:flex;height:22px;background:var(--paper);border:1px solid var(--line);border-radius:4px;overflow:hidden}
+.sbar .p1{background:var(--accent)}
+.sbar .p2{background:var(--warn);opacity:.75}
+.sbar .v{font-family:var(--f-mono);text-align:right}
+@media (max-width:560px){.sbar{grid-template-columns:92px minmax(0,1fr) 54px}}
+.legend{display:flex;flex-wrap:wrap;gap:12px;font-size:.82rem;color:var(--muted);font-family:var(--f-body)}
+.legend i{display:inline-block;width:12px;height:12px;border-radius:2px;margin-right:5px;vertical-align:-1px}
+.play{display:grid;gap:10px}
+.play label{display:grid;gap:4px;font-size:.88rem;font-family:var(--f-body)}
+.play input[type=text]{font:inherit;font-family:var(--f-mono);font-size:.86rem;padding:8px 10px;border:1px solid var(--rule);border-radius:8px;background:var(--paper);color:var(--ink);width:100%}
+.toks{display:grid;gap:8px}
+.tokrow{border:1px solid var(--line);border-radius:10px;padding:8px 10px;background:var(--paper);display:grid;gap:6px}
+.tokrow .h{display:flex;flex-wrap:wrap;gap:8px;align-items:baseline;justify-content:space-between;font-family:var(--f-body)}
+.tokrow .h b{font-family:var(--f-mono);font-size:.84rem}
+.tk{display:inline-block;font-family:var(--f-mono);font-size:.78rem;padding:1px 6px;margin:2px 3px 2px 0;border:1px solid var(--line);border-radius:4px;background:var(--card)}
+.tk.sh{border-color:var(--good);background:var(--good-soft);color:var(--good);font-weight:700}
+.verdict{font-size:.86rem;font-weight:600}
+.verdict.yes{color:var(--good)}
+.verdict.no{color:var(--bad)}
+.ov{position:relative;height:84px;border:1px solid var(--line);border-radius:var(--radius);background:var(--card);overflow:hidden}
+.ov .w{position:absolute;height:24px;border-radius:4px;font-size:.76rem;font-family:var(--f-mono);display:flex;align-items:center;justify-content:center;color:var(--ink);background:var(--dense-soft);border:1px solid var(--dense)}
+.ov .w82{top:12px;left:4%;width:56%}
+.ov .w83{top:46px;left:40%;width:56%}
+.ov .pin{position:absolute;top:4px;bottom:4px;left:44.1%;width:3px;background:var(--accent)}
+.ov .pinl{position:absolute;top:2px;left:45.3%;font-size:.74rem;font-family:var(--f-mono);color:var(--accent);font-weight:700}
+.q{display:grid;gap:8px}
+.q fieldset{border:1px solid var(--line);border-radius:var(--radius);padding:10px 14px;background:var(--card);margin:0;display:grid;gap:6px}
+.q legend{font-weight:600;padding:0 4px}
+.q label{display:flex;gap:8px;align-items:flex-start;font-size:.94rem;cursor:pointer}
+.q .fb{font-size:.9rem;padding:6px 10px;border-radius:6px;display:none}
+.q .fb.show{display:block}
+.q .fb.ok{background:var(--good-soft);color:var(--good)}
+.q .fb.no{background:var(--bad-soft);color:var(--bad)}
+.check{display:grid;gap:6px}
+.check label{display:grid;grid-template-columns:22px minmax(0,1fr);gap:8px;align-items:start;padding:8px 10px;border:1px solid var(--line);border-radius:8px;background:var(--card);cursor:pointer;font-size:.92rem}
+.check label:has(input:checked){border-color:var(--good);background:var(--good-soft)}
+.check input{width:17px;height:17px;margin-top:3px;accent-color:var(--good)}
+.check .how{display:block;color:var(--muted);font-size:.84rem;margin-top:2px}
+footer{margin-top:48px;padding:22px 0 0;border-top:1px solid var(--line);color:var(--muted);font-size:.86rem;display:grid;gap:8px}
+
+
+/* the theory in one read: a numbered chain of ideas */
+.chain{list-style:none;counter-reset:idea;margin:0;padding:0;display:grid;gap:0}
+.chain>li{counter-increment:idea;position:relative;padding:0 0 22px 52px;display:grid;gap:7px;margin:0}
+.chain>li::before{content:counter(idea);position:absolute;left:0;top:-2px;width:34px;height:34px;border-radius:50%;display:grid;place-items:center;
+  background:var(--accent-soft);color:var(--accent);border:1px solid var(--accent);font:600 .9rem/1 var(--f-body);font-variant-numeric:lining-nums}
+.chain>li::after{content:"";position:absolute;left:16.5px;top:36px;bottom:4px;width:1px;background:var(--rule)}
+.chain>li:last-child::after{display:none}
+.chain h3{font-size:1.08rem}
+.chain .formula{font-size:.86rem;padding:8px 12px;line-height:1.65}
+.chain .go{justify-self:start;font-size:.86rem;font-family:var(--f-body);text-decoration:none;border:1px solid var(--rule);border-radius:999px;padding:1px 10px;color:var(--accent)}
+.chain .go:hover{border-color:var(--accent)}
+
+/* ---------- small per-theme touches ---------- */
+[data-style="textbook"] section.s>.num{font-family:var(--f-head);font-size:.95rem;letter-spacing:.02em;font-style:italic;text-transform:none}
+[data-style="textbook"] #answer .lede::first-letter{float:left;font-size:3.1em;line-height:.9;padding:5px 8px 0 0;color:var(--accent);font-family:var(--f-head)}
+[data-style="textbook"] .call{border-left-width:2px;font-style:italic}
+[data-style="textbook"] .call b{font-style:normal}
+[data-style="editor"] h2::before{content:"## ";color:var(--muted)}
+[data-style="editor"] h1::before{content:"# ";color:var(--muted)}
+[data-style="editor"] .formula,[data-style="editor"] pre{border-left:3px solid var(--accent)}
+[data-style="minimal"] .card,[data-style="minimal"] .g,[data-style="minimal"] .rank,[data-style="minimal"] svg.chart{border-color:transparent}
+[data-style="minimal"] aside.side{border-right-color:transparent}
+[data-style="minimal"] .call{border-left-width:3px}
+[data-style="catalogue"] .g,[data-style="catalogue"] .card{box-shadow:0 1px 0 var(--line)}
+/* Reader themes: the rich typographic details */
+:is([data-style="reader"],[data-style="hyper"]){--content-w:720px}
+:is([data-style="reader"],[data-style="hyper"]) body{line-height:1.72;font-variant-numeric:lining-nums;text-rendering:optimizeLegibility;-webkit-font-smoothing:antialiased}
+:is([data-style="reader"],[data-style="hyper"]) :is(p,li){text-wrap:pretty;hanging-punctuation:first}
+:is([data-style="reader"],[data-style="hyper"]) section.s{border-top:1px solid var(--line);margin-top:30px}
+:is([data-style="reader"],[data-style="hyper"]) section.s>.num{font-family:var(--f-body);font-variant-caps:all-small-caps;font-size:1rem;letter-spacing:.09em;color:var(--accent)}
+:is([data-style="reader"],[data-style="hyper"]) .eyebrow{font-family:var(--f-body);font-variant-caps:all-small-caps;font-size:.95rem;text-transform:none;letter-spacing:.08em}
+:is([data-style="reader"],[data-style="hyper"]) h2{font-size:clamp(1.5rem,3vw,1.9rem);letter-spacing:-.005em}
+[data-style="reader"] h1{font-weight:720;font-size:clamp(2rem,5vw,3rem);letter-spacing:-.015em}
+:is([data-style="reader"],[data-style="hyper"]) #answer .lede{font-size:1.2em;line-height:1.62}
+[data-style="reader"] #answer .lede::first-letter{float:left;font-size:3.5em;line-height:.84;padding:6px 10px 0 0;color:var(--accent);font-weight:700}
+:is([data-style="reader"],[data-style="hyper"]) .call{border-left-width:3px;border-radius:0 8px 8px 0;padding:12px 16px}
+:is([data-style="reader"],[data-style="hyper"]) .call.proj::before{content:"✦ ";color:var(--good)}
+:is([data-style="reader"],[data-style="hyper"]) a{text-underline-offset:.18em;text-decoration-thickness:1px}
+:is([data-style="reader"],[data-style="hyper"]) ::selection{background:var(--accent-soft)}
+:is([data-style="reader"],[data-style="hyper"]) table{font-variant-numeric:lining-nums tabular-nums}
+:is([data-style="reader"],[data-style="hyper"]) :is(.g,.card,.rank){box-shadow:0 1px 2px rgba(0,0,0,.05)}
+:is([data-style="reader"],[data-style="hyper"]) .side nav a{font-size:.9rem}
+@media print{.top,aside.side,.totop,.ctl,.btn,.play input{display:none!important} html[data-depth] .full{display:grid!important} .shell{display:block} main{padding:0}}
+
+/* ---------- lesson additions (shared with P1) ---------- */
+.tk.mk{color:var(--muted);border-style:dashed}
+svg .fbox{fill:var(--paper);stroke:var(--rule);stroke-width:1.2}
+svg .fbox.hl{fill:var(--accent-soft);stroke:var(--accent);stroke-width:2}
+svg .farr{stroke:var(--muted);stroke-width:1.6}
+svg .fhead{fill:var(--muted)}
+svg .rb1{fill:var(--muted);opacity:.55}
+svg .rb2{fill:var(--accent)}
+svg .tbar{fill:var(--accent)}
+.sbar .pm{background:var(--muted);opacity:.55}
+.sbar .p3{background:var(--dense)}
+.sbar .ph,.legend i.hatch{background:repeating-linear-gradient(45deg,var(--warn) 0 3px,transparent 3px 7px);opacity:.8}
+.sbar .p4{background:var(--dense);opacity:.8}
+.sbar .p5{background:var(--good)}
+.sbar .pe{background:transparent}
+pre .c{color:var(--muted)}
+table.heat td.hc{text-align:center;font-weight:600}
+table.heat td.g2{background:var(--good-soft);color:var(--good)}
+table.heat td.g1{background:var(--warn-soft);color:var(--warn)}
+table.heat td.g0{background:var(--bad-soft);color:var(--bad)}
+/* grid children may shrink below their content, so wide code scrolls inside its box on phones */
+section.s>*,.two>*,.three>*,.full>*,.card>*,figure>*{min-width:0}
+main :not(pre)>code{overflow-wrap:anywhere}
+@media (max-width:620px){.badge{white-space:normal}}
+
+/* ---------- I5 additions ---------- */
+.badge.y{border-color:var(--accent);color:var(--accent);border-style:dashed}
+.content-seg{display:inline-flex;border:1px solid var(--rule);border-radius:999px;overflow:hidden;flex:none;justify-self:start;flex-wrap:wrap}
+.content-seg button{font:inherit;font-family:var(--f-body);font-size:.86rem;border:0;background:transparent;color:var(--ink);padding:5px 12px;cursor:pointer}
+.content-seg button[aria-pressed="true"]{background:var(--ink);color:var(--paper)}
+.chunktext{font-family:var(--f-mono);font-size:.8rem;line-height:1.55;white-space:pre-wrap;overflow-wrap:anywhere;background:var(--paper);border:1px solid var(--line);border-radius:8px;padding:10px 12px}
+.chunktext .hd{background:var(--accent-soft);color:var(--accent);font-weight:700;border-radius:3px;padding:0 2px}
+.chunktext .hdr{display:block;background:var(--good-soft);color:var(--good);border:1px dashed var(--good);border-radius:6px;padding:4px 8px;margin-bottom:8px;font-weight:600}
+.cb{display:flex;height:34px;border:1px solid var(--line);border-radius:6px;overflow:hidden;background:var(--paper)}
+.cb span{display:flex;align-items:center;justify-content:center;font-size:.68rem;font-family:var(--f-mono);color:var(--ink);overflow:hidden;white-space:nowrap;border-right:1px solid var(--card)}
+.cb span.maj{outline:2px solid var(--accent);outline-offset:-2px;font-weight:700}
+.cbk{display:grid;gap:3px;font-size:.82rem;font-family:var(--f-body)}
+.cbk div{display:grid;grid-template-columns:14px minmax(0,1fr) auto;gap:8px;align-items:baseline}
+.cbk i{display:inline-block;width:12px;height:12px;border-radius:2px}
+.cbk .n{font-family:var(--f-mono);font-size:.78rem;color:var(--muted)}
+.ruler{position:relative;height:46px;border:1px solid var(--line);border-radius:6px;background:var(--paper);overflow:hidden}
+.ruler .seg2{position:absolute;top:8px;height:22px;display:flex;align-items:center;justify-content:center;font-size:.7rem;font-family:var(--f-mono);color:var(--ink);overflow:hidden;white-space:nowrap}
+.ruler .sp{background:var(--muted);opacity:.45}
+.ruler .hh{background:var(--good);opacity:.8;color:var(--paper)}
+.ruler .cc{background:var(--accent-soft);border:1px solid var(--accent)}
+.ruler .cut{background:repeating-linear-gradient(45deg,var(--bad) 0 3px,transparent 3px 7px);border:1px solid var(--bad);opacity:.85}
+.ruler .lim{position:absolute;top:0;bottom:0;width:2px;background:var(--ink)}
+.ruler .liml{position:absolute;bottom:2px;font-size:.66rem;font-family:var(--f-mono);color:var(--ink)}
+.calc{display:grid;gap:8px}
+.calc .row{display:grid;grid-template-columns:minmax(0,1fr) 120px;gap:10px;align-items:center;font-size:.9rem;font-family:var(--f-body)}
+.calc input[type=number],.calc select{font:inherit;font-family:var(--f-mono);font-size:.86rem;padding:5px 8px;border:1px solid var(--rule);border-radius:6px;background:var(--paper);color:var(--ink);width:100%}
+.calc label.tg{display:flex;gap:8px;align-items:center;font-size:.9rem;font-family:var(--f-body);cursor:pointer}
+.pending{color:var(--accent);font-family:var(--f-mono);font-size:.8rem}
+</style>
+</head>
+<body>
+<div class="top">
+  <a class="btn home" id="home" href="../../RAG_ROUTE_MAP.html" title="Back to all phases"><span aria-hidden="true">⌂</span><span class="lbl">All phases</span></a>
+  <button type="button" class="btn menu" id="menu" aria-expanded="true" aria-controls="side" title="Show or hide the contents (key: T)"><span aria-hidden="true">☰</span><span class="lbl">Contents</span></button>
+  <span class="t">I5 · Contextual chunk headers<span class="crumb" id="crumb" aria-live="polite"></span></span>
+  <i class="topprog" id="topprog" aria-hidden="true"></i>
+  <div class="seg" role="group" aria-label="Reading depth">
+    <button type="button" data-depth="short" aria-pressed="true">Short</button>
+    <button type="button" data-depth="full" aria-pressed="false">Full</button>
+  </div>
+  <select class="btn" id="style" aria-label="Theme">
+    <option value="reader">Reader · Literata (new)</option>
+    <option value="hyper">Reader · Atkinson Hyperlegible (new)</option>
+    <option value="notebook">Clean notebook</option>
+    <option value="textbook">Textbook</option>
+    <option value="editor">Editor (VS Code)</option>
+    <option value="minimal">Minimal reading</option>
+    <option value="catalogue">Card catalogue (first version)</option>
+  </select>
+  <button type="button" class="btn" id="color" aria-label="Switch light or dark">☾ Dark</button>
+</div>
+
+<div class="shell">
+<aside class="side" id="side" aria-label="Sections">
+  <div class="head"><div class="lab">On this page</div><button type="button" id="sidepos" title="Move the contents to the other side">⇆ Right</button></div>
+  <div class="prog"><span id="where">The answer first</span><span class="track" aria-hidden="true"><i id="bar"></i></span></div>
+  <nav id="toc">
+    <a href="#answer"><span class="n">→</span><span>The answer first</span></a>
+    <a href="#theory"><span class="n">◆</span><span>The theory in one read</span></a>
+    <a href="#glance"><span class="n">★</span><span>Formula sheet</span></a>
+    <div class="lab">Step by step</div>
+    <a href="#anon"><span class="n">1</span><span>A chunk loses its context</span></a>
+    <a href="#fields"><span class="n">2</span><span>Where the header goes</span></a>
+    <a href="#tree"><span class="n">3</span><span>Headings from the PDF</span></a>
+    <a href="#path"><span class="n">4</span><span>The path, not the leaf</span></a>
+    <a href="#assign"><span class="n">5</span><span>Which heading a chunk gets</span></a>
+    <a href="#info"><span class="n">6</span><span>The information test</span></a>
+    <a href="#dilute"><span class="n">7</span><span>Dilution and the magnet</span></a>
+    <a href="#trunc"><span class="n">8</span><span>Truncation: the tail is cut</span></a>
+    <a href="#measure"><span class="n">9</span><span>Measuring it</span></a>
+    <a href="#llm"><span class="n">10</span><span>LLM contexts and cost</span></a>
+    <a href="#cache"><span class="n">11</span><span>Caching and cache keys</span></a>
+    <a href="#claims"><span class="n">12</span><span>Reading vendor numbers</span></a>
+    <a href="#repo" class="fullonly"><span class="n">13</span><span>The repo, read critically</span><span class="fo">Full</span></a>
+    <a href="#beyond" class="fullonly"><span class="n">14</span><span>Beyond headers</span><span class="fo">Full</span></a>
+    <div class="lab">Practise and apply</div>
+    <a href="#verify"><span class="n">✓</span><span>Verify it: the notebook</span></a>
+    <a href="#apply"><span class="n">⚙</span><span>Use it on your data</span></a>
+    <a href="#check"><span class="n">?</span><span>Check yourself</span></a>
+  </nav>
+  <div class="lab">Course</div>
+  <div class="course">
+    <a id="toRoute" href="../../RAG_ROUTE_MAP.html"><span class="n">⌂</span><span>All phases (the route)</span></a>
+    <a class="kitonly" data-route="#/c/I5" href="#"><span class="n">≡</span><span>I5 page: steps, quiz</span></a>
+    <a class="kitonly" data-route="#/c/I4" href="#"><span class="n">←</span><span>Previous topic: I4 proposition chunking</span></a>
+    <a class="kitonly" data-route="#/c/I6" href="#"><span class="n">→</span><span>Next topic: I6 document augmentation</span></a>
+  </div>
+</aside>
+
+<main id="main">
+<header class="hero" id="top">
+  <div class="eyebrow">RAG study kit · Phase 4 · concept I5 · project v1.2</div>
+  <h1>Contextual chunk headers and contextual retrieval</h1>
+  <p class="sub">A chunk cut out of a document forgets where it came from. A header puts that back into the text you embed, but only helps when it says something that differs between chunks.</p>
+  <p class="key"><span class="badge m">measured</span> by local code on the course's climate PDF and its 97 v0 chunks (no API call) · <span class="badge t">toy</span> made-up data that shows a mechanism · <span class="badge f">formula</span> arithmetic, including token estimates from measured characters-per-token ratios · <span class="badge">external</span> from a cited study · <span class="badge y">your run</span> needs the MiniLM model on your machine: the verify notebook fills it in</p>
+</header>
+
+<!-- ======================= ANSWER FIRST ======================= -->
+<section class="s" id="answer" aria-labelledby="h-answer">
+  <div class="num">THE ANSWER FIRST</div>
+  <h2 id="h-answer">Contextual headers in five sentences</h2>
+  <p class="lede"><b>A chunk cut out of a document often loses what it is about: its heading, its chapter, the thing that "it" refers to, so a question that names the subject may not match it.</b> A contextual header fixes this at index time: you put a short description of where the chunk sits (its heading path, or a sentence an LLM writes) in front of the text you <b>embed</b>, while the stored chunk text and its offsets stay exactly as they were. A header helps only when it carries information that <b>differs between chunks</b>: in the course's climate PDF the one document title is the same on all 97 chunks, so only the chapter and section headings can tell apart look-alikes such as the two "Paris Agreement" pages. Which heading a chunk gets is a real decision, because nearly every chunk holds several headings and the rule you pick can give a chunk the wrong chapter. The LLM-written version costs one call per chunk, each carrying the whole document, so it is affordable only with prompt caching, and the vendor's headline gain (5.7% → 3.7% of relevant chunks missed in the top 20) is far smaller than what about 50 questions can detect.</p>
+  <p>Next comes <b>the whole theory in one read</b>, then a <b>formula sheet</b>, then the <b>step-by-step</b> part. It follows two near-duplicate questions from the course's draft seeds, <b>D-002</b> (the year of the Paris Agreement, answered on page 10) and <b>D-003</b> (the review of national contributions, answered on page 23), through the 97 v0 chunks of the climate PDF. The book covers the idea in Chapter 7 (<a data-book="chapter 7.pdf" data-page="1">Ch7 p.1–2/11</a>, then <a data-book="chapter 7.pdf" data-page="4">p.4–9/11</a>). <b>Short</b> gives a complete first understanding. <b>Full</b> adds the upstream notebook read critically, late chunking, framework defaults and the BM25 side; its parts have a dashed border.</p>
+</section>
+
+<!-- ======================= THEORY IN ONE READ ======================= -->
+<section class="s" id="theory" aria-labelledby="h-theory">
+  <div class="num">THE THEORY IN ONE READ</div>
+  <h2 id="h-theory">The whole topic, idea by idea</h2>
+  <p>Twelve ideas, in the order they build on each other. This part is theory only, with no measurements. Each idea links to its step below, where the climate PDF shows it working.</p>
+  <ol class="chain">
+    <li><h3>Chunks lose their context</h3>
+      <p>Chunking cuts a document into pieces. A piece can start with "It", sit under a heading that stayed in the previous piece, or depend on a chapter it never names. Its meaning depends on text outside its span, so it is <b>contextually anonymous</b>.</p>
+      <a class="go" href="#anon">Step 1 →</a></li>
+    <li><h3>The header goes into a separate field</h3>
+      <p>You add the header to the text the embedding model reads, never to the stored chunk text. The chunk's <code>text</code> and its character offsets stay as they were, so evidence scoring still works. A header can feed three different inputs: the embedding, the keyword index and the generator's prompt. Each one is a separate decision.</p>
+      <div class="formula">embed_text = header + "\n\n" + text&nbsp;&nbsp;<span class="c">text == doc[char_start:char_end] still holds</span></div>
+      <a class="go" href="#fields">Step 2 →</a></li>
+    <li><h3>Headings come from the layout</h3>
+      <p>A PDF has no heading tags. You read each line's font size and boldness and rank them: the biggest bold line is the title, then chapters, sections and subsections. A heading can be the same size as body text and differ only by being bold.</p>
+      <div class="formula">level = rank of (font size, bold) among heading-like line styles</div>
+      <a class="go" href="#tree">Step 3 →</a></li>
+    <li><h3>Use the path, not the leaf</h3>
+      <p>The deepest heading alone (the <b>leaf</b>) repeats across a long document. The full <b>path</b> (title › chapter › section › subsection) is unique, because higher levels differ.</p>
+      <div class="formula">path = title › chapter › section › subsection</div>
+      <a class="go" href="#path">Step 4 →</a></li>
+    <li><h3>A chunk needs a rule to get its heading</h3>
+      <p>A chunk often spans several headings. You must choose: the path in effect where the chunk starts, the path that covers most of its text, or every heading inside it. Each rule gets some chunks wrong.</p>
+      <div class="formula">start: path_at(first character)&nbsp;·&nbsp;majority: argmax over paths of characters covered&nbsp;·&nbsp;all: start + every heading inside</div>
+      <a class="go" href="#assign">Step 5 →</a></li>
+    <li><h3>Only a header that varies can discriminate</h3>
+      <p>If every chunk gets the same header, the header cannot make one chunk rank above another for the right reason. It only shifts every vector the same way. Count distinct headers over chunks before you test anything.</p>
+      <div class="formula">information test: distinct headers / chunks&nbsp;&nbsp;<span class="c">1 / N ⇒ no ranking information</span></div>
+      <a class="go" href="#info">Step 6 →</a></li>
+    <li><h3>A header dilutes the chunk</h3>
+      <p>A sentence embedding is roughly an average over its tokens, so a header of h tokens on a chunk of c tokens takes a share s of the vector. Chunks that share a long header are pulled toward each other.</p>
+      <div class="formula">s = h / (h + c)</div>
+      <a class="go" href="#dilute">Step 7 →</a></li>
+    <li><h3>A long header pushes the chunk's end out</h3>
+      <p>An embedding model reads at most L tokens. When header plus chunk is longer, the model drops the <b>end</b> of the chunk, not the header.</p>
+      <div class="formula">fits ⇔ 2 + h + c ≤ L&nbsp;&nbsp;<span class="c">MiniLM L = 256, the 2 special tokens included</span></div>
+      <a class="go" href="#trunc">Step 8 →</a></li>
+    <li><h3>Measure it with the course's metric</h3>
+      <p>Compare a no-header arm with header arms on the same questions, at the same k: complete evidence in the top 4 (CE@4), per category, with the questions that changed. A label-free check is the score margin between the right chunk and its look-alike.</p>
+      <div class="formula">Δ = CE@4(header) − CE@4(none)&nbsp;&nbsp;<span class="c">paired, with the discordant questions listed</span></div>
+      <a class="go" href="#measure">Step 9 →</a></li>
+    <li><h3>An LLM can write the context</h3>
+      <p>Instead of a heading path, an LLM reads the whole document and the chunk and writes 50–100 tokens that situate the chunk. That is one call per chunk, and each call carries the document.</p>
+      <div class="formula">cost_d = D·p_in·w + (n − 1)·D·p_in·ρ + n·(c + P)·p_in + n·o·p_out</div>
+      <a class="go" href="#llm">Step 10 →</a></li>
+    <li><h3>Caching decides the cost, and the key decides correctness</h3>
+      <p>Put the document first and the chunk last, so every call for one document shares a cached prefix. The cache key must contain everything that shapes the answer: the prompt version, the document text and the chunk.</p>
+      <div class="formula">key = hash(model, params, prompt_version, document text, chunk text)</div>
+      <a class="go" href="#cache">Step 11 →</a></li>
+    <li><h3>A vendor's number is not your number</h3>
+      <p>A relative drop in missed chunks at top 20 is not your metric at top 4, and a reranker score on one chunk is not a retrieval result. Turn every claim into an absolute change and ask whether your question set could detect it.</p>
+      <div class="formula">absolute = b − a&nbsp;&nbsp;·&nbsp;&nbsp;relative = (b − a) / a</div>
+      <a class="go" href="#claims">Step 12 →</a></li>
+  </ol>
+</section>
+
+<!-- ======================= FORMULA SHEET ======================= -->
+<section class="s" id="glance" aria-labelledby="h-glance">
+  <div class="num">FORMULA SHEET</div>
+  <h2 id="h-glance">Every term and formula, on one screen</h2>
+  <div class="glance">
+    <div class="g"><h3>Contextually anonymous <a href="#anon">§1</a></h3><p>The chunk's meaning needs text outside its span.</p><p class="ex">chunk 34 starts "It can be used for …"</p></div>
+    <div class="g"><h3>embed_text <a href="#fields">§2</a></h3><div class="fx">header + "\n\n" + text</div><p class="ex">text and offsets unchanged</p></div>
+    <div class="g"><h3>Three inputs <a href="#fields">§2</a></h3><p>embedding (v1.2) · keyword index (v2.0) · generator prompt (later)</p></div>
+    <div class="g"><h3>Heading level <a href="#tree">§3</a></h3><div class="fx">rank of (size, bold)</div><p class="ex">24 · 18 · 13.56 · 12 bold</p></div>
+    <div class="g"><h3>Path <a href="#path">§4</a></h3><div class="fx">title › chapter › section › subsection</div><p class="ex">11 leaf names repeat</p></div>
+    <div class="g"><h3>Heading rule <a href="#assign">§5</a></h3><div class="fx">start · majority · all inside</div><p class="ex">84 of 97 chunks: start ≠ majority</p></div>
+    <div class="g"><h3>Information test <a href="#info">§6</a></h3><div class="fx">distinct headers / chunks</div><p class="ex">title 1 / 97 · path 97 / 97</p></div>
+    <div class="g"><h3>Header share <a href="#dilute">§7</a></h3><div class="fx">s = h / (h + c)</div><p class="ex">19 on 151 tokens: 0.112</p></div>
+    <div class="g"><h3>Truncation <a href="#trunc">§8</a></h3><div class="fx">2 + h + c ≤ 256</div><p class="ex">182 + 100 = 282: tail cut</p></div>
+    <div class="g"><h3>Paired change <a href="#measure">§9</a></h3><div class="fx">Δ CE@4, discordant pairs</div><p class="ex">n = 50 detects ~0.18</p></div>
+    <div class="g"><h3>LLM-context cost <a href="#llm">§10</a></h3><div class="fx">D·p·w + (n−1)·D·p·ρ + n·(c+P)·p + n·o·p_out</div><p class="ex">Claude w 1.25, ρ 0.1</p></div>
+    <div class="g"><h3>Cache key <a href="#cache">§11</a></h3><div class="fx">prompt version + document + chunk</div><p class="ex">chunk-only key: 96 of 97 stale</p></div>
+    <div class="g"><h3>Absolute vs relative <a href="#claims">§12</a></h3><div class="fx">b − a · (b − a) / a</div><p class="ex">5.7 → 3.7: −2.0 points, −35.1%</p></div>
+  </div>
+  <p class="key"><b>Symbols:</b> <code>h</code> header tokens · <code>c</code> chunk tokens · <code>L</code> the embedder's token limit · <code>n</code> chunks in a document · <code>D</code> document tokens · <code>P</code> instruction tokens · <code>o</code> output tokens · <code>p_in</code>, <code>p_out</code> prices per token · <code>w</code> cache-write multiplier · <code>ρ</code> cache-read multiplier · <code>›</code> separates heading levels.</p>
+</section>
+
+<!-- 1 -->
+<section class="s" id="anon" aria-labelledby="h-anon">
+  <div class="num">STEP 1 · THE FAILURE</div>
+  <h2 id="h-anon">A chunk loses its context</h2>
+  <p>v0 cuts the climate PDF into 97 chunks of up to 1,000 characters, page by page, with 200 characters of overlap. Read chunk 34 the way the embedding model reads it, with nothing around it:</p>
+  <figure>
+    <div class="chunktext">It can be used for tracking carbon credits, verifying renewable energy transactions, and
+ensuring the integrity of supply chains. Blockchain-based solutions are being explored for
+various climate-related applications.
+<span class="hd">Bioengineering</span>
+Bioengineering approaches, such as biochar production and algae cultivation, offer …</div>
+    <figcaption><span class="badge m">measured · chunk 34, page 12</span> What to notice: "It" is blockchain, but the heading that says so ("Blockchain for Climate Action") ended up in the previous chunk.</figcaption>
+  </figure>
+  <p>A question about blockchain and carbon credits shares "carbon credits" with this chunk, but the subject is only in a pronoun. The book describes the same loss: once a document is split, a chunk can lose the heading and the referents that told a reader what it was about (<a data-book="chapter 7.pdf" data-page="1">Ch7 p.1–2/11</a>). A chunk like this is <b>contextually anonymous</b>. Two kinds of context are missing, and a header can restore both: <b>where the chunk sits</b> (its chapter and section) and <b>what it talks about</b> (the subject behind "it", "this protocol", "the agreement").</p>
+  <p>How common is it here? The climate PDF is unusually rich in headings, so the damage is smaller than you might expect:</p>
+  <div class="tw"><table>
+    <thead><tr><th>Check on the 97 v0 chunks</th><th class="n">Count</th><th>What it means</th></tr></thead>
+    <tbody>
+      <tr><td>Chunks with no heading line inside them</td><td class="n">0</td><td>every chunk carries at least one heading already</td></tr>
+      <tr><td>Chunks that hold 2 or more headings</td><td class="n">94</td><td>most chunks span several sections (step 5)</td></tr>
+      <tr><td>Chunks whose last text is a heading (an <b>orphaned heading</b>; its body is in the next chunk)</td><td class="n">31</td><td>16 of them sit at a page end, the same 16 that the C2 lesson counted (07 D.8)</td></tr>
+      <tr><td>Chunks that start in the middle of a sentence</td><td class="n">46</td><td>the 200-character overlap starts them mid-paragraph, like chunk 34</td></tr>
+    </tbody>
+    <caption><span class="badge m">measured · I5_FACTS K4, K9</span></caption>
+  </table></div>
+  <p><b>The climate PDF has little anonymity to repair, so expect a small effect on it.</b> A corpus of papers, with few headings per page and phrases like "our method", is where headers can matter more; the course tests that on Corpus T.</p>
+  <p class="call wrong"><b>Common mistake:</b> "headers fix chunking." They do not move any boundary. The chunk is cut in the same place; only the text the embedder reads gains a line.</p>
+  <p class="call proj"><b>In your project:</b> before building headers, count your chunks with no heading inside, with an orphaned heading, and that start with a pronoun. The apply-it tool does it (checks H7 and H1).</p>
+</section>
+
+<!-- 2 -->
+<section class="s" id="fields" aria-labelledby="h-fields">
+  <div class="num">STEP 2 · WHERE THE HEADER GOES</div>
+  <h2 id="h-fields">embed_text, not text</h2>
+  <p>Every v0 chunk record holds its <code>text</code> and the character offsets it came from, and the course checks that <code>doc_text[char_start:char_end] == text</code> for every chunk (C3). Evidence scoring (CE@k) relies on those offsets: a chunk counts as evidence when it overlaps the labelled span. So the header must <b>not</b> be written into <code>text</code>. It lives in a new field:</p>
+  <pre>{"seq": 27, "char_start": 20555, "char_end": 21506,
+ "text":       "Chapter 6: Global and Local Climate Action \nInternational Collaboration …",   <span class="c">← unchanged</span>
+ "embed_text": "Understanding Climate Change › Chapter 6: … › Paris Agreement\n\nChapter 6: Global …"}   <span class="c">← what the model reads</span></pre>
+  <p>A header can go to three places, and each is a separate decision with its own version in the course:</p>
+  <div class="tw"><table>
+    <thead><tr><th>Input</th><th>Field</th><th>When the course tests it</th></tr></thead>
+    <tbody>
+      <tr><td><b>Embedding</b> (dense retrieval)</td><td><code>embed_text</code></td><td><b>v1.2: the only change at this version</b></td></tr>
+      <tr><td>Keyword index (BM25)</td><td><code>bm25_text</code></td><td>v2.0, when BM25 joins the pipeline (R1)</td></tr>
+      <tr><td>Generator prompt</td><td><code>display_text</code></td><td>a later, separate arm: the book suggests reusing the header there (<a data-book="chapter 7.pdf" data-page="8">Ch7 p.8/11</a>)</td></tr>
+    </tbody></table></div>
+  <p>Two more consequences. The header template is part of the preprocessing, so it gets its own <code>preproc_version</code>, which changes the embedding cache key and the index folder name; without that, two arms would overwrite each other's vectors. And <b>queries stay unchanged</b>: the header goes on documents only, so the query vectors are reused across arms from the cache.</p>
+  <p class="call wrong"><b>Common mistake:</b> "prepend the header to the chunk text." The stored text then no longer matches its offsets, CE@k stops working, and the generator sees a header nobody decided to show it.</p>
+  <p class="call proj"><b>In your project:</b> add <code>embed_text</code> (and later <code>bm25_text</code>, <code>display_text</code>) to the chunk record; bump <code>preproc_version</code> for every header template.</p>
+</section>
+
+<!-- 3 -->
+<section class="s" id="tree" aria-labelledby="h-tree">
+  <div class="num">STEP 3 · GET THE HEADINGS</div>
+  <h2 id="h-tree">Read the headings from the PDF's fonts</h2>
+  <p>A PDF stores text with fonts and positions, not "this is a heading". PyMuPDF's <code>page.get_text("dict")</code> gives every line with its spans, and each span has a size and a bold flag (<code>flags &amp; 16</code>). Count the line styles in the climate PDF:</p>
+  <pre>size  bold   lines   reading
+24    yes        1   the document title
+18    yes       22   chapters (21; Chapter 5's title wraps onto 2 lines)
+13.56 yes       68   sections
+12    yes      192   subsections: the SAME size as body text, only bold
+12    no       814   body text</pre>
+  <p><span class="badge m">measured · K2</span> That gives a tree of <b>1 title, 21 chapters, 68 sections and 192 subsections</b>, 282 headings in all, about one every 257 characters. Two traps are visible. The PDF's own metadata has <b>no title</b> (it is empty), so the title must come from the 24-point line. And 192 of the 281 headings below the title (0.68) are body-sized bold lines, so a detector that only looks for "bigger than body text" misses two thirds of them.</p>
+  <figure>
+    <svg class="chart" id="treeChart" viewBox="0 0 660 250" role="img" aria-labelledby="treeTitle treeDesc"><title id="treeTitle">Headings per page, by level</title><desc id="treeDesc">33 pages. Every page has headings: 1 to 11 per page, median 9. Pages where a reused heading name appears are marked.</desc></svg>
+    <figcaption><span class="badge m">measured · K2, K3</span> What to notice: every page carries several headings (median 9), so most chunks get a precise path; a ▲ marks a page where a reused heading name appears (step 4).</figcaption>
+  </figure>
+  <p class="call wrong"><b>Common mistake:</b> "take the title from the PDF metadata." Here it is empty; elsewhere it is often a file name or a template's leftover. Read it from the page.</p>
+  <p class="call proj"><b>In your project:</b> the heading detector belongs to I2 (structure-aware chunking), which v1.1 builds before v1.2; I5 reuses its tree. Check H1 of the tool says whether your PDFs have a detectable hierarchy.</p>
+</section>
+
+<!-- 4 -->
+<section class="s" id="path" aria-labelledby="h-path">
+  <div class="num">STEP 4 · THE PATH, NOT THE LEAF</div>
+  <h2 id="h-path">Two pages called "Paris Agreement"</h2>
+  <p>D-002 asks in what year the Paris Agreement was adopted; the answer is on page 10. D-003 asks what is essential about countries' national contributions (NDCs); the answer is on page 23. Both pages have a subsection called <b>Paris Agreement</b>, with similar text. Their full paths:</p>
+  <pre>p.10  Understanding Climate Change › Chapter 6: Global and Local Climate Action
+                                   › International Collaboration › Paris Agreement
+p.23  Understanding Climate Change › Chapter 16: Global Cooperation and Governance
+                                   › International Agreements › Paris Agreement</pre>
+  <p><span class="badge m">measured · K3</span> The leaf heading is identical, so a header made of the leaf alone would make the two pages <i>more</i> alike. <b>Only the chapter and section levels separate them.</b> It is not a one-off: 11 section or subsection names repeat under different chapters in this one document.</p>
+  <div class="tw"><table>
+    <thead><tr><th>Reused name</th><th>Where it appears</th></tr></thead>
+    <tbody>
+      <tr><td>Paris Agreement</td><td>p.10 Chapter 6 · p.23 Chapter 16</td></tr>
+      <tr><td>International Agreements</td><td>p.6 Chapter 4 · p.23 Chapter 16</td></tr>
+      <tr><td>Smart Grids</td><td>p.8 Chapter 5 · p.22 Chapter 15</td></tr>
+      <tr><td>Carbon Capture and Utilization; Carbon Utilization</td><td>p.8 Chapter 5 · p.23 Chapter 15</td></tr>
+      <tr><td>Marine Ecosystems</td><td>p.5 Chapter 3 · p.13 Chapter 9</td></tr>
+      <tr><td>International Collaboration</td><td>p.10 Chapter 6 · p.16 Chapter 10</td></tr>
+      <tr><td>Research and Innovation · Policy and Governance · Youth Engagement · Nature-Based Solutions</td><td>p.7/16 · p.12/18 · p.13/32 · p.14/26</td></tr>
+    </tbody>
+    <caption><span class="badge m">measured · K3</span> 11 reused names in all.</caption>
+  </table></div>
+  <p>A full path is 75 to 168 characters (median 120), about 12 to 27 MiniLM tokens <span class="badge f">estimate · 6.21 characters per token</span>.</p>
+  <p class="call wrong"><b>Common mistake:</b> "the section heading is enough." The 06 plan's first hypothesis was "doc title › section heading". On this corpus the title is constant and the leaf collides, so the useful arm is the <b>full path</b>.</p>
+  <p class="call proj"><b>In your project:</b> v1.2's header arm is the heading path. Check H4 of the tool lists the reused leaves in your own documents.</p>
+</section>
+
+<!-- 5 -->
+<section class="s" id="assign" aria-labelledby="h-assign">
+  <div class="num">STEP 5 · A RULE FOR EACH CHUNK</div>
+  <h2 id="h-assign">Which heading does a chunk get?</h2>
+  <p>A heading every 257 characters means a 1,000-character chunk usually spans several: 94 of the 97 chunks hold two or more. So "the chunk's heading" needs a rule. Three are common:</p>
+  <ul>
+    <li><b>Start:</b> the path in effect at the chunk's first character.</li>
+    <li><b>Majority:</b> the path that covers most of the chunk's characters.</li>
+    <li><b>All inside:</b> the start path, plus the name of every heading that begins inside the chunk.</li>
+  </ul>
+  <figure class="card play">
+    <div><b>Heading-rule explorer</b> <span class="badge m">measured · K4</span></div>
+    <div class="content-seg" id="chPick" role="group" aria-label="Chunk"><button type="button" data-ch="68" aria-pressed="true">chunk 68 (D-003)</button><button type="button" data-ch="27" aria-pressed="false">chunk 27 (D-002)</button><button type="button" data-ch="34" aria-pressed="false">chunk 34</button></div>
+    <div class="cb" id="chBar" role="img"></div>
+    <div class="cbk" id="chKey"></div>
+    <div class="content-seg" id="rulePick" role="group" aria-label="Rule"><button type="button" data-rule="start" aria-pressed="true">start</button><button type="button" data-rule="major" aria-pressed="false">majority</button><button type="button" data-rule="all" aria-pressed="false">all inside</button></div>
+    <div class="readout" id="ruleRead" aria-live="polite"></div>
+    <figcaption>What to notice: on chunk 68 the start rule names Chapter 15 (carbon capture) for a chunk that is mostly D-003's Paris Agreement text; on chunk 34 the start rule is the one that names "It" (blockchain). No single rule is right for every chunk.</figcaption>
+  </figure>
+  <p>Over the whole corpus, the start rule and the majority rule disagree on <b>84 of 97 chunks</b>. "All inside" never misses a heading, but its header is longer: 93 to 306 characters (median 198) against 28 to 168 for the start rule.</p>
+  <p class="call wrong"><b>Common mistake:</b> "the heading above the chunk is its heading." On a heading-dense document that is the rule that gives D-003's gold chunk the wrong chapter.</p>
+  <p class="call proj"><b>In your project:</b> make the rule part of the header template (and of <code>preproc_version</code>). Pre-register three arms for v1.2: no header, path by majority, path by start. The tool's <code>--rule</code> option shows each rule's headers.</p>
+</section>
+
+<!-- 6 -->
+<section class="s" id="info" aria-labelledby="h-info">
+  <div class="num">STEP 6 · DOES THE HEADER CARRY INFORMATION?</div>
+  <h2 id="h-info">The information test: a constant title adds nothing</h2>
+  <p>The book's first header is a document title, which it has an LLM write (<a data-book="chapter 7.pdf" data-page="4">Ch7 p.4/11</a>). On a collection of many documents, a title tells chunks of different documents apart. The course's climate corpus is <b>one</b> document, so every chunk would get the same title:</p>
+  <div class="tw"><table>
+    <thead><tr><th>Arm</th><th class="n">Distinct headers / 97</th><th class="n">Largest group sharing one header</th><th>Header length (characters)</th></tr></thead>
+    <tbody>
+      <tr><td>none</td><td class="n">1</td><td class="n">97</td><td>0</td></tr>
+      <tr><td>title only</td><td class="n miss">1</td><td class="n miss">97</td><td>28 on every chunk</td></tr>
+      <tr><td>path, start rule</td><td class="n hit">97</td><td class="n">1</td><td>28 / 120 / 168</td></tr>
+      <tr><td>path, majority rule</td><td class="n hit">96</td><td class="n">2</td><td>67 / 123 / 168</td></tr>
+    </tbody>
+    <caption><span class="badge m">measured · K5</span> min / median / max where three numbers are given.</caption>
+  </table></div>
+  <p><b>A header that is the same on every chunk cannot rank one chunk above another for a reason.</b> It still changes the vectors: every chunk moves a little toward the title's meaning, so similarity scores shift and a ranking can reorder for no good reason. In a keyword index the effect is visible in the numbers: the title's three words appear in all 97 chunks, so their raw inverse document frequency is negative and the library lifts each to its floor, 0.8565, and adds it almost equally to every chunk.</p>
+  <p class="call wrong"><b>Common mistake:</b> "prepend the title and heading path unconditionally." The path part varies; the title part does not on a one-document corpus. Run the information test first: distinct headers ÷ chunks.</p>
+  <p class="call proj"><b>In your project:</b> on the climate corpus the title-only arm is only a negative control (expected: no gain). Titles are tested on Corpus T, which has several documents. Check H2 and H3 of the tool count your distinct titles and headers.</p>
+</section>
+
+<!-- 7 -->
+<section class="s" id="dilute" aria-labelledby="h-dilute">
+  <div class="num">STEP 7 · WHAT THE HEADER DOES TO THE VECTOR</div>
+  <h2 id="h-dilute">Dilution and the header magnet</h2>
+  <p>MiniLM, the course's local embedder, turns a text into one vector by averaging its token vectors (mean pooling; P4). So a header of h tokens on a chunk of c tokens contributes roughly a share <code>s = h / (h + c)</code> of the result. Short chunks feel it most:</p>
+  <figure class="card play">
+    <div><b>Header share</b> <span class="badge f">formula</span></div>
+    <div class="ctl"><label for="hTok">header tokens h</label><input type="range" id="hTok" min="0" max="120" value="19"><output id="hTokV">19</output></div>
+    <div class="ctl"><label for="cTok">chunk tokens c</label><input type="range" id="cTok" min="59" max="182" value="151"><output id="cTokV">151</output></div>
+    <div class="readout" id="shareRead" aria-live="polite"></div>
+    <figcaption>Presets from the climate PDF: a median path header is about 19 tokens; the median chunk about 151 (935 characters), a short chunk about 64 (400 characters). <span class="badge f">estimates · 6.21 characters per token</span></figcaption>
+  </figure>
+  <p>On the 97 chunks, the path header's share by characters runs from 0.029 to 0.201 (median 0.119) <span class="badge m">measured · K6</span>. A share of a tenth barely moves a chunk's own meaning. A large shared header does something else: it pulls every chunk that carries it toward the header's topic, and so toward each other, a <b>header magnet</b>. The toy below shows both effects with made-up vectors.</p>
+  <figure>
+    <svg class="chart" id="magnetChart" viewBox="0 0 640 280" role="img" aria-labelledby="magTitle magDesc"><title id="magTitle">Toy: what a shared header does to two chunk vectors</title><desc id="magDesc">As the header share grows from 0 to 0.4, chunk A stays close to its bare self until about 0.15, then drifts; two unrelated chunks that share the header move toward each other.</desc></svg>
+    <figcaption><span class="badge t">toy · K13, 64 dimensions, seed 0</span> What to notice: at a share of 0.11 the chunk is still itself (cosine 0.990 with its bare vector), but at 0.40 two unrelated chunks with the same header have moved from −0.165 to +0.096 toward each other, and each points toward the header's topic. The sizes are toy; the direction is the point.</figcaption>
+  </figure>
+  <p class="call wrong"><b>Common mistake:</b> "a longer, richer header is always better." Every token of header is a token less of the chunk's own meaning, and a header shared by many chunks makes them harder to tell apart.</p>
+  <p class="call proj"><b>In your project:</b> keep the template short (no field labels, no repeated title), and watch near-duplicate items in the results: they are where the magnet shows. Check H5 of the tool flags a median share above 0.25.</p>
+</section>
+
+<!-- 8 -->
+<section class="s" id="trunc" aria-labelledby="h-trunc">
+  <div class="num">STEP 8 · THE TOKEN LIMIT</div>
+  <h2 id="h-trunc">Truncation: the tail is cut, not the header</h2>
+  <p>MiniLM reads at most <b>256 tokens</b>, and its two special tokens (<code>[CLS]</code> at the start, <code>[SEP]</code> at the end) count inside the 256 (C2 measured this). Anything after the limit is dropped silently. Because the header comes first, a long header pushes the <b>end of the chunk</b> out:</p>
+  <figure class="card play">
+    <div><b>What MiniLM actually reads</b> <span class="badge f">formula</span></div>
+    <div class="content-seg" id="truncPick" role="group" aria-label="Header"><button type="button" data-h="27" aria-pressed="true">longest path header (27)</button><button type="button" data-h="100" aria-pressed="false">100-token LLM context</button><button type="button" data-h="0" aria-pressed="false">no header</button></div>
+    <div class="ctl"><label for="tcTok">chunk tokens (with specials)</label><input type="range" id="tcTok" min="59" max="182" value="182"><output id="tcTokV">182</output></div>
+    <div class="ruler" id="ruler" role="img"></div>
+    <div class="readout" id="truncRead" aria-live="polite"></div>
+    <figcaption>What to notice: the longest v0 chunk is 182 tokens with its specials (C2, measured). A path header fits beside it (182 + 27 = 209). A 100-token LLM context does not (282): the last 26 tokens of the chunk are never read.</figcaption>
+  </figure>
+  <p>Over the 97 chunks, no path header pushes a chunk past 256 <span class="badge f">estimate</span>. A 100-token LLM context would cut the tail of about 29 of them <span class="badge f">estimate from characters</span>. The exact counts need MiniLM's tokenizer; the verify notebook computes them <span class="badge y">your run</span>. Cohere's <code>embed-v4.0</code>, the course's default hosted embedder, has a much longer window, so the problem is specific to the local model.</p>
+  <p class="call wrong"><b>Common mistake:</b> "the model would cut the header if it were too long." It cuts from the end, so the header survives and the evidence goes.</p>
+  <p class="call proj"><b>In your project:</b> log a <code>truncated</code> flag per chunk and per arm; check H6 of the tool counts header + chunk over your embedder's limit.</p>
+</section>
+
+<!-- 9 -->
+<section class="s" id="measure" aria-labelledby="h-measure">
+  <div class="num">STEP 9 · MEASURE IT</div>
+  <h2 id="h-measure">Measuring it on your questions</h2>
+  <p>v1.2 is one change (the embedding input) tested the course's way: the same questions, the same k, the same chunks, and arms that differ only in the header.</p>
+  <ul>
+    <li><b>Primary:</b> CE@4 on the dev questions (does the top 4 contain complete evidence?), paired by question. List the questions that changed (the <b>discordant pairs</b>) instead of only the means.</li>
+    <li><b>Per category, with n:</b> near-duplicate-distractor and vocabulary-mismatch items are where a header should help; factual single-span items are where a magnet would hurt.</li>
+    <li><b>Label-free diagnostic:</b> the margin between the gold chunk's score and its best look-alike's (for D-002, chunk 27 against the Paris chunks on pages 6, 23 and 24).</li>
+    <li><b>Same budget, no extra rule:</b> the header never enters the generator's context at v1.2, so every arm passes the same 4 chunks.</li>
+  </ul>
+  <div class="tw"><table>
+    <thead><tr><th>Arm</th><th>BM25 preview: Hit@4 · CE@4 · MRR@10</th><th>MiniLM (v1.2's real test): Hit@4 · CE@4 · MRR@10</th><th>D-002 margin</th></tr></thead>
+    <tbody>
+      <tr><td>none</td><td>8/8 · 8/8 · 0.938</td><td>8/8 · <span class="pending">your run</span> · 0.708 <span class="badge m">P4</span></td><td class="pending">your run</td></tr>
+      <tr><td>title only</td><td>8/8 · 8/8 · 0.938</td><td class="pending">your run</td><td class="pending">your run</td></tr>
+      <tr><td>path, start</td><td>8/8 · 8/8 · 0.938</td><td class="pending">your run</td><td class="pending">your run</td></tr>
+      <tr><td>path, majority</td><td>8/8 · 8/8 · 0.938</td><td class="pending">your run</td><td class="pending">your run</td></tr>
+    </tbody>
+    <caption><span class="badge m">measured · K10</span> keyword column, on the 8 answerable draft seeds · <span class="badge m">P4</span> the no-header MiniLM row was measured in P4 on the same chunks and seeds (D-002's gold chunk at rank 3) · <span class="badge y">your run</span> the header arms: the model could not be loaded where this page was built; the verify notebook fills them in.</caption>
+  </table></div>
+  <p>The keyword preview teaches two things before any vector is computed. First, <b>these seeds are at the ceiling</b>: BM25 already finds every one in the top 4, so they cannot show a gain for any arm. Second, <b>a draft seed set this small cannot show a small effect at all</b>. With about 50 paired questions and 10 that change, the 95% interval on a difference is about ±0.124, and you need an effect near 0.18 to have an 80% chance of seeing it (06 §9.4).</p>
+  <p>One more check guards the result: <b>header–question leakage</b>. If questions were written by reading the section titles, they reuse the titles' words, and a header arm wins because the header contains the question, not because the chunk became clearer. On the draft seeds no question word appears in the gold chunk's header without also being in its text (K8), because they were written from the evidence spans.</p>
+  <p class="call wrong"><b>Common mistake:</b> "a higher score on the right chunk means the header works." Compare against the look-alikes and across categories; a header can raise every Paris chunk at once.</p>
+  <p class="call proj"><b>In your project:</b> report CE@4 per arm on dev with n and the discordant questions, per category, plus the margins; expect "inconclusive" on the climate corpus and decide on Corpus T (06 §5.1). Check H8 of the tool runs the leakage test.</p>
+</section>
+
+<!-- 10 -->
+<section class="s" id="llm" aria-labelledby="h-llm">
+  <div class="num">STEP 10 · LET AN LLM WRITE THE CONTEXT</div>
+  <h2 id="h-llm">LLM-written contexts and the cost ladder</h2>
+  <p>Anthropic's <b>contextual retrieval</b> (2024, external) replaces the heading path with a few sentences written by an LLM: for each chunk, the model receives the <b>whole document</b> and the chunk, and writes a 50–100-token context that situates it; that context is prepended before embedding and before keyword indexing. It can say what a path cannot ("it" = blockchain; this paragraph contrasts the two agreements). It also costs far more, and its cost depends on how much document each call carries. Four rungs, from free to most expensive:</p>
+  <div class="tw"><table>
+    <thead><tr><th>Rung</th><th>What is sent</th><th class="n">Calls on the climate PDF</th><th>Cost on the climate PDF</th></tr></thead>
+    <tbody>
+      <tr><td>0 · heading path</td><td>nothing: built from the fonts</td><td class="n">0</td><td>$0</td></tr>
+      <tr><td>1 · one title or summary per document</td><td>the first few thousand tokens</td><td class="n">1–2</td><td>not needed here: the title is on page 1</td></tr>
+      <tr><td>2 · per chunk, chapter window</td><td>the chunk's chapter (median 855 tokens per call) + the chunk</td><td class="n">97</td><td>about $0.0124 on Groq; 106,743 tokens, so at least 13.3 minutes at 8,000 tokens per minute</td></tr>
+      <tr><td>3 · per chunk, whole document</td><td>all 12,840 document tokens + the chunk, every call</td><td class="n">97</td><td>Haiku 5.5: $0.1367 without caching, $0.0261 with it</td></tr>
+    </tbody>
+    <caption><span class="badge f">formula · K11</span> assumes 250 tokens of chunk + instruction and 200 output tokens per call; prices from the course's dated price file.</caption>
+  </table></div>
+  <p>dsRAG, the open-source library whose text the upstream notebook copies, stays on rung 1: an LLM writes a document title and a one-sentence summary (and, optionally, section titles), and it makes no call per chunk (external). The book's richer headers (a summary, a section path) are the same idea (<a data-book="chapter 7.pdf" data-page="8">Ch7 p.8/11</a>).</p>
+  <figure class="card calc">
+    <div><b>Whole-document cost calculator</b> <span class="badge f">formula</span></div>
+    <div class="row"><label for="cN">chunks in the document (n)</label><input type="number" id="cN" value="97" min="1"></div>
+    <div class="row"><label for="cD">document tokens (D)</label><input type="number" id="cD" value="12840" min="1"></div>
+    <div class="row"><label for="cP">chunk + instruction tokens per call (c + P)</label><input type="number" id="cP" value="250" min="0"></div>
+    <div class="row"><label for="cO">output tokens per call (o)</label><input type="number" id="cO" value="200" min="0"></div>
+    <div class="row"><label for="cM">model</label><select id="cM"><option value="haiku">Claude Haiku 5.5</option><option value="groq">Groq gpt-oss-20b</option></select></div>
+    <label class="tg"><input type="checkbox" id="cC" checked> prompt caching on (document first, chunks in document order)</label>
+    <div class="readout" id="costRead" aria-live="polite"></div>
+  </figure>
+  <p>The calculator's Groq setting shows the trap the course's LLMOps plan missed. One whole-document request is 13,090 input tokens, but Groq's free tier allows 8,000 tokens per minute, so <b>a single request is already larger than a minute's budget</b> and is refused; 97 of them would also need 1,269,730 tokens against a 200,000-token daily limit <span class="badge">limits: plan row, UNVERIFIED</span>. Three ways out: the chapter window (rung 2) on Groq, Haiku 5.5 with caching, or a paid tier.</p>
+  <p class="call wrong"><b>Common mistake:</b> "the LLM arm is just a better header." It is a different system: a model can write a context that is wrong, it costs one call per chunk, and its output must be stored, versioned and checked like any generated text.</p>
+  <p class="call proj"><b>In your project:</b> the LLM arm runs only if the free path arm helps (06 v1.2). If it runs: Haiku 5.5 with the whole document (about 3 cents per build of the climate corpus, needs credits) or Groq with a chapter window (free, less context). Every call is recorded and replayed.</p>
+</section>
+
+<!-- 11 -->
+<section class="s" id="cache" aria-labelledby="h-cache">
+  <div class="num">STEP 11 · CACHING, KEYS AND WRONG CONTEXTS</div>
+  <h2 id="h-cache">Prompt caching, cache keys and wrong contexts</h2>
+  <p><b>Prompt caching</b> lets a provider reuse the work on a prompt's beginning when the next prompt starts with exactly the same tokens. For rung 3 that is the whole document: write it to the cache once (Claude charges 1.25× for a 5-minute entry), then read it for every other chunk at about 0.1× the input price. That turns $0.1367 into $0.0261 on the climate PDF, 5.2 times cheaper. Three rules make it work:</p>
+  <ul>
+    <li><b>Document first, chunk last.</b> Anything that changes per call must come after the shared part, or nothing matches.</li>
+    <li><b>Process one document's chunks together</b>, in order, inside the cache's lifetime (a read refreshes it). Shuffled chunks across documents keep missing.</li>
+    <li><b>Mind the minimum.</b> A prefix shorter than the model's minimum is simply not cached, with no error: 512 tokens on Haiku 5.5, 4,096 on Haiku 4.5 (external; check the docs before relying on it). Anthropic's own cookbook shows a 3,412-token prompt on Haiku 4.5 with no cache write. Read the usage fields (<code>cache_creation_input_tokens</code>, <code>cache_read_input_tokens</code>) on the first calls.</li>
+  </ul>
+  <p>The course also caches every call on its own side, so notebooks replay without credits. That cache's <b>key</b> decides whether a replayed context is still correct. Suppose one line on page 12 changes:</p>
+  <figure class="card play">
+    <div><b>After a one-line edit on page 12</b> <span class="badge m">measured · K12</span></div>
+    <div class="content-seg" id="keyPick" role="group" aria-label="Cache key"><button type="button" data-key="chunk" aria-pressed="true">key = chunk text</button><button type="button" data-key="full" aria-pressed="false">key = prompt version + document + chunk</button></div>
+    <div class="readout" id="keyRead" aria-live="polite"></div>
+    <figcaption>What to notice: the edit changes the text of only 1 chunk (33), but every whole-document prompt contained the old page 12.</figcaption>
+  </figure>
+  <p>A generated context can also be <b>wrong</b>: a name or number that is not in the document, or the wrong section. A cheap automatic check catches the first kind: every capitalised name and every number in a context must appear somewhere in the document. A hand-read of 10 contexts catches the second. The tool runs both (H11, H12).</p>
+  <p class="call wrong"><b>Common mistake:</b> "cache by chunk hash." It saves money and silently serves contexts written from an older document. Store <code>doc_text_sha256</code> and <code>prompt_version</code> with each context, and key on the full prompt.</p>
+  <p class="call proj"><b>In your project:</b> the LLMOps cache key covers the full messages (so the document is in it) plus the prompt version; when a document's hash changes, rebuild that document's contexts.</p>
+</section>
+
+<!-- 12 -->
+<section class="s" id="claims" aria-labelledby="h-claims">
+  <div class="num">STEP 12 · READING THE EVIDENCE</div>
+  <h2 id="h-claims">Reading the vendor numbers</h2>
+  <p>Three sources report large gains. Read each one for what was measured, not for its headline:</p>
+  <div class="tw"><table>
+    <thead><tr><th>Source</th><th>What it reports</th><th>What it measured</th></tr></thead>
+    <tbody>
+      <tr><td>Anthropic, "Introducing Contextual Retrieval" (2024)</td><td>"35% fewer failed retrievals"; 49% with contextual BM25; 67% with reranking</td><td>1 − recall@20 (the share of relevant chunks missing from the top 20): 5.7% → 3.7% → 2.9% → 1.9%, with Claude 3 Haiku writing the contexts, on codebases, fiction and science papers</td></tr>
+      <tr><td>Anthropic cookbook</td><td>Pass@10 87.15% → 92.34% (→ 95.26% with reranking)</td><td>the mean share of the right chunks in the top 10, on 248 queries over 9 codebases</td></tr>
+      <tr><td>dsRAG README (vendor)</td><td>KITE score 4.72 → 6.04 with document-level headers</td><td>an LLM judge's 0–10 grade of end-to-end answers, 50 questions</td></tr>
+      <tr><td>Upstream notebook, and the book's "0.1 → 0.9" (<a data-book="chapter 7.pdf" data-page="8">Ch7 p.8–9/11</a>)</td><td>0.10576342 → 0.92206234</td><td>one reranker relevance score, for one chunk of a Nike report, with a query that contains "Nike", the very word the header adds</td></tr>
+    </tbody>
+    <caption><span class="badge">external</span> read in the I5 research (2026-10-17); the upstream values are re-read in K14.</caption>
+  </table></div>
+  <figure class="card play">
+    <div><b>Absolute or relative?</b> <span class="badge f">formula</span></div>
+    <div class="row calc"><div class="row"><label for="vA">before (%)</label><input type="number" id="vA" value="5.7" step="0.1"></div><div class="row"><label for="vB">after (%)</label><input type="number" id="vB" value="3.7" step="0.1"></div></div>
+    <div class="readout" id="vRead" aria-live="polite"></div>
+  </figure>
+  <p><b>"35%" is relative; the absolute change is 2.0 points of recall at top 20.</b> The course measures CE@4, a different metric at a different depth, on about 50 questions that can detect roughly 18 points. A real gain of the vendor's size would be invisible here. And the notebook's jump from 0.1 to 0.9 is not a retrieval result at all: it is one score for one chunk, from a reranker, on a query that leaks the header's word.</p>
+  <p class="call wrong"><b>Common mistake:</b> "contextual retrieval cuts failures by a third, so v1.2 should gain a third." The metric, the depth, the corpus, the embedder and the question set all differ; only your own paired test answers the question for your system.</p>
+  <p class="call proj"><b>In your project:</b> write the expected effect in the v1.2 card before running: small on the climate corpus, possibly larger on Corpus T, and "inconclusive" is an expected verdict.</p>
+</section>
+
+<!-- 13 -->
+<section class="s full" id="repo" aria-labelledby="h-repo">
+  <span class="tag">Full only</span>
+  <div class="num">STEP 13 · READING THE REPO CRITICALLY</div>
+  <h2 id="h-repo">The upstream notebook, cell by cell</h2>
+  <p><code>all_rag_techniques/contextual_chunk_headers.ipynb</code> at the pinned commit <code>009adba</code> (17 cells, counted from 0) <span class="badge m">re-read · K14</span>:</p>
+  <div class="tw"><table>
+    <thead><tr><th>Cell</th><th>What it does</th><th>Read it as</th></tr></thead>
+    <tbody>
+      <tr><td>0</td><td>explains contextual chunk headers</td><td>its wording follows dsRAG's README almost word for word</td></tr>
+      <tr><td>8</td><td>downloads the climate PDF <i>and</i> a Nike annual-report text</td><td>only the Nike text is used afterwards</td></tr>
+      <tr><td>9</td><td>splits the Nike text: 800 characters, overlap 0</td><td>not the course corpus, so nothing here replays on it</td></tr>
+      <tr><td>11</td><td>asks <code>gpt-4o-mini</code> for a title; truncates with the <code>gpt-3.5-turbo</code> tokenizer at 4,000 tokens and reuses 4,000 as the output limit; <code>temperature=0.2</code></td><td>a tokenizer that does not match the model, and an output limit sized for a document, for a title. Saved output: <code>NIKE, INC. ANNUAL REPORT ON FORM 10-K</code></td></tr>
+      <tr><td>13</td><td>scores one chunk with Cohere <code>rerank-english-v3.0</code> (the old v1 client), bare and with the title, for the query "Nike climate change impact"</td><td>0.10576342 → 0.92206234: a reranker score on n = 1, the query naming the header's entity. The saved output's label ("w/o") and 8 decimals do not match the cell's source (4 decimals), so the output is stale</td></tr>
+      <tr><td>15</td><td>quotes KITE and FinanceBench results</td><td>copied from dsRAG; the KITE header arm also used a document summary, and the FinanceBench figures have since changed in dsRAG's README</td></tr>
+    </tbody></table></div>
+  <p>No vector index is built anywhere in the notebook. Code execution counts run None, 3, None, 4, 5, 13: the cells were not run top to bottom in one session.</p>
+</section>
+
+<!-- 14 -->
+<section class="s full" id="beyond" aria-labelledby="h-beyond">
+  <span class="tag">Full only</span>
+  <div class="num">STEP 14 · BEYOND THE PATH HEADER</div>
+  <h2 id="h-beyond">Late chunking, framework defaults, and the BM25 side</h2>
+  <div class="tw"><table>
+    <thead><tr><th>Idea</th><th>What it is</th><th>For this course</th></tr></thead>
+    <tbody>
+      <tr><td><b>Late chunking</b> (Günther et al. 2024, external)</td><td>encode the whole document with a long-context embedder, then average the token vectors inside each chunk's span, so every chunk vector "saw" the document. nDCG@10 rose on 4 of 5 BEIR subsets (e.g. NFCorpus 23.46 → 29.98)</td><td>needs token-level outputs, which Cohere's API does not return; MiniLM's 256-token window holds little more than one chunk (up to 182 tokens), so there is almost no document left to add. Not used</td></tr>
+      <tr><td><b>LlamaIndex metadata</b> (v0.14.25, source read)</td><td>a <code>TextNode</code> embeds <i>all</i> its metadata by default, as <code>key: value</code> lines before the content, unless keys are excluded</td><td>a "no-header" LlamaIndex baseline may already carry a file-name header; the same API is the cleanest way to keep embed, BM25 and display text apart</td></tr>
+      <tr><td><b>DocumentContextExtractor</b></td><td>LlamaIndex's port of Anthropic's prompt; defaults: a 1,000-token document limit that only warns, 512 output tokens, its own 5-attempt retry</td><td>the climate PDF (12,840 tokens) would be sent whole, with only a warning</td></tr>
+      <tr><td><b>dsRAG section context</b></td><td>the embedded header names the document and the section; the header shown to the LLM carries document-level information only</td><td>a real precedent for deciding the three inputs separately (step 2)</td></tr>
+      <tr><td><b>Contextual BM25</b></td><td>put the header (or LLM context) into the keyword index too</td><td>v2.0 (R1) reuses <code>bm25_text</code>. The K10 preview: constant title terms sit at the idf floor 0.8565; no rank moved on the 8 seeds</td></tr>
+      <tr><td><b>Hosted contextual embedders</b></td><td>embedding APIs that take a whole document and return chunk vectors</td><td>outside the course's provider decisions</td></tr>
+      <tr><td>An independent comparison</td><td>Merola and Singh (2025) compared contextual retrieval with late chunking</td><td>found by search, page not opened: no numbers used (UNVERIFIED)</td></tr>
+    </tbody></table></div>
+</section>
+
+<!-- VERIFY -->
+<section class="s" id="verify" aria-labelledby="h-verify">
+  <div class="num">PRACTISE · VERIFY IT YOURSELF</div>
+  <h2 id="h-verify">Rebuild every number and chart in a notebook</h2>
+  <p>The notebook <code>study/notebooks/I5_headers_verify.ipynb</code> rebuilds the 97 chunks, the heading tree, the three heading rules, the header arms, the shares and truncation, the keyword preview, the cost ladder and the cache-key demo from code, checks each value against this page, and redraws the charts as interactive Plotly charts. It makes no API call. On your machine it also loads MiniLM and fills in every <span class="badge y">your run</span> cell of this page: exact token counts per arm, Hit@4, CE@4 and MRR@10 per arm, and the D-002 and D-003 margins.</p>
+  <ol>
+    <li>Open the notebook in VS Code (or from the I5 page of the study kit).</li>
+    <li>Choose the kernel: <b>Select Kernel → .venv (Python 3.12)</b> of <code>rag_learning</code>.</li>
+    <li><b>Run All</b>. Each step prints its checks (PASS, FAIL or SKIPPED with the reason); the last cell prints the total.</li>
+  </ol>
+  <div class="card" id="nbSummary"><b>What it rebuilds</b> <span class="badge m">101 checks pass here · 5 MiniLM cells skipped · 7 interactive charts · about 3 seconds</span>
+    <ul style="margin-top:6px;font-size:.92rem">
+      <li><b>Steps 1–5</b> rebuild the chunks (span invariant), the font-size heading tree, the 11 reused names and the three heading rules, with chunks 27, 34 and 68.</li>
+      <li><b>Steps 6–8</b> rebuild the header arms and the information test, the header shares with the toy magnet, and the truncation estimates; with MiniLM, the exact token counts.</li>
+      <li><b>Step 9</b> runs the keyword preview and, with MiniLM, the dense retrieval per arm and the margins.</li>
+      <li><b>Steps 10–12</b> recompute the cost ladder from the price file, the cache-key demo and the vendor-number conversions.</li>
+    </ul>
+    <p style="margin-top:6px;font-size:.9rem;color:var(--muted)">Where this page was built, MiniLM could not be loaded, so its 5 cells printed SKIPPED with the reason; on your machine they run and add their checks, including one that your no-header arm matches P4's measured baseline. A FAIL anywhere means the page and the code disagree: tell the tutor. Rebuild the notebook with <code>uv run python sources/verification/I5/i5_build_verify_nb.py</code>, then run it with <code>i5_verify_nb_run.py</code>.</p></div>
+</section>
+
+<!-- APPLY -->
+<section class="s" id="apply" aria-labelledby="h-apply">
+  <div class="num">APPLY · USE IT ON YOUR OWN DATA</div>
+  <h2 id="h-apply">Would headers help your documents, and which kind?</h2>
+  <p>The tool <code>study/tools/header_fit_check.py</code> runs this lesson's checks on <b>your</b> documents: it finds the heading tree, builds each chunk's header under the rule you choose, and reports what a header could and could not do. Run it from <code>rag_learning/</code>:</p>
+  <pre>uv run python study/tools/header_fit_check.py --docs "D:\my-project\docs" --questions gold.jsonl --rule majority --report header_report.md
+# LLM contexts you generated: --contexts contexts.jsonl · margins with the local model: --embedder minilm
+# compare rules: --rule start | majority | all</pre>
+  <p>It makes <b>no API call</b>. It needs no model unless you ask for MiniLM margins, and it counts tokens with MiniLM's tokenizer when that is on your machine (otherwise it estimates them from characters and says so).</p>
+  <h3>The real-world checklist</h3>
+  <p style="font-size:.92rem;color:var(--muted)">Tick each one for your own project. Your ticks stay in this browser only.</p>
+  <div class="check" id="checklist"></div>
+  <div class="card" id="example" style="display:grid;gap:10px"><div><b>The example: the climate PDF with the 10 draft seeds</b> <span class="badge m">measured</span></div>
+    {{TOOL_EXAMPLE}}
+  </div>
+</section>
+
+<!-- CHECK -->
+<section class="s" id="check" aria-labelledby="h-check">
+  <div class="num">CHECK YOURSELF</div>
+  <h2 id="h-check">Can you use it on something new?</h2>
+  <p>Answer without scrolling back; then take the full quiz the next day.</p>
+  <div class="q" id="quick"></div>
+  <p>All questions, with hints, model answers and key points: <a data-kit="#/quiz/I5/next" data-path="rag_learning/study/questions/I5_questions.md">open the I5 quiz</a>. Text version: <a data-kit="#/read/study/reading/I5_contextual_headers.md" data-path="rag_learning/study/reading/I5_contextual_headers.md">short reading</a> · how this page's contents were chosen: <code>study/lessons/I5_contextual_headers_gap_audit.md</code>. Next topic: <a data-kit="#/c/I6" data-path="rag_learning/02_RAG_MASTER_LEARNING_PLAN.md">document augmentation and HyPE (I6)</a>.</p>
+</section>
+
+<footer>
+  <p><b>Where every number comes from.</b> <span class="badge m">measured</span> numbers come from <code>sources/verification/I5/i5_kit_measure.py</code> on the repo's climate PDF (sha256 <code>1d58a0fa…92669</code>) and v0's 97 chunks (<code>params_hash 1ca9c5a3b548</code>), recorded in <code>I5_FACTS.md</code> (K1–K16); the notebook recomputes them. Token figures marked <span class="badge f">estimate</span> use measured ratios for this corpus (6.21 characters per MiniLM token, C2; 5.65 per <code>o200k_harmony</code> token and 12,840 document tokens, P1). <span class="badge y">your run</span> cells need MiniLM, which could not be downloaded where this page was built. The draft seeds are LLM drafts that you have not verified yet, so every rank on this page is an observation, not an evaluation. No API was called to build this page.</p>
+  <p><b>External, read in the I5 research (2026-10-17):</b> Anthropic, "Introducing Contextual Retrieval" (2024) and its cookbook guide; dsRAG's README and source; Günther et al., late chunking (README); LlamaIndex v0.14.25 source; Claude prompt-caching facts from the course's <code>claude-api</code> notes. Groq's caching and free-tier limits are UNVERIFIED. The book was not available while this page was built: its pages are cited as the course plan gives them, paraphrased and never copied; they open the PDF when this page is opened from the study kit.</p>
+</footer>
+</main>
+</div>
+<button type="button" class="totop" id="totop" aria-label="Back to top">↑</button>
+
+<script>
+"use strict";
+(function () {
+  const $ = (s, el = document) => el.querySelector(s);
+  const $$ = (s, el = document) => [...el.querySelectorAll(s)];
+  const root = document.documentElement;
+  const store = { get(k, d) { try { return localStorage.getItem(k) ?? d; } catch { return d; } },
+                  set(k, v) { try { localStorage.setItem(k, v); } catch { /* private window */ } } };
+  const KIT = location.protocol.startsWith("http") && location.pathname.startsWith("/lesson/");
+  const esc = t => String(t).replace(/&/g, "&amp;").replace(/</g, "&lt;");
+  const money = x => "$" + x.toFixed(4);
+
+  /* ---------- depth, colour, theme (only the top bar's Short/Full buttons set the depth) ---------- */
+  function setDepth(m) {
+    root.dataset.depth = m;
+    $$(".top .seg button").forEach(b => b.setAttribute("aria-pressed", String(b.dataset.depth === m)));
+    store.set("lesson-depth", m);
+    spy();
+  }
+  $$(".top .seg button").forEach(b => b.addEventListener("click", () => setDepth(b.dataset.depth)));
+  function paintColor() {
+    const dark = root.dataset.theme === "dark";
+    $("#color").innerHTML = `<span aria-hidden="true">${dark ? "☀" : "☾"}</span><span class="lbl"> ${dark ? "Light" : "Dark"}</span>`;
+    $("#color").setAttribute("aria-label", dark ? "Switch to light" : "Switch to dark");
+  }
+  $("#color").addEventListener("click", () => { root.dataset.theme = root.dataset.theme === "dark" ? "light" : "dark"; store.set("lesson-color", root.dataset.theme); paintColor(); });
+  paintColor();
+  $("#style").value = root.dataset.style;
+  $("#style").addEventListener("change", e => { root.dataset.style = e.target.value; store.set("lesson-style", e.target.value); });
+
+  /* ---------- contents panel: where am I, hide/show, left/right, back to top ---------- */
+  const links = $$("#toc a");
+  const targets = links.map(a => document.getElementById(a.getAttribute("href").slice(1)));
+  const narrow = () => !!(window.matchMedia && window.matchMedia("(max-width: 980px)").matches);
+  let lastCur = -1;
+  function spy() {
+    const y = window.scrollY + 90;
+    let cur = 0;
+    targets.forEach((t, i) => { if (t && t.offsetParent !== null && t.getBoundingClientRect().top + window.scrollY <= y) cur = i; });
+    links.forEach((a, i) => a.classList.toggle("on", i === cur));
+    const visible = targets.filter(t => t && t.offsetParent !== null);
+    const pos = visible.indexOf(targets[cur]) + 1;
+    const name = links[cur].textContent.replace(/Full$/, "").replace(/^[^A-Za-z]+/, "").trim();
+    $("#where").textContent = `${name} · ${pos} of ${visible.length}`;
+    $("#crumb").textContent = ` › ${links[cur].querySelector(".n").textContent.trim()} ${name}`;
+    const h = document.documentElement.scrollHeight - innerHeight;
+    const pct = (h > 0 ? Math.min(100, 100 * window.scrollY / h) : 0) + "%";
+    $("#bar").style.width = pct; $("#topprog").style.width = pct;
+    $("#totop").classList.toggle("show", window.scrollY > 500);
+    if (cur !== lastCur) {                       // keep the current step visible inside a long panel
+      lastCur = cur;
+      const side = $("#side"), a = links[cur];
+      if (side.scrollHeight > side.clientHeight && (a.offsetTop < side.scrollTop + 40 || a.offsetTop + a.offsetHeight > side.scrollTop + side.clientHeight - 20))
+        side.scrollTop = Math.max(0, a.offsetTop - side.clientHeight / 3);
+    }
+  }
+  addEventListener("scroll", spy, { passive: true });
+  addEventListener("resize", spy);
+  function closeDrawer() { document.body.classList.remove("side-open"); if (narrow()) $("#menu").setAttribute("aria-expanded", "false"); }
+  links.forEach(a => a.addEventListener("click", () => {
+    const t = document.getElementById(a.getAttribute("href").slice(1));
+    if (t && t.closest(".full") && root.dataset.depth === "short") setDepth("full");
+    closeDrawer();
+  }));
+  function setToc(v) { root.dataset.toc = v; store.set("lesson-toc", v); $("#menu").setAttribute("aria-expanded", String(v === "shown")); spy(); }
+  $("#menu").addEventListener("click", () => {
+    if (narrow()) { const open = document.body.classList.toggle("side-open"); $("#menu").setAttribute("aria-expanded", String(open)); }
+    else setToc(root.dataset.toc === "hidden" ? "shown" : "hidden");
+  });
+  $("#main").addEventListener("click", () => { if (document.body.classList.contains("side-open")) closeDrawer(); });
+  function paintSide() { $("#sidepos").textContent = root.dataset.side === "right" ? "⇆ Left" : "⇆ Right"; }
+  $("#sidepos").addEventListener("click", () => { root.dataset.side = root.dataset.side === "right" ? "left" : "right"; store.set("lesson-side", root.dataset.side); paintSide(); });
+  paintSide();
+  $("#menu").setAttribute("aria-expanded", String(!narrow() && root.dataset.toc === "shown"));
+  addEventListener("keydown", e => {
+    if (e.key && e.key.toLowerCase() === "t" && !e.ctrlKey && !e.metaKey && !e.altKey && !/^(INPUT|TEXTAREA|SELECT)$/.test((document.activeElement || {}).tagName || "")) $("#menu").click();
+  });
+  $("#totop").addEventListener("click", () => { window.scrollTo({ top: 0, behavior: "smooth" }); $(".top .t").focus?.(); });
+  const qd = new URLSearchParams(location.search).get("mode");
+  setDepth(qd === "full" || location.hash === "#full" ? "full" : qd === "short" ? "short" : store.get("lesson-depth", "short"));
+
+  /* ---------- way back: all phases (kit Route page, or the offline route map) ---------- */
+  const HOME = KIT ? "/#/" : "../../RAG_ROUTE_MAP.html";
+  ["#home", "#toRoute"].forEach(s => { const a = $(s); if (a) a.href = HOME; });
+  $$(".kitonly").forEach(a => { if (KIT) a.href = "/" + a.dataset.route; else a.remove(); });
+
+  /* ---------- links: study kit routes, book PDFs ---------- */
+  $$("a[data-kit]").forEach(a => {
+    if (KIT) { a.href = "/" + a.dataset.kit; return; }
+    const c = document.createElement("code");
+    c.textContent = a.dataset.path; c.title = "Open from the study kit to get a link";
+    a.replaceWith(c);
+  });
+  $$("a[data-book]").forEach(a => {
+    a.href = (KIT ? "/book/" : "../../../RAG_Made_Simple_The_Complete_Visual_Guide/") + encodeURIComponent(a.dataset.book) + "#page=" + a.dataset.page;
+    a.target = "_blank"; a.rel = "noopener"; a.title = "Open the book at this page";
+  });
+
+  /* ---------- tiny helpers ---------- */
+  const keepMeta = svg => $$("title,desc", svg).map(e => e.outerHTML).join("");
+  function segGroup(sel, attr, onPick) {
+    const btns = $$(sel + " button");
+    btns.forEach(b => b.addEventListener("click", () => {
+      btns.forEach(x => x.setAttribute("aria-pressed", String(x === b)));
+      onPick(b.dataset[attr]);
+    }));
+  }
+
+  /* ---------- step 3: headings per page (I5_FACTS K2; reused-name pages K3) ---------- */
+  const PER_PAGE = [[2,3,2],[0,2,5],[1,2,5],[0,2,6],[1,2,5],[0,2,6],[1,2,5],[0,2,7],[0,2,6],[1,3,7],[1,2,6],[1,2,6],[1,2,5],[0,2,7],[1,2,6],[1,2,6],[1,2,6],[0,3,7],[1,1,5],[1,3,6],[0,2,7],[1,2,6],[1,2,6],[0,2,7],[1,2,6],[0,2,7],[1,3,7],[1,2,6],[0,2,6],[1,2,7],[1,2,6],[0,2,6],[0,0,1]];
+  const REUSED_PAGES = [5, 6, 7, 8, 10, 12, 13, 14, 16, 18, 22, 23, 26, 32];
+  (function tree() {
+    const svg = $("#treeChart"), L = 40, R = 14, T = 26, B = 46, W = 660, H = 250, n = PER_PAGE.length, bw = (W - L - R) / n;
+    const Y = v => T + (1 - v / 12) * (H - T - B);
+    let s = "";
+    [0, 4, 8, 12].forEach(v => { s += `<line class="grid" x1="${L}" x2="${W - R}" y1="${Y(v)}" y2="${Y(v)}"/><text x="${L - 6}" y="${Y(v) + 4}" text-anchor="end">${v}</text>`; });
+    const cls = ["rb2", "dot2", "rb1"];
+    PER_PAGE.forEach((lv, i) => {
+      let base = 0;
+      lv.forEach((c, k) => { if (!c) return; const y1 = Y(base + c), y0 = Y(base);
+        s += `<rect class="${cls[k]}" x="${L + i * bw + 2}" y="${y1}" width="${bw - 4}" height="${y0 - y1}"><title>p.${i + 1}: ${c} ${["chapter", "section", "subsection"][k]}${c > 1 ? "s" : ""}</title></rect>`; base += c; });
+      if (REUSED_PAGES.includes(i + 1)) s += `<text class="lab" x="${L + i * bw + bw / 2}" y="${Y(base) - 4}" text-anchor="middle">▲</text>`;
+      if ((i + 1) % 4 === 1 || i + 1 === n) s += `<text x="${L + i * bw + bw / 2}" y="${H - B + 16}" text-anchor="middle">${i + 1}</text>`;
+    });
+    s += `<text x="${(L + W - R) / 2}" y="${H - 8}" text-anchor="middle">page</text>`;
+    s += `<rect class="rb2" x="${L + 6}" y="6" width="10" height="10"/><text x="${L + 20}" y="15">chapter</text><rect class="dot2" x="${L + 86}" y="6" width="10" height="10"/><text x="${L + 100}" y="15">section</text><rect class="rb1" x="${L + 160}" y="6" width="10" height="10"/><text x="${L + 174}" y="15">subsection</text><text x="${L + 250}" y="15">▲ a reused name appears</text>`;
+    svg.innerHTML = keepMeta(svg) + s;
+  })();
+
+  /* ---------- step 5: heading-rule explorer (I5_FACTS K4; offsets inside the chunk) ---------- */
+  const T0 = "Understanding Climate Change";
+  const CH = {
+    68: { page: 23, len: 657, note: "D-003's gold chunk: it opens with the end of the Direct Air Capture text, then Chapter 16 begins.",
+      segs: [[0, 170, "Ch15 › Carbon Capture and Utilization › Direct Air Capture (DAC)"], [170, 217, "Ch16"], [217, 243, "Ch16 › International Agreements"], [243, 657, "Ch16 › International Agreements › Paris Agreement"]], maj: 3,
+      start: `${T0} › Chapter 15: Climate Change and Technology › Carbon Capture and Utilization › Direct Air Capture (DAC)`,
+      major: `${T0} › Chapter 16: Global Cooperation and Governance › International Agreements › Paris Agreement`,
+      all: `${T0} › Chapter 15: Climate Change and Technology › Carbon Capture and Utilization › Direct Air Capture (DAC) | Chapter 16: Global Cooperation and Governance | International Agreements | Paris Agreement`,
+      verdict: { start: ["miss", "wrong chapter: D-003's evidence sits under Chapter 16, not Chapter 15"], major: ["hit", "right: the Paris Agreement section of Chapter 16, where D-003's answer is"], all: ["hit", "contains both, at the cost of a longer header"] } },
+    27: { page: 10, len: 951, note: "D-002's gold chunk: it starts exactly on the Chapter 6 heading.",
+      segs: [[0, 44, "Ch6"], [44, 73, "Ch6 › International Collaboration"], [73, 323, "Ch6 › Int. Collab. › UNFCCC"], [323, 739, "Ch6 › Int. Collab. › Paris Agreement"], [739, 760, "Ch6 › National Strategies"], [760, 951, "Ch6 › Nat. Strategies › Carbon Pricing"]], maj: 3,
+      start: `${T0} › Chapter 6: Global and Local Climate Action`,
+      major: `${T0} › Chapter 6: Global and Local Climate Action › International Collaboration › Paris Agreement`,
+      all: `${T0} › Chapter 6: Global and Local Climate Action | International Collaboration | United Nations Framework Convention on Climate Change (UNFCCC) | Paris Agreement | National Strategies | Carbon Pricing`,
+      verdict: { start: ["miss", "only the chapter, which the chunk's own first line already says"], major: ["hit", "right: the Paris Agreement subsection that holds D-002's answer"], all: ["hit", "contains everything, at the cost of a 6-heading header"] } },
+    34: { page: 12, len: 928, note: "Starts mid-paragraph with \"It can be used for tracking carbon credits\": \"it\" is blockchain.",
+      segs: [[0, 221, "Ch8 › Emerging Technologies › Blockchain for Climate Action"], [221, 520, "Ch8 › Emerging Tech. › Bioengineering"], [520, 543, "Ch8 › Policy and Governance"], [543, 901, "Ch8 › Policy and Gov. › Integrated Climate Policies"], [901, 928, "Ch8 › P&G › Int. Coop."]], maj: 3,
+      start: `${T0} › Chapter 8: Future Directions and Innovations › Emerging Technologies › Blockchain for Climate Action`,
+      major: `${T0} › Chapter 8: Future Directions and Innovations › Policy and Governance › Integrated Climate Policies`,
+      all: `${T0} › Chapter 8: Future Directions and Innovations › Emerging Technologies › Blockchain for Climate Action | Bioengineering | Policy and Governance | Integrated Climate Policies | International Cooperation`,
+      verdict: { start: ["hit", "right for the opening: it names what \"It\" refers to"], major: ["miss", "names the later section; the opening \"It\" stays anonymous"], all: ["hit", "names both, at the cost of a 5-heading header"] } } };
+  const SEGCOL = ["var(--accent-soft)", "var(--dense-soft)", "var(--good-soft)", "var(--warn-soft)", "var(--bad-soft)", "var(--card)"];
+  let ch = "68", rule = "start";
+  function drawRule() {
+    const c = CH[ch];
+    $("#chBar").setAttribute("aria-label", `chunk ${ch}, page ${c.page}, ${c.len} characters, ${c.segs.length} heading paths`);
+    $("#chBar").innerHTML = c.segs.map(([a, b, lab], i) => `<span class="${i === c.maj ? "maj" : ""}" style="width:${(100 * (b - a) / c.len).toFixed(2)}%;background:${SEGCOL[i % SEGCOL.length]}" title="${esc(lab)}: characters ${a}–${b}">${b - a > 120 ? esc(lab.split(" › ").pop()) : ""}</span>`).join("");
+    $("#chKey").innerHTML = c.segs.map(([a, b, lab], i) => `<div><i style="background:${SEGCOL[i % SEGCOL.length]}"></i><span>${esc(lab)}${i === c.maj ? " <b>(majority)</b>" : ""}${i === 0 ? " <b>(start)</b>" : ""}</span><span class="n">${b - a} chars</span></div>`).join("");
+    const v = c.verdict[rule], h = rule === "start" ? c.start : rule === "major" ? c.major : c.all;
+    $("#ruleRead").innerHTML = `<div style="margin-bottom:4px">${esc(c.note)}</div><code>${esc(h)}</code><div style="margin-top:4px">${h.length} characters · <span class="${v[0]}">${v[0] === "hit" ? "✓" : "✗"} ${esc(v[1])}</span></div>`;
+  }
+  segGroup("#chPick", "ch", v => { ch = v; drawRule(); });
+  segGroup("#rulePick", "rule", v => { rule = v; drawRule(); });
+  drawRule();
+
+  /* ---------- step 7: header share (formula) and the toy magnet (I5_FACTS K13) ---------- */
+  function drawShare() {
+    const h = Number($("#hTok").value), c = Number($("#cTok").value), s = h / (h + c);
+    $("#hTokV").textContent = h; $("#cTokV").textContent = c;
+    $("#shareRead").innerHTML = `s = ${h} / (${h} + ${c}) = <b>${s.toFixed(3)}</b> · the header is ${(100 * s).toFixed(1)}% of the averaged tokens` + (s > .25 ? ` · <span class="miss">over 0.25: tool check H5 warns</span>` : "");
+  }
+  ["#hTok", "#cTok"].forEach(sel => $(sel).addEventListener("input", drawShare));
+  drawShare();
+  (function magnet() {
+    const S = [0, .112, .153, .25, .4], self = [1, .9897, .9810, .9423, .8014], ab = [-.1651, -.1857, -.1734, -.1265, .0964], ht = [-.1261, .0078, .0608, .2047, .4850];
+    const svg = $("#magnetChart"), L = 56, R = 18, T = 20, B = 46, W = 640, H = 280, X = v => L + v / .4 * (W - L - R), Y = v => T + (1 - (v + .3) / 1.3) * (H - T - B);
+    let s = "";
+    [-.25, 0, .25, .5, .75, 1].forEach(v => { s += `<line class="${v === 0 ? "zero" : "grid"}" x1="${L}" x2="${W - R}" y1="${Y(v)}" y2="${Y(v)}"/><text x="${L - 6}" y="${Y(v) + 4}" text-anchor="end">${v}</text>`; });
+    [0, .1, .2, .3, .4].forEach(v => { s += `<text x="${X(v)}" y="${H - B + 18}" text-anchor="middle">${v}</text>`; });
+    s += `<text x="${(L + W - R) / 2}" y="${H - 8}" text-anchor="middle">header share s</text><text transform="translate(14 ${(T + H - B) / 2}) rotate(-90)" text-anchor="middle">cosine</text>`;
+    const line = (ys, cls) => `<polyline class="${cls}" points="${S.map((x, i) => `${X(x)},${Y(ys[i])}`).join(" ")}"/>` + S.map((x, i) => `<circle class="${cls === "s-bm25" ? "dot" : "dot2"}" cx="${X(x)}" cy="${Y(ys[i])}" r="3.5"/>`).join("");
+    s += line(self, "s-bm25") + line(ab, "s-tfidf") + line(ht, "s-ref");
+    s += `<text class="lab" x="${X(.4) - 4}" y="${Y(self[4]) - 8}" text-anchor="end">chunk A vs its bare self</text>`;
+    s += `<text class="lab" x="${X(.4) - 4}" y="${Y(ht[4]) - 8}" text-anchor="end">chunk A vs the header's topic</text>`;
+    s += `<text class="lab" x="${X(.4) - 4}" y="${Y(ab[4]) + 18}" text-anchor="end">A vs unrelated B, same header (dashed)</text>`;
+    svg.innerHTML = keepMeta(svg) + s;
+  })();
+
+  /* ---------- step 8: what MiniLM reads (formula; limit 256 with [CLS]/[SEP] inside) ---------- */
+  let th = 27;
+  function drawTrunc() {
+    const c = Number($("#tcTok").value), body = c - 2, total = th + c, LIM = 256, MAXX = 300, pct = v => (100 * v / MAXX).toFixed(2) + "%";
+    $("#tcTokV").textContent = c;
+    const kept = Math.max(0, Math.min(body, LIM - 2 - th)), cut = body - kept;
+    let x = 0, html = "";
+    const seg = (w, cls, lab) => { if (w <= 0) return; html += `<span class="seg2 ${cls}" style="left:${pct(x)};width:${pct(w)}">${w >= 22 ? lab : ""}</span>`; x += w; };
+    seg(1, "sp", ""); seg(th, "hh", "header " + th); seg(kept, "cc", "chunk " + kept); seg(1, "sp", "");
+    if (cut > 0) seg(cut, "cut", "cut " + cut);
+    html += `<span class="lim" style="left:${pct(LIM)}"></span><span class="liml" style="left:calc(${pct(LIM)} + 4px)">256</span>`;
+    $("#ruler").innerHTML = html;
+    $("#ruler").setAttribute("aria-label", `header ${th} tokens plus chunk ${c} tokens: ${total} of 256`);
+    $("#truncRead").innerHTML = `${th} + ${c} = <b>${total}</b> tokens · ` + (total <= LIM ? `<span class="hit">fits: nothing is dropped</span>` : `<span class="miss">over by ${total - LIM}: the last ${cut} tokens of the chunk are never read</span>`);
+  }
+  segGroup("#truncPick", "h", v => { th = Number(v); drawTrunc(); });
+  $("#tcTok").addEventListener("input", drawTrunc);
+  drawTrunc();
+
+  /* ---------- step 10: whole-document cost (formula; prices: study/tools/examples/prices_2026-10-17.json) ---------- */
+  const PRICE = { haiku: { pin: 0.1, pout: 0.5, w: 1.25, read: 0.1 * 0.1, min: 512, tpm: null, name: "Haiku 5.5" },
+                  groq: { pin: 0.075, pout: 0.3, w: 1, read: 0.037, min: 0, tpm: 8000, name: "Groq gpt-oss-20b" } };
+  function drawCost() {
+    const n = Math.max(1, Number($("#cN").value) || 1), D = Math.max(0, Number($("#cD").value) || 0), P = Math.max(0, Number($("#cP").value) || 0), o = Math.max(0, Number($("#cO").value) || 0);
+    const m = PRICE[$("#cM").value], on = $("#cC").checked, M = 1e6;
+    const unc = (n * (D + P) * m.pin + n * o * m.pout) / M;
+    const cachesOn = on && D >= m.min;
+    const cac = (D * m.pin * m.w + (n - 1) * D * m.read + n * P * m.pin + n * o * m.pout) / M;
+    let out = `${m.name}: without caching <b>${money(unc)}</b>`;
+    if (on) out += cachesOn ? ` · with caching <b>${money(cac)}</b> (${(unc / cac).toFixed(1)}× cheaper)` : ` · <span class="miss">caching on, but the ${D}-token document is below the ${m.min}-token minimum: nothing is cached, and nothing says so</span>`;
+    out += ` · ${n} calls of ${D + P} input tokens`;
+    if (m.tpm && D + P > m.tpm) out += ` · <span class="miss">free tier: one request (${D + P} tokens) is larger than ${m.tpm} tokens per minute, so it is refused</span>`;
+    $("#costRead").innerHTML = out;
+  }
+  ["#cN", "#cD", "#cP", "#cO", "#cM", "#cC"].forEach(s => $(s).addEventListener("input", drawCost));
+  drawCost();
+
+  /* ---------- step 11: cache keys after the page-12 edit (I5_FACTS K12) ---------- */
+  segGroup("#keyPick", "key", k => drawKey(k));
+  function drawKey(k) {
+    $("#keyRead").innerHTML = k === "chunk"
+      ? `<b>96 of 97</b> contexts come back from the cache, although every one of them was written from a prompt that held the old page 12. Only chunk 33, whose own text changed, is rebuilt. <span class="miss">Nothing fails; the contexts are just stale.</span>`
+      : `<b>0 of 97</b> come back from the cache: the document text is part of every key, so all 97 contexts are rebuilt (one more build: about $0.0261 with caching on the climate PDF). <span class="hit">Correct, and the cost is known in advance.</span>`;
+  }
+  drawKey("chunk");
+
+  /* ---------- step 12: absolute vs relative ---------- */
+  function drawV() {
+    const a = Number($("#vA").value), b = Number($("#vB").value);
+    $("#vRead").innerHTML = Number.isFinite(a) && Number.isFinite(b) && a !== 0
+      ? `absolute change <b>${(b - a >= 0 ? "+" : "") + (b - a).toFixed(1)} points</b> · relative change <b>${(b - a >= 0 ? "+" : "") + (100 * (b - a) / a).toFixed(1)}%</b>`
+      : "enter two percentages (before must not be 0)";
+  }
+  ["#vA", "#vB"].forEach(s => $(s).addEventListener("input", drawV));
+  drawV();
+
+  /* ---------- apply: the real-world checklist (H1-H12) ---------- */
+  const CHECKS = [
+    ["A heading hierarchy is detectable in your documents.", "At least 2 heading levels from font size and boldness, and headings on at least half the pages (tool H1). If not, parse structure first (I2) or consider an LLM context."],
+    ["You know how many distinct titles your corpus has.", "Count documents with a real title (from the page, not only the metadata). One title for the whole corpus means a title header carries no information (H2)."],
+    ["Distinct headers ÷ chunks is high, and no header covers a large share of chunks.", "Build the headers under your rule and count them; report the largest group sharing one header (H3). A big group is a header magnet."],
+    ["Reused leaf headings are listed.", "List section names that appear under different parents (H4). Any reuse means: use the full path, not the leaf."],
+    ["The header's share of the embedded tokens is small.", "Median and maximum h / (h + c); warn above 0.25 (H5). Shorten the template if it warns."],
+    ["Header + chunk fits the embedder's limit.", "Count chunks where header + chunk exceeds the limit (MiniLM 256, specials included) (H6). Those lose the end of the chunk."],
+    ["You know how many chunks are really anonymous.", "Chunks with no heading inside whose first word is a pronoun or \"this/the\" (H7). Few of them means: expect little gain."],
+    ["Your questions do not copy the headings.", "Find questions whose content words appear in the gold chunk's header but not in its text (H8). Many means the eval set favours headers; write questions from the spans."],
+    ["Near-duplicate margins were compared with and without headers.", "Gold score minus the best look-alike's score, per near-duplicate pair, per arm (H9, needs an embedder)."],
+    ["You read 10 random chunks with their headers.", "Is the section right for what the chunk is mostly about? Note every wrong one with its rule (H10)."],
+    ["Generated contexts were checked automatically for names and numbers not in the document.", "Every capitalised name and number in a context must occur in the document; do not index contexts if over 2% fail; also count empty and over-long contexts (H11)."],
+    ["You hand-checked 10 generated contexts.", "Read each against its page: a wrong claim or a wrong section is a fail (H12)."]];
+  const saved = JSON.parse(store.get("i5-checklist", "[]") || "[]");
+  $("#checklist").innerHTML = CHECKS.map(([t, how], i) => `<label><input type="checkbox" data-i="${i}" ${saved.includes(i) ? "checked" : ""}><span><b>H${i + 1}.</b> ${esc(t)}<span class="how">How to check: ${esc(how)}</span></span></label>`).join("");
+  $$("#checklist input").forEach(c => c.addEventListener("change", () => store.set("i5-checklist", JSON.stringify($$("#checklist input:checked").map(x => Number(x.dataset.i))))));
+
+  /* ---------- check yourself ---------- */
+  const QS = [
+    { q: "Your corpus is one long manual, and you prepend its title to every chunk before embedding. What can that do for ranking?", a: ["separate chunks of different chapters", "nothing useful: every chunk gets the same header, so it only shifts all of them", "make every chunk score lower than before"], ok: 1,
+      why: ["A title is the same in every chunk of one document, so it cannot separate chapters; the path can.", "Right: the information test. One distinct header for all chunks carries no ranking information.", "It shifts every vector toward the title's meaning; scores move, but not systematically down."] },
+    { q: "A chunk opens with the last lines of section A and is mostly section B. Its header is the path in effect at its first character. What goes wrong?", a: ["nothing: that is the chunk's heading", "the header names section A for a chunk mostly about B", "the chunk's stored text changes"], ok: 1,
+      why: ["That is the start rule, and it is exactly what mislabels chunk 68 (Chapter 15 instead of Chapter 16).", "Right: like chunk 68. The majority rule would name B; the start rule is still right for chunks like 34.", "The header goes into embed_text; the stored text never changes."] },
+    { q: "MiniLM reads at most 256 tokens, its two special tokens included. A chunk of 182 tokens (with specials) gets a 100-token LLM context in front. What is lost?", a: ["the start of the header", "the last 26 tokens of the chunk", "nothing: the model compresses long input"], ok: 1,
+      why: ["The model keeps the start of the input; the header comes first, so it survives.", "Right: 100 + 182 = 282, over by 26, and the cut is at the end, which is the chunk's text.", "Sentence-transformers truncates at the limit; it does not compress."] },
+  ];
+  $("#quick").innerHTML = QS.map((x, i) => `<fieldset><legend>${i + 1}. ${x.q}</legend>` + x.a.map((a, j) => `<label><input type="radio" name="q${i}" value="${j}"> ${a}</label>`).join("") + `<div class="fb" id="fb${i}" aria-live="polite"></div></fieldset>`).join("");
+  QS.forEach((x, i) => $$(`input[name=q${i}]`).forEach(r => r.addEventListener("change", () => {
+    const j = Number(r.value), fb = $("#fb" + i);
+    fb.className = "fb show " + (j === x.ok ? "ok" : "no"); fb.textContent = x.why[j];
+  })));
+  window.__i5 = { CH, PRICE, drawCost };
+  spy();
+})();
+</script>
+</body>
+</html>
