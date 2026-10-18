@@ -1,0 +1,53 @@
+PASS kit.lint_questions: no problems
+PASS question file header line
+PASS the 20 ids of the plan, no more, no less (20; brief: 17-21)
+PASS ids unique
+PASS each id is in the plan's set
+PASS id letter = type
+PASS the 2 set=pre items come first, in order
+PASS main items cover research §3's 4 R / 4 A / 2 T at least ({'R': 8, 'A': 7, 'T': 2})
+PASS each research §3 title is asked by its item (all 10)
+PASS every item has Hint 1 and Hint 2; Hint 3 only on A items
+PASS 2-5 key points per item
+PASS 1-2 'for a 4' points per item
+PASS 1-3 common wrong answers per item
+PASS exactly one interview item, at most 2 external items (['I2-T-03'])
+PASS the pinned AIQ file is readable (/tmp/claude-0/dl/repo/aiq/questions.md)
+PASS I2-T-03 quotes the repo's Q4 heading verbatim
+PASS I2-T-03 carries the MIT notice, the pinned commit, the path and source=AIQ-04-Q4
+PASS I2-T-03: the 7 quoted lines are exact substrings of the repo's Q4 answer
+PASS I2-T-03: the repo's answer (with its Structure-aware bullet) comes before ours
+PASS I2-T-03: our answer states the I2-E8 correction (no consistent winner; the heading path is I5's claim; inconclusive here)
+PASS AIQ-04 Q13 (a coach seed) and Q14 are not used
+PASS every reread links the reading file, the lesson (#sN) and a book page (all 20)
+PASS every reread names the reading section(s) the plan assigns (all 20)
+PASS every reread names exactly the lesson step(s) the plan assigns (all 20)
+PASS main items test every lesson step #s1-#s13 ([1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13])
+     items: I2-PRE-01 R/pre s1 · I2-PRE-02 R/pre s2 · I2-R-01 R/main s2 · I2-R-02 R/main s3 · I2-R-03 R/main s7 · I2-R-04 R/main s6 · I2-R-05 R/main s1,10 · I2-R-06 R/main s6 · I2-R-07 R/main s8,4 · I2-R-08 R/main s12 · I2-A-01 A/main s4 · I2-A-02 A/main s9 · I2-A-03 A/main s11 · I2-A-04 A/main s7 · I2-A-05 A/main s5 · I2-A-06 A/main s9 · I2-A-07 A/main s13 · I2-T-01 T/main s5,12 · I2-T-02 T/main s13 · I2-T-03 T/interview s13
+PASS question file: 60 links resolve (58 with #anchors; 23 lesson ids checked against the lesson file's ids (103))
+PASS reading file: 1 links resolve (0 with #anchors; 0 lesson ids checked against the lesson file's ids (103))
+PASS 0 links from other workspace files into the two I2 kit files resolve
+     word count: reading file 2990 (code blocks removed); question file 7988
+PASS reading file is 1,800-3,000 words without code blocks (2990)
+PASS reading file header line
+PASS reading file has What this is / is not, the book box (per 04/07; not re-opened in this session) and Check yourself
+PASS sections ## 1. ... ## 14. in order (14)
+PASS sections 1-13 follow the lesson's Short path (failure ... measuring: inconclusive)
+PASS section 14 is 'When not to use it', then 'Check yourself'
+PASS sections 1-13 each open with 'The answer first'
+PASS Check yourself names the question file
+PASS §13 states the verdict (inconclusive) and the empty boundary bucket (0 of 8)
+PASS 26 book page references, all well-formed and among research §1's four pages
+PASS no other 'p.N' form (corpus pages are written 'page N')
+PASS every reread marks its book page 'not re-opened' (all)
+PASS every decimal and every integer >= 10 is in I2_FACTS / out_i2_measure or on the FORMULA / TOY list (20 FORMULA/TOY values used)
+PASS 23 key numbers are printed by the run and quoted in the kit files
+PASS question file: no 15-word run shared with AIQ-04 Q4's answer outside the quoted preamble
+PASS reading file: no 15-word run shared with AIQ-04 Q4's answer outside the quoted preamble
+PASS none of the 28 coach-banned phrases appears ({'questions': [], 'reading': []})
+PASS question file: no 10-word run shared with the coach's seed bank (held in memory, not printed)
+PASS reading file: no 10-word run shared with the coach's seed bank (held in memory, not printed)
+PASS study/quiz.py --check passes for I2 (OK   I2_questions.md: 20 questions)
+PASS study/quiz.py --check exits 0 for all files (exit 0; 7/7 files pass)
+
+49/49 checks passed

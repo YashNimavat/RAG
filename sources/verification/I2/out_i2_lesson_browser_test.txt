@@ -1,0 +1,69 @@
+PASS all 24 contents links have a target []
+PASS section #answer exists
+PASS section #theory exists
+PASS section #formulas exists
+PASS section #s1 exists
+PASS section #s2 exists
+PASS section #s3 exists
+PASS section #s4 exists
+PASS section #s5 exists
+PASS section #s6 exists
+PASS section #s7 exists
+PASS section #s8 exists
+PASS section #s9 exists
+PASS section #s10 exists
+PASS section #s11 exists
+PASS section #s12 exists
+PASS section #s13 exists
+PASS section #f1 exists
+PASS section #f2 exists
+PASS section #f3 exists
+PASS section #f4 exists
+PASS section #verify exists
+PASS section #apply exists
+PASS section #llmops exists
+PASS section #check exists
+PASS section #sources exists
+PASS every chart SVG has a title and a description
+PASS no unfilled placeholders
+PASS Short hides the Full sections
+PASS Full shows the Full sections
+PASS a Full-only contents link switches to Full
+PASS ruler pp.1–2, L3: Coal kept with its body
+PASS ruler pp.1–2, v0: Coal split from its body
+PASS ruler pp.12–13, v0: PPP sentence split
+PASS ruler pp.12–13, L3: PPP whole, across the break
+PASS ruler pp.12–13, L4: PPP whole in the PPP sub-section
+PASS rule explorer: size + bold finds 282, nothing missed
+PASS rule explorer: size only finds 90; Chapter 6 loses its 8 sub-sections
+PASS rule explorer: Paris Agreement is among the missed
+PASS 11 repeated titles
+PASS 10 inspected chunks
+PASS histogram: 6 arms, L3 117 chunks by default
+PASS histogram: L4 209 chunks, 187/338/636
+PASS histogram: v0 97 chunks
+PASS balanced split 2,300 / 1,000: ℓ = 2300, C = 1000: n = ⌈2300 / 1000⌉ = 3 · cap-filling gives 1000 + 1000 + 300 · balanced
+PASS balanced split 1,004: cap-filling 1000 + 4, balanced 502 + 502
+PASS balanced split 1,935: ideal 967.5 each
+PASS retrieval table: 6 arms at fixed k
+PASS retrieval table: MRR view shows 0.917 and 0.708
+PASS retrieval table: budget view shows the control's 6/8
+PASS checklist has S1–S11
+PASS checklist tick survives a reload
+PASS quick check 1: wrong then right feedback
+PASS quick check 2: wrong then right feedback
+PASS quick check 3: wrong then right feedback
+PASS T hides the contents
+PASS T shows the contents
+PASS ⇆ moves the contents right
+PASS ↑ appears after scrolling
+PASS dark mode toggles
+PASS theme and colour survive a reload
+PASS Literata loads from fonts/ (offline)
+PASS no sideways scroll at 390 px in 7 styles × 2 colours × 2 depths []
+PASS phone: Contents opens the drawer
+PASS phone: tapping the page closes the drawer
+PASS no network request outside file: []
+PASS no console or page errors []
+
+67/67 PASS

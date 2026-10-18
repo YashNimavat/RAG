@@ -1,0 +1,181 @@
+
+=== S1 Environment and snapshot ===
+python 3.12.3 · pymupdf 1.26.7
+pdf sha256 1d58a0fac2435c2ce4129ff84906b93118d731e4a004e7a26f8ab8f749a92669 bytes 206372 pages 33
+doc_text chars 72593 sha256 5106772efa77 snapshot_id ea07572562ac
+get_toc() = []
+catalog StructTreeRoot: xref · MarkInfo: ('dict', '<</Marked true>>')
+metadata creator: 'Microsoft® Word 2021'
+
+=== S2 One real span dict (page 1, first 3 lines) ===
+text='Understanding Climate Change ' size=24.00 flags=20 (bold bit 16) char_flags=24 font=TimesNewRomanPS-BoldMT bbox=(72.0, 73.1, 403.4, 99.6)
+keys: alpha, ascender, bbox, bidi, char_flags, color, descender, flags, font, origin, size
+text='Chapter 1: Introduction to Climate Change ' size=18.00 flags=20 (bold bit 16) char_flags=24 font=TimesNewRomanPS-BoldMT bbox=(72.0, 114.4, 411.1, 134.3)
+text='Climate change refers to significant, long-term changes in the global climate. The term ' size=12.00 flags=4 (bold bit 0) char_flags=16 font=TimesNewRomanPSMT bbox=(72.0, 148.8, 492.1, 162.1)
+flags bits: 1 superscript, 2 italic, 4 serif, 8 monospaced, 16 bold
+
+=== S3 Font sizes, character-weighted ===
+size 24.00 bold=True  chars     28 (0.0%)
+size 18.00 bold=True  chars    855 (1.2%)
+size 13.56 bold=True  chars   1666 (2.4%)
+size 12.00 bold=True  chars   4057 (5.8%)
+size 12.00 bold=False chars  63762 (90.6%)
+size 11.04 bold=False chars      0 (0.0%)
+body size (most characters): 12.0 · spans per size: {12.0: 1006, 13.56: 68, 18.0: 22, 24.0: 1}
+
+=== S4 Heading detection: size only vs size + bold ===
+text lines 1097 · all-bold lines 283 · bold lines with > 1 span: 0
+size     : 90 headings · per level {1: 1, 2: 21, 3: 68}
+size+bold: 282 headings · per level {1: 1, 2: 21, 3: 68, 4: 192}
+size-only misses 192 of 282 (68.1%)
+joined (wrapped) headings: [(7, 'Chapter 5: The Role of Technology in Climate Change Mitigation')]
+level-2 lines before joining: 22
+headings with a hyphen (one span each?): [('Next-Generation Solar Technologies', 7), ('Community-Based Conservation', 10), ('Public-Private Partnerships', 12), ('Ex-Situ Conservation', 14), ('Nature-Based Solutions', 14), ('Climate-Resilient Conservation', 14), ('Heat-Related Illnesses', 15), ('Vector-Borne Diseases', 15), ('Climate-Smart Healthcare', 16), ('Gender-Responsive Policies', 20), ('Climate-Resilient Design', 25), ('Nature-Based Solutions', 26), ('Climate-Resilient Agriculture', 27), ('Cross-Sector Collaboration', 30), ('Community-Based Solutions', 30)]
+bold lines removed by the filters (> 12 words or final . ! ?): 0
+lines repeated on >= 3 pages: []
+
+=== S5 Same text, same order: dict lines vs page.get_text() ===
+pages where the dict lines + '\n' rebuild get_text() exactly: 33 of 33 · differ: []
+
+=== S6 Align every heading to the snapshot (cursor + find) ===
+aligned 282 of 282 headings; all inside their page: True
+'Coal': level 4 page 1 doc [2418, 2423) · page 1 ends at 2424 · text after it: '\n\nCoal is the most carbon-intensive foss'
+first 6 headings: [(1, 'Understanding Climate Change', 0), (2, 'Chapter 1: Introduction to Climate Change', 30), (3, 'Historical Context', 467), (3, 'Modern Observations', 1072), (2, 'Chapter 2: Causes of Climate Change', 1621), (3, 'Greenhouse Gases', 1658)]
+
+=== S7 Section tree and repeated titles ===
+repeated titles: 11
+  'Carbon Capture and Utilization' p.8 L3: Chapter 5: The Role of Technology in Climate Change Mitigation > Carbon Capture and Utilization
+  'Carbon Capture and Utilization' p.23 L3: Chapter 15: Climate Change and Technology > Carbon Capture and Utilization
+  'Carbon Utilization' p.8 L4: Chapter 5: The Role of Technology in Climate Change Mitigation > Carbon Capture and Utilization > Carbon Utilization
+  'Carbon Utilization' p.23 L4: Chapter 15: Climate Change and Technology > Carbon Capture and Utilization > Carbon Utilization
+  'International Agreements' p.6 L4: Chapter 4: Mitigation and Adaptation > Climate Policy > International Agreements
+  'International Agreements' p.23 L3: Chapter 16: Global Cooperation and Governance > International Agreements
+  'International Collaboration' p.10 L3: Chapter 6: Global and Local Climate Action > International Collaboration
+  'International Collaboration' p.16 L4: Chapter 10: Climate Change and Human Health > Global Health Initiatives > International Collaboration
+  'Marine Ecosystems' p.5 L4: Chapter 3: Effects of Climate Change > Ocean Acidification > Marine Ecosystems
+  'Marine Ecosystems' p.13 L4: Chapter 9: Climate Change and Biodiversity > Impact on Ecosystems > Marine Ecosystems
+  'Nature-Based Solutions' p.14 L4: Chapter 9: Climate Change and Biodiversity > Integrating Biodiversity and Climate Action > Nature-Based Solutions
+  'Nature-Based Solutions' p.26 L3: Chapter 17: Building Climate Resilience > Nature-Based Solutions
+  'Paris Agreement' p.10 L4: Chapter 6: Global and Local Climate Action > International Collaboration > Paris Agreement
+  'Paris Agreement' p.23 L4: Chapter 16: Global Cooperation and Governance > International Agreements > Paris Agreement
+  'Policy and Governance' p.12 L3: Chapter 8: Future Directions and Innovations > Policy and Governance
+  'Policy and Governance' p.18 L4: Chapter 12: The Path Forward > Taking Action > Policy and Governance
+  'Research and Innovation' p.7 L3: Chapter 4: Mitigation and Adaptation > Research and Innovation
+  'Research and Innovation' p.16 L4: Chapter 10: Climate Change and Human Health > Global Health Initiatives > Research and Innovation
+  'Smart Grids' p.8 L4: Chapter 5: The Role of Technology in Climate Change Mitigation > Energy Storage and Grid Management > Smart Grids
+  'Smart Grids' p.22 L4: Chapter 15: Climate Change and Technology > Digital Technologies > Smart Grids
+  'Youth Engagement' p.13 L4: Chapter 8: Future Directions and Innovations > Social and Cultural Change > Youth Engagement
+  'Youth Engagement' p.32 L4: Chapter 21: Climate Change and Cultural Shifts > Intergenerational Dialogue > Youth Engagement
+  L2 Chapter 6: Global and Local Climate Action (2728 chars, p.10)
+    L3 International Collaboration (695 chars, p.10)
+      L4 United Nations Framework Convention on Climate Change (UNFCCC) (348 chars, p.10)
+      L4 Paris Agreement (318 chars, p.10)
+    L3 National Strategies (913 chars, p.10)
+      L4 Carbon Pricing (290 chars, p.10)
+      L4 Renewable Energy Targets (295 chars, p.10)
+      L4 Emission Reduction Regulations (307 chars, p.10)
+    L3 Local and Community Initiatives (1076 chars, p.10)
+      L4 Urban Climate Action (362 chars, p.10)
+      L4 Community-Based Conservation (346 chars, p.10)
+      L4 Education and Awareness (335 chars, p.11)
+level 2 sections: 21 · length min/median/max 1591/3336/6058 · mean 3455.4
+level 3 sections: 68 · length min/median/max 549/1033.5/1898 · mean 1041.3
+level 4 sections: 192 · length min/median/max 243/334.0/636 · mean 336.5
+
+=== S8 The page-break failures on PyMuPDF text (re-measures 07 D.8) ===
+orphaned headings: 16: ['1->2', '2->3', '3->4', '4->5', '5->6', '6->7', '7->8', '8->9', '10->11', '11->12', '17->18', '18->19', '20->21', '27->28', '30->31', '31->32']
+mid-sentence cuts: 8: ['12->13', '14->15', '15->16', '16->17', '21->22', '22->23', '24->25', '28->29']
+page breaks not ending in . ! ? : or quote: 24 of 32
+
+=== S9 Chunking: v0, the cross-page control, and structure at three split levels ===
+v0 per-page 1000/200                 n= 97 len min/median/max 393/935/1000 mean 857.9 multi-page 0 · hist(100s) [0, 0, 0, 1, 0, 9, 13, 5, 3, 66]
+cross-page recursive 1000/200        n= 92 len min/median/max 755/962.5/999 mean 954.8 multi-page 41 · hist(100s) [0, 0, 0, 0, 0, 0, 0, 1, 1, 90]
+structure L2 (chapter)               n= 86 len min/median/max 644/843.5/1000 mean 844.1 multi-page 29 · hist(100s) [0, 0, 0, 0, 0, 0, 9, 27, 17, 33]
+structure L3 (section)               n=117 len min/median/max 187/619/997 mean 620.5 multi-page 27 · hist(100s) [0, 1, 0, 18, 16, 18, 29, 15, 6, 14]
+structure L4 (sub-section)           n=209 len min/median/max 187/338/636 mean 347.3 multi-page 24 · hist(100s) [0, 1, 40, 143, 19, 2, 4, 0, 0, 0]
+structure L4 + merge<400             n=139 len min/median/max 187/545/772 mean 522.3 multi-page 25 · hist(100s) [0, 1, 7, 36, 19, 17, 34, 25, 0, 0]
+structure L3, size-only headings     n=117 len min/median/max 187/619/997 mean 620.5 multi-page 27 · hist(100s) [0, 1, 0, 18, 16, 18, 29, 15, 6, 14]
+L3 chunks by pieces per section: {1: 25, 2: 92}
+L4 merge: merged chunks 70
+size-only L3 chunks that end on a sub-heading (orphan re-created): 0
+size-only L3 chunks identical to size+bold L3: True
+
+=== S10 Balanced split: a worked case ===
+shortest L3 section over the cap: Chapter 11: Education and Advocacy > Advocacy and Activism · 1004 chars · n = ceil(1004/1000) = 2 · ideal 502.0 each · pieces [341, 663] · naive 1000 + 4
+longest L3 section: Chapter 2: Causes of Climate Change > Greenhouse Gases · 1935 chars · pieces [990, 945]
+L3 sections over the cap: 46 of 71
+
+=== S11 Invariants (offset round trip, cap, no gaps, no crossing, page segments) ===
+structure L2 (chapter)               round_trip=0 cap=0 gaps=0 crossing=0 segments=0
+structure L3 (section)               round_trip=0 cap=0 gaps=0 crossing=0 segments=0
+structure L4 (sub-section)           round_trip=0 cap=0 gaps=0 crossing=0 segments=0
+structure L4 + merge<400             round_trip=0 cap=0 gaps=0 crossing=0 segments=0
+structure L3, size-only headings     round_trip=0 cap=0 gaps=0 crossing=0 segments=0
+L3 chunks tile the document (no overlap, gaps only whitespace): True · overlap pairs: 0
+
+=== S12 Containment demos ===
+v0 per-page 1000/200: one chunk holds 'Coal' + its first body line: False
+structure L3 (section): one chunk holds 'Coal' + its first body line: True (chunk 3, pages [1, 2])
+PPP sentence doc [26866, 26997) pages 12->13: 'Public-\nprivate partnerships (PPPs) can leverage resources, expertise, and innovation to implement \n\nlarge-scale climate solutions.'
+  v0 per-page 1000/200                 whole PPP sentence in one chunk: False
+  cross-page recursive 1000/200        whole PPP sentence in one chunk: True (path -)
+  structure L2 (chapter)               whole PPP sentence in one chunk: True (path Chapter 8: Future Directions and Innovations)
+  structure L3 (section)               whole PPP sentence in one chunk: True (path Chapter 8: Future Directions and Innovations > Policy and Governance)
+  structure L4 (sub-section)           whole PPP sentence in one chunk: True (path Chapter 8: Future Directions and Innovations > Policy and Governance > Public-Private Partnerships)
+  structure L4 + merge<400             whole PPP sentence in one chunk: True (path Chapter 8: Future Directions and Innovations > Policy and Governance > Public-Private Partnerships)
+  structure L3, size-only headings     whole PPP sentence in one chunk: True (path Chapter 8: Future Directions and Innovations > Policy and Governance)
+
+=== S13 Eye inspection: 10 random L3 chunks, seed 0 ===
+chunk   5 [3556,4543) 987 chars pages [2] head-start=True sentence-end=True piece 1/1
+     path: Chapter 2: Causes of Climate Change > Deforestation
+     starts 'Deforestation  Forests act as carbon sinks, absorbing CO2 fr' … ends 'ng  indigenous communities and wildlife.'
+chunk  33 [21294,22207) 913 chars pages [10] head-start=True sentence-end=True piece 1/1
+     path: Chapter 6: Global and Local Climate Action > National Strategies
+     starts 'National Strategies  Carbon Pricing  Carbon pricing mechanis' … ends 'ce are critical for their effectiveness.'
+chunk  49 [31533,32348) 815 chars pages [15] head-start=True sentence-end=True piece 1/2
+     path: Chapter 10: Climate Change and Human Health > Health Impacts
+     starts 'Chapter 10: Climate Change and Human Health  Health Impacts ' … ends 'are critical for prevention and control.'
+chunk  51 [33071,33769) 698 chars pages [15, 16] head-start=True sentence-end=True piece 1/2
+     path: Chapter 10: Climate Change and Human Health > Health Adaptation Strategies
+     starts 'Health Adaptation Strategies  Public Health Infrastructure  ' … ends 'networks  enhances community resilience.'
+chunk  53 [34158,34869) 711 chars pages [16] head-start=True sentence-end=True piece 1/1
+     path: Chapter 10: Climate Change and Human Health > Global Health Initiatives
+     starts 'Global Health Initiatives  International Collaboration  Glob' … ends 'idence-based policies and interventions.'
+chunk  62 [39900,40609) 709 chars pages [18, 19] head-start=True sentence-end=True piece 1/2
+     path: Chapter 12: The Path Forward > Commitment to Future Generations
+     starts 'Commitment to Future Generations  Intergenerational Equity  ' … ends 'youth are catalysts for positive change.'
+chunk  65 [41727,42456) 729 chars pages [19] head-start=True sentence-end=True piece 2/2
+     path: Chapter 13: Climate Change and Social Justice > Climate Justice
+     starts 'Environmental Racism  Environmental racism refers to the dis' … ends 'mate adaptation resources are essential.'
+chunk  97 [60282,61223) 941 chars pages [27, 28] head-start=True sentence-end=True piece 1/1
+     path: Chapter 18: Moving Forward Together > Hope and Inspiration
+     starts 'Hope and Inspiration  Positive Narratives   Positive narrati' … ends 'ive empowerment drives systemic  change.'
+chunk 108 [67316,68026) 710 chars pages [30, 31] head-start=True sentence-end=True piece 2/2
+     path: Chapter 20: Climate Change and Innovation > Social Innovation
+     starts 'Community-Based Solutions   Community-based solutions levera' … ends 'apital is crucial for widespread impact.'
+chunk 113 [70214,70603) 389 chars pages [32] head-start=True sentence-end=True piece 1/2
+     path: Chapter 21: Climate Change and Cultural Shifts > Educational Initiatives
+     starts 'Educational Initiatives  Climate Education in Schools  Integ' … ends ', enhances understanding and engagement.'
+
+=== S14 Seeds: buckets and retrieval ===
+seeds 10 · answerable 8 · single-segment quotes that match the snapshot exactly: 11 of 12
+D-001 exact-term             groups 1 pages [3] straddles_v0=False crosses_page=False
+D-002 factual-single-span    groups 1 pages [10] straddles_v0=False crosses_page=False
+D-003 factual-single-span    groups 1 pages [23] straddles_v0=False crosses_page=False
+D-004 exact-term             groups 1 pages [8, 23] straddles_v0=False crosses_page=False
+D-005 multi-span             groups 2 pages [2] straddles_v0=False crosses_page=False
+D-006 vocabulary-mismatch    groups 2 pages [8] straddles_v0=False crosses_page=False
+D-007 multi-hop              groups 2 pages [10, 29] straddles_v0=False crosses_page=False
+D-008 exact-term             groups 1 pages [24] straddles_v0=False crosses_page=False
+MiniLM-L6 ONNX export; equal budget = 4 x v0 mean chunk length = 3432 characters
+v0 per-page 1000/200                 CE@4 8/8 [1, 1, 1, 1, 1, 1, 1, 1] · CE@budget 8/8 · CE-rank [3, 3, 1, 1, 1, 1, 3, 2] · MRR@10(CE) 0.688 · first-hit ranks [3, 3, 1, 1, 1, 1, 2, 2] MRR@10 0.708 · WordPiece max 182, > 256: 0
+cross-page recursive 1000/200        CE@4 7/8 [1, 1, 1, 1, 1, 1, 0, 1] · CE@budget 6/8 · CE-rank [4, 3, 2, 1, 1, 1, 5, 2] · MRR@10(CE) 0.598 · first-hit ranks [4, 3, 2, 1, 1, 1, 4, 2] MRR@10 0.604 · WordPiece max 196, > 256: 0
+structure L2 (chapter)               CE@4 8/8 [1, 1, 1, 1, 1, 1, 1, 1] · CE@budget 8/8 · CE-rank [2, 3, 1, 1, 2, 1, 4, 1] · MRR@10(CE) 0.698 · first-hit ranks [2, 3, 1, 1, 1, 1, 2, 1] MRR@10 0.792 · WordPiece max 175, > 256: 0
+structure L3 (section)               CE@4 8/8 [1, 1, 1, 1, 1, 1, 1, 1] · CE@budget 7/8 · CE-rank [2, 3, 1, 1, 4, 3, 4, 2] · MRR@10(CE) 0.521 · first-hit ranks [2, 3, 1, 1, 1, 3, 3, 2] MRR@10 0.625 · WordPiece max 196, > 256: 0
+structure L4 (sub-section)           CE@4 7/8 [1, 1, 1, 1, 1, 1, 0, 1] · CE@budget 8/8 · CE-rank [1, 1, 1, 1, 2, 1, 5, 1] · MRR@10(CE) 0.838 · first-hit ranks [1, 1, 1, 1, 1, 1, 3, 1] MRR@10 0.917 · WordPiece max 118, > 256: 0
+structure L4 + merge<400             CE@4 7/8 [1, 1, 1, 1, 1, 1, 0, 1] · CE@budget 8/8 · CE-rank [1, 1, 1, 1, 4, 3, 5, 2] · MRR@10(CE) 0.660 · first-hit ranks [1, 1, 1, 1, 1, 3, 3, 2] MRR@10 0.771 · WordPiece max 140, > 256: 0
+structure L3, size-only headings     CE@4 8/8 [1, 1, 1, 1, 1, 1, 1, 1] · CE@budget 7/8 · CE-rank [2, 3, 1, 1, 4, 3, 4, 2] · MRR@10(CE) 0.521 · first-hit ranks [2, 3, 1, 1, 1, 3, 3, 2] MRR@10 0.625 · WordPiece max 196, > 256: 0
+check vs P4 K3: v0 D-002 top-5 [np.int64(69), np.int64(68), np.int64(27), np.int64(17), np.int64(84)] cos [0.4606, 0.4513, 0.4386, 0.4385, 0.3387]
+
+=== S15 Data file ===
+wrote i2_lesson_data.json sha256 d028f4482bb1

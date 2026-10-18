@@ -466,3 +466,33 @@ All items: type R/A/T/X as shown, not scheduled, hint level H0, unassisted. "Con
 ### Next session
 1. Read P1, P2, then P4 (Short first), each followed by its lab and, the next day, its quiz. (Recommended study order: P1 → P2 → P6 → P3 → P4 → P5 → P7.)
 2. The next lesson to build: **P5** (vector search), or P6 if you want to follow the study order.
+
+## Session 2026-10-18 #5: the I2 lesson in the P1/P2 format (no tutoring)
+- **Tutor:** Claude, in a Claude Code cloud session (Linux). No study items were asked, so nothing is scored or scheduled.
+- **Learner request:** "Build the I2 lesson in the P1/P2 format": read `study/research/phase_04_indexing.md` (Concept I2), then facts, spec, three helpers, the HTML lesson, the gap audit and all checks.
+- **Cloud limits, and how they were handled:**
+  - The book PDFs were not present. Its four I2 pages are cited as the course files cite them and marked UNVERIFIED; the local pass must open them.
+  - Hugging Face and tiktoken downloads are blocked. MiniLM ran through its public ONNX export instead, which reproduces P4 K3/K4 exactly (D-002 top-5 and cosines; MRR@10 0.708). The verify notebook uses sentence-transformers from the local cache on Yash's machine. No cl100k/o200k counts are new.
+- **Facts:** `sources/verification/I2/I2_FACTS.md` (S1–S14, byte-identical on rerun), reference chunker `i2_structure.py`, sources check `i2_sources.py` ALL PASS. Key results:
+  - 282 headings (1/21/68/192); size only finds 90 (misses 68.1%); 11 repeated titles;
+  - 16 orphans and 8 page cuts, re-measured on PyMuPDF (closes research I2-E7);
+  - L3 sections: 117 chunks, 187/619/997; 0 invariant violations in every arm; "Coal" and the PPP sentence kept whole;
+  - on the 8 draft seeds: **inconclusive**, and 0 of 8 seeds straddle a v0 chunk or cross a page.
+- **Spec:** `sources/verification/I2/I2_BUILD_SPEC.md` (decisions: Corpus D, split at L3, cap 1,000; file names; section ids; one brief per helper).
+- **Built** (three helpers in parallel; the tutor re-ran every check):
+  - `study/lessons/I2_structure_chunking.html` (Short/Full, the P4 shell; 13 steps plus 4 Full-only steps). Interactive parts: the page ruler, the font ladder, the heading-rule explorer, the Chapter 6 tree, the length histograms, the balanced-split calculator, the retrieval table and the S1–S11 checklist.
+  - `I2_structure_chunking_gap_audit.md`: 27 ideas placed; quiz vs Short found 6 gaps, all fixed.
+  - `study/notebooks/I2_structure_chunking_verify.ipynb`: 128 checks, 0 failed, 0 skipped; 4 Plotly charts; about 15 s; no API call.
+  - `study/tools/structure_fit_check.py` with a climate example report and inspection sheet: `i2_tool_test.py` 114/114, including a 15-PDF synthetic zoo. `study/kit.py` links it.
+  - `study/reading/I2_structure_chunking.md` (2,990 words) and `study/questions/I2_questions.md` (20 items, one MIT interview item, AIQ-04 Q4). `quiz.py --check` 7/7; `i2_md_check.py` 49/49.
+- **Checks on the lesson:**
+  - 67/67 browser tests (`i2_lesson_browser_test.py`);
+  - no console errors and no network requests;
+  - no sideways scroll at 390 px in 7 styles × light/dark × Short/Full;
+  - the study kit serves the lesson, fonts, reading, report and quiz, and its I2 page sees the lesson, notebook, tool, reading and questions.
+- **Not built:** the I2 LLMOps notebook (it needs `study/llmops/`). The lesson has a "planned" section.
+- **Committed and pushed** on branch `claude/gifted-euler-2b06jc`.
+
+### Next session
+1. On Yash's machine: open the four book pages, run the notebook with sentence-transformers, and fill in the inspection sheet.
+2. Before measuring v1.1: M1 must add `straddles_champion` and `crosses_page` items; today's seeds contain none.

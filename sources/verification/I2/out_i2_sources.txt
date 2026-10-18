@@ -1,0 +1,28 @@
+PASS all_rag_techniques/simple_rag.ipynb cell 10 contains 'def encode_pdf(path, chunk_size=1000, chunk_overlap=200):'
+PASS all_rag_techniques/simple_rag.ipynb cell 10 contains 'PyPDFLoader(path)'
+PASS all_rag_techniques/simple_rag.ipynb cell 10 contains 'RecursiveCharacterTextSplitter('
+PASS all_rag_techniques/simple_rag.ipynb cell 10 contains 'chunk_size=chunk_size, chunk_overlap=chunk_overlap, length_function=len'
+PASS all_rag_techniques/simple_rag.ipynb cell 10 contains 'text_splitter.split_documents(documents)'
+PASS all_rag_techniques/simple_rag.ipynb cell 10 passes no separators argument
+PASS all_rag_techniques/hierarchical_indices.ipynb cell 11 contains 'PyPDFLoader'
+PASS all_rag_techniques/hierarchical_indices.ipynb cell 11 contains 'summary'
+PASS all_rag_techniques/hierarchical_indices.ipynb cell 11 passes no separators argument
+PASS helper_functions.py L48: 'def encode_pdf(path, chunk_size=1000, chunk_overlap=200):'
+PASS helper_functions.py L76: 'return vectorstore'
+PASS helper_functions.py L48-L76 uses RecursiveCharacterTextSplitter
+PASS hierarchical_indices.ipynb cell 11 summarises per PyPDFLoader page
+  cell 11 first lines: async def encode_pdf_hierarchical(path, chunk_size=1000, chunk_overlap=200, is_string=False): | """ | Asynchronously encodes a PDF book into a hierarchical vector store using OpenAI embeddings. | Includes rate limit handling with exponential backoff. | Args:
+PASS README has no 'structure-aware'
+PASS README has no 'markdownheader'
+PASS README has no 'markdown header'
+PASS README has no 'heading-aware'
+PASS README has no 'header-aware'
+PASS climate PDF sha256 1d58a0fa…
+PASS AIQ LICENSE: MIT, Copyright (c) 2026 Om
+PASS AIQ 04 Q4 title
+PASS AIQ 04 Q4 structure-aware bullet (the overclaim, I2-E8)
+PASS AIQ 04 Q14 title
+PASS AIQ 04 Q13 title
+  AIQ Q4 block: 2199 characters
+
+ALL PASS
