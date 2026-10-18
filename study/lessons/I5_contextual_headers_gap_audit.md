@@ -56,7 +56,29 @@ There was no earlier I5 lesson, so every idea is new. The research listed 26; th
 
 ## What step 4 found: the quiz against the lesson
 
-{{QUIZ_TABLE}}
+Every key point of the 19 questions was checked against the **Short** lesson (and the short reading file, where `i5_md_check.py` also checks that each reread names the section that teaches it). Two points were missing from the Short lesson and were added: late chunking (interview item, now one sentence in step 10; the details stay in step 14, Full) and "retrying cannot help" (I5-T-03, step 10).
+
+| Item | What its key points need | Taught in (Short) |
+|---|---|---|
+| I5-PRE-01 | the subject sits outside the chunk ("it"); the retriever sees only the chunk's words | step 1 |
+| I5-PRE-02 | a title identical on every chunk separates nothing; a header must vary | step 6 |
+| I5-R-01 | meaning depends on text outside the span; two kinds of context: where it sits, what it refers to | step 1 |
+| I5-R-02 | 1 distinct header for 97 chunks; the information test; it still shifts every vector | step 6 |
+| I5-R-03 | embedding, BM25, generation inputs; v1.2 changes the embedding only; separate fields | step 2 |
+| I5-R-04 | the span invariant; CE scoring uses offsets; template id → `preproc_version` → its own index | step 2 |
+| I5-R-05 | 1 − recall@20; 5.7% → 3.7%; 35% is relative, 2.0 points absolute | step 12 |
+| I5-R-06 | the document is a shared prefix written once, read 96 times; document first; below the minimum nothing is cached; any change in the prefix breaks the match | step 11 |
+| I5-A-01 | 182 + 27 = 209 fits; 182 + 100 = 282, over by 26; the tail is cut | step 8 (ruler) |
+| I5-A-02 | uncached $0.1367; cached $0.0261 (1.25× once, 0.1× reads); about 5.2× | steps 10–11 (calculator) |
+| I5-A-03 | the p.10 and p.23 paths; title and leaf equal, chapter and section differ | step 4 |
+| I5-A-04 | −2.0 points, −35.1%; about 18 points needed at n = 50 | steps 9 and 12 (converter) |
+| I5-A-05 | chunk 68: start → Chapter 15 › … › DAC; majority → Chapter 16 › … › Paris Agreement; majority right for D-003 (for a 4: the start rule wins on chunk 34) | step 5 (explorer) |
+| I5-A-06 | s = 0.112 on 151 tokens, 0.229 on 64; the short chunk is pulled about twice as much | step 7 (slider) |
+| I5-T-01 | check n per category and the discordant pairs first; then dilution on short chunks; then shared or wrong headers | steps 5, 7, 9 |
+| I5-T-02 | the key held the chunk text only; a context depends on the whole document; key on prompt version + document + chunk | step 11 (demo) |
+| I5-T-03 | one 13,090-token request exceeds 8,000 TPM; waiting cannot help; two fixes (chapter window, Haiku with caching, paid tier) | step 10 |
+| I5-T-04 | header–question leakage; the per-question header-only word check; re-test on span-written questions | step 9 |
+| I5-R-07 | chunks lose context; contextual retrieval (LLM context from the whole document, cached); late chunking (dense only); the title is constant on one document; the heading rule matters (chunk 68) | steps 1, 5, 6, 10 |
 
 ## Left to other concepts on purpose (link only)
 

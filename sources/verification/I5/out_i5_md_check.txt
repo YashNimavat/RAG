@@ -1,0 +1,140 @@
+PASS kit.lint_questions: no problems
+PASS question file header line and title (spec §4)
+PASS the 19 ids of the build spec, no more, no less (19)
+PASS ids unique
+PASS each id has the spec's type and set (pre/main/review/interview)
+PASS ids follow I5-<type>-<nn> / I5-PRE-<nn>
+PASS id letter = type
+PASS the 2 set=pre items come first, in order
+     items: 19; pre 2 (R 2); main 15 (R 6, A 5, T 4); review 1 (A 1); interview 1 (R 1)
+PASS I5-PRE-01: 2+ hints, 2-5 keys (2), 1-2 'for a 4' (1), 1-3 wrong answers (2)
+PASS I5-PRE-01: one short question sentence (22 words), data after it
+PASS I5-PRE-02: 2+ hints, 2-5 keys (2), 1-2 'for a 4' (1), 1-3 wrong answers (2)
+PASS I5-PRE-02: one short question sentence (18 words), data after it
+PASS I5-R-01: 2+ hints, 2-5 keys (3), 1-2 'for a 4' (1), 1-3 wrong answers (2)
+PASS I5-R-01: one short question sentence (17 words), data after it
+PASS I5-R-02: 2+ hints, 2-5 keys (3), 1-2 'for a 4' (1), 1-3 wrong answers (2)
+PASS I5-R-02: one short question sentence (19 words), data after it
+PASS I5-R-03: 2+ hints, 2-5 keys (3), 1-2 'for a 4' (1), 1-3 wrong answers (2)
+PASS I5-R-03: one short question sentence (16 words), data after it
+PASS I5-R-04: 2+ hints, 2-5 keys (3), 1-2 'for a 4' (1), 1-3 wrong answers (2)
+PASS I5-R-04: one short question sentence (16 words), data after it
+PASS I5-R-05: 2+ hints, 2-5 keys (3), 1-2 'for a 4' (1), 1-3 wrong answers (2)
+PASS I5-R-05: one short question sentence (10 words), data after it
+PASS I5-R-06: 2+ hints, 2-5 keys (4), 1-2 'for a 4' (1), 1-3 wrong answers (2)
+PASS I5-R-06: one short question sentence (17 words), data after it
+PASS I5-A-01: 2+ hints, 2-5 keys (3), 1-2 'for a 4' (1), 1-3 wrong answers (2)
+PASS I5-A-01: Hint 3 only on an A item
+PASS I5-A-01: one short question sentence (26 words), data after it
+PASS I5-A-02: 2+ hints, 2-5 keys (3), 1-2 'for a 4' (1), 1-3 wrong answers (2)
+PASS I5-A-02: Hint 3 only on an A item
+PASS I5-A-02: one short question sentence (18 words), data after it
+PASS I5-A-03: 2+ hints, 2-5 keys (3), 1-2 'for a 4' (1), 1-3 wrong answers (2)
+PASS I5-A-03: Hint 3 only on an A item
+PASS I5-A-03: one short question sentence (19 words), data after it
+PASS I5-A-04: 2+ hints, 2-5 keys (3), 1-2 'for a 4' (1), 1-3 wrong answers (2)
+PASS I5-A-04: Hint 3 only on an A item
+PASS I5-A-04: one short question sentence (20 words), data after it
+PASS I5-A-05: 2+ hints, 2-5 keys (3), 1-2 'for a 4' (1), 1-3 wrong answers (2)
+PASS I5-A-05: Hint 3 only on an A item
+PASS I5-A-05: one short question sentence (22 words), data after it
+PASS I5-A-06: 2+ hints, 2-5 keys (3), 1-2 'for a 4' (1), 1-3 wrong answers (2)
+PASS I5-A-06: Hint 3 only on an A item
+PASS I5-A-06: one short question sentence (19 words), data after it
+PASS I5-T-01: 2+ hints, 2-5 keys (3), 1-2 'for a 4' (1), 1-3 wrong answers (2)
+PASS I5-T-01: one short question sentence (19 words), data after it
+PASS I5-T-02: 2+ hints, 2-5 keys (3), 1-2 'for a 4' (1), 1-3 wrong answers (2)
+PASS I5-T-02: one short question sentence (27 words), data after it
+PASS I5-T-03: 2+ hints, 2-5 keys (3), 1-2 'for a 4' (1), 1-3 wrong answers (2)
+PASS I5-T-03: one short question sentence (19 words), data after it
+PASS I5-T-04: 2+ hints, 2-5 keys (3), 1-2 'for a 4' (1), 1-3 wrong answers (2)
+PASS I5-T-04: one short question sentence (25 words), data after it
+PASS I5-R-07: 2+ hints, 2-5 keys (4), 1-2 'for a 4' (1), 1-3 wrong answers (2)
+PASS every A item has a Hint 3 (worked step)
+PASS at most 2 external items; only I5-R-07 is external (1)
+PASS I5-R-07: set=interview, source=AIQ-04-Q17
+PASS I5-R-07: the question field is the spec's verbatim question, then the spec's MIT notice line
+PASS I5-R-07: the quoted question is verbatim in the repo (heading of Q17)
+PASS I5-R-07: the 4 quoted repo paragraphs (297 words) are exact substrings of Q17 in the pinned file, with the MIT notice
+PASS I5-R-07: the quote includes the 'unconditionally' recommendation our check corrects
+PASS I5-R-07: the repo's answer comes first, then our check, then **Model answer:**
+PASS I5-R-07: our check adds the Corpus D finding (title constant 1 of 97; heading rule matters on chunk 68)
+     note: the interview question is verbatim; the one-sentence rule is not applied to it
+PASS I5-A-03: both Paris paths in the answer equal K3's measured paths
+PASS reading §4: both Paris paths equal K3's measured paths
+PASS I5-A-05: start and majority paths of chunk 68 equal K4
+PASS chunk 34 counter-case (K4): start names blockchain, majority does not; taught in the reading and in I5-A-05's 'for a 4'
+PASS I5-A-01: 209 fits, 282 is over by 26 (recomputed; equals K6)
+PASS I5-A-02: cost recomputed (uncached $0.1367, cached $0.0261, 5.2x) and equal to K11
+PASS I5-A-04: −2.0 points / −35.1% recomputed and equal to K15
+PASS I5-A-06: s = 0.112 / 0.229 recomputed and equal to K6
+PASS I5-PRE-01: reread links to the reading file AND the lesson, plus a book page Ch7 p.x/11
+PASS I5-PRE-01: reread names the reading section(s) and lesson step(s) the spec says teach it (§[1])
+PASS I5-PRE-02: reread links to the reading file AND the lesson, plus a book page Ch7 p.x/11
+PASS I5-PRE-02: reread names the reading section(s) and lesson step(s) the spec says teach it (§[6])
+PASS I5-R-01: reread links to the reading file AND the lesson, plus a book page Ch7 p.x/11
+PASS I5-R-01: reread names the reading section(s) and lesson step(s) the spec says teach it (§[1])
+PASS I5-R-02: reread links to the reading file AND the lesson, plus a book page Ch7 p.x/11
+PASS I5-R-02: reread names the reading section(s) and lesson step(s) the spec says teach it (§[6])
+PASS I5-R-03: reread links to the reading file AND the lesson, plus a book page Ch7 p.x/11
+PASS I5-R-03: reread names the reading section(s) and lesson step(s) the spec says teach it (§[2])
+PASS I5-R-04: reread links to the reading file AND the lesson, plus a book page Ch7 p.x/11
+PASS I5-R-04: reread names the reading section(s) and lesson step(s) the spec says teach it (§[2])
+PASS I5-R-05: reread links to the reading file AND the lesson, plus a book page Ch7 p.x/11
+PASS I5-R-05: reread names the reading section(s) and lesson step(s) the spec says teach it (§[12])
+PASS I5-R-06: reread links to the reading file AND the lesson, plus a book page Ch7 p.x/11
+PASS I5-R-06: reread names the reading section(s) and lesson step(s) the spec says teach it (§[11])
+PASS I5-A-01: reread links to the reading file AND the lesson, plus a book page Ch7 p.x/11
+PASS I5-A-01: reread names the reading section(s) and lesson step(s) the spec says teach it (§[8])
+PASS I5-A-02: reread links to the reading file AND the lesson, plus a book page Ch7 p.x/11
+PASS I5-A-02: reread names the reading section(s) and lesson step(s) the spec says teach it (§[10, 11])
+PASS I5-A-03: reread links to the reading file AND the lesson, plus a book page Ch7 p.x/11
+PASS I5-A-03: reread names the reading section(s) and lesson step(s) the spec says teach it (§[4])
+PASS I5-A-04: reread links to the reading file AND the lesson, plus a book page Ch7 p.x/11
+PASS I5-A-04: reread names the reading section(s) and lesson step(s) the spec says teach it (§[12, 9])
+PASS I5-A-05: reread links to the reading file AND the lesson, plus a book page Ch7 p.x/11
+PASS I5-A-05: reread names the reading section(s) and lesson step(s) the spec says teach it (§[5])
+PASS I5-A-06: reread links to the reading file AND the lesson, plus a book page Ch7 p.x/11
+PASS I5-A-06: reread names the reading section(s) and lesson step(s) the spec says teach it (§[7])
+PASS I5-T-01: reread links to the reading file AND the lesson, plus a book page Ch7 p.x/11
+PASS I5-T-01: reread names the reading section(s) and lesson step(s) the spec says teach it (§[7, 9])
+PASS I5-T-02: reread links to the reading file AND the lesson, plus a book page Ch7 p.x/11
+PASS I5-T-02: reread names the reading section(s) and lesson step(s) the spec says teach it (§[11])
+PASS I5-T-03: reread links to the reading file AND the lesson, plus a book page Ch7 p.x/11
+PASS I5-T-03: reread names the reading section(s) and lesson step(s) the spec says teach it (§[10])
+PASS I5-T-04: reread links to the reading file AND the lesson, plus a book page Ch7 p.x/11
+PASS I5-T-04: reread names the reading section(s) and lesson step(s) the spec says teach it (§[9])
+PASS I5-R-07: reread links to the reading file AND the lesson, plus a book page Ch7 p.x/11
+PASS I5-R-07: reread names the reading section(s) and lesson step(s) the spec says teach it (§[1, 6, 10])
+PASS question file: 50 links resolve (48 with #anchors; 24 into the lesson, checked against its id="..." attributes)
+PASS reading file: 4 links resolve (0 with #anchors; 1 into the lesson, checked against its id="..." attributes)
+PASS the lesson has the 12 step ids of spec §3 (anon, fields, tree, path, assign, info, dilute, trunc, measure, llm, cache, claims)
+PASS 0 links from other workspace .md files into the two I5 kit files resolve
+     word count: reading file 4018 (prose only, code blocks removed: 2980); question file 7297
+PASS reading file prose within 1,800-3,000 words (2980)
+PASS reading file header line and title (spec §5)
+PASS reading file has What this is / is not and Check yourself (FORMAT §3)
+PASS book box as the spec gives it
+PASS the ## headings are exactly the spec's 1-13 + Check yourself, in order
+PASS their GitHub anchors equal the spec's §3 anchor list
+PASS house style: sections 1-12 each have setup / result / what this means / for your project ({'setup': 12, 'result': 12, 'means': 12, 'project': 12})
+PASS the tempting wrong idea vs the right one, at least 3 times
+PASS Check yourself links the question file
+PASS Check yourself states the right item counts per set
+PASS MiniLM rule: K16 was skipped, the reading says 'run the verify notebook', and no margin/τ number is stated
+PASS 8 distinct book pages cited, all Ch7 p.x/11 within the spec's page list [1, 2, 4, 5, 6, 7, 8, 9]
+SKIPPED each cited book page exists with the right page count: book folder not present (/home/user/RAG_Made_Simple_The_Complete_Visual_Guide); Ch7 pages are UNVERIFIED in this session (I5_FACTS §2)
+SKIPPED question file: no 15-word run shared with the book: book folder not present (/home/user/RAG_Made_Simple_The_Complete_Visual_Guide); Ch7 pages are UNVERIFIED in this session (I5_FACTS §2)
+SKIPPED reading file: no 15-word run shared with the book: book folder not present (/home/user/RAG_Made_Simple_The_Complete_Visual_Guide); Ch7 pages are UNVERIFIED in this session (I5_FACTS §2)
+PASS question file: outside the marked verbatim quotes, no 15-word run shared with the AIQ file (longest: <6 words)
+PASS reading file: outside the marked verbatim quotes, no 15-word run shared with the AIQ file (longest: <6 words)
+PASS every decimal and every integer >= 10 matches a number in out_i5_kit_measure.txt or I5_FACTS.md, or the EXTERNAL (2) / DERIVED (15) list
+PASS 28 key numbers of spec §3 are printed by i5_kit_measure.py or listed in I5_FACTS
+PASS each key number is quoted in the reading file
+PASS none of the 14 coach-banned phrases appears ({'I5_questions.md': [], 'I5_contextual_headers.md': []})
+     quiz.py --check: OK   C1_questions.md: 15 questions | OK   I5_questions.md: 19 questions | OK   P1_questions.md: 21 questions | OK   P2_questions.md: 17 questions | OK   P3_questions.md: 18 questions | OK   P4_questions.md: 21 questions | OK   R1_questions.md: 17 questions | 7/7 files pass
+PASS study/quiz.py --check passes for I5 (OK   I5_questions.md: 19 questions)
+PASS study/quiz.py --check exits 0 for all files (exit 0)
+
+133 checks: 130 passed / 0 failed / 3 skipped
+ALL PASS (3 skipped, reasons above)
