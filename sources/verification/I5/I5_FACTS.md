@@ -205,6 +205,7 @@ What it shows: a small share barely moves a chunk vector. A large shared header 
 | Book Ch7 pages (p.1–2, p.4, p.7, p.8, p.8–9/11) | UNVERIFIED in this session (book not present); taken from 02/04 as the research did. I5-E7 (step/page order) stays open |
 | WordPiece / o200k token counts in K3, K6, K11 | DERIVED from the measured ratios named in §0 |
 | MiniLM margins and retrieval per arm | not measured (K16 skipped) |
+| MiniLM **no-header baseline** on the same 97 chunks and 8 answerable seeds: first relevant ranks D-001…D-008 [3, 3, 1, 1, 1, 1, 2, 2], Hit@4 8/8, MRR@10 **0.708**; D-002's gold chunk at rank 3 | CITED, `P4_FACTS.md` K4 (measured 2026-10-18 on Yash's machine). I5's `none` arm embeds exactly `text`, so it is the same run; the verify notebook checks it when MiniLM is cached. CE@4 for it was not recorded |
 
 ## 3. Notes for 02, 04, 06 (not edited; recorded here)
 

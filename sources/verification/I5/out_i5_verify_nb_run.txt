@@ -1,0 +1,8 @@
+SKIPPED  §6 how far the constant title moves each MiniLM vector: sentence-transformers/all-MiniLM-L6-v2 is not in the local Hugging Face cache (LocalEntryNotFoundError); this notebook never downloads. Run it where the model is cached
+SKIPPED  §8 exact WordPiece token counts per arm (none / title / path / major): sentence-transformers/all-MiniLM-L6-v2 is not in the local Hugging Face cache (LocalEntryNotFoundError); this notebook never downloads. Run it where the model is cached
+SKIPPED  §9 MiniLM retrieval per arm (Hit@4 / CE@4 / MRR@10 on the 8 answerable draft seeds): sentence-transformers/all-MiniLM-L6-v2 is not in the local Hugging Face cache (LocalEntryNotFoundError); this notebook never downloads. Run it where the model is cached
+SKIPPED  §9 D-002 / D-003 gold-vs-best-distractor margins per arm and the margin dumbbell chart: sentence-transformers/all-MiniLM-L6-v2 is not in the local Hugging Face cache (LocalEntryNotFoundError); this notebook never downloads. Run it where the model is cached
+SKIPPED  §9 Kendall tau between the none and title rankings: sentence-transformers/all-MiniLM-L6-v2 is not in the local Hugging Face cache (LocalEntryNotFoundError); this notebook never downloads. Run it where the model is cached
+cells with errors: 0
+Plotly figures saved: 7; runtime 2.7 s; file study/notebooks/I5_headers_verify.ipynb 182 KiB
+101 passed / 0 failed / 5 skipped
