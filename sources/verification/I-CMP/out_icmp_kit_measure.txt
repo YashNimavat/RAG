@@ -1,0 +1,204 @@
+
+=== K1 environment and corpus ===
+python 3.12.3
+pymupdf 1.26.7
+numpy 2.5.3
+tiktoken 0.14.0
+tokenizers 0.23.2
+transformers 5.19.0
+sentence-transformers 6.1.0
+torch 2.14.1
+pdf sha256 1d58a0fac2435c2ce4129ff84906b93118d731e4a004e7a26f8ab8f749a92669 bytes 206372
+pages 33 chars 72593 page length min 636 / median 2225 / p95 2468 / max 2494 / mean 2198.8
+gpt2 encoding loaded as r50k_base
+
+=== K2 units ===
+WordPiece (no specials): 11694 tokens = 6.21 chars/token
+cl100k_base: 13026 tokens = 5.57 chars/token
+gpt2: 14375 tokens = 5.05 chars/token
+o200k_harmony: 12840 tokens = 5.65 chars/token
+regex words \b\w+\b: 9406 = 7.72 chars/word
+I3 regex sentences (document scope): 612 chars min 47 / median 111 / p95 189 / max 300 / mean 117.2
+segments under 20 chars: 0
+I6a document-level windows 4000/100 words: 3 · fragments 128/16 words: 84
+I4 base chunks, gpt2-token windows 200/50 (from_tiktoken_encoder-style count): 96
+
+=== K3 heading tree (size + bold) ===
+headings by level: {'title': 1, 'chapter': 21, 'section': 68, 'sub': 192} total 282
+bold at body size (12 pt): 192 of 281 below the title = 68%
+heading names that repeat: 11
+   carbon capture and utilization [('section', 8), ('section', 23)]
+   carbon utilization [('sub', 8), ('sub', 23)]
+   international agreements [('sub', 6), ('section', 23)]
+   international collaboration [('section', 10), ('sub', 16)]
+   marine ecosystems [('sub', 5), ('sub', 13)]
+   nature-based solutions [('sub', 14), ('section', 26)]
+   paris agreement [('sub', 10), ('sub', 23)]
+   policy and governance [('section', 12), ('sub', 18)]
+   research and innovation [('section', 7), ('sub', 16)]
+   smart grids [('sub', 8), ('sub', 22)]
+   youth engagement [('sub', 13), ('sub', 32)]
+headings located in doc_text: 282 of 282
+headings glued inside an I3 regex sentence (not at its start): 75 of 282
+
+=== K4 arms and size distributions ===
+I3 probe: 612 sentence windows embedded, 611 distances, threshold (p90) 0.2768, 61 breakpoints -> 62 chunks
+v0 recursive 1000/200 per page: N 97
+   chars min 393 / median 935 / p95 996 / max 1000 / mean 857.9
+   WordPiece incl. specials min 59 / median 149 / p95 174 / max 182 / mean 140.1
+   o200k_harmony min 68 / median 162 / p95 188 / max 192 / mean 151.7 · cl100k mean 153.9
+   over 256 (MiniLM cap): 0 = 0.0% · over 128: 70 · over 512: 0 · chars past the 256 cap: 0
+   stored chars / doc chars 1.146 · units crossing a page break 0
+   index bytes: 384-d 149,120 · 1536-d 596,096
+I1 grid 500/100: N 201
+   chars min 94 / median 449 / p95 496 / max 500 / mean 431.1
+   WordPiece incl. specials min 17 / median 74 / p95 90 / max 99 / mean 71.4
+   o200k_harmony min 14 / median 79 / p95 95 / max 107 / mean 76.0 · cl100k mean 77.2
+   over 256 (MiniLM cap): 0 = 0.0% · over 128: 0 · over 512: 0 · chars past the 256 cap: 0
+   stored chars / doc chars 1.194 · units crossing a page break 0
+   index bytes: 384-d 308,864 · 1536-d 1,235,072
+I1 grid 1500/300: N 65
+   chars min 636 / median 1303 / p95 1487 / max 1500 / mean 1242.3
+   WordPiece incl. specials min 109 / median 215 / p95 260 / max 270 / mean 202.3
+   o200k_harmony min 115 / median 231 / p95 277 / max 290 / mean 219.8 · cl100k mean 222.9
+   over 256 (MiniLM cap): 4 = 6.2% · over 128: 63 · over 512: 0 · chars past the 256 cap: 184
+   stored chars / doc chars 1.112 · units crossing a page break 0
+   index bytes: 384-d 99,968 · 1536-d 399,488
+I1 grid 2000/400: N 65
+   chars min 393 / median 953 / p95 1997 / max 2000 / mean 1290.5
+   WordPiece incl. specials min 59 / median 160 / p95 357 / max 365 / mean 209.5
+   o200k_harmony min 67 / median 177 / p95 372 / max 397 / mean 228.3 · cl100k mean 231.6
+   over 256 (MiniLM cap): 32 = 49.2% · over 128: 38 · over 512: 0 · chars past the 256 cap: 12333
+   stored chars / doc chars 1.155 · units crossing a page break 0
+   index bytes: 384-d 99,968 · 1536-d 399,488
+page (one unit per page): N 33
+   chars min 636 / median 2225 / p95 2468 / max 2494 / mean 2198.8
+   WordPiece incl. specials min 109 / median 354 / p95 438 / max 443 / mean 356.4
+   o200k_harmony min 115 / median 392 / p95 478 / max 486 / mean 389.1 · cl100k mean 394.7
+   over 256 (MiniLM cap): 32 = 97.0% · over 128: 32 · over 512: 0 · chars past the 256 cap: 21439
+   stored chars / doc chars 1.000 · units crossing a page break 0
+   index bytes: 384-d 50,816 · 1536-d 202,880
+sections, uncapped (chapter + section headings): N 90
+   chars min 30 / median 992 / p95 1328 / max 1898 / mean 806.6
+   WordPiece incl. specials min 5 / median 156 / p95 223 / max 358 / mean 131.9
+   o200k_harmony min 4 / median 170 / p95 235 / max 382 / mean 142.7 · cl100k mean 144.7
+   over 256 (MiniLM cap): 1 = 1.1% · over 128: 62 · over 512: 0 · chars past the 256 cap: 565
+   stored chars / doc chars 1.000 · units crossing a page break 28
+   index bytes: 384-d 138,368 · 1536-d 553,088
+I3 probe: semantic, MiniLM, p90, uncapped: N 62
+   chars min 78 / median 812.5 / p95 2905 / max 4029 / mean 1169.6
+   WordPiece incl. specials min 14 / median 131.5 / p95 456 / max 686 / mean 190.6
+   o200k_harmony min 12 / median 143 / p95 502 / max 769 / mean 207.0 · cl100k mean 210.1
+   over 256 (MiniLM cap): 18 = 29.0% · over 128: 31 · over 512: 3 · chars past the 256 cap: 15246
+   stored chars / doc chars 0.999 · units crossing a page break 28
+   index bytes: 384-d 95,360 · 1536-d 381,056
+
+=== K5 deterministic I5 header on v0's chunks ===
+title header distinct values: 1 of 97
+path header (title > chapter > section at the chunk start) distinct values: 71 of 97
+example (seq 27): Understanding Climate Change > Chapter 6: Global and Local Climate Action
+path header WordPiece tokens min 3 / median 15 / p95 22 / max 23 / mean 15.5 · share h/(h+c) mean 0.103 max 0.181
+chunks over 256 after prepending the path: 0
+embeds needed: all 97 (new text = new cache keys); LLM calls 0
+
+=== K6 retrieval on the 8 answerable draft seeds (observation, not a result) ===
+seeds 10 answerable 8 ['D-001', 'D-002', 'D-003', 'D-004', 'D-005', 'D-006', 'D-007', 'D-008']
+v0 top-4 context o200k_harmony tokens per seed: [696, 644, 644, 610, 730, 642, 700, 702] -> B = mean = 671
+v0 recursive 1000/200 per page:
+   first relevant rank [3, 3, 1, 1, 1, 1, 2, 2] · Hit@4 8/8 · MRR@10 0.708
+   fixed k=4: CE@4 [1, 1, 1, 1, 1, 1, 1, 1] = 8/8 · Span-Coverage@4 mean 1.000 · context tokens mean 671 · unique chars mean 3412
+   equal budget B=671: k per seed [3, 4, 4, 4, 3, 4, 3, 3] (mean 3.50) · CE@B [1, 1, 1, 1, 1, 1, 1, 1] = 8/8 · realized tokens mean 589 (min 526, max 644) · unique chars mean 3030
+   largest unit 192 o200k tokens; B >= largest unit: True
+I1 grid 500/100:
+   first relevant rank [1, 1, 2, 1, 2, 1, 4, 1] · Hit@4 8/8 · MRR@10 0.781
+   fixed k=4: CE@4 [1, 1, 1, 1, 1, 1, 0, 1] = 7/8 · Span-Coverage@4 mean 0.938 · context tokens mean 323 · unique chars mean 1611
+   equal budget B=671: k per seed [8, 8, 8, 8, 7, 7, 8, 8] (mean 7.75) · CE@B [1, 1, 1, 1, 1, 1, 1, 1] = 8/8 · realized tokens mean 614 (min 575, max 641) · unique chars mean 3097
+   largest unit 107 o200k tokens; B >= largest unit: True
+I1 grid 1500/300:
+   first relevant rank [1, 3, 2, 1, 1, 1, 2, 2] · Hit@4 8/8 · MRR@10 0.729
+   fixed k=4: CE@4 [0, 1, 1, 1, 1, 1, 1, 1] = 7/8 · Span-Coverage@4 mean 0.899 · context tokens mean 934 · unique chars mean 4979
+   equal budget B=671: k per seed [2, 2, 3, 3, 2, 2, 2, 2] (mean 2.25) · CE@B [0, 0, 1, 1, 1, 1, 0, 1] = 5/8 · realized tokens mean 525 (min 445, max 644) · unique chars mean 2840
+   largest unit 290 o200k tokens; B >= largest unit: True
+I1 grid 2000/400:
+   first relevant rank [16, 4, 1, 2, 1, 1, 2, 2] · Hit@4 7/8 · MRR@10 0.594
+   fixed k=4: CE@4 [0, 1, 1, 1, 1, 1, 1, 1] = 7/8 · Span-Coverage@4 mean 0.875 · context tokens mean 1022 · unique chars mean 5466
+   equal budget B=671: k per seed [3, 3, 3, 3, 2, 2, 2, 1] (mean 2.38) · CE@B [0, 0, 1, 1, 1, 1, 0, 0] = 4/8 · realized tokens mean 551 (min 333, max 671) · unique chars mean 2999
+   largest unit 397 o200k tokens; B >= largest unit: True
+page (one unit per page):
+   first relevant rank [7, 2, 29, 13, 1, 1, 2, 2] · Hit@4 5/8 · MRR@10 0.455
+   fixed k=4: CE@4 [0, 1, 0, 0, 1, 1, 1, 1] = 5/8 · Span-Coverage@4 mean 0.625 · context tokens mean 1590 · unique chars mean 8954
+   equal budget B=671: k per seed [1, 1, 1, 1, 1, 1, 1, 1] (mean 1.00) · CE@B [0, 0, 0, 0, 1, 1, 0, 0] = 2/8 · realized tokens mean 420 (min 372, max 486) · unique chars mean 2299
+   largest unit 486 o200k tokens; B >= largest unit: True
+sections, uncapped (chapter + section headings):
+   first relevant rank [2, 2, 2, 1, 1, 1, 2, 8] · Hit@4 7/8 · MRR@10 0.641
+   fixed k=4: CE@4 [1, 1, 1, 1, 1, 1, 1, 0] = 7/8 · Span-Coverage@4 mean 0.875 · context tokens mean 620 · unique chars mean 3328
+   equal budget B=671: k per seed [16, 3, 3, 4, 2, 3, 3, 7] (mean 5.12) · CE@B [1, 1, 1, 1, 1, 1, 1, 0] = 7/8 · realized tokens mean 563 (min 480, max 640) · unique chars mean 3003
+   largest unit 382 o200k tokens; B >= largest unit: True
+I3 probe: semantic, MiniLM, p90, uncapped:
+   first relevant rank [1, 3, 1, 1, 1, 2, 2, 9] · Hit@4 7/8 · MRR@10 0.681
+   fixed k=4: CE@4 [1, 1, 1, 1, 0, 1, 1, 0] = 6/8 · Span-Coverage@4 mean 0.812 · context tokens mean 817 · unique chars mean 4453
+   equal budget B=671: k per seed [0, 3, 2, 4, 4, 5, 2, 2] (mean 2.75) · CE@B [0, 1, 1, 1, 0, 1, 0, 0] = 4/8 · realized tokens mean 473 (min 0, max 651) · unique chars mean 2589
+   largest unit 769 o200k tokens; B >= largest unit: False
+
+=== K7 paired comparison with v0 on the seeds (CE@4, fixed k and equal budget) ===
+ce4 I1 grid 500/100: b (v0 only) 1, c (arm only) 0, Δ -0.125, bootstrap 95% CI [-0.375, +0.000] (CI spans 0), exact McNemar two-sided p 1.0000
+ce4 I1 grid 1500/300: b (v0 only) 1, c (arm only) 0, Δ -0.125, bootstrap 95% CI [-0.375, +0.000] (CI spans 0), exact McNemar two-sided p 1.0000
+ce4 I1 grid 2000/400: b (v0 only) 1, c (arm only) 0, Δ -0.125, bootstrap 95% CI [-0.375, +0.000] (CI spans 0), exact McNemar two-sided p 1.0000
+ce4 page (one unit per page): b (v0 only) 3, c (arm only) 0, Δ -0.375, bootstrap 95% CI [-0.750, -0.125] (CI below 0), exact McNemar two-sided p 0.2500
+ce4 sections, uncapped (chapter + section headings): b (v0 only) 1, c (arm only) 0, Δ -0.125, bootstrap 95% CI [-0.375, +0.000] (CI spans 0), exact McNemar two-sided p 1.0000
+ce4 I3 probe: semantic, MiniLM, p90, uncapped: b (v0 only) 2, c (arm only) 0, Δ -0.250, bootstrap 95% CI [-0.500, +0.000] (CI spans 0), exact McNemar two-sided p 0.5000
+ceB I1 grid 500/100: b (v0 only) 0, c (arm only) 0, Δ +0.000, bootstrap 95% CI [+0.000, +0.000] (CI spans 0), exact McNemar two-sided p 1.0000
+ceB I1 grid 1500/300: b (v0 only) 3, c (arm only) 0, Δ -0.375, bootstrap 95% CI [-0.750, -0.125] (CI below 0), exact McNemar two-sided p 0.2500
+ceB I1 grid 2000/400: b (v0 only) 4, c (arm only) 0, Δ -0.500, bootstrap 95% CI [-0.875, -0.125] (CI below 0), exact McNemar two-sided p 0.1250
+ceB page (one unit per page): b (v0 only) 6, c (arm only) 0, Δ -0.750, bootstrap 95% CI [-1.000, -0.500] (CI below 0), exact McNemar two-sided p 0.0312
+ceB sections, uncapped (chapter + section headings): b (v0 only) 1, c (arm only) 0, Δ -0.125, bootstrap 95% CI [-0.375, +0.000] (CI spans 0), exact McNemar two-sided p 1.0000
+ceB I3 probe: semantic, MiniLM, p90, uncapped: b (v0 only) 4, c (arm only) 0, Δ -0.500, bootstrap 95% CI [-0.875, -0.125] (CI below 0), exact McNemar two-sided p 0.1250
+MDE at n = 8, b + c = 4: 2.8*sqrt(4)/8 = 0.7
+
+=== K8 comparability: a subset run against the full run ===
+full vs subset: REFUSED: comparison key differs: qids
+subset vs champion rerun on the subset qids (order reversed): True
+
+=== K9 family statistics (FORMULA) ===
+FWER at alpha 0.05, m = 1: 0.0500
+FWER at alpha 0.05, m = 3: 0.1426
+FWER at alpha 0.05, m = 5: 0.2262
+FWER at alpha 0.05, m = 12: 0.4596
+FWER at alpha 0.05, m = 37: 0.8501
+FWER at alpha 0.05, m = 48: 0.9147
+Holm thresholds, 3 arms:  [0.0167, 0.025, 0.05]
+Holm on toy p-values {'A2': (0.012, 0.0167, 'reject H0'), 'A1': (0.03, 0.025, 'keep H0'), 'A3': (0.2, 0.05, 'keep H0')}
+Bonferroni on the same toy: threshold 0.0167 {'A1': 'keep', 'A2': 'reject', 'A3': 'keep'}
+MDE ≈ 2.8*sqrt(b+c)/n, n = 12, b + c = 4: 0.4667
+MDE ≈ 2.8*sqrt(b+c)/n, n = 16, b + c = 4: 0.3500
+MDE ≈ 2.8*sqrt(b+c)/n, n = 12, b + c = 9: 0.7000
+MDE ≈ 2.8*sqrt(b+c)/n, n = 40, b + c = 9: 0.2100
+MDE ≈ 2.8*sqrt(b+c)/n, n = 8, b + c = 4: 0.7000
+one item on n = 12 moves CE by 0.0833
+
+=== K10 cost ladder on Corpus D (DERIVED from the counts above; prices LLMOPS §6.2, checked 2026-10-17) ===
+N v0 chunks 97; S sentences 612; doc cl100k tokens 13026; mean chunk cl100k 153.9
+I3: embeds S + N = 612 + 97 = 709; Cohere calls at 96 texts each ceil(S/96) + ceil(N/96) = 9
+I4 (ASSUMPTION 10 propositions per 200-gpt2-token chunk): generate calls 96, grade calls per proposition 960, total 1056; embeds 960; vectors 960; bytes 1536-d 5,898,368
+I5 deterministic header: LLM calls 0; embeds 97
+I5 per-chunk context (whole document in each call): calls 97; input tokens ≈ 97 × (13026 + 154 + 100) = 1,288,153
+   Groq gpt-oss-20b at $0.075/M: $0.097 · Haiku 5.5 at $0.10/M: $0.129 · one request ≈ 13,280 tokens vs an 8,000 TPM limit: fits = False
+I6a input tokens ≈ Σ window cl100k tokens 13,320 + 3 × 100 = 13,620
+I6b HyPE input tokens ≈ 97 × (154 + 100) = 24,631
+I6a document level: LLM calls 3 (one per 4,000-word window); fragments 84; questions 40 per window -> 120; vectors 84 + 120 = 204
+I6b HyPE: LLM calls 97; q = 5 questions per chunk -> vectors 485; bytes 1536-d 2,979,968; 384-d 745,088
+I6b HyPE: LLM calls 97; q = 8 questions per chunk -> vectors 776; bytes 1536-d 4,767,872; 384-d 1,192,064
+v0 index bytes at 1536-d 596,096 (C3 S6: 596,096)
+
+=== K11 I6 (index-time) vs Q2 (query-time) calls (FORMULA) ===
+Q_total 50, rebuilds 1: index-side 97 calls vs query-side 50 -> cheaper: query-side
+Q_total 500, rebuilds 1: index-side 97 calls vs query-side 500 -> cheaper: index-side
+Q_total 500, rebuilds 12: index-side 1164 calls vs query-side 500 -> cheaper: query-side
+Q_total 5000, rebuilds 12: index-side 1164 calls vs query-side 5000 -> cheaper: index-side
+with replay caching, repeated eval runs of either cost 0 new calls
+
+=== K12 TOY: duplicate parents and the budget ===
+no dedup, B = 640: ['P3', 'P3', 'P7'] used 480 distinct 2
+dedup parents first, B = 640: ['P3', 'P7', 'P1', 'P2'] used 620 distinct 4
+
+DONE

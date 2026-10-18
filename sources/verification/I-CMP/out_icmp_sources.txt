@@ -1,0 +1,73 @@
+PASS climate PDF sha256 1d58a0fa…
+PASS simple_rag cell 10 contains 'def encode_pdf(path, chunk_size=1000, chunk_overlap=200)'
+PASS simple_rag cell 10 contains 'RecursiveCharacterTextSplitter('
+PASS simple_rag cell 10 contains 'length_function=len'
+PASS simple_rag cell 10 contains 'PyPDFLoader(path)'
+PASS simple_rag cell 13 contains 'search_kwargs={"k": 2}'
+PASS helper_functions.py L48 is def encode_pdf
+PASS helper_functions.py L73 hardcodes OpenAIEmbeddings()
+PASS helper_functions.py L76 returns the vector store
+PASS choose_chunk_size cell 4 contains 'data_dir = "../data"'
+PASS choose_chunk_size cell 4 contains 'SimpleDirectoryReader(data_dir).load_data()'
+PASS choose_chunk_size cell 6 contains 'num_eval_questions = 25'
+PASS choose_chunk_size cell 6 contains 'documents[0:20]'
+PASS choose_chunk_size cell 8 contains 'model="gpt-4o"'
+PASS choose_chunk_size cell 8 contains 'Settings.llm = gpt4'
+PASS choose_chunk_size cell 10 contains 'OpenAI(model="gpt-3.5-turbo")'
+PASS choose_chunk_size cell 10 contains 'Settings.chunk_size = chunk_size'
+PASS choose_chunk_size cell 10 contains 'Settings.chunk_overlap = chunk_size // 5'
+PASS choose_chunk_size cell 12 contains 'chunk_sizes = [128, 256]'
+PASS semantic_chunking cell 10 contains 'read_pdf_to_string(path)'
+PASS semantic_chunking cell 12 contains 'SemanticChunker(OpenAIEmbeddings()'
+PASS semantic_chunking cell 12 contains "breakpoint_threshold_type='percentile'"
+PASS semantic_chunking cell 12 contains 'breakpoint_threshold_amount=90'
+PASS semantic_chunking cell 12 sets no size cap
+PASS semantic_chunking cell 14 contains 'create_documents([content])'
+PASS semantic_chunking cell 16 contains 'search_kwargs={"k": 2}'
+PASS proposition_chunking cell 7 contains 'Paul Graham'
+PASS proposition_chunking cell 7 contains 'sample_content = """'
+PASS proposition_chunking cell 9 contains 'from_tiktoken_encoder('
+PASS proposition_chunking cell 9 contains 'chunk_size=200, chunk_overlap=50'
+PASS proposition_chunking cell 9 contains 'nomic-embed-text:v1.5'
+PASS proposition_chunking cell 12 contains 'ChatGroq(model="llama-3.1-70b-versatile", temperature=0)'
+PASS proposition_chunking cell 15 contains 'ChatGroq(model="llama-3.1-70b-versatile", temperature=0)'
+PASS proposition_chunking cell 15 contains 'accuracy'
+PASS proposition_chunking cell 15 contains 'conciseness'
+PASS proposition_chunking cell 16 contains '"accuracy": 7, "clarity": 7, "completeness": 7, "conciseness": 7'
+PASS contextual_chunk_headers cell 8 contains 'nike_2023_annual_report.txt'
+PASS contextual_chunk_headers cell 9 contains 'chunk_size: int = 800'
+PASS contextual_chunk_headers cell 9 contains 'chunk_overlap=0'
+PASS contextual_chunk_headers cell 9 contains 'length_function=len'
+PASS contextual_chunk_headers cell 11 contains 'MAX_CONTENT_TOKENS = 4000'
+PASS contextual_chunk_headers cell 11 contains 'MODEL_NAME = "gpt-4o-mini"'
+PASS contextual_chunk_headers cell 13 contains 'MODEL = "rerank-english-v3.0"'
+PASS contextual_chunk_headers cell 15 contains 'KITE'
+PASS contextual_chunk_headers cell 15 contains '4 datasets and a total of 50 questions'
+PASS contextual_chunk_headers cell 15 reports 4.72 -> 6.04 (repo claim)
+PASS document_augmentation cell 4 defines DOCUMENT_LEVEL / FRAGMENT_LEVEL
+PASS document_augmentation cell 4 sets DOCUMENT_MAX_TOKENS = 4000
+PASS document_augmentation cell 4 sets DOCUMENT_OVERLAP_TOKENS = 100
+PASS document_augmentation cell 4 sets FRAGMENT_MAX_TOKENS = 128
+PASS document_augmentation cell 4 sets FRAGMENT_OVERLAP_TOKENS = 16
+PASS document_augmentation cell 4 sets QUESTIONS_PER_DOCUMENT = 40
+PASS document_augmentation cell 4 uses DOCUMENT_LEVEL
+PASS document_augmentation cell 6 split_document counts regex words
+PASS document_augmentation cell 10 contains 'split_document(content, DOCUMENT_MAX_TOKENS, DOCUMENT_OVERLAP_TOKENS)'
+PASS document_augmentation cell 10 retrieves k = 1
+PASS document_augmentation cell 13 contains 'read_pdf_to_string(path)'
+PASS HyPE_Hypothetical_Prompt_Embeddings cell 7 contains 'LANGUAGE_MODEL_NAME = "gpt-4o-mini"'
+PASS HyPE_Hypothetical_Prompt_Embeddings cell 7 contains 'EMBEDDING_MODEL_NAME = "text-embedding-3-small"'
+PASS HyPE_Hypothetical_Prompt_Embeddings cell 7 contains 'CHUNK_SIZE = 1000'
+PASS HyPE_Hypothetical_Prompt_Embeddings cell 7 contains 'CHUNK_OVERLAP = 200'
+PASS HyPE_Hypothetical_Prompt_Embeddings cell 9 contains 'temperature=0'
+PASS HyPE_Hypothetical_Prompt_Embeddings cell 9 contains 'generate essential questions'
+PASS HyPE cell 11 does not parse (SyntaxError as committed)
+PASS HyPE cell 15 saved output shows 97/97 chunks processed
+PASS HyPE retrieves k = 3 and deduplicates with set()
+PASS AIQ 04 Q4 heading
+PASS AIQ 04 Q4 semantic-chunking sentence
+PASS AIQ 04 Q4 follow-up
+PASS AIQ 04 Q4 heading-path example
+PASS AIQ LICENSE is MIT
+
+71/71 PASS — ALL PASS

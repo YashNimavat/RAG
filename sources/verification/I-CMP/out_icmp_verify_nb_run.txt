@@ -1,0 +1,4 @@
+cells with errors: 0
+Plotly figures saved: 6; runtime 23.2 s; file study/notebooks/I-CMP_granularity_verify.ipynb 166 KiB
+172 checks passed / 0 failed
+SKIPPED lines: 0

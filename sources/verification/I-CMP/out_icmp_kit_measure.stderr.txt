@@ -1,0 +1,7 @@
+[transformers] [1mBertModel LOAD REPORT[0m from: sentence-transformers/all-MiniLM-L6-v2
+Key                 | Status  | 
+--------------------+---------+-
+pooler.dense.bias   | MISSING | 
+pooler.dense.weight | MISSING | 
+Notes:
+- MISSING:	those params were newly initialized because missing from the checkpoint. Consider training on your downstream task.

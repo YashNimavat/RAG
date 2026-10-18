@@ -1,0 +1,1224 @@
+<!doctype html>
+<html lang="en" data-style="notebook" data-theme="light">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Granularity Family Compared</title>
+<meta name="description" content="I-CMP: the granularity family (fixed, structure, semantic, proposition chunking, headers, generated questions) compared on units, size spread, cost, equal token budget, honest table cells and family statistics. Short and full depths, seven themes, light and dark. Works offline.">
+<script>
+/* Apply saved choices before the page paints (no flash). Shared by every lesson. */
+(function () {
+  var d = document.documentElement, get = function (k) { try { return localStorage.getItem(k); } catch (e) { return null; } };
+  var p = new URLSearchParams(location.search), styles = ["reader", "hyper", "notebook", "textbook", "editor", "minimal", "catalogue"];
+  var dark = !!(window.matchMedia && window.matchMedia("(prefers-color-scheme: dark)").matches);
+  var pick = function (key, allowed, stored, dflt) { var v = p.get(key); return allowed.indexOf(v) >= 0 ? v : (allowed.indexOf(stored) >= 0 ? stored : dflt); };
+  d.dataset.style = pick("style", styles, get("lesson-style"), "notebook");
+  d.dataset.theme = pick("color", ["light", "dark"], get("lesson-color"), dark ? "dark" : "light");
+  d.dataset.toc = pick("toc", ["shown", "hidden"], get("lesson-toc"), "shown");
+  d.dataset.side = pick("side", ["left", "right"], get("lesson-side"), "left");
+})();
+</script>
+<style>
+/* ---------- themes: five styles, each light and dark. Colours and fonts live in variables. ---------- */
+:root{--content-w:800px;--f-mono:"Cascadia Mono",Consolas,ui-monospace,monospace;--radius:8px;--body-size:16.5px;--h-weight:650;--sec-pad:40px}
+:root[data-style="notebook"]{--f-head:"Segoe UI Variable Display","Segoe UI",system-ui,sans-serif;--f-body:"Segoe UI Variable Text","Segoe UI",system-ui,sans-serif;
+  --paper:#FFFFFF;--card:#F6F8FA;--side:#F6F8FA;--ink:#1F2328;--muted:#59636E;--line:#D1D9E0;--rule:#BFC8D2;--code:#F2F4F7;
+  --accent:#0969DA;--accent-soft:#DDF4FF;--dense:#8250DF;--dense-soft:#F4EDFF;--good:#1A7F37;--good-soft:#DAFBE1;--warn:#9A6700;--warn-soft:#FFF8C5;--bad:#CF222E;--bad-soft:#FFEBE9}
+:root[data-style="notebook"][data-theme="dark"]{--paper:#0D1117;--card:#161B22;--side:#010409;--ink:#E6EDF3;--muted:#9198A1;--line:#30363D;--rule:#3D444D;--code:#1B2129;
+  --accent:#4493F8;--accent-soft:#0C2D6B;--dense:#AB7DF8;--dense-soft:#2A1F45;--good:#3FB950;--good-soft:#12261E;--warn:#D29922;--warn-soft:#2E2410;--bad:#F85149;--bad-soft:#3A1418}
+:root[data-style="textbook"]{--f-head:Cambria,"Palatino Linotype",Georgia,serif;--f-body:Cambria,"Palatino Linotype",Georgia,serif;--body-size:17.5px;--radius:3px;--h-weight:700;
+  --paper:#FFFDF8;--card:#FFFFFF;--side:#FAF6EE;--ink:#1B1B1B;--muted:#5E5A55;--line:#E4DED3;--rule:#CFC6B6;--code:#F5F1E8;
+  --accent:#9E1B32;--accent-soft:#F7E4E7;--dense:#1F4E79;--dense-soft:#E3ECF5;--good:#2E6B3A;--good-soft:#E3F0E5;--warn:#8A5A00;--warn-soft:#FAF0D7;--bad:#9E1B32;--bad-soft:#F7E4E7}
+:root[data-style="textbook"][data-theme="dark"]{--paper:#1A1917;--card:#22201D;--side:#1F1D1A;--ink:#ECE7DE;--muted:#A8A196;--line:#3A3631;--rule:#4E4840;--code:#2A2723;
+  --accent:#E26D7E;--accent-soft:#3D1C22;--dense:#8DB4DE;--dense-soft:#1B2A3A;--good:#86C48F;--good-soft:#1C2D1F;--warn:#E0B65A;--warn-soft:#33290F;--bad:#E26D7E;--bad-soft:#3D1C22}
+:root[data-style="editor"]{--f-head:"Cascadia Code","Cascadia Mono",Consolas,monospace;--f-body:"Segoe UI",system-ui,sans-serif;--radius:4px;--h-weight:600;
+  --paper:#FFFFFF;--card:#F3F3F3;--side:#F3F3F3;--ink:#1E1E1E;--muted:#6E6E6E;--line:#E0E0E0;--rule:#CCCCCC;--code:#F8F8F8;
+  --accent:#005FB8;--accent-soft:#E5F0FB;--dense:#AF00DB;--dense-soft:#F7E6FB;--good:#008000;--good-soft:#E8F5E8;--warn:#795E26;--warn-soft:#FBF4E2;--bad:#A31515;--bad-soft:#FBE9E9}
+:root[data-style="editor"][data-theme="dark"]{--paper:#1E1E1E;--card:#252526;--side:#181818;--ink:#D4D4D4;--muted:#9D9D9D;--line:#3C3C3C;--rule:#4A4A4A;--code:#1A1A1A;
+  --accent:#569CD6;--accent-soft:#1B2B3A;--dense:#C586C0;--dense-soft:#33243A;--good:#6A9955;--good-soft:#1F2A1C;--warn:#DCDCAA;--warn-soft:#2E2E22;--bad:#CE9178;--bad-soft:#3A2820}
+:root[data-style="minimal"]{--f-head:"Segoe UI Variable Display","Segoe UI",system-ui,sans-serif;--f-body:Charter,"Bitstream Charter",Georgia,serif;--body-size:19px;--radius:12px;--h-weight:700;--sec-pad:60px;
+  --paper:#FFFFFF;--card:#FAFAFA;--side:#FFFFFF;--ink:#242424;--muted:#6B6B6B;--line:#EEEEEE;--rule:#E2E2E2;--code:#F6F6F6;
+  --accent:#1A8917;--accent-soft:#E9F5E9;--dense:#2F6FDB;--dense-soft:#EAF1FD;--good:#1A8917;--good-soft:#E9F5E9;--warn:#B26B00;--warn-soft:#FFF4E0;--bad:#C94A4A;--bad-soft:#FBECEC}
+:root[data-style="minimal"][data-theme="dark"]{--paper:#191919;--card:#202020;--side:#191919;--ink:#E6E6E6;--muted:#9B9B9B;--line:#2E2E2E;--rule:#3A3A3A;--code:#252525;
+  --accent:#5DBB63;--accent-soft:#1E2E20;--dense:#6EA8FE;--dense-soft:#1C2638;--good:#5DBB63;--good-soft:#1E2E20;--warn:#E3A33B;--warn-soft:#33270F;--bad:#E57373;--bad-soft:#3A1F1F}
+:root[data-style="catalogue"]{--f-head:"Iowan Old Style","Palatino Linotype","Book Antiqua",Palatino,Georgia,serif;--f-body:"Segoe UI",system-ui,sans-serif;--h-weight:700;
+  --paper:#FBF7EF;--card:#FFFDF8;--side:#F6F0E3;--ink:#231F18;--muted:#6B6457;--line:#E2D9C7;--rule:#C9BBA0;--code:#F1EBDD;
+  --accent:#B0431A;--accent-soft:#F6E2D6;--dense:#355C8C;--dense-soft:#E0E8F2;--good:#2D7549;--good-soft:#DDEFE2;--warn:#8F6200;--warn-soft:#F6EBCB;--bad:#B0431A;--bad-soft:#F6E2D6}
+:root[data-style="catalogue"][data-theme="dark"]{--paper:#16140F;--card:#1F1C16;--side:#1B1813;--ink:#EDE6D6;--muted:#A99F8D;--line:#38322A;--rule:#5A5040;--code:#29251D;
+  --accent:#F08B5E;--accent-soft:#3B2318;--dense:#8DB2E3;--dense-soft:#1C2939;--good:#7BCB97;--good-soft:#18301F;--warn:#E3B653;--warn-soft:#352A12;--bad:#F08B5E;--bad-soft:#3B2318}
+/* Reader themes: research-based reading typography (bundled OFL fonts, so they work offline).
+   Lines about 68 characters, line height about 1.7, off-white paper; dark mode on dark grey with off-white text (no pure black or white). */
+@font-face{font-family:"Literata";src:url("fonts/literata-latin-opsz-normal.woff2") format("woff2");font-weight:200 900;font-style:normal;font-display:swap}
+@font-face{font-family:"Literata";src:url("fonts/literata-latin-opsz-italic.woff2") format("woff2");font-weight:200 900;font-style:italic;font-display:swap}
+@font-face{font-family:"Atkinson Hyperlegible";src:url("fonts/atkinson-hyperlegible-latin-400-normal.woff2") format("woff2");font-weight:400;font-style:normal;font-display:swap}
+@font-face{font-family:"Atkinson Hyperlegible";src:url("fonts/atkinson-hyperlegible-latin-400-italic.woff2") format("woff2");font-weight:400;font-style:italic;font-display:swap}
+@font-face{font-family:"Atkinson Hyperlegible";src:url("fonts/atkinson-hyperlegible-latin-700-normal.woff2") format("woff2");font-weight:700;font-style:normal;font-display:swap}
+@font-face{font-family:"Atkinson Hyperlegible";src:url("fonts/atkinson-hyperlegible-latin-700-italic.woff2") format("woff2");font-weight:700;font-style:italic;font-display:swap}
+:root[data-style="reader"],:root[data-style="hyper"]{
+  --paper:#FBF8F1;--card:#F5F1E8;--side:#F3EEE3;--ink:#2A2723;--muted:#6B655B;--line:#E4DCCD;--rule:#CFC4AF;--code:#F0EADF;
+  --accent:#8C3A12;--accent-soft:#F5E3D6;--dense:#24588A;--dense-soft:#E2ECF6;--good:#2F6B3B;--good-soft:#E3F0E3;--warn:#8A5B00;--warn-soft:#F8EDCF;--bad:#A1271B;--bad-soft:#F8E1DD;
+  --radius:6px;--sec-pad:56px}
+:root[data-style="reader"][data-theme="dark"],:root[data-style="hyper"][data-theme="dark"]{
+  --paper:#1C1B19;--card:#24221F;--side:#191816;--ink:#DEDAD2;--muted:#A39E93;--line:#36332E;--rule:#4A463F;--code:#2A2825;
+  --accent:#E3A178;--accent-soft:#3A2A20;--dense:#94BCE6;--dense-soft:#1F2B38;--good:#8CC79A;--good-soft:#1F2D22;--warn:#E2BD6A;--warn-soft:#352B14;--bad:#EE8E80;--bad-soft:#3B2420}
+:root[data-style="reader"]{--f-head:"Literata",Cambria,Georgia,serif;--f-body:"Literata",Cambria,Georgia,serif;--body-size:19px;--h-weight:650}
+:root[data-style="hyper"]{--f-head:"Atkinson Hyperlegible","Segoe UI",system-ui,sans-serif;--f-body:"Atkinson Hyperlegible","Segoe UI",system-ui,sans-serif;--body-size:18.5px;--h-weight:700}
+:root[data-theme="dark"]{color-scheme:dark}
+
+/* ---------- base ---------- */
+*{box-sizing:border-box}
+html{scroll-behavior:smooth;scroll-padding-top:72px}
+body{margin:0;background:var(--paper);color:var(--ink);font:var(--body-size)/1.62 var(--f-body)}
+a{color:var(--accent)}
+a:focus-visible,button:focus-visible,input:focus-visible,select:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+h1,h2,h3{font-family:var(--f-head);font-weight:var(--h-weight);line-height:1.2;margin:0;text-wrap:balance}
+h1{font-size:clamp(1.8rem,4.2vw,2.6rem);letter-spacing:-.01em}
+h2{font-size:clamp(1.3rem,2.8vw,1.65rem)}
+h3{font-size:1.06rem}
+p{margin:0}
+code,.mono{font-family:var(--f-mono);font-size:.86em}
+:not(pre)>code{background:var(--code);padding:.08em .35em;border-radius:4px}
+pre{font-family:var(--f-mono);font-size:.84rem;background:var(--code);padding:12px 14px;border-radius:var(--radius);overflow-x:auto;margin:0;line-height:1.5;border:1px solid var(--line)}
+ul,ol{margin:0;padding-left:1.25em}
+li+li{margin-top:4px}
+
+/* ---------- top bar, sidebar, layout ---------- */
+.top{position:sticky;top:0;z-index:30;height:56px;display:flex;align-items:center;gap:10px;padding:0 16px;background:color-mix(in srgb,var(--paper) 92%,transparent);backdrop-filter:blur(8px);border-bottom:1px solid var(--line)}
+.top .t{font-family:var(--f-head);font-weight:var(--h-weight);margin-right:auto;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;min-width:0}
+.menu,.home{display:inline-flex;gap:4px;align-items:center;flex:none}
+.home{text-decoration:none}
+.side .course a{display:grid;grid-template-columns:26px minmax(0,1fr);gap:4px;padding:5px 8px;border-radius:6px;color:var(--ink);text-decoration:none;font-size:.88rem;line-height:1.35}
+.side .course a .n{font-family:var(--f-mono);font-size:.74rem;color:var(--muted)}
+.side .course a:hover{background:color-mix(in srgb,var(--accent) 10%,transparent)}
+.top .btn,.top .seg{flex:none;white-space:nowrap}
+.crumb{display:none;color:var(--muted);font-weight:400;font-family:var(--f-body)}
+html[data-toc="hidden"] .crumb{display:inline}
+.topprog{position:absolute;left:0;bottom:-1px;height:3px;width:0;background:var(--accent);transition:width .15s}
+html:not([data-toc="hidden"]) .topprog{display:none}
+.seg{display:inline-flex;border:1px solid var(--rule);border-radius:999px;overflow:hidden;flex:none}
+.seg button{font:inherit;font-family:var(--f-body);font-size:.88rem;border:0;background:transparent;color:var(--ink);padding:5px 12px;cursor:pointer}
+.seg button[aria-pressed="true"]{background:var(--ink);color:var(--paper)}
+.btn,select.btn{font:inherit;font-family:var(--f-body);font-size:.88rem;border:1px solid var(--rule);background:var(--card);color:var(--ink);border-radius:8px;padding:5px 10px;cursor:pointer}
+.btn:hover{border-color:var(--ink)}
+/* Panel docked to the window edge (like VS Code); the text starts right beside it; spare space goes to the far side only. */
+.shell{--side-w:260px;display:grid;grid-template-columns:var(--side-w) minmax(0,var(--content-w));justify-content:start;column-gap:48px;padding:0 24px 0 0}
+aside.side{position:sticky;top:56px;height:calc(100vh - 56px);overflow:auto;background:var(--side);border-right:1px solid var(--line);padding:20px 12px 24px;font-family:var(--f-body)}
+.side .lab{font-size:.72rem;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);margin:14px 8px 6px}
+.side .head{display:flex;justify-content:space-between;align-items:center;gap:8px;margin:0 8px 8px}
+.side .head .lab{margin:0}
+.side .head button{font:inherit;font-family:var(--f-body);font-size:.74rem;border:1px solid var(--rule);background:var(--paper);color:var(--muted);border-radius:6px;padding:2px 7px;cursor:pointer}
+.side .head button:hover{color:var(--ink);border-color:var(--ink)}
+html[data-side="right"] .shell{grid-template-columns:minmax(0,var(--content-w)) var(--side-w);justify-content:end;padding:0 0 0 24px}
+html[data-side="right"] aside.side{order:2;border-right:0;border-left:1px solid var(--line)}
+html[data-toc="hidden"] .shell{grid-template-columns:minmax(0,var(--content-w));justify-content:center;padding:0 24px}
+html[data-toc="hidden"] aside.side{display:none}
+.prog{margin:0 8px 6px;display:grid;gap:4px;font-size:.8rem;color:var(--muted)}
+.prog .track{height:5px;border-radius:3px;background:var(--line);overflow:hidden}
+.prog .track i{display:block;height:100%;width:0;background:var(--accent);transition:width .15s}
+.side nav a{display:grid;grid-template-columns:26px minmax(0,1fr) auto;gap:4px;align-items:baseline;padding:5px 8px;border-radius:6px;color:var(--ink);text-decoration:none;font-size:.88rem;line-height:1.35}
+.side nav a .n{font-family:var(--f-mono);font-size:.74rem;color:var(--muted)}
+.side nav a:hover{background:color-mix(in srgb,var(--accent) 10%,transparent)}
+.side nav a.on{background:var(--accent-soft);color:var(--accent);font-weight:600}
+.side nav a.on .n{color:var(--accent)}
+.side nav a .fo{font-size:.66rem;font-family:var(--f-mono);color:var(--dense);border:1px solid var(--dense);border-radius:4px;padding:0 4px}
+html[data-depth="short"] .side nav a.fullonly{opacity:.55}
+main{padding:8px 0 90px;min-width:0;width:100%}
+@media (max-width:980px){
+  .shell,html[data-side="right"] .shell,html[data-toc="hidden"] .shell{grid-template-columns:minmax(0,1fr);padding:0}
+  aside.side,html[data-toc="hidden"] aside.side,html[data-side="right"] aside.side{display:block;position:fixed;left:0;top:56px;bottom:0;height:auto;width:min(300px,86vw);z-index:25;transform:translateX(-104%);transition:transform .2s;box-shadow:0 10px 30px rgba(0,0,0,.25);background:var(--side);padding:16px 12px 24px}
+  html[data-side="right"] aside.side{left:auto;right:0;transform:translateX(104%)}
+  body.side-open aside.side{transform:none!important}
+  .topprog{display:block!important}
+  .crumb{display:inline}
+  main{padding:8px 16px 90px}
+}
+@media (max-width:620px){.top .t{display:none}.top .seg{margin-left:auto}.top select.btn{max-width:118px}}
+@media (max-width:480px){.top{gap:6px;padding:0 10px}.top .lbl{display:none}.top select.btn{max-width:100px}.seg button{padding:5px 10px}}
+.totop{position:fixed;right:20px;bottom:20px;width:46px;height:46px;border-radius:50%;border:1px solid var(--rule);background:var(--ink);color:var(--paper);font-size:1.3rem;line-height:1;cursor:pointer;box-shadow:0 4px 14px rgba(0,0,0,.2);opacity:0;pointer-events:none;transform:translateY(8px);transition:opacity .2s,transform .2s;z-index:20}
+.totop.show{opacity:1;pointer-events:auto;transform:none}
+
+/* ---------- content blocks ---------- */
+header.hero{padding:28px 0 4px;display:grid;gap:10px}
+.eyebrow{font-family:var(--f-mono);font-size:.72rem;letter-spacing:.08em;text-transform:uppercase;color:var(--muted)}
+.sub{color:var(--muted);font-size:1.05rem}
+section.s{padding-top:var(--sec-pad);display:grid;gap:14px}
+section.s>.num{font-family:var(--f-mono);font-size:.74rem;letter-spacing:.08em;color:var(--accent)}
+.lede{font-size:1.1rem}
+.badge{font-size:.72rem;font-family:var(--f-mono);padding:1px 7px;border-radius:999px;border:1px solid var(--rule);color:var(--muted);background:var(--card);white-space:nowrap;vertical-align:1px}
+.badge.m{border-color:var(--good);color:var(--good)}
+.badge.t{border-color:var(--warn);color:var(--warn)}
+.badge.f{border-color:var(--dense);color:var(--dense)}
+.card{background:var(--card);border:1px solid var(--line);border-radius:var(--radius);padding:14px 16px}
+.call{padding:10px 14px;border-radius:0 var(--radius) var(--radius) 0;border-left:4px solid}
+.call.proj{border-color:var(--good);background:var(--good-soft)}
+.call.wrong{border-color:var(--bad);background:var(--bad-soft)}
+.call.wrong>b:first-child{color:var(--bad)}
+.call.note{border-color:var(--warn);background:var(--warn-soft)}
+.full{border:1px dashed var(--dense);border-radius:var(--radius);padding:14px 16px;display:grid;gap:12px;background:color-mix(in srgb,var(--dense-soft) 50%,transparent)}
+.full>.tag{font-family:var(--f-mono);font-size:.7rem;letter-spacing:.08em;text-transform:uppercase;color:var(--dense)}
+html[data-depth="short"] .full{display:none}
+.two{display:grid;gap:12px}
+@media (min-width:760px){.two{grid-template-columns:1fr 1fr}}
+.three{display:grid;gap:10px}
+@media (min-width:760px){.three{grid-template-columns:repeat(3,1fr)}}
+table{border-collapse:collapse;width:100%;font-size:.92rem;font-family:var(--f-body)}
+th,td{text-align:left;padding:7px 9px;border-bottom:1px solid var(--line);vertical-align:top}
+th{font-size:.78rem;color:var(--muted);font-weight:600}
+td.n,th.n{text-align:right;font-variant-numeric:tabular-nums;font-family:var(--f-mono);font-size:.84rem}
+.tw{overflow-x:auto}
+caption,figcaption{caption-side:bottom;text-align:left;color:var(--muted);font-size:.84rem;padding-top:6px;font-family:var(--f-body)}
+figure{margin:0;display:grid;gap:8px}
+.hit{color:var(--good);font-weight:700}
+.miss{color:var(--bad);font-weight:700}
+.formula{font-family:var(--f-mono);font-size:.92rem;background:var(--code);padding:12px 14px;border-radius:var(--radius);overflow-x:auto;line-height:1.75;border:1px solid var(--line)}
+.formula .w{color:var(--accent);font-weight:700}
+.formula .c{color:var(--muted)}
+
+/* at a glance */
+.glance{display:grid;gap:10px;grid-template-columns:repeat(auto-fill,minmax(240px,1fr))}
+.g{background:var(--card);border:1px solid var(--line);border-radius:var(--radius);padding:10px 12px;display:grid;gap:5px;align-content:start}
+.g h3{font-size:.95rem;display:flex;justify-content:space-between;gap:8px;align-items:baseline}
+.g h3 a{font-family:var(--f-mono);font-size:.72rem;font-weight:400;text-decoration:none}
+.g .fx{font-family:var(--f-mono);font-size:.8rem;background:var(--code);border:1px solid var(--line);padding:5px 8px;border-radius:6px;white-space:normal;overflow-wrap:anywhere;line-height:1.45}
+.g p{font-size:.88rem}
+.g .ex{font-size:.8rem;color:var(--muted)}
+.key{font-size:.86rem;color:var(--muted)}
+.key code{color:var(--ink)}
+
+/* rank cards, index explorer */
+.ranks{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.rank{border-radius:var(--radius);padding:14px;border:1px solid var(--line);background:var(--card);display:grid;gap:4px}
+.rank .big{font-family:var(--f-head);font-size:2.5rem;line-height:1;font-weight:700}
+.rank.d .big{color:var(--dense)}
+.rank.k .big{color:var(--accent)}
+.idx-docs{display:grid;gap:6px}
+.doc{font-family:var(--f-mono);font-size:.8rem;padding:6px 10px;border:1px solid var(--line);border-radius:8px;background:var(--paper);display:flex;gap:10px;align-items:baseline}
+.doc .id{font-weight:700;min-width:2.2em}
+.doc .tok{padding:0 2px;border-radius:3px}
+.doc .tok.on{background:var(--accent-soft);color:var(--accent);font-weight:700}
+.doc.cand{border-color:var(--accent)}
+.chips{display:flex;flex-wrap:wrap;gap:6px}
+.chip{font:inherit;font-family:var(--f-mono);font-size:.82rem;border:1px solid var(--rule);background:var(--paper);color:var(--ink);border-radius:999px;padding:3px 10px;cursor:pointer}
+.chip[aria-pressed="true"]{background:var(--accent);border-color:var(--accent);color:var(--paper)}
+.cards{display:grid;gap:8px;grid-template-columns:repeat(auto-fill,minmax(190px,1fr))}
+.icard{background:var(--paper);border:1px solid var(--rule);border-radius:4px;padding:8px 10px 10px;position:relative}
+.icard::before{content:"";position:absolute;left:0;right:0;top:28px;border-top:1px solid var(--accent);opacity:.55}
+.icard h4{margin:0 0 10px;font-family:var(--f-mono);font-size:.92rem}
+.icard p{font-size:.82rem;font-family:var(--f-mono)}
+.icard .meta{color:var(--muted);font-family:var(--f-body);font-size:.78rem;margin-top:4px}
+
+/* controls and charts */
+.ctl{display:grid;grid-template-columns:160px minmax(0,1fr) 64px;gap:10px;align-items:center;font-size:.9rem;font-family:var(--f-body)}
+.ctl input[type=range]{width:100%;accent-color:var(--accent)}
+.ctl output{font-family:var(--f-mono);text-align:right}
+@media (max-width:560px){.ctl{grid-template-columns:110px minmax(0,1fr) 54px}}
+svg.chart{width:100%;height:auto;display:block;background:var(--card);border:1px solid var(--line);border-radius:var(--radius)}
+svg .ax{stroke:var(--rule);stroke-width:1}
+svg .grid{stroke:var(--line);stroke-width:1}
+svg text{fill:var(--muted);font-family:"Segoe UI",system-ui,sans-serif;font-size:12px}
+svg .lab{fill:var(--ink);font-size:12.5px}
+svg .s-bm25{stroke:var(--accent);stroke-width:3;fill:none}
+svg .s-tfidf{stroke:var(--muted);stroke-width:2;fill:none;stroke-dasharray:6 5}
+svg .s-raw{stroke:var(--accent);stroke-width:1.5;fill:none;stroke-dasharray:2 4;opacity:.8}
+svg .s-ceil{stroke:var(--warn);stroke-width:1.5;stroke-dasharray:5 4}
+svg .s-ref{stroke:var(--dense);stroke-width:2;fill:none;opacity:.55}
+svg .dot{fill:var(--accent);stroke:var(--card);stroke-width:2}
+svg .dot2{fill:var(--dense);stroke:var(--card);stroke-width:2}
+svg .zero{stroke:var(--ink);stroke-width:1;opacity:.45}
+.readout{font-size:.9rem;background:var(--card);border:1px solid var(--line);border-radius:8px;padding:8px 12px;font-family:var(--f-body)}
+.readout b{font-family:var(--f-mono)}
+.sbars{display:grid;gap:8px}
+.sbar{display:grid;grid-template-columns:130px minmax(0,1fr) 64px;gap:10px;align-items:center;font-size:.88rem;font-family:var(--f-body)}
+.sbar .track{display:flex;height:22px;background:var(--paper);border:1px solid var(--line);border-radius:4px;overflow:hidden}
+.sbar .p1{background:var(--accent)}
+.sbar .p2{background:var(--warn);opacity:.75}
+.sbar .v{font-family:var(--f-mono);text-align:right}
+@media (max-width:560px){.sbar{grid-template-columns:92px minmax(0,1fr) 54px}}
+.legend{display:flex;flex-wrap:wrap;gap:12px;font-size:.82rem;color:var(--muted);font-family:var(--f-body)}
+.legend i{display:inline-block;width:12px;height:12px;border-radius:2px;margin-right:5px;vertical-align:-1px}
+.play{display:grid;gap:10px}
+.play label{display:grid;gap:4px;font-size:.88rem;font-family:var(--f-body)}
+.play input[type=text]{font:inherit;font-family:var(--f-mono);font-size:.86rem;padding:8px 10px;border:1px solid var(--rule);border-radius:8px;background:var(--paper);color:var(--ink);width:100%}
+.toks{display:grid;gap:8px}
+.tokrow{border:1px solid var(--line);border-radius:10px;padding:8px 10px;background:var(--paper);display:grid;gap:6px}
+.tokrow .h{display:flex;flex-wrap:wrap;gap:8px;align-items:baseline;justify-content:space-between;font-family:var(--f-body)}
+.tokrow .h b{font-family:var(--f-mono);font-size:.84rem}
+.tk{display:inline-block;font-family:var(--f-mono);font-size:.78rem;padding:1px 6px;margin:2px 3px 2px 0;border:1px solid var(--line);border-radius:4px;background:var(--card)}
+.tk.sh{border-color:var(--good);background:var(--good-soft);color:var(--good);font-weight:700}
+.verdict{font-size:.86rem;font-weight:600}
+.verdict.yes{color:var(--good)}
+.verdict.no{color:var(--bad)}
+.ov{position:relative;height:84px;border:1px solid var(--line);border-radius:var(--radius);background:var(--card);overflow:hidden}
+.ov .w{position:absolute;height:24px;border-radius:4px;font-size:.76rem;font-family:var(--f-mono);display:flex;align-items:center;justify-content:center;color:var(--ink);background:var(--dense-soft);border:1px solid var(--dense)}
+.ov .w82{top:12px;left:4%;width:56%}
+.ov .w83{top:46px;left:40%;width:56%}
+.ov .pin{position:absolute;top:4px;bottom:4px;left:44.1%;width:3px;background:var(--accent)}
+.ov .pinl{position:absolute;top:2px;left:45.3%;font-size:.74rem;font-family:var(--f-mono);color:var(--accent);font-weight:700}
+.q{display:grid;gap:8px}
+.q fieldset{border:1px solid var(--line);border-radius:var(--radius);padding:10px 14px;background:var(--card);margin:0;display:grid;gap:6px}
+.q legend{font-weight:600;padding:0 4px}
+.q label{display:flex;gap:8px;align-items:flex-start;font-size:.94rem;cursor:pointer}
+.q .fb{font-size:.9rem;padding:6px 10px;border-radius:6px;display:none}
+.q .fb.show{display:block}
+.q .fb.ok{background:var(--good-soft);color:var(--good)}
+.q .fb.no{background:var(--bad-soft);color:var(--bad)}
+.check{display:grid;gap:6px}
+.check label{display:grid;grid-template-columns:22px minmax(0,1fr);gap:8px;align-items:start;padding:8px 10px;border:1px solid var(--line);border-radius:8px;background:var(--card);cursor:pointer;font-size:.92rem}
+.check label:has(input:checked){border-color:var(--good);background:var(--good-soft)}
+.check input{width:17px;height:17px;margin-top:3px;accent-color:var(--good)}
+.check .how{display:block;color:var(--muted);font-size:.84rem;margin-top:2px}
+footer{margin-top:48px;padding:22px 0 0;border-top:1px solid var(--line);color:var(--muted);font-size:.86rem;display:grid;gap:8px}
+
+
+/* the theory in one read: a numbered chain of ideas */
+.chain{list-style:none;counter-reset:idea;margin:0;padding:0;display:grid;gap:0}
+.chain>li{counter-increment:idea;position:relative;padding:0 0 22px 52px;display:grid;gap:7px;margin:0}
+.chain>li::before{content:counter(idea);position:absolute;left:0;top:-2px;width:34px;height:34px;border-radius:50%;display:grid;place-items:center;
+  background:var(--accent-soft);color:var(--accent);border:1px solid var(--accent);font:600 .9rem/1 var(--f-body);font-variant-numeric:lining-nums}
+.chain>li::after{content:"";position:absolute;left:16.5px;top:36px;bottom:4px;width:1px;background:var(--rule)}
+.chain>li:last-child::after{display:none}
+.chain h3{font-size:1.08rem}
+.chain .formula{font-size:.86rem;padding:8px 12px;line-height:1.65}
+.chain .go{justify-self:start;font-size:.86rem;font-family:var(--f-body);text-decoration:none;border:1px solid var(--rule);border-radius:999px;padding:1px 10px;color:var(--accent)}
+.chain .go:hover{border-color:var(--accent)}
+
+/* ---------- small per-theme touches ---------- */
+[data-style="textbook"] section.s>.num{font-family:var(--f-head);font-size:.95rem;letter-spacing:.02em;font-style:italic;text-transform:none}
+[data-style="textbook"] #answer .lede::first-letter{float:left;font-size:3.1em;line-height:.9;padding:5px 8px 0 0;color:var(--accent);font-family:var(--f-head)}
+[data-style="textbook"] .call{border-left-width:2px;font-style:italic}
+[data-style="textbook"] .call b{font-style:normal}
+[data-style="editor"] h2::before{content:"## ";color:var(--muted)}
+[data-style="editor"] h1::before{content:"# ";color:var(--muted)}
+[data-style="editor"] .formula,[data-style="editor"] pre{border-left:3px solid var(--accent)}
+[data-style="minimal"] .card,[data-style="minimal"] .g,[data-style="minimal"] .rank,[data-style="minimal"] svg.chart{border-color:transparent}
+[data-style="minimal"] aside.side{border-right-color:transparent}
+[data-style="minimal"] .call{border-left-width:3px}
+[data-style="catalogue"] .g,[data-style="catalogue"] .card{box-shadow:0 1px 0 var(--line)}
+/* Reader themes: the rich typographic details */
+:is([data-style="reader"],[data-style="hyper"]){--content-w:720px}
+:is([data-style="reader"],[data-style="hyper"]) body{line-height:1.72;font-variant-numeric:lining-nums;text-rendering:optimizeLegibility;-webkit-font-smoothing:antialiased}
+:is([data-style="reader"],[data-style="hyper"]) :is(p,li){text-wrap:pretty;hanging-punctuation:first}
+:is([data-style="reader"],[data-style="hyper"]) section.s{border-top:1px solid var(--line);margin-top:30px}
+:is([data-style="reader"],[data-style="hyper"]) section.s>.num{font-family:var(--f-body);font-variant-caps:all-small-caps;font-size:1rem;letter-spacing:.09em;color:var(--accent)}
+:is([data-style="reader"],[data-style="hyper"]) .eyebrow{font-family:var(--f-body);font-variant-caps:all-small-caps;font-size:.95rem;text-transform:none;letter-spacing:.08em}
+:is([data-style="reader"],[data-style="hyper"]) h2{font-size:clamp(1.5rem,3vw,1.9rem);letter-spacing:-.005em}
+[data-style="reader"] h1{font-weight:720;font-size:clamp(2rem,5vw,3rem);letter-spacing:-.015em}
+:is([data-style="reader"],[data-style="hyper"]) #answer .lede{font-size:1.2em;line-height:1.62}
+[data-style="reader"] #answer .lede::first-letter{float:left;font-size:3.5em;line-height:.84;padding:6px 10px 0 0;color:var(--accent);font-weight:700}
+:is([data-style="reader"],[data-style="hyper"]) .call{border-left-width:3px;border-radius:0 8px 8px 0;padding:12px 16px}
+:is([data-style="reader"],[data-style="hyper"]) .call.proj::before{content:"✦ ";color:var(--good)}
+:is([data-style="reader"],[data-style="hyper"]) a{text-underline-offset:.18em;text-decoration-thickness:1px}
+:is([data-style="reader"],[data-style="hyper"]) ::selection{background:var(--accent-soft)}
+:is([data-style="reader"],[data-style="hyper"]) table{font-variant-numeric:lining-nums tabular-nums}
+:is([data-style="reader"],[data-style="hyper"]) :is(.g,.card,.rank){box-shadow:0 1px 2px rgba(0,0,0,.05)}
+:is([data-style="reader"],[data-style="hyper"]) .side nav a{font-size:.9rem}
+@media print{.top,aside.side,.totop,.ctl,.btn,.play input{display:none!important} html[data-depth] .full{display:grid!important} .shell{display:block} main{padding:0}}
+
+/* ---------- lesson additions (shared with P1) ---------- */
+.tk.mk{color:var(--muted);border-style:dashed}
+svg .fbox{fill:var(--paper);stroke:var(--rule);stroke-width:1.2}
+svg .fbox.hl{fill:var(--accent-soft);stroke:var(--accent);stroke-width:2}
+svg .farr{stroke:var(--muted);stroke-width:1.6}
+svg .fhead{fill:var(--muted)}
+svg .rb1{fill:var(--muted);opacity:.55}
+svg .rb2{fill:var(--accent)}
+svg .tbar{fill:var(--accent)}
+.sbar .pm{background:var(--muted);opacity:.55}
+.sbar .p3{background:var(--dense)}
+.sbar .ph,.legend i.hatch{background:repeating-linear-gradient(45deg,var(--warn) 0 3px,transparent 3px 7px);opacity:.8}
+.sbar .p4{background:var(--dense);opacity:.8}
+.sbar .p5{background:var(--good)}
+.sbar .pe{background:transparent}
+pre .c{color:var(--muted)}
+table.heat td.hc{text-align:center;font-weight:600}
+table.heat td.g2{background:var(--good-soft);color:var(--good)}
+table.heat td.g1{background:var(--warn-soft);color:var(--warn)}
+table.heat td.g0{background:var(--bad-soft);color:var(--bad)}
+/* grid children may shrink below their content, so wide code scrolls inside its box on phones */
+section.s>*,.two>*,.three>*,.full>*,.card>*,figure>*{min-width:0}
+main :not(pre)>code{overflow-wrap:anywhere}
+@media (max-width:620px){.badge{white-space:normal}}
+
+/* ---------- I-CMP additions ---------- */
+.badge.d{border-color:var(--accent);color:var(--accent)}
+.cs{display:inline-block;font-size:.76rem;font-family:var(--f-mono);padding:1px 7px;border-radius:999px;border:1px solid var(--rule);white-space:nowrap}
+.cs-m{border-color:var(--good);color:var(--good);background:var(--good-soft)}
+.cs-i{border-color:var(--warn);color:var(--warn);background:var(--warn-soft)}
+.cs-n{color:var(--muted);background:var(--card)}
+.cs-x{border-color:var(--bad);color:var(--bad);background:var(--bad-soft)}
+.cs-d{border-color:var(--accent);color:var(--accent);background:var(--accent-soft)}
+.cs-b{border-color:var(--dense);color:var(--dense);background:var(--dense-soft)}
+@media (max-width:620px){.cs{white-space:normal}}
+ol.flow{margin:0;padding-left:1.4em;display:grid;gap:6px}
+.prereg{display:grid;gap:6px;border-color:var(--good)}
+table.heat td.hc .key{font-size:.7rem;font-weight:400}
+#cmpTable td{font-size:.86rem}
+</style>
+</head>
+<body>
+<div class="top">
+  <a class="btn home" id="home" href="../../RAG_ROUTE_MAP.html" title="Back to all phases"><span aria-hidden="true">⌂</span><span class="lbl">All phases</span></a>
+  <button type="button" class="btn menu" id="menu" aria-expanded="true" aria-controls="side" title="Show or hide the contents (key: T)"><span aria-hidden="true">☰</span><span class="lbl">Contents</span></button>
+  <span class="t">I-CMP · The granularity family, compared fairly<span class="crumb" id="crumb" aria-live="polite"></span></span>
+  <i class="topprog" id="topprog" aria-hidden="true"></i>
+  <div class="seg" role="group" aria-label="Reading depth">
+    <button type="button" data-depth="short" aria-pressed="true">Short</button>
+    <button type="button" data-depth="full" aria-pressed="false">Full</button>
+  </div>
+  <select class="btn" id="style" aria-label="Theme">
+    <option value="reader">Reader · Literata (new)</option>
+    <option value="hyper">Reader · Atkinson Hyperlegible (new)</option>
+    <option value="notebook">Clean notebook</option>
+    <option value="textbook">Textbook</option>
+    <option value="editor">Editor (VS Code)</option>
+    <option value="minimal">Minimal reading</option>
+    <option value="catalogue">Card catalogue (first version)</option>
+  </select>
+  <button type="button" class="btn" id="color" aria-label="Switch light or dark">☾ Dark</button>
+</div>
+
+<div class="shell">
+<aside class="side" id="side" aria-label="Sections">
+  <div class="head"><div class="lab">On this page</div><button type="button" id="sidepos" title="Move the contents to the other side">⇆ Right</button></div>
+  <div class="prog"><span id="where">The answer first</span><span class="track" aria-hidden="true"><i id="bar"></i></span></div>
+  <nav id="toc">
+    <a href="#answer"><span class="n">→</span><span>The answer first</span></a>
+    <a href="#theory"><span class="n">◆</span><span>The theory in one read</span></a>
+    <a href="#glance"><span class="n">★</span><span>Formula sheet</span></a>
+    <div class="lab">Step by step</div>
+    <a href="#upstream"><span class="n">1</span><span>Seven notebooks, seven setups</span></a>
+    <a href="#axes"><span class="n">2</span><span>Two axes and a return arrow</span></a>
+    <a href="#units"><span class="n">3</span><span>Name the unit first</span></a>
+    <a href="#sizes"><span class="n">4</span><span>Size spreads and the cap</span></a>
+    <a href="#cost"><span class="n">5</span><span>What each member costs</span></a>
+    <a href="#budget"><span class="n">6</span><span>Equal k or equal budget</span></a>
+    <a href="#cells"><span class="n">7</span><span>What a cell may say</span></a>
+    <a href="#targets"><span class="n">8</span><span>Which failure each targets</span></a>
+    <a href="#family"><span class="n">9</span><span>Many arms, few questions</span></a>
+    <a href="#others"><span class="n">10</span><span>Other people's benchmarks</span></a>
+    <a href="#choose"><span class="n">11</span><span>Choosing for a new corpus</span></a>
+    <a href="#project"><span class="n">12</span><span>For your project</span></a>
+    <a href="#repo" class="fullonly"><span class="n">13</span><span>The repo, read critically</span><span class="fo">Full</span></a>
+    <a href="#book" class="fullonly"><span class="n">14</span><span>The book, checked</span><span class="fo">Full</span></a>
+    <a href="#beyond" class="fullonly"><span class="n">15</span><span>Beyond the family</span><span class="fo">Full</span></a>
+    <div class="lab">Practise and apply</div>
+    <a href="#verify"><span class="n">✓</span><span>Verify it: the notebook</span></a>
+    <a href="#apply"><span class="n">⚙</span><span>Use it on your data</span></a>
+    <a href="#check"><span class="n">?</span><span>Check yourself</span></a>
+  </nav>
+  <div class="lab">Course</div>
+  <div class="course">
+    <a id="toRoute" href="../../RAG_ROUTE_MAP.html"><span class="n">⌂</span><span>All phases (the route)</span></a>
+    <a class="kitonly" data-route="#/c/I-CMP" href="#"><span class="n">≡</span><span>I-CMP page: steps, quiz</span></a>
+    <a class="kitonly" data-route="#/c/I6" href="#"><span class="n">←</span><span>Previous topic: I6 document augmentation</span></a>
+    <a class="kitonly" data-route="#/c/R1" href="#"><span class="n">→</span><span>Next topic: R1 hybrid search</span></a>
+  </div>
+</aside>
+
+<main id="main">
+<header class="hero" id="top">
+  <div class="eyebrow">RAG study kit · Phase 4 · concept I-CMP</div>
+  <h1>The granularity family, compared fairly</h1>
+  <p class="sub">Fixed windows, structure, semantic breakpoints, propositions, headers and generated questions: what each one changes, what it costs, which failure it targets, and how to compare them without fooling yourself.</p>
+  <p class="key"><span class="badge m">measured</span> local runs on the course's climate PDF, no API call · <span class="badge t">toy</span> made-up numbers that show a mechanism · <span class="badge f">formula</span> computed on this page · <span class="badge d">derived</span> a cost worked out from measured counts · <span class="badge">external</span> from a cited study</p>
+  <p class="call note"><b>Read this first.</b> None of the per-technique runs (I1–I6) exists yet. So this lesson measures what can be built offline on the climate PDF, calls those builds <b>probes</b>, and scores them on the 8 answerable <b>draft</b> questions, which an LLM wrote and you have not checked. Every rank or score on them is an observation, never a result. Where a real number is missing, the page says "not run", which is the honest answer.</p>
+</header>
+
+<!-- ======================= ANSWER FIRST ======================= -->
+<section class="s" id="answer" aria-labelledby="h-answer">
+  <div class="num">THE ANSWER FIRST</div>
+  <h2 id="h-answer">The whole family in five sentences</h2>
+  <p class="lede"><b>Every member of the granularity family changes one of two things: where the boundaries go, or what text stands for a unit in the index.</b> Boundaries can come from fixed windows (I1), the document's own headings (I2), jumps in meaning between sentences (I3) or facts an LLM writes out (I4); the stand-in can be the chunk plus a header (I5) or questions generated from it (I6), and a third choice, retrieving a small unit but handing back its parent, cuts across both. The members differ in their size unit, how much their sizes spread, what they cost to build (from 0 LLM calls to about one per fact), how big the index gets, and the failure they are meant to fix. None of them is better in general, and a fair comparison holds the questions, the labels, the embedder and the <b>token budget</b> fixed; with the 12 to 16 dev questions you will have, most differences will honestly read "inconclusive". So for a new corpus you match its structure and its questions to each member's target failure and cost, pre-register at most three arms, and write "not run" or "not comparable" wherever you have no fair number.</p>
+  <p>Next come <b>the theory in one read</b>, a <b>formula sheet</b>, and then twelve steps that follow the course's climate PDF (Corpus D, 33 pages) through every member that can be built without an API call. <b>Short</b> gives a complete first understanding. <b>Full</b> adds the repo and book checks and what lies beyond the family; its parts have a dashed border.</p>
+</section>
+
+<!-- ======================= THEORY IN ONE READ ======================= -->
+<section class="s" id="theory" aria-labelledby="h-theory">
+  <div class="num">THE THEORY IN ONE READ</div>
+  <h2 id="h-theory">The whole topic, idea by idea</h2>
+  <p>Eleven ideas, in the order they build on each other. This part is theory only; each idea links to the step where the climate PDF shows it working.</p>
+  <ol class="chain">
+    <li><h3>Two axes plus one</h3>
+      <p>A <b>boundary</b> rule decides where units start and end. A <b>representation</b> rule decides what text is embedded for each unit. A third choice decides what is handed to the LLM: the unit itself or its parent. The three choices combine freely.</p>
+      <div class="formula">unit = boundary(text) · pointer = representation(unit) · returned = parent(unit) or unit</div>
+      <a class="go" href="#axes">Step 2 →</a></li>
+    <li><h3>Name the unit</h3>
+      <p>"Size 500" means nothing until you say 500 of what. Characters, tokens of a named tokenizer, regex words, sentences and LLM-written facts are all in use; convert with a ratio ρ measured on your corpus.</p>
+      <div class="formula">characters ≈ tokens × ρ&nbsp;&nbsp;<span class="c">ρ per corpus and per tokenizer</span></div>
+      <a class="go" href="#units">Step 3 →</a></li>
+    <li><h3>Look at the spread</h3>
+      <p>Two chunkers with the same mean size can differ wildly at the top. The embedder reads only its first L tokens, so the share of units over L is the share it reads only in part.</p>
+      <div class="formula">truncation share = #(tokens &gt; L) / N&nbsp;&nbsp;<span class="c">L = 256 for MiniLM</span></div>
+      <a class="go" href="#sizes">Step 4 →</a></li>
+    <li><h3>Index-time cost</h3>
+      <p>Count three things per member when the index is built: embeddings, LLM calls and the tokens those calls read. They range from N embeds and no calls to about one call per fact.</p>
+      <div class="formula">cost(arm) = (E embeds, L LLM calls, T input tokens) per build × builds</div>
+      <a class="go" href="#cost">Step 5 →</a></li>
+    <li><h3>Query-time cost and index size</h3>
+      <p>At question time every member costs the same: one question embedding and a search, no LLM call. What grows is the number of vectors, and with it the bytes.</p>
+      <div class="formula">bytes = 128 + N_vectors × d × 4</div>
+      <a class="go" href="#cost">Step 5 →</a></li>
+    <li><h3>Equal budget, not only equal k</h3>
+      <p>Four big chunks carry more text than four small ones, so "more found" may only mean "more read". Fill the same token budget B from each arm's ranked list instead, after removing duplicate parents, and make B at least as big as the largest unit.</p>
+      <div class="formula">keep units in rank order while Σ tokens ≤ B</div>
+      <a class="go" href="#budget">Step 6 →</a></li>
+    <li><h3>A fair comparison</h3>
+      <p>Two rows may sit side by side only if they share every comparison key: the same questions, labels, split, corpus snapshot and scorer. Change one thing at a time, and report both fixed k and equal B.</p>
+      <div class="formula">compare(a, b) only if keys(a) = keys(b)</div>
+      <a class="go" href="#cells">Step 7 →</a></li>
+    <li><h3>Honest cells</h3>
+      <p>A comparison table cell holds a measured value with its interval and n, or says why it does not: inconclusive, not run, not comparable, or a derived cost. The book's own ratings get a column of their own.</p>
+      <a class="go" href="#cells">Step 7 →</a></li>
+    <li><h3>Each member targets one failure</h3>
+      <p>Each technique is a hypothesis about one failure bucket (a boundary cut, a vocabulary mismatch, an anonymous chunk). Its row also says when not to use it.</p>
+      <a class="go" href="#targets">Step 8 →</a></li>
+    <li><h3>Conditional effects and family error</h3>
+      <p>Each v1.x arm is tried on top of the previous winner, so its effect is conditional on that base. Trying many arms on few questions makes a lucky winner likely; correct for it and know the smallest difference you can see.</p>
+      <div class="formula">P(≥ 1 false win) = 1 − (1 − α)^m · Holm · MDE ≈ 2.8 · √(b + c) / n</div>
+      <a class="go" href="#family">Step 9 →</a></li>
+    <li><h3>Choosing</h3>
+      <p>Rank candidate arms by how often their target failure occurs, how bad it is, and what the arm costs. Other people's benchmarks transfer as directions and design rules, not as numbers to rank against yours.</p>
+      <div class="formula">priority ≈ bucket count × severity / cost</div>
+      <a class="go" href="#choose">Step 11 →</a></li>
+  </ol>
+</section>
+
+<!-- ======================= FORMULA SHEET ======================= -->
+<section class="s" id="glance" aria-labelledby="h-glance">
+  <div class="num">FORMULA SHEET</div>
+  <h2 id="h-glance">Every term and formula, on one screen</h2>
+  <div class="glance">
+    <div class="g"><h3>Boundary · representation <a href="#axes">§2</a></h3><p>where units end · what is embedded for each</p><p class="ex">I1–I4 · I5, I6</p></div>
+    <div class="g"><h3>Returned unit <a href="#axes">§2</a></h3><p>retrieve small, return big</p><p class="ex">HyPE: question → its chunk</p></div>
+    <div class="g"><h3>ρ (chars per token) <a href="#units">§3</a></h3><div class="fx">ρ = characters / tokens</div><p class="ex">D: WordPiece 6.21 · cl100k 5.57</p></div>
+    <div class="g"><h3>Truncation share <a href="#sizes">§4</a></h3><div class="fx">#(tokens &gt; L) / N</div><p class="ex">pages on MiniLM: 32 of 33</p></div>
+    <div class="g"><h3>Index bytes <a href="#cost">§5</a></h3><div class="fx">128 + N × d × 4</div><p class="ex">97 × 1,536-d = 596,096</p></div>
+    <div class="g"><h3>HyPE vectors <a href="#cost">§5</a></h3><div class="fx">N × q</div><p class="ex">97 × 8 = 776</p></div>
+    <div class="g"><h3>I6 vs Q2 calls <a href="#cost">§5</a></h3><div class="fx">index-side cheaper if N × builds &lt; Q_total</div></div>
+    <div class="g"><h3>Equal budget <a href="#budget">§6</a></h3><div class="fx">keep while Σ tokens ≤ B</div><p>dedup parents first · B ≥ largest unit</p></div>
+    <div class="g"><h3>Cell states <a href="#cells">§7</a></h3><p>measured · inconclusive · not run · not comparable · derived · book rating</p></div>
+    <div class="g"><h3>FWER <a href="#family">§9</a></h3><div class="fx">1 − (1 − α)^m</div><p class="ex">m = 5 → 0.226</p></div>
+    <div class="g"><h3>Holm (3 arms) <a href="#family">§9</a></h3><div class="fx">sorted p vs α/3, α/2, α</div><p class="ex">0.0167 · 0.025 · 0.05</p></div>
+    <div class="g"><h3>MDE (paired, 0/1) <a href="#family">§9</a></h3><div class="fx">≈ 2.8 · √(b + c) / n</div><p class="ex">n 12, b + c 4 → 0.47</p></div>
+  </div>
+  <p class="key"><b>Symbols:</b> <code>N</code> units (chunks) · <code>S</code> sentences · <code>P</code> propositions · <code>q</code> questions per chunk · <code>d</code> numbers per vector · <code>L</code> the embedder's token limit · <code>B</code> the token budget · <code>k</code> units kept · <code>m</code> comparisons tried · <code>b, c</code> questions only the first / only the second arm gets right · <code>n</code> questions.</p>
+</section>
+
+<!-- 1 -->
+<section class="s" id="upstream" aria-labelledby="h-upstream">
+  <div class="num">STEP 1 · WHERE THE TECHNIQUES COME FROM</div>
+  <h2 id="h-upstream">Seven notebooks, seven setups</h2>
+  <p>The course's repo shows each granularity technique in its own notebook. It is tempting to read them side by side as a comparison. They are not one: each was built on its own corpus, unit, embedder and k.</p>
+  <div class="tw"><table id="upTable">
+    <thead><tr><th>Notebook</th><th>Corpus</th><th>Size unit</th><th>Size / overlap</th><th>Embedder</th><th>LLM at index time</th><th class="n">k</th></tr></thead>
+    <tbody>
+      <tr><td><code>simple_rag</code></td><td>climate PDF, per page</td><td>characters</td><td>1000 / 200</td><td>OpenAI</td><td>none</td><td class="n">2</td></tr>
+      <tr><td><code>choose_chunk_size</code></td><td>every file in a data folder</td><td>LlamaIndex tokens</td><td>128, 256 / size ÷ 5</td><td>library default</td><td>none (judge at eval)</td><td class="n">5</td></tr>
+      <tr><td><code>semantic_chunking</code></td><td>climate PDF as one string</td><td>sentence groups, <b>no cap</b></td><td>percentile 90</td><td>OpenAI</td><td>none</td><td class="n">2</td></tr>
+      <tr><td><code>proposition_chunking</code></td><td>an essay pasted into the notebook</td><td>gpt2 tokens</td><td>200 / 50</td><td>Ollama nomic</td><td>Groq Llama, generates <b>and</b> grades</td><td class="n">4</td></tr>
+      <tr><td><code>contextual_chunk_headers</code></td><td>a company annual report</td><td>characters</td><td>800 / 0</td><td>none (no index)</td><td>gpt-4o-mini writes a title</td><td class="n">—</td></tr>
+      <tr><td><code>document_augmentation</code></td><td>climate PDF as one string</td><td>regex words</td><td>4000 / 100, fragments 128 / 16</td><td>OpenAI</td><td>gpt-4o-mini, 40 questions per window</td><td class="n">1</td></tr>
+      <tr><td><code>HyPE</code></td><td>climate PDF, per page</td><td>characters</td><td>1000 / 200</td><td>OpenAI small</td><td>gpt-4o-mini, one call per chunk</td><td class="n">3</td></tr>
+    </tbody>
+    <caption><span class="badge m">measured · repo cells read, 71 checks pass</span> Across seven notebooks: 4 corpora, 5 size units, 6 embedder settings (one is none), 5 LLMs and k from 1 to 5.</caption>
+  </table></div>
+  <p>No two rows share a baseline, so no number in the repo ranks one chunker above another. The one comparative claim in it is a benchmark reported in the headers notebook's markdown: 50 questions graded 0–10 by an LLM, average 4.72 rising to 6.04 with headers. That is the repo's own claim, never reproduced.</p>
+  <p class="call wrong"><b>Common mistake:</b> "the semantic notebook got better answers than the simple one, so semantic chunking wins." Different corpus scope, unit, cap and k: the two results cannot be lined up.</p>
+  <p class="call proj"><b>In your project:</b> every v1.x arm runs on the same Corpus D snapshot, the same questions, labels, embedder and scorer as v0; only the chunking changes.</p>
+</section>
+
+<!-- 2 -->
+<section class="s" id="axes" aria-labelledby="h-axes">
+  <div class="num">STEP 2 · THE MAP</div>
+  <h2 id="h-axes">Two axes and a return arrow</h2>
+  <p>Sort the six techniques by what they change. Four of them move the <b>boundaries</b>: fixed windows (I1), the document's headings (I2), drops in similarity between neighbouring sentences (I3), or facts an LLM writes out (I4). Two leave the boundaries alone and change the <b>representation</b>, the text that is embedded for each unit: a header in front of it (I5), or questions written about it (I6). Because the axes are independent, members <b>compose</b>: structure-aware chunks with a heading-path header is one arm, not a contradiction.</p>
+  <figure>
+    <svg class="chart" id="axesMap" viewBox="0 0 640 360" role="img" aria-labelledby="axTitle axDesc"><title id="axTitle">The granularity family on two axes</title><desc id="axDesc">Boundary rule on the horizontal axis from fixed to proposition; representation on the vertical axis from the chunk text alone to the chunk plus a header to generated questions. I1 to I4 sit on the bottom row; I5 and I6 sit above the fixed and structure columns; arrows from I6 and I4 point back to the parent chunk that is returned.</desc></svg>
+    <div class="seg" id="axesRet" role="group" aria-label="Returned unit" style="justify-self:start"><button type="button" data-r="off" aria-pressed="true">what is embedded</button><button type="button" data-r="on" aria-pressed="false">+ what is returned</button></div>
+    <figcaption>What to notice: the members are not rivals on one line. A cell can hold two of them at once, and the return arrow shows a third choice that sits across both axes.</figcaption>
+  </figure>
+  <p>The third choice is <b>what you hand to the LLM</b>. The unit you search with can be smaller than the unit you return: a generated question finds its parent chunk (I6), a proposition can point back to the chunk it came from (I4), and later the context-window step returns the neighbours of a hit (X1). "Retrieve small, return big" gives precise matching and readable context; its catch is that two small hits often share one parent, which step 6 deals with.</p>
+  <p class="call wrong"><b>Common mistake:</b> "semantic chunking replaces headers." They act on different axes; you can test semantic boundaries with or without a header.</p>
+  <p class="call proj"><b>In your project:</b> each arm's record names its boundary rule, its representation rule and its returned unit, so a reader can tell which axis an arm moved.</p>
+</section>
+
+<!-- 3 -->
+<section class="s" id="units" aria-labelledby="h-units">
+  <div class="num">STEP 3 · NAME THE UNIT BEFORE THE NUMBER</div>
+  <h2 id="h-units">"Size 500" of what?</h2>
+  <p>The repo measures chunk size in five different units, and so do libraries: characters, tokens of a named tokenizer, regex "words", sentences and propositions. The same text gives very different counts. On the climate PDF (72,593 characters):</p>
+  <div class="tw"><table>
+    <thead><tr><th>Unit</th><th class="n">Count for the whole PDF</th><th class="n">Characters per unit (ρ)</th><th>Who uses it</th></tr></thead>
+    <tbody>
+      <tr><td>MiniLM WordPiece token</td><td class="n">11,694</td><td class="n">6.21</td><td>the course's local embedder (its cap is 256)</td></tr>
+      <tr><td>o200k_harmony token</td><td class="n">12,840</td><td class="n">5.65</td><td>the generator's tokenizer (budget B in step 6)</td></tr>
+      <tr><td>cl100k token</td><td class="n">13,026</td><td class="n">5.57</td><td>LlamaIndex defaults, many guides</td></tr>
+      <tr><td>gpt2 token</td><td class="n">14,375</td><td class="n">5.05</td><td>the proposition notebook</td></tr>
+      <tr><td>regex word <code>\b\w+\b</code></td><td class="n">9,406</td><td class="n">7.72</td><td>the document-augmentation notebook ("tokens")</td></tr>
+      <tr><td>sentence (regex <code>(?&lt;=[.?!])\s+</code>)</td><td class="n">612</td><td class="n">117 mean</td><td>semantic chunking</td></tr>
+    </tbody>
+    <caption><span class="badge m">measured · climate PDF</span> ρ depends on the corpus and the tokenizer; measure it, do not assume 4.</caption>
+  </table></div>
+  <figure class="card play">
+    <div><b>Unit converter</b> <span class="badge f">formula · ρ from the table</span></div>
+    <div class="ctl"><label for="ucN">size</label><input type="range" id="ucN" min="100" max="2000" step="50" value="1000"><output id="ucNv">1000</output></div>
+    <div class="chips" id="ucUnit" role="group" aria-label="Unit"></div>
+    <div class="readout" id="ucRead" aria-live="polite"></div>
+    <figcaption>What to notice: "1,000 tokens" in cl100k is about 5,570 characters here, more than five of v0's 1,000-character chunks.</figcaption>
+  </figure>
+  <p class="call wrong"><b>Common mistake (MC-001):</b> "a token is about a word, so 1,000 tokens ≈ 1,000 characters." On this PDF a v0 chunk of 1,000 characters is about 150 WordPiece tokens; setting a "1,000-token" chunker gives units more than five times larger.</p>
+  <p class="call proj"><b>In your project:</b> every arm's config names its unit and tokenizer, and every comparison table cell states sizes in one unit with the tokenizer named.</p>
+</section>
+
+<!-- 4 -->
+<section class="s" id="sizes" aria-labelledby="h-sizes">
+  <div class="num">STEP 4 · LOOK AT THE SPREAD, NOT THE MEAN</div>
+  <h2 id="h-sizes">Size spreads, and what the embedder cannot read</h2>
+  <p>Seven arms were built on the climate PDF with no API call: v0 (recursive, 1,000 characters, overlap 200, per page), three more points of the I1 grid, one unit per page, one unit per section (cut at chapter and section headings, no size cap), and an <b>I3 probe</b>: semantic breakpoints with MiniLM over the 612 sentences, threshold at the 90th percentile of neighbour distances, no cap. Each dot below is one unit, measured in MiniLM tokens.</p>
+  <figure>
+    <svg class="chart" id="sizeChart" viewBox="0 0 640 360" role="img" aria-labelledby="szTitle szDesc"><title id="szTitle">Tokens per unit for seven arms, with the 128 and 256 token lines</title><desc id="szDesc">v0 and the 500-character arm stay below 256 tokens. The page arm sits almost entirely above 256. The I3 probe spreads from 14 to 686 tokens. The section arm has tiny units of 5 tokens and one of 358.</desc></svg>
+    <figcaption><span class="badge m">measured · MiniLM tokenizer, [CLS]/[SEP] included</span> What to notice: means hide the tails. The I3 probe's median (132 tokens) looks safe, yet 29% of its units are cut at 256.</figcaption>
+  </figure>
+  <div class="tw"><table>
+    <thead><tr><th>Arm</th><th class="n">Units</th><th class="n">Characters min / median / max</th><th class="n">Tokens median / max</th><th class="n">Over 256 (cut)</th></tr></thead>
+    <tbody id="sizeRows"></tbody>
+    <caption><span class="badge m">measured · climate PDF</span> MiniLM reads the first 256 tokens; it was trained on 128.</caption>
+  </table></div>
+  <p>Three things stand out. Pages are 97% truncated on MiniLM: the embedder never sees most of each page. Uncapped semantic chunks run up to 4,029 characters, because nothing stops a long stretch of similar sentences from becoming one chunk. And headings make tiny units: the section arm's smallest unit is a 30-character heading with no body. A size table that shows only the mean would show none of this.</p>
+  <p class="call wrong"><b>Common mistake:</b> "the average chunk is under the limit, so the embedder reads everything." The average says nothing about the tail; count the units over the limit.</p>
+  <p class="call proj"><b>In your project:</b> each arm reports min, median, p95 and max in characters and embedder tokens, plus the truncation share, before any retrieval number. An arm with a large truncation share needs a cap or a longer-context embedder first.</p>
+</section>
+
+<!-- 5 -->
+<section class="s" id="cost" aria-labelledby="h-cost">
+  <div class="num">STEP 5 · INDEX-TIME COST, QUERY-TIME COST, INDEX SIZE</div>
+  <h2 id="h-cost">What each member costs</h2>
+  <p>All members cost the same when a question arrives: one question embedding and a search, with no LLM call. They differ when the index is <b>built</b>, and every rebuild pays again. Counted on the climate PDF (N = 97 v0 chunks):</p>
+  <div class="tw"><table>
+    <thead><tr><th>Member</th><th>LLM calls per build</th><th>Embeddings</th><th>Vectors in the index</th><th>On the climate PDF</th></tr></thead>
+    <tbody>
+      <tr><td>I1 fixed / recursive, I2 structure</td><td>0</td><td>N</td><td>N</td><td>0 calls, 97 embeds</td></tr>
+      <tr><td>I3 semantic</td><td>0</td><td>S + N (every sentence window, then the chunks)</td><td>chunks</td><td>612 + 97 = 709 embeds</td></tr>
+      <tr><td>I4 propositions</td><td>one per base chunk to write them, plus one per proposition to grade it</td><td>P</td><td>P</td><td>≈ 96 + 960 = 1,056 calls (assumes 10 per chunk)</td></tr>
+      <tr><td>I5 header from headings</td><td>0</td><td>N (new text)</td><td>N</td><td>0 calls, 97 embeds</td></tr>
+      <tr><td>I5 context written by an LLM</td><td>N, each reading the whole document</td><td>N</td><td>N</td><td>97 calls, ≈ 1.29 M input tokens</td></tr>
+      <tr><td>I6 questions per document window</td><td>one per window</td><td>fragments + questions</td><td>fragments + questions</td><td>3 calls, 204 vectors</td></tr>
+      <tr><td>I6 HyPE, questions per chunk</td><td>N</td><td>N × q</td><td>N × q</td><td>97 calls; q = 8 → 776 vectors</td></tr>
+    </tbody>
+    <caption><span class="badge d">derived · from measured counts</span> S = 612 sentences, 3 word windows and 84 fragments are measured; 10 propositions per chunk and q are assumptions.</caption>
+  </table></div>
+  <figure>
+    <div class="seg" id="ladderMode" role="group" aria-label="What to show" style="justify-self:start"><button type="button" data-m="calls" aria-pressed="true">LLM calls</button><button type="button" data-m="tokens" aria-pressed="false">input tokens</button></div>
+    <svg class="chart" id="ladder" viewBox="0 0 640 300" role="img" aria-labelledby="ldTitle ldDesc"><title id="ldTitle">Index-time LLM calls or input tokens per member, log scale</title><desc id="ldDesc">Fixed, structure, semantic and the deterministic header need no LLM call. Document-level questions need 3, HyPE and the LLM context 97, propositions about 1,056. In input tokens, the LLM context reads about 1.29 million.</desc></svg>
+    <figcaption><span class="badge d">derived</span> What to notice: four members cost nothing at index time; the jump to one call per chunk or per fact is two to three orders of magnitude.</figcaption>
+  </figure>
+  <p><b>The LLM context arm has a size problem as well as a cost.</b> Each of its calls carries the whole document (13,026 cl100k tokens) plus the chunk and an instruction, about 13,280 tokens in one request. A free plan limited to 8,000 tokens per minute cannot accept that request at all. The money is small (about $0.10 at the course's Groq price, $0.13 on Claude Haiku 5.5); the request size decides.</p>
+  <p><b>Index size</b> follows the vector count: bytes = 128 + N × d × 4. v0 with 1,536-number vectors takes 596,096 bytes; HyPE with 8 questions per chunk keeps 776 vectors, eight times as many.</p>
+  <figure class="card play">
+    <div><b>Index-time or query-time questions?</b> <span class="badge f">formula · N = 97</span> I6 writes questions once per build; Q2 (HyDE) writes a hypothetical answer for every question asked.</div>
+    <div class="ctl"><label for="xoQ">questions asked</label><input type="range" id="xoQ" min="10" max="5000" step="10" value="500"><output id="xoQv">500</output></div>
+    <div class="ctl"><label for="xoR">rebuilds</label><input type="range" id="xoR" min="1" max="24" step="1" value="1"><output id="xoRv">1</output></div>
+    <div class="readout" id="xoRead" aria-live="polite"></div>
+    <figcaption>What to notice: index-side wins only when more questions arrive than N × rebuilds. With replay caching, re-running an evaluation costs neither side anything.</figcaption>
+  </figure>
+  <p class="call wrong"><b>Common mistake (MC-003):</b> "HyPE makes every question slower because it calls an LLM." HyPE's calls happen at index time; at question time it is one embedding and a search, like v0. HyDE (Q2) is the one that calls an LLM per question.</p>
+  <p class="call proj"><b>In your project:</b> each arm's row carries its index-time calls, input tokens, embeds, vectors and bytes per build, and the cost per month at your rebuild rate.</p>
+</section>
+
+<!-- 6 -->
+<section class="s" id="budget" aria-labelledby="h-budget">
+  <div class="num">STEP 6 · COMPARE AT THE SAME TOKEN BUDGET</div>
+  <h2 id="h-budget">Equal k or equal budget</h2>
+  <p>Score every arm at k = 4 and the bigger units win on coverage for a dull reason: four pages carry far more text than four small chunks. So fix the <b>budget</b> instead. Here B is the average size of v0's top 4 on the 8 draft questions, measured with the generator's tokenizer: <b>B = 671 tokens</b>. Each arm then walks its own ranked list and keeps units while the running total stays within B, stopping at the first unit that does not fit (the course's <code>take_within_budget</code>).</p>
+  <figure>
+    <svg class="chart" id="budChart" viewBox="0 0 640 330" role="img" aria-labelledby="bdTitle bdDesc"><title id="bdTitle">Complete evidence on 8 draft questions at k equals 4 and at a 671-token budget</title><desc id="bdDesc">v0 has 8 of 8 both ways. The 500-character arm rises from 7 to 8 at the budget. Pages fall from 5 to 2, the 2000-character arm from 7 to 4, the I3 probe from 6 to 4.</desc></svg>
+    <figcaption><span class="badge m">measured · observation on 8 llm-draft questions</span> What to notice: the ranking of the arms changes with the rule. Small units gain at equal budget; big units lose.</figcaption>
+  </figure>
+  <div class="tw"><table>
+    <thead><tr><th>Arm</th><th class="n">Context tokens at k = 4</th><th class="n">Complete evidence at k = 4</th><th class="n">Mean k at B</th><th class="n">Complete evidence at B</th></tr></thead>
+    <tbody id="budRows"></tbody>
+    <caption><span class="badge m">measured</span> "Complete evidence" = every evidence span of the question is inside the kept units (CE, P6). The draft questions saturate v0 at 8 of 8, so no arm can look better than v0 here.</caption>
+  </table></div>
+  <p>Two traps show up in the numbers:</p>
+  <ul>
+    <li><b>B must be at least the largest unit.</b> The I3 probe's largest chunk is 769 tokens, bigger than B. For one question (D-001) it ranked first, did not fit, and the rule stopped: <b>zero</b> units kept. State the rule (stop, or skip and continue) before you run, and check B ≥ the largest unit of every arm.</li>
+    <li><b>Overlap and duplicate parents spend the budget twice.</b> v0's top 4 hold 671 tokens but only 3,412 distinct characters, because neighbouring chunks share up to 200 characters. With "retrieve small, return big" it is worse: two questions that point at the same parent bring it twice. Remove duplicate parents <b>before</b> filling the budget.</li>
+  </ul>
+  <figure class="card" style="display:grid;gap:10px">
+    <div><b>Duplicate parents</b> <span class="badge t">toy · B = 640</span> A HyPE-style index returns seven question hits, pointing at parents P3, P3, P7, P3, P1, P7, P2.</div>
+    <div class="seg" id="dupMode" role="group" aria-label="Dedup" style="justify-self:start"><button type="button" data-d="raw" aria-pressed="true">fill as returned</button><button type="button" data-d="dedup" aria-pressed="false">dedup parents first</button></div>
+    <div class="idx-docs" id="dupRun"></div>
+    <div class="readout" id="dupRead" aria-live="polite"></div>
+  </figure>
+  <p class="call wrong"><b>Common mistake (MC-005):</b> "bigger chunks are better because they found more evidence at k = 4." They also sent more text. At an equal budget the 2,000-character arm drops from 7 to 4 of 8 here.</p>
+  <p class="call proj"><b>In your project:</b> report every arm at fixed k <b>and</b> at equal B, with the tokenizer named, the realized tokens per question (mean, min, max) and the distinct characters in context.</p>
+</section>
+
+<!-- 7 -->
+<section class="s" id="cells" aria-labelledby="h-cells">
+  <div class="num">STEP 7 · WHAT A CELL MAY SAY</div>
+  <h2 id="h-cells">Fill the table honestly</h2>
+  <p>The outcome of this concept is a filled comparison table. "Filled" does not mean every cell holds a number. A cell holds one of these:</p>
+  <div class="tw"><table>
+    <thead><tr><th>Cell state</th><th>What it contains</th><th>When</th></tr></thead>
+    <tbody>
+      <tr><td><span class="cs cs-m">measured</span></td><td>value [95% interval], n, split, run id</td><td>a run on identical comparison keys</td></tr>
+      <tr><td><span class="cs cs-i">inconclusive</span></td><td>the value and an interval that spans 0</td><td>the run happened; the data cannot tell the arms apart</td></tr>
+      <tr><td><span class="cs cs-n">not run</span></td><td>the reason: empty bucket, cost, a branch not taken</td><td>no run exists</td></tr>
+      <tr><td><span class="cs cs-x">not comparable</span></td><td>which comparison key differs</td><td>the run exists but on other questions, labels, split or scorer</td></tr>
+      <tr><td><span class="cs cs-d">derived</span></td><td>a cost from counts, no metric</td><td>cost columns of arms that were not run</td></tr>
+      <tr><td><span class="cs cs-b">book rating</span></td><td>Low / Medium / High as printed</td><td>its own column only; the book gives no scale</td></tr>
+    </tbody></table></div>
+  <figure class="card">
+    <div class="tw"><table id="cmpTable"></table></div>
+    <figcaption>The v1.x comparison table today. <span class="badge m">measured</span> sizes and costs come from steps 4–5; no retrieval cell is filled, because no per-technique run exists.</figcaption>
+  </figure>
+  <p><b>Not comparable is a decision, not a gap.</b> The v1.4 plan runs propositions on a 5-page subset, so its questions are a subset of v1.3's. The course's comparison check refuses to put the two side by side: on the draft questions, the full set against a 3-question subset is refused with "comparison key differs: qids", and the subset against the champion re-run on the same 3 questions is accepted (questions are compared as sets). So v1.4's row reads "not comparable: qids" until the champion is re-run on the subset's questions.</p>
+  <p class="call wrong"><b>Common mistake:</b> "leave the cell blank if the arm was not run." A blank reads as a zero or as forgotten work. Write the state and the reason.</p>
+  <p class="call proj"><b>In your project:</b> the 06 roll-up needs more columns than it has (index calls and tokens, vectors and bytes, base champion, k and B, split and n, qid-set hash, and "comparable to"); add them before v1.0 runs.</p>
+</section>
+
+<!-- 8 -->
+<section class="s" id="targets" aria-labelledby="h-targets">
+  <div class="num">STEP 8 · EACH MEMBER IS A HYPOTHESIS ABOUT ONE FAILURE</div>
+  <h2 id="h-targets">Which failure each member targets</h2>
+  <p>Phase 3's failure log (M5) sorts misses into buckets. Each member of the family is a bet on one of them, and each has a case where it should not be used:</p>
+  <div class="tw"><table class="heat" id="heatTable"></table></div>
+  <p class="key"><span class="badge">hypothesis</span> ↑ expected to help · ↓ expected to hurt · blank no effect expected. Every measured cell reads "not run" until the per-technique runs exist; then each cell gets a Δ with its n.</p>
+  <p><b>Corpus D cannot test a title header.</b> The climate PDF is one document, so a header holding the document title is the same on all 97 chunks: 1 distinct value of 97. It shifts every vector the same way and carries no information to rank by. A path header (title, chapter, section at the chunk's start) has 71 distinct values of 97, adds about 10% to each chunk's tokens and pushes none over 256. Title headers need a corpus with many documents (Corpus T).</p>
+  <p><b>Structure is there, but not where a size rule looks.</b> The PDF has 282 headings: 1 title, 21 chapters, 68 sections and 192 sub-headings. The 192 sub-headings (68% of those below the title) are bold text at body size, so a detector that only looks for larger fonts misses them. And 11 heading names repeat across chapters ("Paris Agreement" on pages 10 and 23): only the chapter level tells those pages apart.</p>
+  <p class="call wrong"><b>Common mistake:</b> "a technique that helps on average should be adopted." Read the bucket: a header arm may help near-duplicate questions and do nothing for the rest. The book's Low / Medium / High ratings are hypotheses with no scale, not measurements.</p>
+  <p class="call proj"><b>In your project:</b> write the bucket hypothesis for each arm before it runs, report Δ per bucket with n, and fill the "when not to use" column with one example from your own documents.</p>
+</section>
+
+<!-- 9 -->
+<section class="s" id="family" aria-labelledby="h-family">
+  <div class="num">STEP 9 · MANY ARMS, FEW QUESTIONS</div>
+  <h2 id="h-family">The family needs its own statistics</h2>
+  <p><b>Effects are conditional.</b> The v1.x plan tries each arm on top of the current champion: v1.1 on v1.0's winner, v1.2 on v1.1's, and so on. So "headers add +x" really means "headers add +x <i>on top of structure-aware chunks</i>". On v0 the same arm could do more, less or nothing. Every row records its base.</p>
+  <figure>
+    <svg class="chart" id="lineage" viewBox="0 0 640 150" role="img" aria-labelledby="lnTitle lnDesc"><title id="lnTitle">The v1.x champion lineage</title><desc id="lnDesc">v0 then v1.0 chunk grid, v1.1 structure, v1.2 headers, v1.3 semantic, v1.4 propositions on a subset, with I6 on a side branch. None has run yet.</desc></svg>
+    <figcaption><span class="badge">plan · 06</span> Each arrow is "tried on top of". None of these has run yet, so every box is "not run".</figcaption>
+  </figure>
+  <p><b>Trying many arms makes a lucky winner likely.</b> If each comparison has a 5% chance of a false "win" and none of the arms truly helps, the chance of at least one false win after m comparisons is 1 − 0.95^m:</p>
+  <figure>
+    <svg class="chart" id="fwerChart" viewBox="0 0 640 260" role="img" aria-labelledby="fwTitle fwDesc"><title id="fwTitle">Chance of at least one false win against the number of comparisons</title><desc id="fwDesc">The curve rises from 0.05 at one comparison to 0.226 at five, 0.460 at twelve and 0.850 at thirty-seven.</desc></svg>
+    <figcaption><span class="badge f">formula</span> What to notice: five confirmations on test already give a 22.6% chance of adopting at least one arm that does nothing. The v1.0 grid alone has 34 to 37 configurations.</figcaption>
+  </figure>
+  <p>Two defences. Cap each round at three pre-registered arms, and correct within the round with <b>Holm</b>: sort the p-values, compare the smallest with α/3 (0.0167), the next with α/2 (0.025), the last with α (0.05), and stop at the first that fails. Holm never rejects less than Bonferroni (α/3 for all three) and often more.</p>
+  <figure class="card play">
+    <div><b>What can your dev set detect?</b> <span class="badge f">formula · paired, right/wrong per question</span></div>
+    <div class="ctl"><label for="mdN">questions n</label><input type="range" id="mdN" min="6" max="100" step="1" value="12"><output id="mdNv">12</output></div>
+    <div class="ctl"><label for="mdBC">disagreements b + c</label><input type="range" id="mdBC" min="1" max="30" step="1" value="4"><output id="mdBCv">4</output></div>
+    <div class="readout" id="mdRead" aria-live="polite"></div>
+    <figcaption>What to notice: with 12 dev questions you can only see a difference of about 0.47 in complete evidence, nearly half the scale. One question is worth 0.083.</figcaption>
+  </figure>
+  <p>Here b counts questions only the first arm gets right and c questions only the second gets right; only those disagreements carry information. Dev will hold about 12 to 16 answerable questions (30% of 40–55), so <b>"inconclusive" is the expected verdict</b> for most rows, and writing it is a success, not a failure.</p>
+  <p>The draft questions show this in miniature. On them no arm beats v0 on a single question (c = 0 everywhere). Pages lose 3 to 0 at k = 4; a bootstrap interval excludes zero, yet the exact two-sided test on 3 disagreements gives p = 0.25, and at equal budget the strongest loss (6 to 0, p = 0.031) still misses Holm's first threshold across 6 arms (0.0083). On 8 questions a bootstrap is overconfident; count the disagreements.</p>
+  <p class="call wrong"><b>Common mistake:</b> "the arm with the best dev score wins." With many arms and a small dev set, the best dev score is partly luck; it needs a pre-registered shortlist, Holm, and one confirmation on test.</p>
+  <p class="call proj"><b>In your project:</b> keep one register of every arm tried (the denominator for the family error), grow the eval set before v1.0, and break ties towards v0 or the cheaper arm.</p>
+</section>
+
+<!-- 10 -->
+<section class="s" id="others" aria-labelledby="h-others">
+  <div class="num">STEP 10 · OTHER PEOPLE'S BENCHMARKS</div>
+  <h2 id="h-others">Directions transfer, numbers do not</h2>
+  <p>Published chunker comparisons use different scores, k, corpora, embedders and question sources. A number from one cannot be ranked against a number from another, or against yours. What each one does give you is a direction under stated conditions, or a design rule:</p>
+  <div class="tw"><table>
+    <thead><tr><th>Study</th><th>Score it uses</th><th>What it found</th><th>What transfers</th></tr></thead>
+    <tbody>
+      <tr><td>Chroma's chunking report</td><td>overlap of retrieved and gold <b>character ranges</b>: recall, precision, IoU, at k = 5</td><td>at a fixed k, bigger chunks raise recall and lower IoU; the LLM chunker led on recall and trailed on IoU (secondary summaries)</td><td>span-based gold is right; at fixed k, recall and IoU rank chunkers in opposite orders, so compare at an equal budget</td></tr>
+      <tr><td>Qu, Tu &amp; Bao, NAACL 2025</td><td>F1@5 for retrieval and answers</td><td>semantic chunking won mainly on <b>stitched</b> data (documents glued together, so topic shifts are artificial); fixed-size did better on real documents</td><td>on real documents like Corpus D, expect a small or no I3 gain</td></tr>
+      <tr><td>NVIDIA developer blog</td><td>end-to-end answer accuracy (scale not stated)</td><td>page-level chunks had the best average on paginated financial PDFs</td><td>add a page arm for paginated PDFs; check the embedder's cap (step 4)</td></tr>
+      <tr><td>HiChunk, ACL 2026</td><td>answer metrics at a fixed 4,096-token context</td><td>argues that questions with one short piece of evidence cannot tell chunkers apart</td><td>compare at an equal budget; use questions whose evidence spans several sentences</td></tr>
+      <tr><td>Merola &amp; Singh, ECIR 2025 workshop</td><td>retrieval relevance metrics</td><td>contextual text kept meaning better but cost more compute; late chunking was cheaper, gains depended on the embedder</td><td>representation arms need a cost column; their gains are embedder-specific</td></tr>
+    </tbody>
+    <caption><span class="badge">external · research §5.2</span> Results as recorded there; several were checked only through search summaries.</caption>
+  </table></div>
+  <p><b>How can two reports both be right?</b> Character-range recall rewards returning more text; IoU penalises every returned character that is not gold. At a fixed k, a chunker with bigger units wins on recall and loses on IoU on the same data. Neither number is wrong; they answer different questions, and neither fixes the amount of text sent.</p>
+  <p class="call wrong"><b>Common mistake:</b> "their chunker scored 0.9, ours 0.6, so theirs is better." Different score, k, corpus and questions: the two numbers are not on one scale.</p>
+  <p class="call proj"><b>In your project:</b> quote outside results only as "direction, under these conditions", and turn them into hypotheses for your own table.</p>
+</section>
+
+<!-- 11 -->
+<section class="s" id="choose" aria-labelledby="h-choose">
+  <div class="num">STEP 11 · CHOOSING FOR A CORPUS YOU HAVE NOT SEEN</div>
+  <h2 id="h-choose">A decision procedure, worked once</h2>
+  <p>For a new corpus, answer five questions in order. Each one turns a member on or off:</p>
+  <figure class="card"><ol class="flow">
+    <li><b>Is there reliable structure?</b> (headings found on most pages or files) → yes: take boundaries from it (I2). No: recursive chunks (I1) at a size that fits the embedder.</li>
+    <li><b>Are there near-duplicate documents or sections?</b> → yes: a header that names what differs (I5, from headings: free).</li>
+    <li><b>Do chunks start "anonymous"</b> ("it", "this policy", an orphaned heading)? → yes: a header; an LLM-written context only if the free header helps and the cost fits.</li>
+    <li><b>What do the questions look like?</b> Many single facts → propositions on a subset (I4), if the corpus is static. Users phrase things in other words → generated questions (I6). Long prose that changes topic with no headings → semantic boundaries (I3).</li>
+    <li><b>What does a rebuild cost, times rebuilds per month?</b> → drop any arm whose index-time calls do not fit the budget or the provider's limits.</li>
+  </ol></figure>
+  <p><b>Worked example.</b> An HR policy handbook: 120 Markdown pages with clean H1–H3 headings, three near-identical regional versions (UK, US, India), questions such as "how much parental leave do I get in the US office?", updated every month.</p>
+  <ul>
+    <li><b>Structure exists</b>, so boundaries come from the headings (I2).</li>
+    <li><b>Near-duplicates exist</b> (three regions), and that is exactly where headers help: prepend region, document title and section path (I5 from headings, 0 LLM calls). The interview repo's own example of a heading path is "Handbook &gt; Benefits &gt; Parental leave" (AIQ 04 Q4, MIT, © 2026 Om).</li>
+    <li><b>Skip I3</b>: the headings already give the boundaries, and the studies in step 10 predict little gain on real documents.</li>
+    <li><b>Skip I4</b>: a monthly rebuild would pay its LLM calls every month, and the questions are lookups a section already answers.</li>
+    <li><b>Keep I6 for later</b>, only if a vocabulary-mismatch bucket appears in the failure log.</li>
+  </ul>
+  <div class="card prereg"><b>Pre-registered plan</b>
+    <ul>
+      <li>A0 recursive 1,000 / 200 (baseline) · A1 = I2 (heading sections, capped at the embedder's limit) · A2 = I2 + I5 (region + title + section path).</li>
+      <li>Primary: complete evidence at k = 4 <b>and</b> at an equal budget B, on region-scoped questions. Guards: MRR@10 and mean context tokens.</li>
+      <li>Two comparisons (A1 vs A0, A2 vs A1) with Holm at 0.025 / 0.05; select on dev, confirm once on test; MDE stated at the dev n; "inconclusive" allowed; ties go to the cheaper arm.</li>
+    </ul></div>
+  <p class="call wrong"><b>Common mistake:</b> "test every technique to be safe." Every extra arm raises the family error (step 9) and the cost; three pre-registered arms with reasons beat ten tried at random.</p>
+  <p class="call proj"><b>In your project:</b> the same five questions decide v1.x on Corpus T; Corpus D keeps parity with the repo. Never use Corpus H for this exercise: it is kept for the capstone (K1).</p>
+</section>
+
+<!-- 12 -->
+<section class="s" id="project" aria-labelledby="h-project">
+  <div class="num">STEP 12 · PUTTING IT TOGETHER</div>
+  <h2 id="h-project">What this means for v1.x</h2>
+  <div class="tw"><table>
+    <thead><tr><th>Idea from I-CMP</th><th>Where it lives in the course</th></tr></thead>
+    <tbody>
+      <tr><td>One variable at a time, identical keys</td><td>every v1.x run uses the comparison-key check (06 §4.1); v1.4 needs a champion re-run on its subset</td></tr>
+      <tr><td>Fixed k and equal budget</td><td>both columns in the roll-up, with the tokenizer, realized tokens and distinct characters</td></tr>
+      <tr><td>Honest cells</td><td>the cell-state legend in the roll-up; book ratings in their own column</td></tr>
+      <tr><td>Cost per arm</td><td>index calls, tokens, embeds, vectors, bytes and build time per arm, from the cache's usage rows</td></tr>
+      <tr><td>Family error</td><td>at most 3 arms per round, Holm, one test touch per round, one register of every arm tried</td></tr>
+      <tr><td>Power</td><td>grow the eval set towards 60–100 items before the v1.0 grid; state the MDE at the dev n in every report</td></tr>
+      <tr><td>Where decisions are made</td><td>Corpus T decides; Corpus D keeps parity with the repo (06 §5.1)</td></tr>
+    </tbody></table></div>
+  <p><b>The deliverable</b> of this concept is the filled table (your numbers or the honest state of each cell) plus a written choice for one corpus you have not seen, with its pre-registered plan.</p>
+  <p class="call wrong"><b>Common mistake:</b> "I-CMP waits until every technique has run." The table, the legend, the cost columns and the plan can be written now; measured cells fill in as runs arrive.</p>
+</section>
+
+<!-- 13 -->
+<section class="s full" id="repo" aria-labelledby="h-repo">
+  <span class="tag">Full only</span>
+  <div class="num">STEP 13 · READING THE REPO CRITICALLY</div>
+  <h2 id="h-repo">What the notebooks really do</h2>
+  <div class="tw"><table>
+    <thead><tr><th>Cell (0-based)</th><th>What it does</th><th>Read it as</th></tr></thead>
+    <tbody>
+      <tr><td><code>choose_chunk_size</code> cells 4, 6, 8</td><td>loads every file in the data folder, uses the first 20, generates 25 questions; sets the judge model after generating them</td><td>not a climate-PDF experiment; which files the folder held is UNVERIFIED</td></tr>
+      <tr><td><code>semantic_chunking</code> cell 12</td><td>percentile 90 breakpoints, no size argument</td><td>uncapped chunks (step 4: up to 4,029 characters on our probe)</td></tr>
+      <tr><td><code>proposition_chunking</code> cells 12, 15, 16</td><td>the same Groq model writes the propositions and grades them, threshold 7 of 10 on four criteria</td><td>a self-graded filter, never checked against people</td></tr>
+      <tr><td><code>contextual_chunk_headers</code> cells 9–13, 15</td><td>800-character chunks of a 10-K, an LLM-written title, one chunk reranked; no index built; a 50-question benchmark in markdown</td><td>a mechanism demo and a repo claim, not a retrieval result</td></tr>
+      <tr><td><code>document_augmentation</code> cells 4, 6, 10</td><td>"tokens" are regex words; 40 questions per 4,000-word window; k = 1</td><td>3 windows on the climate PDF; the parent is a 4,000-word window</td></tr>
+      <tr><td><code>HyPE</code> cells 11, 15</td><td>cell 11 does not parse as committed; the saved output shows 97 of 97 chunks processed; results deduplicated with <code>set()</code> at k = 3</td><td>the 97 index-time calls are real; the saved run predates the syntax error</td></tr>
+    </tbody>
+    <caption><span class="badge m">measured · repo cells read</span> Repo text is paraphrased; the repo has a non-commercial licence.</caption>
+  </table></div>
+</section>
+
+<!-- 14 -->
+<section class="s full" id="book" aria-labelledby="h-book">
+  <span class="tag">Full only</span>
+  <div class="num">STEP 14 · READING THE BOOK CRITICALLY</div>
+  <h2 id="h-book">What the book offers, and its limits</h2>
+  <p class="call note">The book was not open when this page was written. The pages below come from the course's mapping files and are <b>UNVERIFIED</b> pointers; open them and check.</p>
+  <div class="tw"><table>
+    <thead><tr><th>Book</th><th>What it offers (per the mapping)</th><th>How to read it</th></tr></thead>
+    <tbody>
+      <tr><td><a data-book="Appendix.pdf" data-page="9">App p.9–11/23</a></td><td>quick-reference tables rating cost as Low / Medium / High, and a decision tree</td><td>ratings with no stated scale: hypotheses, kept in their own column</td></tr>
+      <tr><td><a data-book="chapter 9.pdf" data-page="10">Ch9 p.10–11/14</a></td><td>where semantic chunking sits among strategies, as a spectrum</td><td>the spectrum lists the context window as a chunking strategy, but a window leaves the chunks unchanged (X1)</td></tr>
+      <tr><td><a data-book="chapter 4.pdf" data-page="10">Ch4 p.10–11/15</a></td><td>propositions against standard chunks</td><td>a hypothesis for the I4 row, with its cost</td></tr>
+      <tr><td><a data-book="chapter 8.pdf" data-page="7">Ch8 p.7–10/11</a></td><td>comparisons with headers and propositions</td><td>the two course plans cite different pages here; record which is which when you open it</td></tr>
+      <tr><td><a data-book="chapter 1.pdf" data-page="10">Ch1 p.10–11/14</a></td><td>the chunk-size trade-off</td><td>check it against step 6: the trade-off depends on whether k or the budget is fixed</td></tr>
+    </tbody></table></div>
+</section>
+
+<!-- 15 -->
+<section class="s full" id="beyond" aria-labelledby="h-beyond">
+  <span class="tag">Full only</span>
+  <div class="num">STEP 15 · BEYOND THE FAMILY</div>
+  <h2 id="h-beyond">Late chunking, auto-merge, and two finer points</h2>
+  <ul>
+    <li><b>Late chunking</b> moves along the representation axis without an LLM: embed the whole document with a long-context model, then average the token vectors inside each chunk's span, so each chunk's vector has seen its context. It needs an embedder that returns token vectors and reads the whole document; Cohere's API returns one vector per text, so it is a demo, not a v1.x arm.</li>
+    <li><b>Hierarchical chunking with auto-merge</b> (HiChunk): chunk at several levels and, when enough children of one parent are retrieved, return the parent. It is "retrieve small, return big" decided at query time.</li>
+    <li><b>Chroma's precision denominator</b> adds up the lengths of the retrieved chunks without merging overlaps, so overlapping chunks are penalised twice; its "precision Ω" is the best score any set of chunks could reach. Read their numbers with that in mind.</li>
+    <li><b>The crossover with caching:</b> with the course's record-and-replay cache, re-running an evaluation costs neither I6 nor Q2 anything; the crossover in step 5 matters for real traffic and for rebuilds after the corpus changes.</li>
+    <li><b>When Corpus T and Corpus D disagree</b> about an arm, that is a finding: write it down with both n, rather than averaging the two.</li>
+  </ul>
+</section>
+
+<!-- VERIFY -->
+<section class="s" id="verify" aria-labelledby="h-verify">
+  <div class="num">PRACTISE · VERIFY IT YOURSELF</div>
+  <h2 id="h-verify">Rebuild every number and chart in a notebook</h2>
+  <p>The notebook <code>study/notebooks/I-CMP_granularity_verify.ipynb</code> rebuilds the units table, the heading tree, all seven arms and their sizes, the cost ladder, the equal-budget comparison on the draft questions, the comparability check and the family statistics, checks each value against this page, and redraws the charts as interactive Plotly charts. It makes no API call.</p>
+  <ol>
+    <li>Open the notebook in VS Code (or from the I-CMP page of the study kit).</li>
+    <li>Choose the kernel: <b>Select Kernel → .venv (Python 3.12)</b> of <code>rag_learning</code>.</li>
+    <li><b>Run All</b>. Each step prints its checks (✓ or ✗); the last cell prints the total.</li>
+  </ol>
+  <div class="card" id="nbSummary"><b>What it rebuilds</b> <span class="badge m" id="nbBadge">172 checks · 6 interactive charts · about 30 seconds</span>
+    <ul style="margin-top:6px;font-size:.92rem">
+      <li><b>Steps 1–3</b> read the seven notebooks' settings and recompute ρ for four tokenizers, the regex words and sentences.</li>
+      <li><b>Steps 4–5</b> rebuild the heading tree and the seven arms, their size spreads and truncation shares, and the cost ladder.</li>
+      <li><b>Steps 6–7</b> rank every arm with MiniLM on the 8 draft questions, fill the 671-token budget, and run the comparison-key check.</li>
+      <li><b>Steps 8–9</b> rebuild the header facts, the discordant counts with exact p-values, the family error, Holm and the MDE.</li>
+    </ul>
+    <p style="margin-top:6px;font-size:.9rem;color:var(--muted)">A ✗ anywhere means the page and the code disagree: tell the tutor. Rebuild the notebook with <code>uv run python sources/verification/I-CMP/icmp_build_verify_nb.py</code>, then run it with <code>icmp_verify_nb_run.py</code>.</p></div>
+</section>
+
+<!-- APPLY -->
+<section class="s" id="apply" aria-labelledby="h-apply">
+  <div class="num">APPLY · USE IT ON YOUR OWN DATA</div>
+  <h2 id="h-apply">Which arms should you test, and what will they cost?</h2>
+  <p>The tool <code>study/tools/chunker_chooser.py</code> runs this lesson's checks on <b>your</b> documents and questions and drafts a pre-registered plan. Run it from <code>rag_learning/</code>:</p>
+  <pre>uv run python study/tools/chunker_chooser.py --docs "D:\my-project\docs" --questions q.jsonl --report chooser_report.md
+# a usage profile (rebuilds and questions per month, budget, provider limits): --profile profile.json
+# the embedder whose cap matters: --embedder minilm (256) or cohere-v4 · your dev size for the MDE: --dev-n 12</pre>
+  <p>It makes <b>no API call</b> and needs no embedding model: it measures the text (structure, sizes against the cap, near-duplicates, anonymous chunk starts, the question mix) and estimates each arm's index-time cost from token counts.</p>
+  <h3>The real-world checklist</h3>
+  <p style="font-size:.92rem;color:var(--muted)">Tick each one for your own project. Your ticks stay in this browser only.</p>
+  <div class="check" id="checklist"></div>
+  <div class="card" id="example" style="display:grid;gap:10px"><div><b>Two examples</b> <span class="badge m">measured · climate PDF and a toy handbook</span></div>
+    <p style="font-size:.92rem" id="exText">The tool's example reports are in <code>study/tools/examples/</code>: the climate PDF with the draft questions, and a small three-region handbook written for the tool.</p>
+    <p style="font-size:.86rem;color:var(--muted)">The examples demonstrate the tool; they do not evaluate a chunker. Full reports: <a data-kit="#/read/study/tools/examples/climate_chooser_report.md" data-path="rag_learning/study/tools/examples/climate_chooser_report.md">climate_chooser_report.md</a> · <a data-kit="#/read/study/tools/examples/handbook_chooser_report.md" data-path="rag_learning/study/tools/examples/handbook_chooser_report.md">handbook_chooser_report.md</a>.</p></div>
+</section>
+
+<!-- CHECK -->
+<section class="s" id="check" aria-labelledby="h-check">
+  <div class="num">CHECK YOURSELF</div>
+  <h2 id="h-check">Can you use it on something new?</h2>
+  <p>Answer without scrolling back; then take the full quiz the next day.</p>
+  <div class="q" id="quick"></div>
+  <p>All questions, with hints, model answers and key points: <a data-kit="#/quiz/I-CMP/next" data-path="rag_learning/study/questions/I-CMP_questions.md">open the I-CMP quiz</a>. Text version: <a data-kit="#/read/study/reading/I-CMP_granularity.md" data-path="rag_learning/study/reading/I-CMP_granularity.md">short reading</a>. Next topic: <a data-kit="#/c/R1" data-path="rag_learning/concepts/R1_hybrid_fusion.md">hybrid search and fusion (R1)</a>.</p>
+</section>
+
+<footer>
+  <p><b>Where every number comes from.</b> <span class="badge m">measured</span> numbers come from local runs on the repo's climate PDF and the repo's notebooks (<code>sources/verification/I-CMP/I-CMP_FACTS.md</code>, K1–K12 and §2); the notebook recomputes them. <span class="badge d">derived</span> costs are arithmetic on those counts with the course's 2026-10-17 prices; the propositions-per-chunk, instruction-token and questions-per-chunk figures are assumptions. <span class="badge t">toy</span> numbers were written for this page. The draft questions are LLM-written and unchecked: illustration only. No API was called to build this page.</p>
+  <p><b>External:</b> the comparative studies in step 10 as recorded in <code>study/research/phase_04_indexing.md</code> (Concept I-CMP, §5.2, read 2026-10-17); AIQ <code>04-rag-and-retrieval/questions.md</code> Q4 @ e080df2 (MIT, Copyright (c) 2026 Om). <b>UNVERIFIED:</b> every book page (the book was not open), the provider's per-minute limit, the contents of the repo's data folder.</p>
+</footer>
+</main>
+</div>
+<button type="button" class="totop" id="totop" aria-label="Back to top">↑</button>
+
+
+<script>
+"use strict";
+(function () {
+  const $ = (s, el = document) => el.querySelector(s);
+  const $$ = (s, el = document) => [...el.querySelectorAll(s)];
+  const root = document.documentElement;
+  const store = { get(k, d) { try { return localStorage.getItem(k) ?? d; } catch { return d; } },
+                  set(k, v) { try { localStorage.setItem(k, v); } catch { /* private window */ } } };
+  const fmt = (x, d = 3) => Number.isFinite(x) ? x.toFixed(d) : "—";
+  const KIT = location.protocol.startsWith("http") && location.pathname.startsWith("/lesson/");
+  const esc = t => String(t).replace(/&/g, "&amp;").replace(/</g, "&lt;");
+
+  /* ---------- depth, colour, theme ---------- */
+  function setDepth(m) {
+    root.dataset.depth = m;
+    $$(".seg button").forEach(b => b.setAttribute("aria-pressed", String(b.dataset.depth === m)));
+    store.set("lesson-depth", m);
+    spy();
+  }
+  $$(".seg button").forEach(b => b.addEventListener("click", () => setDepth(b.dataset.depth)));
+  function paintColor() {
+    const dark = root.dataset.theme === "dark";
+    $("#color").innerHTML = `<span aria-hidden="true">${dark ? "☀" : "☾"}</span><span class="lbl"> ${dark ? "Light" : "Dark"}</span>`;
+    $("#color").setAttribute("aria-label", dark ? "Switch to light" : "Switch to dark");
+  }
+  $("#color").addEventListener("click", () => { root.dataset.theme = root.dataset.theme === "dark" ? "light" : "dark"; store.set("lesson-color", root.dataset.theme); paintColor(); });
+  paintColor();
+  $("#style").value = root.dataset.style;
+  $("#style").addEventListener("change", e => { root.dataset.style = e.target.value; store.set("lesson-style", e.target.value); });
+
+  /* ---------- contents panel: where am I, hide/show, left/right, back to top ---------- */
+  const links = $$("#toc a");
+  const targets = links.map(a => document.getElementById(a.getAttribute("href").slice(1)));
+  const narrow = () => !!(window.matchMedia && window.matchMedia("(max-width: 980px)").matches);
+  let lastCur = -1;
+  function spy() {
+    const y = window.scrollY + 90;
+    let cur = 0;
+    targets.forEach((t, i) => { if (t && t.offsetParent !== null && t.getBoundingClientRect().top + window.scrollY <= y) cur = i; });
+    links.forEach((a, i) => a.classList.toggle("on", i === cur));
+    const visible = targets.filter(t => t && t.offsetParent !== null);
+    const pos = visible.indexOf(targets[cur]) + 1;
+    const name = links[cur].textContent.replace(/Full$/, "").replace(/^[^A-Za-z]+/, "").trim();
+    $("#where").textContent = `${name} · ${pos} of ${visible.length}`;
+    $("#crumb").textContent = ` › ${links[cur].querySelector(".n").textContent.trim()} ${name}`;
+    const h = document.documentElement.scrollHeight - innerHeight;
+    const pct = (h > 0 ? Math.min(100, 100 * window.scrollY / h) : 0) + "%";
+    $("#bar").style.width = pct; $("#topprog").style.width = pct;
+    $("#totop").classList.toggle("show", window.scrollY > 500);
+    if (cur !== lastCur) {                       // keep the current step visible inside a long panel
+      lastCur = cur;
+      const side = $("#side"), a = links[cur];
+      if (side.scrollHeight > side.clientHeight && (a.offsetTop < side.scrollTop + 40 || a.offsetTop + a.offsetHeight > side.scrollTop + side.clientHeight - 20))
+        side.scrollTop = Math.max(0, a.offsetTop - side.clientHeight / 3);
+    }
+  }
+  addEventListener("scroll", spy, { passive: true });
+  addEventListener("resize", spy);
+  function closeDrawer() { document.body.classList.remove("side-open"); if (narrow()) $("#menu").setAttribute("aria-expanded", "false"); }
+  links.forEach(a => a.addEventListener("click", () => {
+    const t = document.getElementById(a.getAttribute("href").slice(1));
+    if (t && t.closest(".full") && root.dataset.depth === "short") setDepth("full");
+    closeDrawer();
+  }));
+  function setToc(v) { root.dataset.toc = v; store.set("lesson-toc", v); $("#menu").setAttribute("aria-expanded", String(v === "shown")); spy(); }
+  $("#menu").addEventListener("click", () => {
+    if (narrow()) { const open = document.body.classList.toggle("side-open"); $("#menu").setAttribute("aria-expanded", String(open)); }
+    else setToc(root.dataset.toc === "hidden" ? "shown" : "hidden");
+  });
+  $("#main").addEventListener("click", () => { if (document.body.classList.contains("side-open")) closeDrawer(); });
+  function paintSide() { $("#sidepos").textContent = root.dataset.side === "right" ? "⇆ Left" : "⇆ Right"; }
+  $("#sidepos").addEventListener("click", () => { root.dataset.side = root.dataset.side === "right" ? "left" : "right"; store.set("lesson-side", root.dataset.side); paintSide(); });
+  paintSide();
+  $("#menu").setAttribute("aria-expanded", String(!narrow() && root.dataset.toc === "shown"));
+  addEventListener("keydown", e => {
+    if (e.key && e.key.toLowerCase() === "t" && !e.ctrlKey && !e.metaKey && !e.altKey && !/^(INPUT|TEXTAREA|SELECT)$/.test((document.activeElement || {}).tagName || "")) $("#menu").click();
+  });
+  $("#totop").addEventListener("click", () => { window.scrollTo({ top: 0, behavior: "smooth" }); $(".top .t").focus?.(); });
+  const qd = new URLSearchParams(location.search).get("mode");
+  setDepth(qd === "full" || location.hash === "#full" ? "full" : qd === "short" ? "short" : store.get("lesson-depth", "short"));
+
+  /* ---------- way back: all phases (kit Route page, or the offline route map) ---------- */
+  const HOME = KIT ? "/#/" : "../../RAG_ROUTE_MAP.html";
+  ["#home", "#toRoute"].forEach(s => { const a = $(s); if (a) a.href = HOME; });
+  $$(".kitonly").forEach(a => { if (KIT) a.href = "/" + a.dataset.route; else a.remove(); });
+
+  /* ---------- links: study kit routes, book PDFs ---------- */
+  $$("a[data-kit]").forEach(a => {
+    if (KIT) { a.href = "/" + a.dataset.kit; return; }
+    const c = document.createElement("code");
+    c.textContent = a.dataset.path; c.title = "Open from the study kit to get a link";
+    a.replaceWith(c);
+  });
+  $$("a[data-book]").forEach(a => {
+    a.href = (KIT ? "/book/" : "../../../RAG_Made_Simple_The_Complete_Visual_Guide/") + encodeURIComponent(a.dataset.book) + "#page=" + a.dataset.page;
+    a.target = "_blank"; a.rel = "noopener"; a.title = "Open the book at this page";
+  });
+
+  /* ---------- tiny SVG chart helpers ---------- */
+  const keepMeta = svg => $$("title,desc", svg).map(e => e.outerHTML).join("");
+
+
+  /* ---------- I-CMP data (sources/verification/I-CMP/I-CMP_FACTS.md) ---------- */
+  const ARMS = [
+    { id: "v0", name: "v0 recursive 1000/200", n: 97, ch: [393, 935, 1000], tk: [149, 182], cut: 0, ctx4: 671, ce4: 8, kB: 3.50, ceB: 8 },
+    { id: "g500", name: "I1 grid 500/100", n: 201, ch: [94, 449, 500], tk: [74, 99], cut: 0, ctx4: 323, ce4: 7, kB: 7.75, ceB: 8 },
+    { id: "g1500", name: "I1 grid 1500/300", n: 65, ch: [636, 1303, 1500], tk: [215, 270], cut: 4, ctx4: 934, ce4: 7, kB: 2.25, ceB: 5 },
+    { id: "g2000", name: "I1 grid 2000/400", n: 65, ch: [393, 953, 2000], tk: [160, 365], cut: 32, ctx4: 1022, ce4: 7, kB: 2.38, ceB: 4 },
+    { id: "page", name: "page", n: 33, ch: [636, 2225, 2494], tk: [354, 443], cut: 32, ctx4: 1590, ce4: 5, kB: 1.00, ceB: 2 },
+    { id: "sect", name: "sections, uncapped", n: 90, ch: [30, 992, 1898], tk: [156, 358], cut: 1, ctx4: 620, ce4: 7, kB: 5.12, ceB: 7 },
+    { id: "i3", name: "I3 probe (semantic)", n: 62, ch: [78, 812.5, 4029], tk: [131.5, 686], cut: 18, ctx4: 817, ce4: 6, kB: 2.75, ceB: 4 }];
+  /* tokens per unit (MiniLM WordPiece incl. specials), sorted; measured (K4) */
+  const WP = {"v0":[59,77,78,81,83,84,90,97,99,99,100,100,101,102,104,105,105,107,109,109,110,111,112,121,123,124,127,133,135,136,137,139,140,141,142,143,144,144,144,145,145,145,146,147,147,147,148,149,149,150,151,151,151,152,152,152,153,153,153,153,153,153,153,154,154,154,156,156,157,157,158,158,158,159,160,160,161,161,162,162,163,164,165,165,167,167,168,170,171,172,174,174,174,174,177,179,182],"g500":[17,18,20,25,28,30,35,35,35,37,38,40,44,49,49,51,51,53,53,54,56,56,57,58,58,60,60,62,62,63,63,63,63,63,64,65,65,65,65,65,65,65,65,65,65,67,67,67,67,67,67,67,67,68,68,68,68,68,68,69,69,69,69,69,69,70,70,70,70,70,70,70,70,71,71,71,71,71,71,71,72,72,72,72,72,72,73,73,73,73,73,73,73,73,73,73,73,73,73,73,74,74,74,74,74,74,74,75,75,75,75,75,75,75,75,75,75,76,76,76,76,76,76,76,76,76,76,77,77,77,77,77,77,77,77,77,77,78,78,78,78,78,78,78,78,78,78,78,78,78,79,79,79,80,80,80,80,81,81,81,81,81,82,82,82,82,82,83,83,83,83,83,83,84,84,84,84,84,85,85,85,85,86,87,87,88,89,89,90,90,90,90,91,91,92,92,92,93,93,94,99],"g1500":[109,118,129,135,137,140,150,151,152,152,154,155,157,163,164,165,165,170,172,173,175,179,182,184,184,185,186,191,191,202,207,213,215,215,217,217,223,223,226,226,227,229,231,231,232,233,234,236,236,236,236,238,239,241,248,248,249,253,254,254,254,260,263,266,270],"g2000":[59,66,71,76,78,80,83,84,84,87,90,91,93,99,101,102,103,104,104,105,109,109,112,115,117,124,127,134,135,136,139,141,160,285,293,294,295,296,297,298,301,306,306,311,311,312,313,313,314,318,319,320,321,322,323,325,329,332,334,335,339,357,357,358,365],"page":[109,302,312,321,331,337,338,340,340,342,346,347,348,352,352,353,354,355,360,363,371,373,377,378,380,392,393,398,401,401,413,438,443],"sect":[5,8,8,8,9,9,9,9,9,9,9,10,10,10,10,10,10,10,15,37,62,78,90,111,113,118,121,128,142,142,142,143,147,149,150,151,151,151,152,153,154,154,155,156,156,156,158,160,161,161,161,162,163,164,164,164,165,166,167,167,167,168,169,169,170,170,172,173,175,175,177,178,179,180,181,182,184,185,189,190,192,198,201,211,214,223,231,236,255,358],"i3":[14,17,17,20,47,51,53,53,54,54,56,57,57,63,70,70,78,86,90,91,92,94,96,102,103,105,106,109,113,114,115,148,157,166,167,178,179,184,185,191,209,227,230,251,268,280,286,287,293,319,330,334,348,358,386,407,441,443,456,551,626,686]};
+  const nf = x => Number(x).toLocaleString("en-US");
+
+  /* ---------- step 2: the two-axis map ---------- */
+  let axRet = "off";
+  function drawAxes() {
+    $$("#axesRet button").forEach(b => b.setAttribute("aria-pressed", String(b.dataset.r === axRet)));
+    const svg = $("#axesMap"), L = 120, T = 30, W = 640, cw = 125, rh = 88;
+    const cols = ["fixed / recursive", "structure", "semantic", "proposition"], rows = ["chunk text only", "+ header", "generated questions"];
+    let s = "";
+    cols.forEach((c, i) => { s += `<text class="lab" x="${L + i * cw + cw / 2}" y="${T + 3 * rh + 22}" text-anchor="middle">${c}</text>`; });
+    s += `<text x="${L + 2 * cw}" y="${T + 3 * rh + 42}" text-anchor="middle">boundary rule (where units end) →</text>`;
+    rows.forEach((r, j) => { s += `<text class="lab" x="${L - 10}" y="${T + (2 - j) * rh + rh / 2 + 4}" text-anchor="end">${r}</text>`; });
+    s += `<text transform="translate(16 ${T + 1.5 * rh}) rotate(-90)" text-anchor="middle">representation (what is embedded) →</text>`;
+    for (let i = 0; i < 4; i++) for (let j = 0; j < 3; j++) s += `<rect class="fbox" x="${L + i * cw + 4}" y="${T + j * rh + 4}" width="${cw - 8}" height="${rh - 8}" rx="6"/>`;
+    const cell = (i, j, t, sub) => `<rect class="fbox hl" x="${L + i * cw + 4}" y="${T + (2 - j) * rh + 4}" width="${cw - 8}" height="${rh - 8}" rx="6"/>` +
+      `<text class="lab" x="${L + i * cw + cw / 2}" y="${T + (2 - j) * rh + rh / 2 - 2}" text-anchor="middle" style="font-weight:700">${t}</text>` +
+      `<text x="${L + i * cw + cw / 2}" y="${T + (2 - j) * rh + rh / 2 + 16}" text-anchor="middle">${sub}</text>`;
+    s += cell(0, 0, "I1", "size, overlap") + cell(1, 0, "I2", "headings, pages") + cell(2, 0, "I3", "meaning jumps") + cell(3, 0, "I4", "LLM-written facts");
+    s += cell(1, 1, "I5", "path header") + cell(0, 1, "I5", "on any boundary") + cell(0, 2, "I6", "questions → chunk");
+    if (axRet === "on") {
+      const xa = L + 18, y0 = T + rh - 6, y1 = T + 2 * rh + 6;
+      s += `<line class="farr" x1="${xa}" y1="${y0}" x2="${xa}" y2="${y1 + 6}" stroke-dasharray="5 4"/><path class="fhead" d="M${xa - 5},${y1 + 4} l5,8 l5,-8z"/>`;
+      s += `<text class="lab" x="${L + cw + 14}" y="${T + rh / 2 - 6}">↙ I6: a question hit</text><text class="lab" x="${L + cw + 14}" y="${T + rh / 2 + 12}">returns its parent chunk</text>`;
+      const yb = T + 3 * rh - 2;
+      s += `<path class="farr" fill="none" stroke-dasharray="5 4" d="M${L + 3 * cw + cw / 2},${yb} C ${L + 3 * cw + cw / 2},${yb + 14} ${L + cw / 2},${yb + 14} ${L + cw / 2},${yb}"/>`;
+      s += `<text class="lab" x="${L + 3 * cw + cw / 2}" y="${T + rh + rh / 2 - 6}" text-anchor="middle">↓ I4: a fact</text><text class="lab" x="${L + 3 * cw + cw / 2}" y="${T + rh + rh / 2 + 12}" text-anchor="middle">returns its chunk</text>`;
+    }
+    svg.innerHTML = keepMeta(svg) + s;
+  }
+  $$("#axesRet button").forEach(b => b.addEventListener("click", () => { axRet = b.dataset.r; drawAxes(); }));
+  drawAxes();
+
+  /* ---------- step 3: unit converter (K2 ρ) ---------- */
+  const RHO = { "characters": 1, "WordPiece": 6.21, "o200k": 5.65, "cl100k": 5.57, "gpt2": 5.05, "regex words": 7.72 };
+  let ucU = "cl100k";
+  function drawUC() {
+    const n = Number($("#ucN").value);
+    $("#ucNv").textContent = n;
+    $("#ucUnit").innerHTML = Object.keys(RHO).map(u => `<button type="button" class="chip" data-u="${u}" aria-pressed="${u === ucU}">${u}</button>`).join("");
+    $$("#ucUnit .chip").forEach(c => c.addEventListener("click", () => { ucU = c.dataset.u; drawUC(); }));
+    const chars = n * RHO[ucU];
+    const parts = Object.keys(RHO).filter(u => u !== ucU).map(u => `${u} <b>${nf(Math.round(chars / RHO[u]))}</b>`);
+    $("#ucRead").innerHTML = `${nf(n)} ${ucU} ≈ ${parts.join(" · ")} · = <b>${(chars / 1000).toFixed(1)}×</b> a v0 chunk of 1,000 characters`;
+  }
+  $("#ucN").addEventListener("input", drawUC);
+  drawUC();
+
+  /* ---------- step 4: size strip plot (K4) ---------- */
+  (function sizes() {
+    const svg = $("#sizeChart"), L = 150, R = 16, T = 16, B = 40, W = 640, H = 360, max = 700;
+    const X = v => L + Math.min(v, max) / max * (W - L - R), rowH = (H - T - B) / ARMS.length;
+    let s = "";
+    [0, 100, 200, 300, 400, 500, 600, 700].forEach(v => { s += `<line class="grid" x1="${X(v)}" x2="${X(v)}" y1="${T}" y2="${H - B}"/><text x="${X(v)}" y="${H - B + 16}" text-anchor="middle">${v}</text>`; });
+    s += `<text x="${(L + W - R) / 2}" y="${H - 6}" text-anchor="middle">MiniLM tokens per unit</text>`;
+    s += `<line class="s-ceil" x1="${X(256)}" x2="${X(256)}" y1="${T}" y2="${H - B}"/><text class="lab" x="${X(256) + 4}" y="${T + 10}">256 cap</text>`;
+    s += `<line class="s-ref" x1="${X(128)}" x2="${X(128)}" y1="${T}" y2="${H - B}" stroke-dasharray="3 4"/><text x="${X(128) + 4}" y="${T + 10}">128 trained</text>`;
+    ARMS.forEach((a, i) => {
+      const y = T + i * rowH + rowH / 2, pts = WP[a.id];
+      s += `<text class="lab" x="${L - 8}" y="${y + 4}" text-anchor="end">${a.name}</text>`;
+      pts.forEach((v, j) => { const jit = ((j * 7919) % 13 - 6) / 6 * rowH * 0.28;
+        s += `<circle cx="${X(v).toFixed(1)}" cy="${(y + jit).toFixed(1)}" r="2.6" class="${v > 256 ? "dot" : "dot2"}" opacity=".75"/>`; });
+    });
+    svg.innerHTML = keepMeta(svg) + s;
+    $("#sizeRows").innerHTML = ARMS.map(a => `<tr><td>${a.name}</td><td class="n">${a.n}</td><td class="n">${nf(a.ch[0])} / ${nf(a.ch[1])} / ${nf(a.ch[2])}</td><td class="n">${a.tk[0]} / ${a.tk[1]}</td><td class="n">${a.cut} (${(100 * a.cut / a.n).toFixed(1)}%)</td></tr>`).join("");
+  })();
+
+  /* ---------- step 5: cost ladder (K10, derived) and the I6 vs Q2 crossover (K11) ---------- */
+  const LADDER = [["I1 / I2 chunks", 0, 0], ["I3 semantic", 0, 0], ["I5 path header", 0, 0], ["I6 per window", 3, 13620], ["I6 HyPE", 97, 24631], ["I5 LLM context", 97, 1288153], ["I4 propositions", 1056, null]];
+  let ldM = "calls";
+  function drawLadder() {
+    $$("#ladderMode button").forEach(b => b.setAttribute("aria-pressed", String(b.dataset.m === ldM)));
+    const svg = $("#ladder"), L = 130, R = 70, T = 14, B = 34, W = 640, H = 300, idx = ldM === "calls" ? 1 : 2;
+    const top = ldM === "calls" ? 4 : 7, X = v => L + (v <= 0 ? 0 : Math.log10(v) / top) * (W - L - R), rh = (H - T - B) / LADDER.length;
+    let s = "";
+    for (let e = 0; e <= top; e++) s += `<line class="grid" x1="${X(10 ** e)}" x2="${X(10 ** e)}" y1="${T}" y2="${H - B}"/><text x="${X(10 ** e)}" y="${H - B + 16}" text-anchor="middle">${nf(10 ** e)}</text>`;
+    s += `<text x="${(L + W - R) / 2}" y="${H - 4}" text-anchor="middle">${ldM === "calls" ? "LLM calls per build (log)" : "input tokens per build (log)"}</text>`;
+    LADDER.forEach((r, i) => { const v = r[idx], y = T + i * rh + 5;
+      s += `<text class="lab" x="${L - 8}" y="${y + rh / 2}" text-anchor="end">${r[0]}</text>`;
+      if (v === null) s += `<text x="${L + 6}" y="${y + rh / 2}">not estimated (assumption-heavy)</text>`;
+      else if (v === 0) s += `<text x="${L + 6}" y="${y + rh / 2}">0</text>`;
+      else s += `<rect class="tbar" x="${L}" y="${y}" width="${(X(v) - L).toFixed(1)}" height="${rh - 10}" rx="3"/><text x="${X(v) + 6}" y="${y + rh / 2}">${nf(v)}</text>`; });
+    svg.innerHTML = keepMeta(svg) + s;
+  }
+  $$("#ladderMode button").forEach(b => b.addEventListener("click", () => { ldM = b.dataset.m; drawLadder(); }));
+  drawLadder();
+  function drawXO() {
+    const q = Number($("#xoQ").value), r = Number($("#xoR").value), idx = 97 * r;
+    $("#xoQv").textContent = q; $("#xoRv").textContent = r;
+    $("#xoRead").innerHTML = `index-side (I6): 97 × ${r} = <b>${nf(idx)}</b> calls · query-side (Q2): <b>${nf(q)}</b> calls → cheaper: <b>${idx < q ? "index-side" : idx > q ? "query-side" : "a tie"}</b>`;
+  }
+  ["#xoQ", "#xoR"].forEach(s => $(s).addEventListener("input", drawXO));
+  drawXO();
+
+  /* ---------- step 6: equal k vs equal budget (K6) and the dedup toy (K12) ---------- */
+  (function budget() {
+    const svg = $("#budChart"), L = 150, R = 20, T = 18, B = 46, W = 640, H = 330, X = v => L + v / 8 * (W - L - R - 72), rh = (H - T - B) / ARMS.length;
+    let s = "";
+    for (let v = 0; v <= 8; v += 2) s += `<line class="grid" x1="${X(v)}" x2="${X(v)}" y1="${T}" y2="${H - B}"/><text x="${X(v)}" y="${H - B + 16}" text-anchor="middle">${v}</text>`;
+    s += `<text x="${(L + W - R) / 2}" y="${H - 8}" text-anchor="middle">questions with complete evidence (of 8 draft questions)</text>`;
+    ARMS.forEach((a, i) => { const y = T + i * rh + 4, h = (rh - 10) / 2;
+      s += `<text class="lab" x="${L - 8}" y="${y + rh / 2}" text-anchor="end">${a.name}</text>`;
+      s += `<rect class="rb1" x="${L}" y="${y}" width="${X(a.ce4) - L}" height="${h}" rx="2"/><text x="${X(a.ce4) + 4}" y="${y + h - 1}">${a.ce4} at k = 4</text>`;
+      s += `<rect class="rb2" x="${L}" y="${y + h + 1}" width="${Math.max(0, X(a.ceB) - L)}" height="${h}" rx="2"/><text x="${X(a.ceB) + 4}" y="${y + 2 * h}">${a.ceB} at B</text>`; });
+    svg.innerHTML = keepMeta(svg) + s;
+    $("#budRows").innerHTML = ARMS.map(a => `<tr><td>${a.name}</td><td class="n">${nf(a.ctx4)}</td><td class="n">${a.ce4} / 8</td><td class="n">${a.kB.toFixed(2)}</td><td class="n">${a.ceB} / 8</td></tr>`).join("");
+  })();
+  const TOY = ["P3", "P3", "P7", "P3", "P1", "P7", "P2"], PT = { P1: 160, P2: 150, P3: 170, P7: 140 };
+  let dup = "raw";
+  function drawDup() {
+    $$("#dupMode button").forEach(b => b.setAttribute("aria-pressed", String(b.dataset.d === dup)));
+    const list = dup === "raw" ? TOY : TOY.filter((p, i) => TOY.indexOf(p) === i);
+    let used = 0, stop = false;
+    const rows = list.map((p, i) => { if (stop) return `<div class="doc"><span class="id">#${i + 1}</span><span>${p} · ${PT[p]} tokens · not reached</span></div>`;
+      if (used + PT[p] > 640) { stop = true; return `<div class="doc"><span class="id">#${i + 1}</span><span>${p} · ${PT[p]} tokens · <b>does not fit: stop</b></span></div>`; }
+      used += PT[p]; return `<div class="doc cand"><span class="id">#${i + 1}</span><span>${p} · ${PT[p]} tokens · kept (total ${used})</span></div>`; });
+    $("#dupRun").innerHTML = rows.join("");
+    const kept = []; let u = 0;
+    for (const p of list) { if (u + PT[p] > 640) break; kept.push(p); u += PT[p]; }
+    $("#dupRead").innerHTML = `kept <b>${kept.join(", ")}</b> · ${u} of 640 tokens · <b>${new Set(kept).size}</b> distinct parents`;
+  }
+  $$("#dupMode button").forEach(b => b.addEventListener("click", () => { dup = b.dataset.d; drawDup(); }));
+  drawDup();
+
+  /* ---------- step 7: the comparison table with cell states ---------- */
+  const st = (k, t) => `<span class="cs cs-${k}">${t}</span>`;
+  const CMP = [
+    ["v0 (baseline)", "chars, 1000/200", "97 · 0 cut", "0", "97", st("n", "not run: no human labels yet"), st("n", "not run"), "—"],
+    ["v1.0 I1 grid", "chars, grid", "e.g. 65 · 32 cut (2000/400)", "0", "N", st("n", "not run"), st("n", "not run"), "Ch1: Low / Low"],
+    ["v1.1 I2 structure", "chars, sections", "90 uncapped · 1 cut", "0", "N", st("n", "not run"), st("n", "not run"), "—"],
+    ["v1.2 I5 path header", "chars + header", "97 · 0 cut", "0", "97", st("n", "not run"), st("n", "not run"), "Ch7: Medium / Low"],
+    ["v1.3 I3 semantic", "sentence groups", "62 (probe) · 18 cut", "0", "N", st("n", "not run"), st("n", "not run"), "Ch9: Medium / Low"],
+    ["v1.4 I4 propositions (5-page subset)", "LLM facts", "—", st("d", "≈ 165 (derived)"), "≈ 150", st("x", "not comparable: qids"), st("x", "not comparable: qids"), "Ch4: High / Low"],
+    ["I6 branch (HyPE)", "questions → chunk", "97 parents", st("d", "97 (derived)"), "97 × q", st("n", "not run: branch"), st("n", "not run: branch"), "Ch11: High / Low"]];
+  $("#cmpTable").innerHTML = `<thead><tr><th>Arm (base = previous champion)</th><th>Unit</th><th>Units · cut at 256</th><th>Index LLM calls</th><th>Vectors</th><th>CE@4, fixed k</th><th>CE at equal B</th><th>Book rating (no scale)</th></tr></thead><tbody>` +
+    CMP.map(r => `<tr>${r.map(c => `<td>${c}</td>`).join("")}</tr>`).join("") + "</tbody>";
+
+  /* ---------- step 8: the target-failure table (hypotheses only) ---------- */
+  const BUCKETS = ["boundary cut", "vocabulary mismatch", "exact term", "near-duplicate rank", "context noise"];
+  const HYP = [["I1 size / overlap", ["↑", "", "", "", "↓ if big"], "a size that overflows the embedder"],
+    ["I2 structure", ["↑", "", "", "↑", ""], "no reliable headings (scans, flat text)"],
+    ["I3 semantic", ["↑", "", "", "", "↓ uncapped"], "documents with headings; short texts"],
+    ["I4 propositions", ["", "", "↑", "", "↑"], "a corpus that changes often; multi-step questions"],
+    ["I5 header", ["", "↑", "", "↑", ""], "one document (the title never varies)"],
+    ["I6 questions", ["", "↑", "", "", ""], "few queries; questions already worded like the text"]];
+  $("#heatTable").innerHTML = `<thead><tr><th>Member</th>${BUCKETS.map(b => `<th>${b}</th>`).join("")}<th>When not to use</th></tr></thead><tbody>` +
+    HYP.map(([m, c, w]) => `<tr><td><b>${m}</b></td>${c.map(x => `<td class="hc ${x.startsWith("↑") ? "g2" : x.startsWith("↓") ? "g0" : ""}">${x}${x ? "<br><span class=\"key\">not run</span>" : ""}</td>`).join("")}<td>${w}</td></tr>`).join("") + "</tbody>";
+
+  /* ---------- step 9: lineage, FWER curve, MDE calculator (K9) ---------- */
+  (function lineage() {
+    const svg = $("#lineage"), names = ["v0", "v1.0 grid", "v1.1 structure", "v1.2 header", "v1.3 semantic", "v1.4 props"], w = 92, gap = 13;
+    let s = "";
+    names.forEach((n, i) => { const x = 8 + i * (w + gap);
+      s += `<rect class="fbox${i === 0 ? " hl" : ""}" x="${x}" y="30" width="${w}" height="40" rx="6"/><text class="lab" x="${x + w / 2}" y="49" text-anchor="middle">${n}</text><text x="${x + w / 2}" y="64" text-anchor="middle">${i === 0 ? "built" : "not run"}</text>`;
+      if (i) s += `<line class="farr" x1="${x - gap + 1}" y1="50" x2="${x - 3}" y2="50"/><path class="fhead" d="M${x - 3},46 l0,8 l5,-4z"/>`; });
+    const x6 = 8 + 1 * (w + gap);
+    s += `<rect class="fbox" x="${x6 + 40}" y="100" width="${w + 40}" height="36" rx="6" stroke-dasharray="5 4"/><text class="lab" x="${x6 + 40 + (w + 40) / 2}" y="122" text-anchor="middle">I6 branch · not run</text>`;
+    s += `<line class="farr" x1="${x6 + w / 2}" y1="70" x2="${x6 + w / 2 + 40}" y2="100" stroke-dasharray="4 3"/>`;
+    svg.innerHTML = keepMeta(svg) + s;
+  })();
+  (function fwer() {
+    const svg = $("#fwerChart"), L = 56, R = 18, T = 14, B = 44, W = 640, H = 260, M = 50, X = m => L + (m - 1) / (M - 1) * (W - L - R), Y = v => T + (1 - v) * (H - T - B);
+    let s = "";
+    [0, .25, .5, .75, 1].forEach(v => { s += `<line class="grid" x1="${L}" x2="${W - R}" y1="${Y(v)}" y2="${Y(v)}"/><text x="${L - 8}" y="${Y(v) + 4}" text-anchor="end">${v}</text>`; });
+    [1, 10, 20, 30, 40, 50].forEach(m => { s += `<text x="${X(m)}" y="${H - B + 16}" text-anchor="middle">${m}</text>`; });
+    s += `<text x="${(L + W - R) / 2}" y="${H - 6}" text-anchor="middle">comparisons m (α = 0.05 each, no true effect)</text>`;
+    const pts = []; for (let m = 1; m <= M; m++) pts.push(`${X(m).toFixed(1)},${Y(1 - 0.95 ** m).toFixed(1)}`);
+    s += `<polyline class="s-bm25" points="${pts.join(" ")}"/>`;
+    [[5, "0.226"], [12, "0.460"], [37, "0.850"]].forEach(([m, t]) => { s += `<circle class="dot" cx="${X(m)}" cy="${Y(1 - 0.95 ** m)}" r="5"/><text class="lab" x="${X(m) + 8}" y="${Y(1 - 0.95 ** m) + 16}">m = ${m}: ${t}</text>`; });
+    svg.innerHTML = keepMeta(svg) + s;
+  })();
+  function drawMDE() {
+    const n = Number($("#mdN").value), bc = Math.min(Number($("#mdBC").value), n);
+    $("#mdNv").textContent = n; $("#mdBCv").textContent = bc;
+    const mde = 2.8 * Math.sqrt(bc) / n;
+    $("#mdRead").innerHTML = `MDE ≈ 2.8 × √${bc} / ${n} = <b>${mde.toFixed(3)}</b> · one question = ${(1 / n).toFixed(3)} · ${mde >= 0.3 ? "most real differences will read <b>inconclusive</b>" : "a moderate difference is visible"}`;
+  }
+  ["#mdN", "#mdBC"].forEach(s => $(s).addEventListener("input", drawMDE));
+  drawMDE();
+
+  /* ---------- apply: the real-world checklist (research §8, K1–K12) ---------- */
+  const CHECKS = [["The size unit and tokenizer are named for every arm, and ρ is measured on this corpus.", "Report section 1 prints ρ per tokenizer; each arm's config states its unit (characters, a named tokenizer, words, sentences)."],
+    ["No candidate arm puts more than 1% of its units over the embedder's limit.", "Count tokens with the embedder's own tokenizer (special tokens included) and compare with its cap: 256 for MiniLM."],
+    ["Reliable structure exists (headings on at least 80% of pages or files), or I2 is not proposed.", "The tool counts headings from bold or large font spans in PDFs and # lines in Markdown; then read 10 chunks by hand."],
+    ["Near-duplicate documents or sections are checked; a one-document corpus is flagged for title headers.", "8-word shingle overlap between documents and sections, plus repeated heading names; one document means one title value."],
+    ["The share of chunks that start anonymously is high enough to justify a contextual arm.", "The tool counts chunks that open with 'it', 'this', 'they' or a bare heading; read 10 of them."],
+    ["The question mix fits each arm's target: facts (I4), other wording (I6), several spans (bigger units).", "Tag your questions by category, or let the tool count them; without questions this stays a manual check."],
+    ["Index-time cost per rebuild × rebuilds per month fits your budget and the provider's limits, per day and per request.", "Report section 6: calls, input tokens, USD and quota-days per arm; the largest single request against the per-minute limit."],
+    ["The equal budget B is at least the largest unit of every arm.", "Compare B with each arm's largest unit in the generator's tokens; otherwise the packing rule can keep nothing."],
+    ["At most 3 arms; Holm's α stated; the MDE at your dev n shown; 'inconclusive' allowed.", "The tool's pre-registration draft states all four; edit it, then freeze it before the first run."],
+    ["Gold is chunk-agnostic (character spans), so every arm is scored on the same labels.", "Check the eval set schema: evidence spans with offsets, not chunk ids of one chunker."],
+    ["A page-level or section-level arm is considered for paginated PDFs.", "The tool suggests one when pages exist; check the page arm's truncation share first."],
+    ["'When not to use' is written for each rejected arm, with one example from these documents.", "One line per rejected arm in the plan, quoting a real chunk or question."]];
+  const saved = JSON.parse(store.get("icmp-checklist", "[]") || "[]");
+  $("#checklist").innerHTML = CHECKS.map(([t, how], i) => `<label><input type="checkbox" data-i="${i}" ${saved.includes(i) ? "checked" : ""}><span><b>K${i + 1}.</b> ${esc(t)}<span class="how">How to check: ${esc(how)}</span></span></label>`).join("");
+  $$("#checklist input").forEach(c => c.addEventListener("change", () => store.set("icmp-checklist", JSON.stringify($$("#checklist input:checked").map(x => Number(x.dataset.i))))));
+
+  /* ---------- check yourself ---------- */
+  const QS = [
+    { q: "Arm A uses 1,500-character chunks and arm B 500-character chunks. At k = 4, A finds complete evidence more often. What do you check before believing A is better?", a: ["nothing: more evidence found is better", "the same comparison at an equal token budget", "whether A's embedder is newer"], ok: 1,
+      why: ["At k = 4, A simply sends about three times more text.", "Right: fill the same budget from each ranked list; on the draft questions the 1,500-character arm drops from 7 to 5 of 8 that way.", "The embedder is held fixed in a fair comparison; it is not the difference here."] },
+    { q: "A proposition arm was scored on 14 of your 40 dev questions. What does its cell in the roll-up say?", a: ["its score, with a footnote", "not comparable: the question set differs", "inconclusive"], ok: 1,
+      why: ["A footnote does not make two different question sets comparable.", "Right: re-run the champion on the same 14 questions, then compare those two.", "Inconclusive is for a run on identical keys whose interval spans 0."] },
+    { q: "Your dev set has 12 questions and two arms disagree on 4 of them. Can you detect a 0.2 difference in complete evidence?", a: ["yes, 12 questions is enough", "no: the smallest detectable difference is about 0.47", "only with Holm"], ok: 1,
+      why: ["2.8 × √4 / 12 ≈ 0.47, more than twice 0.2.", "Right: write 'inconclusive' and grow the set before choosing.", "Holm controls false wins across arms; it does not add power."] },
+  ];
+  $("#quick").innerHTML = QS.map((x, i) => `<fieldset><legend>${i + 1}. ${x.q}</legend>` + x.a.map((a, j) => `<label><input type="radio" name="q${i}" value="${j}"> ${a}</label>`).join("") + `<div class="fb" id="fb${i}" aria-live="polite"></div></fieldset>`).join("");
+  QS.forEach((x, i) => $$(`input[name=q${i}]`).forEach(r => r.addEventListener("change", () => {
+    const j = Number(r.value), fb = $("#fb" + i);
+    fb.className = "fb show " + (j === x.ok ? "ok" : "no"); fb.textContent = x.why[j];
+  })));
+  spy();
+})();
+</script>
+</body>
+</html>
