@@ -1,0 +1,40 @@
+{"prop_id":"p10-01","page":10,"text":"The United Nations Framework Convention on Climate Change (UNFCCC) is an international treaty.","source_ids":["10:2","10:3"],"resolved":[]}
+{"prop_id":"p10-02","page":10,"text":"The UNFCCC is aimed at addressing climate change.","source_ids":["10:3"],"resolved":[]}
+{"prop_id":"p10-03","page":10,"text":"The UNFCCC provides a framework for negotiating specific protocols and agreements.","source_ids":["10:4"],"resolved":["UNFCCC"]}
+{"prop_id":"p10-04","page":10,"text":"The UNFCCC provides a framework for negotiating the Kyoto Protocol.","source_ids":["10:4"],"resolved":["UNFCCC"]}
+{"prop_id":"p10-05","page":10,"text":"The UNFCCC provides a framework for negotiating the Paris Agreement.","source_ids":["10:4"],"resolved":["UNFCCC"]}
+{"prop_id":"p10-06","page":10,"text":"Global cooperation under the UNFCCC is crucial for coordinated climate action.","source_ids":["10:5"],"resolved":[]}
+{"prop_id":"p10-07","page":10,"text":"The Paris Agreement was adopted in 2015.","source_ids":["10:7"],"resolved":[]}
+{"prop_id":"p10-08","page":10,"text":"The Paris Agreement aims to limit global warming to well below 2 degrees Celsius above pre-industrial levels.","source_ids":["10:7"],"resolved":[]}
+{"prop_id":"p10-09","page":10,"text":"Efforts under the Paris Agreement aim to limit the increase in global warming to 1.5 degrees Celsius.","source_ids":["10:7"],"resolved":[]}
+{"prop_id":"p10-10","page":10,"text":"Under the Paris Agreement, countries submit nationally determined contributions (NDCs).","source_ids":["10:8"],"resolved":["Paris Agreement"]}
+{"prop_id":"p10-11","page":10,"text":"Nationally determined contributions (NDCs) outline countries' climate action plans and targets.","source_ids":["10:8"],"resolved":[]}
+{"prop_id":"p10-12","page":10,"text":"Carbon taxes are a carbon pricing mechanism.","source_ids":["10:11"],"resolved":[]}
+{"prop_id":"p10-13","page":10,"text":"Cap-and-trade systems are a carbon pricing mechanism.","source_ids":["10:11"],"resolved":[]}
+{"prop_id":"p10-14","page":10,"text":"Carbon pricing mechanisms incentivize emission reductions by assigning a cost to carbon emissions.","source_ids":["10:11"],"resolved":[]}
+{"prop_id":"p10-15","page":10,"text":"Carbon pricing policies encourage businesses and individuals to reduce their carbon footprints.","source_ids":["10:12"],"resolved":["carbon pricing"]}
+{"prop_id":"p10-16","page":10,"text":"Carbon pricing policies encourage businesses and individuals to invest in cleaner technologies.","source_ids":["10:12"],"resolved":["carbon pricing"]}
+{"prop_id":"p10-17","page":10,"text":"Many countries have set ambitious targets for renewable energy adoption.","source_ids":["10:14"],"resolved":[]}
+{"prop_id":"p10-18","page":10,"text":"Renewable energy targets are supported by policies such as subsidies, tax incentives, and mandates for renewable energy use.","source_ids":["10:15"],"resolved":["renewable energy"]}
+{"prop_id":"p10-19","page":10,"text":"Achieving renewable energy targets requires robust infrastructure and market development.","source_ids":["10:16"],"resolved":["renewable energy"]}
+{"prop_id":"p10-20","page":10,"text":"Governments implement regulations to limit emissions from key sectors such as energy, transportation, and industry.","source_ids":["10:18"],"resolved":[]}
+{"prop_id":"p10-21","page":10,"text":"Emission reduction regulations can include efficiency standards, emission caps, and pollution controls.","source_ids":["10:19"],"resolved":["emission reduction"]}
+{"prop_id":"p10-22","page":10,"text":"Enforcement and compliance are critical for the effectiveness of emission reduction regulations.","source_ids":["10:20"],"resolved":["emission reduction regulations"]}
+{"prop_id":"p10-23","page":10,"text":"Cities play a pivotal role in climate action due to their high population densities and economic activities.","source_ids":["10:23"],"resolved":[]}
+{"prop_id":"p10-24","page":10,"text":"Urban climate initiatives include sustainable transportation systems, green building standards, and climate-resilient infrastructure.","source_ids":["10:24"],"resolved":[]}
+{"prop_id":"p10-25","page":10,"text":"Community engagement and participatory planning are essential for successful implementation of urban climate initiatives.","source_ids":["10:25"],"resolved":["urban climate initiatives"]}
+{"prop_id":"p23-01","page":23,"text":"The Paris Agreement is a landmark international accord.","source_ids":["23:25"],"resolved":[]}
+{"prop_id":"p23-02","page":23,"text":"The Paris Agreement aims to limit global warming to well below 2 degrees Celsius above pre-industrial levels.","source_ids":["23:25"],"resolved":[]}
+{"prop_id":"p23-03","page":23,"text":"Efforts under the Paris Agreement aim to limit the increase in global warming to 1.5 degrees Celsius.","source_ids":["23:25"],"resolved":[]}
+{"prop_id":"p23-04","page":23,"text":"Under the Paris Agreement, countries submit nationally determined contributions (NDCs) outlining their climate action plans.","source_ids":["23:26"],"resolved":["Paris Agreement"]}
+{"prop_id":"p23-05","page":23,"text":"Regular reviews and updates of NDCs are essential for meeting the Paris Agreement's goals.","source_ids":["23:27"],"resolved":["Paris Agreement"]}
+{"prop_id":"p29-01","page":29,"text":"The Conference of the Parties (COP) is the supreme decision-making body of the United Nations Framework Convention on Climate Change (UNFCCC).","source_ids":["29:12"],"resolved":[]}
+{"prop_id":"p29-02","page":29,"text":"COP meetings bring together representatives from all signatory countries.","source_ids":["29:13"],"resolved":[]}
+{"prop_id":"p29-03","page":29,"text":"At COP meetings, representatives negotiate and review progress on climate agreements.","source_ids":["29:13"],"resolved":[]}
+{"prop_id":"p29-04","page":29,"text":"COP meetings play a crucial role in advancing global climate action.","source_ids":["29:14"],"resolved":["COP"]}
+{"prop_id":"p02-01","page":2,"text":"Coal is the most carbon-intensive fossil fuel.","source_ids":["2:0"],"resolved":[]}
+{"prop_id":"p02-02","page":2,"text":"Coal use for electricity generation is a major source of CO2 emissions.","source_ids":["2:0"],"resolved":[]}
+{"prop_id":"p02-03","page":2,"text":"Coal remains a significant energy source globally, despite a decline in some regions.","source_ids":["2:1"],"resolved":[]}
+{"prop_id":"p02-04","page":2,"text":"Coal is mined extensively in countries like China, India, and the United States.","source_ids":["2:2"],"resolved":["Coal"]}
+{"prop_id":"p02-05","page":2,"text":"Natural gas is the least carbon-intensive fossil fuel.","source_ids":["2:8"],"resolved":[]}
+{"prop_id":"p02-06","page":2,"text":"Natural gas is often seen as a \"bridge fuel\" to a lower-carbon future.","source_ids":["2:8"],"resolved":[]}
