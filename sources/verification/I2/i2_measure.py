@@ -272,7 +272,7 @@ def main(pdf, onnx_dir=None):
     sec("S14 Seeds: buckets and retrieval")
     seeds = [json.loads(x) for x in SEEDS.read_text(encoding="utf-8").splitlines() if x.strip()]
     ans = [s for s in seeds if s.get("answerable")]
-    ok = 0
+    ok = single = 0
     groups = {}
     for s in ans:
         gs = []
@@ -280,18 +280,21 @@ def main(pdf, onnx_dir=None):
             alts = []
             for alt in g["alternatives"]:
                 segs = [S.to_doc(starts, sg["page"], sg["char_start"], sg["char_end"]) for sg in alt["segments"]]
-                ok += all(" ".join(T[a:b].split()) == " ".join(alt["quote"].split()) for a, b in segs) if len(segs) == 1 else 0
+                if len(segs) == 1:
+                    single += 1
+                    ok += all(" ".join(T[a:b].split()) == " ".join(alt["quote"].split()) for a, b in segs)
                 alts.append(segs)
             gs.append(alts)
         groups[s["qid"]] = gs
-    print(f"seeds {len(seeds)} · answerable {len(ans)} · single-segment quotes that match the snapshot: {ok}")
+    print(f"seeds {len(seeds)} · answerable {len(ans)} · single-segment quotes that match the snapshot exactly: {ok} of {single}")
     v0_ranges = [(c["a"], c["b"]) for c in v0]
 
-    def covered(segs, ranges):
-        return all(any(a <= x and y <= b for a, b in ranges) for x, y in segs)
+    def in_one(segs, ranges):              # research §5: the whole alternative inside one chunk
+        lo, hi = min(x for x, _ in segs), max(y for _, y in segs)
+        return any(a <= lo and hi <= b for a, b in ranges)
 
     for s in ans:
-        straddle = not any(covered(alt, v0_ranges) for g in groups[s["qid"]] for alt in g)
+        straddle = not all(any(in_one(alt, v0_ranges) for alt in g) for g in groups[s["qid"]])
         pages_ = sorted({S.page_of(starts, x) for g in groups[s["qid"]] for alt in g for x, _ in alt})
         crosses = any(len({S.page_of(starts, x) for x, _ in alt} | {S.page_of(starts, y - 1) for _, y in alt}) > 1
                       for g in groups[s["qid"]] for alt in g)

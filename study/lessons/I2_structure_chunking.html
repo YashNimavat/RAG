@@ -939,7 +939,7 @@ def test_no_gaps(chunks, doc_text):
   <p style="font-size:.92rem;color:var(--muted)">Tick each one for your own project. Your ticks stay in this browser only.</p>
   <div class="check" id="checklist"></div>
   <div class="card" id="example" style="display:grid;gap:10px"><div><b>An example</b> <span class="badge m">measured · climate PDF</span></div>
-    <p style="font-size:.92rem" id="exText">TOOL_EXAMPLE</p>
+    <p style="font-size:.92rem" id="exText"><b>The climate PDF with the 10 draft questions</b> (<code>--pdf …/Understanding_Climate_Change.pdf --doc-ids climate --evalset study/tools/examples/climate_seed_spans.jsonl</code>): the tool reproduces this page exactly: body size 12.0; 90 headings by size only against 282 with the bold rule (1 / 21 / 68 / 192); 282 of 282 aligned; 11 repeated titles; 16 orphans and 8 cuts repaired; <code>auto</code> picks L3 (median section 1,033.5 characters): 117 chunks, 0 invariant violations, the same 10 inspection chunks. Checklist: PASS on S1–S3, S6–S8 and S11; <b>WARN</b> on S9 (19 of 117 chunks are under 400 characters, 17 of them second pieces of split sections, which merging cannot join); MANUAL on S4 (read the 192 bold headings), S5 (no outline, but tagged) and S10 (fill the sheet). It also says the 8 seeds include <b>0</b> that straddle a v0 chunk or cross a page, so expect "inconclusive". Recommendation: <b>typography route (size + bold) at L3</b>.</p>
     <p style="font-size:.86rem;color:var(--muted)">The example demonstrates the tool; it does not evaluate a retriever. Full report: <a data-kit="#/read/study/tools/examples/climate_structure_report.md" data-path="rag_learning/study/tools/examples/climate_structure_report.md">climate_structure_report.md</a>.</p></div>
 </section>
 

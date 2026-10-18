@@ -150,7 +150,7 @@ Chunks 5, 33, 49, 51, 53, 62, 65, 97, 108, 113. **10 of 10 start at a heading an
 
 ### S14 Seeds and retrieval (MiniLM-L6 via the ONNX stand-in; 8 answerable `llm-draft` seeds: **observations, never evaluation results**)
 
-- All 11 single-segment seed quotes match the snapshot.
+- 11 of the 12 single-segment seed quotes match the snapshot text exactly; the 12th, D-007's first quote, is shorter than its span (it stops at "such as the"). Straddling uses research §5's rule: an alternative counts as held only when one chunk contains all of it.
 - **Buckets: `straddles_v0` = 0 of 8, `crosses_page` = 0 of 8.** No seed tests the failure I2 fixes. D-005, D-006, D-007 have 2 evidence groups.
 - Equal budget = 4 × v0's mean chunk length = **3,432 characters**, packed in rank order until the next chunk would not fit.
 

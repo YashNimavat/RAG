@@ -1126,7 +1126,7 @@ md(r"""
 ## 14 · Seeds, buckets and retrieval (observations, not results)
 
 **What this verifies** (lesson `#s13`; I2_FACTS S14).
-- The 10 draft seeds (`study/tools/examples/climate_seed_spans.jsonl`), 8 answerable; all 11 single-segment quotes match the snapshot.
+- The 10 draft seeds (`study/tools/examples/climate_seed_spans.jsonl`), 8 answerable; 11 of the 12 single-segment quotes match the snapshot exactly (D-007's first quote is shorter than its span).
 - **Buckets:** `straddles_v0` (no v0 chunk holds an evidence span) = **0 of 8**; `crosses_page` = **0 of 8**. No seed tests the failure I2 fixes, so the verdict on these 8 is **inconclusive**.
 - **Retrieval** with MiniLM-L6, exact cosine, for every arm: **CE@4** (all evidence groups covered by the top 4 chunks), **CE@budget** (top chunks packed in rank order into 4 × v0's mean length = **3,432 characters**), the CE rank per seed and MRR@10 by CE, the first-hit ranks and their MRR@10 (v0: **0.708**, = P4 K4), and the WordPiece maximum (no chunk over 256).
 - Cross-check with P4 K3: D-002's top 5 on v0 are chunks 69, 68, 27, 17, 84.

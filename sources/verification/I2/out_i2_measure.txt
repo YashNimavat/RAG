@@ -158,7 +158,7 @@ chunk 113 [70214,70603) 389 chars pages [32] head-start=True sentence-end=True p
      starts 'Educational Initiatives  Climate Education in Schools  Integ' … ends ', enhances understanding and engagement.'
 
 === S14 Seeds: buckets and retrieval ===
-seeds 10 · answerable 8 · single-segment quotes that match the snapshot: 11
+seeds 10 · answerable 8 · single-segment quotes that match the snapshot exactly: 11 of 12
 D-001 exact-term             groups 1 pages [3] straddles_v0=False crosses_page=False
 D-002 factual-single-span    groups 1 pages [10] straddles_v0=False crosses_page=False
 D-003 factual-single-span    groups 1 pages [23] straddles_v0=False crosses_page=False
