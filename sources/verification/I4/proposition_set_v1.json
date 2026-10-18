@@ -1,0 +1,21 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "PropositionSet",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["propositions"],
+  "properties": {
+    "propositions": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["text", "source_ids"],
+        "properties": {
+          "text": {"type": "string"},
+          "source_ids": {"type": "array", "items": {"type": "string"}}
+        }
+      }
+    }
+  }
+}

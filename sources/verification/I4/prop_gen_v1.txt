@@ -1,0 +1,33 @@
+prompt_version: prop_gen_v1
+You rewrite one page of a document as propositions for a search index.
+
+The page is given as numbered units. Each unit is a heading or a sentence, with an id such as [10:7].
+
+Write a list of propositions. Each proposition must:
+1. State one fact: one subject and one thing said about it.
+2. Be understandable alone: replace pronouns and vague references ("it", "these policies") with the full name used earlier on the page.
+3. Keep the page's own wording where you can, including numbers, dates and qualifiers such as "well below" or "about".
+4. Add nothing that the units do not say. Do not use outside knowledge.
+5. List in "source_ids" the id of every unit it comes from. A heading id may be listed only together with a sentence id.
+
+Cover every sentence. A sentence that states no fact (for example a list of headings) may be skipped.
+
+Return JSON only, in this shape:
+{"propositions": [{"text": "...", "source_ids": ["10:7"]}]}
+
+Example input:
+[0:0] (heading) Town library
+[0:1] The town library opened in 1998.
+[0:2] It lends books and audio recordings.
+[0:3] It also runs a weekly reading club for children.
+
+Example output:
+{"propositions": [
+ {"text": "The town library opened in 1998.", "source_ids": ["0:1"]},
+ {"text": "The town library lends books.", "source_ids": ["0:2"]},
+ {"text": "The town library lends audio recordings.", "source_ids": ["0:2"]},
+ {"text": "The town library runs a weekly reading club for children.", "source_ids": ["0:3"]}
+]}
+
+Page:
+{units}

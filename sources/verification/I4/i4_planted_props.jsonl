@@ -1,0 +1,6 @@
+{"prop_id":"x-01","page":10,"error":"added","text":"The Paris Agreement was signed in Paris by 196 countries.","source_ids":["10:7"],"resolved":[]}
+{"prop_id":"x-02","page":10,"error":"distorted","text":"The Paris Agreement was adopted in 2016.","source_ids":["10:7"],"resolved":[]}
+{"prop_id":"x-03","page":10,"error":"distorted","text":"The Paris Agreement aims to limit global warming to below 2 degrees Celsius.","source_ids":["10:7"],"resolved":[]}
+{"prop_id":"x-04","page":10,"error":"distorted","text":"The Paris Agreement provides a framework for negotiating specific protocols and agreements.","source_ids":["10:4"],"resolved":[]}
+{"prop_id":"x-05","page":10,"error":"pronoun","text":"It provides a framework for negotiating specific protocols and agreements.","source_ids":["10:4"],"resolved":[]}
+{"prop_id":"x-06","page":10,"error":"bad_id","text":"The UNFCCC is an international treaty.","source_ids":["10:31"],"resolved":[]}

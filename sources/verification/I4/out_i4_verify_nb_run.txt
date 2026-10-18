@@ -1,0 +1,5 @@
+SKIPPED (MiniLM not in the local cache)  §9 MiniLM observation
+cells with errors: 0
+Plotly figures saved: 9; runtime 1.9 s; file study/notebooks/I4_propositions_verify.ipynb 142 KiB
+110 checks passed / 0 failed
+SKIPPED lines: 1

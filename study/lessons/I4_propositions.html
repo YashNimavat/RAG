@@ -1,0 +1,1224 @@
+<!doctype html>
+<html lang="en" data-style="notebook" data-theme="light">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Proposition Chunking</title>
+<meta name="description" content="I4: proposition chunking. Why many facts in one vector hide the one you ask about, how an LLM rewrites a page into single facts with source ids, how to check and score that rewrite, and what it costs. Short and full depths, seven themes, light and dark. Works offline.">
+<script>
+/* Apply saved choices before the page paints (no flash). Shared by every lesson. */
+(function () {
+  var d = document.documentElement, get = function (k) { try { return localStorage.getItem(k); } catch (e) { return null; } };
+  var p = new URLSearchParams(location.search), styles = ["reader", "hyper", "notebook", "textbook", "editor", "minimal", "catalogue"];
+  var dark = !!(window.matchMedia && window.matchMedia("(prefers-color-scheme: dark)").matches);
+  var pick = function (key, allowed, stored, dflt) { var v = p.get(key); return allowed.indexOf(v) >= 0 ? v : (allowed.indexOf(stored) >= 0 ? stored : dflt); };
+  d.dataset.style = pick("style", styles, get("lesson-style"), "notebook");
+  d.dataset.theme = pick("color", ["light", "dark"], get("lesson-color"), dark ? "dark" : "light");
+  d.dataset.toc = pick("toc", ["shown", "hidden"], get("lesson-toc"), "shown");
+  d.dataset.side = pick("side", ["left", "right"], get("lesson-side"), "left");
+})();
+</script>
+<style>
+/* ---------- themes: five styles, each light and dark. Colours and fonts live in variables. ---------- */
+:root{--content-w:800px;--f-mono:"Cascadia Mono",Consolas,ui-monospace,monospace;--radius:8px;--body-size:16.5px;--h-weight:650;--sec-pad:40px}
+:root[data-style="notebook"]{--f-head:"Segoe UI Variable Display","Segoe UI",system-ui,sans-serif;--f-body:"Segoe UI Variable Text","Segoe UI",system-ui,sans-serif;
+  --paper:#FFFFFF;--card:#F6F8FA;--side:#F6F8FA;--ink:#1F2328;--muted:#59636E;--line:#D1D9E0;--rule:#BFC8D2;--code:#F2F4F7;
+  --accent:#0969DA;--accent-soft:#DDF4FF;--dense:#8250DF;--dense-soft:#F4EDFF;--good:#1A7F37;--good-soft:#DAFBE1;--warn:#9A6700;--warn-soft:#FFF8C5;--bad:#CF222E;--bad-soft:#FFEBE9}
+:root[data-style="notebook"][data-theme="dark"]{--paper:#0D1117;--card:#161B22;--side:#010409;--ink:#E6EDF3;--muted:#9198A1;--line:#30363D;--rule:#3D444D;--code:#1B2129;
+  --accent:#4493F8;--accent-soft:#0C2D6B;--dense:#AB7DF8;--dense-soft:#2A1F45;--good:#3FB950;--good-soft:#12261E;--warn:#D29922;--warn-soft:#2E2410;--bad:#F85149;--bad-soft:#3A1418}
+:root[data-style="textbook"]{--f-head:Cambria,"Palatino Linotype",Georgia,serif;--f-body:Cambria,"Palatino Linotype",Georgia,serif;--body-size:17.5px;--radius:3px;--h-weight:700;
+  --paper:#FFFDF8;--card:#FFFFFF;--side:#FAF6EE;--ink:#1B1B1B;--muted:#5E5A55;--line:#E4DED3;--rule:#CFC6B6;--code:#F5F1E8;
+  --accent:#9E1B32;--accent-soft:#F7E4E7;--dense:#1F4E79;--dense-soft:#E3ECF5;--good:#2E6B3A;--good-soft:#E3F0E5;--warn:#8A5A00;--warn-soft:#FAF0D7;--bad:#9E1B32;--bad-soft:#F7E4E7}
+:root[data-style="textbook"][data-theme="dark"]{--paper:#1A1917;--card:#22201D;--side:#1F1D1A;--ink:#ECE7DE;--muted:#A8A196;--line:#3A3631;--rule:#4E4840;--code:#2A2723;
+  --accent:#E26D7E;--accent-soft:#3D1C22;--dense:#8DB4DE;--dense-soft:#1B2A3A;--good:#86C48F;--good-soft:#1C2D1F;--warn:#E0B65A;--warn-soft:#33290F;--bad:#E26D7E;--bad-soft:#3D1C22}
+:root[data-style="editor"]{--f-head:"Cascadia Code","Cascadia Mono",Consolas,monospace;--f-body:"Segoe UI",system-ui,sans-serif;--radius:4px;--h-weight:600;
+  --paper:#FFFFFF;--card:#F3F3F3;--side:#F3F3F3;--ink:#1E1E1E;--muted:#6E6E6E;--line:#E0E0E0;--rule:#CCCCCC;--code:#F8F8F8;
+  --accent:#005FB8;--accent-soft:#E5F0FB;--dense:#AF00DB;--dense-soft:#F7E6FB;--good:#008000;--good-soft:#E8F5E8;--warn:#795E26;--warn-soft:#FBF4E2;--bad:#A31515;--bad-soft:#FBE9E9}
+:root[data-style="editor"][data-theme="dark"]{--paper:#1E1E1E;--card:#252526;--side:#181818;--ink:#D4D4D4;--muted:#9D9D9D;--line:#3C3C3C;--rule:#4A4A4A;--code:#1A1A1A;
+  --accent:#569CD6;--accent-soft:#1B2B3A;--dense:#C586C0;--dense-soft:#33243A;--good:#6A9955;--good-soft:#1F2A1C;--warn:#DCDCAA;--warn-soft:#2E2E22;--bad:#CE9178;--bad-soft:#3A2820}
+:root[data-style="minimal"]{--f-head:"Segoe UI Variable Display","Segoe UI",system-ui,sans-serif;--f-body:Charter,"Bitstream Charter",Georgia,serif;--body-size:19px;--radius:12px;--h-weight:700;--sec-pad:60px;
+  --paper:#FFFFFF;--card:#FAFAFA;--side:#FFFFFF;--ink:#242424;--muted:#6B6B6B;--line:#EEEEEE;--rule:#E2E2E2;--code:#F6F6F6;
+  --accent:#1A8917;--accent-soft:#E9F5E9;--dense:#2F6FDB;--dense-soft:#EAF1FD;--good:#1A8917;--good-soft:#E9F5E9;--warn:#B26B00;--warn-soft:#FFF4E0;--bad:#C94A4A;--bad-soft:#FBECEC}
+:root[data-style="minimal"][data-theme="dark"]{--paper:#191919;--card:#202020;--side:#191919;--ink:#E6E6E6;--muted:#9B9B9B;--line:#2E2E2E;--rule:#3A3A3A;--code:#252525;
+  --accent:#5DBB63;--accent-soft:#1E2E20;--dense:#6EA8FE;--dense-soft:#1C2638;--good:#5DBB63;--good-soft:#1E2E20;--warn:#E3A33B;--warn-soft:#33270F;--bad:#E57373;--bad-soft:#3A1F1F}
+:root[data-style="catalogue"]{--f-head:"Iowan Old Style","Palatino Linotype","Book Antiqua",Palatino,Georgia,serif;--f-body:"Segoe UI",system-ui,sans-serif;--h-weight:700;
+  --paper:#FBF7EF;--card:#FFFDF8;--side:#F6F0E3;--ink:#231F18;--muted:#6B6457;--line:#E2D9C7;--rule:#C9BBA0;--code:#F1EBDD;
+  --accent:#B0431A;--accent-soft:#F6E2D6;--dense:#355C8C;--dense-soft:#E0E8F2;--good:#2D7549;--good-soft:#DDEFE2;--warn:#8F6200;--warn-soft:#F6EBCB;--bad:#B0431A;--bad-soft:#F6E2D6}
+:root[data-style="catalogue"][data-theme="dark"]{--paper:#16140F;--card:#1F1C16;--side:#1B1813;--ink:#EDE6D6;--muted:#A99F8D;--line:#38322A;--rule:#5A5040;--code:#29251D;
+  --accent:#F08B5E;--accent-soft:#3B2318;--dense:#8DB2E3;--dense-soft:#1C2939;--good:#7BCB97;--good-soft:#18301F;--warn:#E3B653;--warn-soft:#352A12;--bad:#F08B5E;--bad-soft:#3B2318}
+/* Reader themes: research-based reading typography (bundled OFL fonts, so they work offline).
+   Lines about 68 characters, line height about 1.7, off-white paper; dark mode on dark grey with off-white text (no pure black or white). */
+@font-face{font-family:"Literata";src:url("fonts/literata-latin-opsz-normal.woff2") format("woff2");font-weight:200 900;font-style:normal;font-display:swap}
+@font-face{font-family:"Literata";src:url("fonts/literata-latin-opsz-italic.woff2") format("woff2");font-weight:200 900;font-style:italic;font-display:swap}
+@font-face{font-family:"Atkinson Hyperlegible";src:url("fonts/atkinson-hyperlegible-latin-400-normal.woff2") format("woff2");font-weight:400;font-style:normal;font-display:swap}
+@font-face{font-family:"Atkinson Hyperlegible";src:url("fonts/atkinson-hyperlegible-latin-400-italic.woff2") format("woff2");font-weight:400;font-style:italic;font-display:swap}
+@font-face{font-family:"Atkinson Hyperlegible";src:url("fonts/atkinson-hyperlegible-latin-700-normal.woff2") format("woff2");font-weight:700;font-style:normal;font-display:swap}
+@font-face{font-family:"Atkinson Hyperlegible";src:url("fonts/atkinson-hyperlegible-latin-700-italic.woff2") format("woff2");font-weight:700;font-style:italic;font-display:swap}
+:root[data-style="reader"],:root[data-style="hyper"]{
+  --paper:#FBF8F1;--card:#F5F1E8;--side:#F3EEE3;--ink:#2A2723;--muted:#6B655B;--line:#E4DCCD;--rule:#CFC4AF;--code:#F0EADF;
+  --accent:#8C3A12;--accent-soft:#F5E3D6;--dense:#24588A;--dense-soft:#E2ECF6;--good:#2F6B3B;--good-soft:#E3F0E3;--warn:#8A5B00;--warn-soft:#F8EDCF;--bad:#A1271B;--bad-soft:#F8E1DD;
+  --radius:6px;--sec-pad:56px}
+:root[data-style="reader"][data-theme="dark"],:root[data-style="hyper"][data-theme="dark"]{
+  --paper:#1C1B19;--card:#24221F;--side:#191816;--ink:#DEDAD2;--muted:#A39E93;--line:#36332E;--rule:#4A463F;--code:#2A2825;
+  --accent:#E3A178;--accent-soft:#3A2A20;--dense:#94BCE6;--dense-soft:#1F2B38;--good:#8CC79A;--good-soft:#1F2D22;--warn:#E2BD6A;--warn-soft:#352B14;--bad:#EE8E80;--bad-soft:#3B2420}
+:root[data-style="reader"]{--f-head:"Literata",Cambria,Georgia,serif;--f-body:"Literata",Cambria,Georgia,serif;--body-size:19px;--h-weight:650}
+:root[data-style="hyper"]{--f-head:"Atkinson Hyperlegible","Segoe UI",system-ui,sans-serif;--f-body:"Atkinson Hyperlegible","Segoe UI",system-ui,sans-serif;--body-size:18.5px;--h-weight:700}
+:root[data-theme="dark"]{color-scheme:dark}
+
+/* ---------- base ---------- */
+*{box-sizing:border-box}
+html{scroll-behavior:smooth;scroll-padding-top:72px}
+body{margin:0;background:var(--paper);color:var(--ink);font:var(--body-size)/1.62 var(--f-body)}
+a{color:var(--accent)}
+a:focus-visible,button:focus-visible,input:focus-visible,select:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+h1,h2,h3{font-family:var(--f-head);font-weight:var(--h-weight);line-height:1.2;margin:0;text-wrap:balance}
+h1{font-size:clamp(1.8rem,4.2vw,2.6rem);letter-spacing:-.01em}
+h2{font-size:clamp(1.3rem,2.8vw,1.65rem)}
+h3{font-size:1.06rem}
+p{margin:0}
+code,.mono{font-family:var(--f-mono);font-size:.86em}
+:not(pre)>code{background:var(--code);padding:.08em .35em;border-radius:4px}
+pre{font-family:var(--f-mono);font-size:.84rem;background:var(--code);padding:12px 14px;border-radius:var(--radius);overflow-x:auto;margin:0;line-height:1.5;border:1px solid var(--line)}
+ul,ol{margin:0;padding-left:1.25em}
+li+li{margin-top:4px}
+
+/* ---------- top bar, sidebar, layout ---------- */
+.top{position:sticky;top:0;z-index:30;height:56px;display:flex;align-items:center;gap:10px;padding:0 16px;background:color-mix(in srgb,var(--paper) 92%,transparent);backdrop-filter:blur(8px);border-bottom:1px solid var(--line)}
+.top .t{font-family:var(--f-head);font-weight:var(--h-weight);margin-right:auto;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;min-width:0}
+.menu,.home{display:inline-flex;gap:4px;align-items:center;flex:none}
+.home{text-decoration:none}
+.side .course a{display:grid;grid-template-columns:26px minmax(0,1fr);gap:4px;padding:5px 8px;border-radius:6px;color:var(--ink);text-decoration:none;font-size:.88rem;line-height:1.35}
+.side .course a .n{font-family:var(--f-mono);font-size:.74rem;color:var(--muted)}
+.side .course a:hover{background:color-mix(in srgb,var(--accent) 10%,transparent)}
+.top .btn,.top .seg{flex:none;white-space:nowrap}
+.crumb{display:none;color:var(--muted);font-weight:400;font-family:var(--f-body)}
+html[data-toc="hidden"] .crumb{display:inline}
+.topprog{position:absolute;left:0;bottom:-1px;height:3px;width:0;background:var(--accent);transition:width .15s}
+html:not([data-toc="hidden"]) .topprog{display:none}
+.seg{display:inline-flex;border:1px solid var(--rule);border-radius:999px;overflow:hidden;flex:none}
+.seg button{font:inherit;font-family:var(--f-body);font-size:.88rem;border:0;background:transparent;color:var(--ink);padding:5px 12px;cursor:pointer}
+.seg button[aria-pressed="true"]{background:var(--ink);color:var(--paper)}
+.btn,select.btn{font:inherit;font-family:var(--f-body);font-size:.88rem;border:1px solid var(--rule);background:var(--card);color:var(--ink);border-radius:8px;padding:5px 10px;cursor:pointer}
+.btn:hover{border-color:var(--ink)}
+/* Panel docked to the window edge (like VS Code); the text starts right beside it; spare space goes to the far side only. */
+.shell{--side-w:260px;display:grid;grid-template-columns:var(--side-w) minmax(0,var(--content-w));justify-content:start;column-gap:48px;padding:0 24px 0 0}
+aside.side{position:sticky;top:56px;height:calc(100vh - 56px);overflow:auto;background:var(--side);border-right:1px solid var(--line);padding:20px 12px 24px;font-family:var(--f-body)}
+.side .lab{font-size:.72rem;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);margin:14px 8px 6px}
+.side .head{display:flex;justify-content:space-between;align-items:center;gap:8px;margin:0 8px 8px}
+.side .head .lab{margin:0}
+.side .head button{font:inherit;font-family:var(--f-body);font-size:.74rem;border:1px solid var(--rule);background:var(--paper);color:var(--muted);border-radius:6px;padding:2px 7px;cursor:pointer}
+.side .head button:hover{color:var(--ink);border-color:var(--ink)}
+html[data-side="right"] .shell{grid-template-columns:minmax(0,var(--content-w)) var(--side-w);justify-content:end;padding:0 0 0 24px}
+html[data-side="right"] aside.side{order:2;border-right:0;border-left:1px solid var(--line)}
+html[data-toc="hidden"] .shell{grid-template-columns:minmax(0,var(--content-w));justify-content:center;padding:0 24px}
+html[data-toc="hidden"] aside.side{display:none}
+.prog{margin:0 8px 6px;display:grid;gap:4px;font-size:.8rem;color:var(--muted)}
+.prog .track{height:5px;border-radius:3px;background:var(--line);overflow:hidden}
+.prog .track i{display:block;height:100%;width:0;background:var(--accent);transition:width .15s}
+.side nav a{display:grid;grid-template-columns:26px minmax(0,1fr) auto;gap:4px;align-items:baseline;padding:5px 8px;border-radius:6px;color:var(--ink);text-decoration:none;font-size:.88rem;line-height:1.35}
+.side nav a .n{font-family:var(--f-mono);font-size:.74rem;color:var(--muted)}
+.side nav a:hover{background:color-mix(in srgb,var(--accent) 10%,transparent)}
+.side nav a.on{background:var(--accent-soft);color:var(--accent);font-weight:600}
+.side nav a.on .n{color:var(--accent)}
+.side nav a .fo{font-size:.66rem;font-family:var(--f-mono);color:var(--dense);border:1px solid var(--dense);border-radius:4px;padding:0 4px}
+html[data-depth="short"] .side nav a.fullonly{opacity:.55}
+main{padding:8px 0 90px;min-width:0;width:100%}
+@media (max-width:980px){
+  .shell,html[data-side="right"] .shell,html[data-toc="hidden"] .shell{grid-template-columns:minmax(0,1fr);padding:0}
+  aside.side,html[data-toc="hidden"] aside.side,html[data-side="right"] aside.side{display:block;position:fixed;left:0;top:56px;bottom:0;height:auto;width:min(300px,86vw);z-index:25;transform:translateX(-104%);transition:transform .2s;box-shadow:0 10px 30px rgba(0,0,0,.25);background:var(--side);padding:16px 12px 24px}
+  html[data-side="right"] aside.side{left:auto;right:0;transform:translateX(104%)}
+  body.side-open aside.side{transform:none!important}
+  .topprog{display:block!important}
+  .crumb{display:inline}
+  main{padding:8px 16px 90px}
+}
+@media (max-width:620px){.top .t{display:none}.top .seg{margin-left:auto}.top select.btn{max-width:118px}}
+@media (max-width:480px){.top{gap:6px;padding:0 10px}.top .lbl{display:none}.top select.btn{max-width:100px}.seg button{padding:5px 10px}}
+.totop{position:fixed;right:20px;bottom:20px;width:46px;height:46px;border-radius:50%;border:1px solid var(--rule);background:var(--ink);color:var(--paper);font-size:1.3rem;line-height:1;cursor:pointer;box-shadow:0 4px 14px rgba(0,0,0,.2);opacity:0;pointer-events:none;transform:translateY(8px);transition:opacity .2s,transform .2s;z-index:20}
+.totop.show{opacity:1;pointer-events:auto;transform:none}
+
+/* ---------- content blocks ---------- */
+header.hero{padding:28px 0 4px;display:grid;gap:10px}
+.eyebrow{font-family:var(--f-mono);font-size:.72rem;letter-spacing:.08em;text-transform:uppercase;color:var(--muted)}
+.sub{color:var(--muted);font-size:1.05rem}
+section.s{padding-top:var(--sec-pad);display:grid;gap:14px}
+section.s>.num{font-family:var(--f-mono);font-size:.74rem;letter-spacing:.08em;color:var(--accent)}
+.lede{font-size:1.1rem}
+.badge{font-size:.72rem;font-family:var(--f-mono);padding:1px 7px;border-radius:999px;border:1px solid var(--rule);color:var(--muted);background:var(--card);white-space:nowrap;vertical-align:1px}
+.badge.m{border-color:var(--good);color:var(--good)}
+.badge.t{border-color:var(--warn);color:var(--warn)}
+.badge.f{border-color:var(--dense);color:var(--dense)}
+.card{background:var(--card);border:1px solid var(--line);border-radius:var(--radius);padding:14px 16px}
+.call{padding:10px 14px;border-radius:0 var(--radius) var(--radius) 0;border-left:4px solid}
+.call.proj{border-color:var(--good);background:var(--good-soft)}
+.call.wrong{border-color:var(--bad);background:var(--bad-soft)}
+.call.wrong>b:first-child{color:var(--bad)}
+.call.note{border-color:var(--warn);background:var(--warn-soft)}
+.full{border:1px dashed var(--dense);border-radius:var(--radius);padding:14px 16px;display:grid;gap:12px;background:color-mix(in srgb,var(--dense-soft) 50%,transparent)}
+.full>.tag{font-family:var(--f-mono);font-size:.7rem;letter-spacing:.08em;text-transform:uppercase;color:var(--dense)}
+html[data-depth="short"] .full{display:none}
+.two{display:grid;gap:12px}
+@media (min-width:760px){.two{grid-template-columns:1fr 1fr}}
+.three{display:grid;gap:10px}
+@media (min-width:760px){.three{grid-template-columns:repeat(3,1fr)}}
+table{border-collapse:collapse;width:100%;font-size:.92rem;font-family:var(--f-body)}
+th,td{text-align:left;padding:7px 9px;border-bottom:1px solid var(--line);vertical-align:top}
+th{font-size:.78rem;color:var(--muted);font-weight:600}
+td.n,th.n{text-align:right;font-variant-numeric:tabular-nums;font-family:var(--f-mono);font-size:.84rem}
+.tw{overflow-x:auto}
+caption,figcaption{caption-side:bottom;text-align:left;color:var(--muted);font-size:.84rem;padding-top:6px;font-family:var(--f-body)}
+figure{margin:0;display:grid;gap:8px}
+.hit{color:var(--good);font-weight:700}
+.miss{color:var(--bad);font-weight:700}
+.formula{font-family:var(--f-mono);font-size:.92rem;background:var(--code);padding:12px 14px;border-radius:var(--radius);overflow-x:auto;line-height:1.75;border:1px solid var(--line)}
+.formula .w{color:var(--accent);font-weight:700}
+.formula .c{color:var(--muted)}
+
+/* at a glance */
+.glance{display:grid;gap:10px;grid-template-columns:repeat(auto-fill,minmax(240px,1fr))}
+.g{background:var(--card);border:1px solid var(--line);border-radius:var(--radius);padding:10px 12px;display:grid;gap:5px;align-content:start}
+.g h3{font-size:.95rem;display:flex;justify-content:space-between;gap:8px;align-items:baseline}
+.g h3 a{font-family:var(--f-mono);font-size:.72rem;font-weight:400;text-decoration:none}
+.g .fx{font-family:var(--f-mono);font-size:.8rem;background:var(--code);border:1px solid var(--line);padding:5px 8px;border-radius:6px;white-space:normal;overflow-wrap:anywhere;line-height:1.45}
+.g p{font-size:.88rem}
+.g .ex{font-size:.8rem;color:var(--muted)}
+.key{font-size:.86rem;color:var(--muted)}
+.key code{color:var(--ink)}
+
+/* rank cards, index explorer */
+.ranks{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.rank{border-radius:var(--radius);padding:14px;border:1px solid var(--line);background:var(--card);display:grid;gap:4px}
+.rank .big{font-family:var(--f-head);font-size:2.5rem;line-height:1;font-weight:700}
+.rank.d .big{color:var(--dense)}
+.rank.k .big{color:var(--accent)}
+.idx-docs{display:grid;gap:6px}
+.doc{font-family:var(--f-mono);font-size:.8rem;padding:6px 10px;border:1px solid var(--line);border-radius:8px;background:var(--paper);display:flex;gap:10px;align-items:baseline}
+.doc .id{font-weight:700;min-width:2.2em}
+.doc .tok{padding:0 2px;border-radius:3px}
+.doc .tok.on{background:var(--accent-soft);color:var(--accent);font-weight:700}
+.doc.cand{border-color:var(--accent)}
+.chips{display:flex;flex-wrap:wrap;gap:6px}
+.chip{font:inherit;font-family:var(--f-mono);font-size:.82rem;border:1px solid var(--rule);background:var(--paper);color:var(--ink);border-radius:999px;padding:3px 10px;cursor:pointer}
+.chip[aria-pressed="true"]{background:var(--accent);border-color:var(--accent);color:var(--paper)}
+.cards{display:grid;gap:8px;grid-template-columns:repeat(auto-fill,minmax(190px,1fr))}
+.icard{background:var(--paper);border:1px solid var(--rule);border-radius:4px;padding:8px 10px 10px;position:relative}
+.icard::before{content:"";position:absolute;left:0;right:0;top:28px;border-top:1px solid var(--accent);opacity:.55}
+.icard h4{margin:0 0 10px;font-family:var(--f-mono);font-size:.92rem}
+.icard p{font-size:.82rem;font-family:var(--f-mono)}
+.icard .meta{color:var(--muted);font-family:var(--f-body);font-size:.78rem;margin-top:4px}
+
+/* controls and charts */
+.ctl{display:grid;grid-template-columns:160px minmax(0,1fr) 64px;gap:10px;align-items:center;font-size:.9rem;font-family:var(--f-body)}
+.ctl input[type=range]{width:100%;accent-color:var(--accent)}
+.ctl output{font-family:var(--f-mono);text-align:right}
+@media (max-width:560px){.ctl{grid-template-columns:110px minmax(0,1fr) 54px}}
+svg.chart{width:100%;height:auto;display:block;background:var(--card);border:1px solid var(--line);border-radius:var(--radius)}
+svg .ax{stroke:var(--rule);stroke-width:1}
+svg .grid{stroke:var(--line);stroke-width:1}
+svg text{fill:var(--muted);font-family:"Segoe UI",system-ui,sans-serif;font-size:12px}
+svg .lab{fill:var(--ink);font-size:12.5px}
+svg .s-bm25{stroke:var(--accent);stroke-width:3;fill:none}
+svg .s-tfidf{stroke:var(--muted);stroke-width:2;fill:none;stroke-dasharray:6 5}
+svg .s-raw{stroke:var(--accent);stroke-width:1.5;fill:none;stroke-dasharray:2 4;opacity:.8}
+svg .s-ceil{stroke:var(--warn);stroke-width:1.5;stroke-dasharray:5 4}
+svg .s-ref{stroke:var(--dense);stroke-width:2;fill:none;opacity:.55}
+svg .dot{fill:var(--accent);stroke:var(--card);stroke-width:2}
+svg .dot2{fill:var(--dense);stroke:var(--card);stroke-width:2}
+svg .zero{stroke:var(--ink);stroke-width:1;opacity:.45}
+.readout{font-size:.9rem;background:var(--card);border:1px solid var(--line);border-radius:8px;padding:8px 12px;font-family:var(--f-body)}
+.readout b{font-family:var(--f-mono)}
+.sbars{display:grid;gap:8px}
+.sbar{display:grid;grid-template-columns:130px minmax(0,1fr) 64px;gap:10px;align-items:center;font-size:.88rem;font-family:var(--f-body)}
+.sbar .track{display:flex;height:22px;background:var(--paper);border:1px solid var(--line);border-radius:4px;overflow:hidden}
+.sbar .p1{background:var(--accent)}
+.sbar .p2{background:var(--warn);opacity:.75}
+.sbar .v{font-family:var(--f-mono);text-align:right}
+@media (max-width:560px){.sbar{grid-template-columns:92px minmax(0,1fr) 54px}}
+.legend{display:flex;flex-wrap:wrap;gap:12px;font-size:.82rem;color:var(--muted);font-family:var(--f-body)}
+.legend i{display:inline-block;width:12px;height:12px;border-radius:2px;margin-right:5px;vertical-align:-1px}
+.play{display:grid;gap:10px}
+.play label{display:grid;gap:4px;font-size:.88rem;font-family:var(--f-body)}
+.play input[type=text]{font:inherit;font-family:var(--f-mono);font-size:.86rem;padding:8px 10px;border:1px solid var(--rule);border-radius:8px;background:var(--paper);color:var(--ink);width:100%}
+.toks{display:grid;gap:8px}
+.tokrow{border:1px solid var(--line);border-radius:10px;padding:8px 10px;background:var(--paper);display:grid;gap:6px}
+.tokrow .h{display:flex;flex-wrap:wrap;gap:8px;align-items:baseline;justify-content:space-between;font-family:var(--f-body)}
+.tokrow .h b{font-family:var(--f-mono);font-size:.84rem}
+.tk{display:inline-block;font-family:var(--f-mono);font-size:.78rem;padding:1px 6px;margin:2px 3px 2px 0;border:1px solid var(--line);border-radius:4px;background:var(--card)}
+.tk.sh{border-color:var(--good);background:var(--good-soft);color:var(--good);font-weight:700}
+.verdict{font-size:.86rem;font-weight:600}
+.verdict.yes{color:var(--good)}
+.verdict.no{color:var(--bad)}
+.ov{position:relative;height:84px;border:1px solid var(--line);border-radius:var(--radius);background:var(--card);overflow:hidden}
+.ov .w{position:absolute;height:24px;border-radius:4px;font-size:.76rem;font-family:var(--f-mono);display:flex;align-items:center;justify-content:center;color:var(--ink);background:var(--dense-soft);border:1px solid var(--dense)}
+.ov .w82{top:12px;left:4%;width:56%}
+.ov .w83{top:46px;left:40%;width:56%}
+.ov .pin{position:absolute;top:4px;bottom:4px;left:44.1%;width:3px;background:var(--accent)}
+.ov .pinl{position:absolute;top:2px;left:45.3%;font-size:.74rem;font-family:var(--f-mono);color:var(--accent);font-weight:700}
+.q{display:grid;gap:8px}
+.q fieldset{border:1px solid var(--line);border-radius:var(--radius);padding:10px 14px;background:var(--card);margin:0;display:grid;gap:6px}
+.q legend{font-weight:600;padding:0 4px}
+.q label{display:flex;gap:8px;align-items:flex-start;font-size:.94rem;cursor:pointer}
+.q .fb{font-size:.9rem;padding:6px 10px;border-radius:6px;display:none}
+.q .fb.show{display:block}
+.q .fb.ok{background:var(--good-soft);color:var(--good)}
+.q .fb.no{background:var(--bad-soft);color:var(--bad)}
+.check{display:grid;gap:6px}
+.check label{display:grid;grid-template-columns:22px minmax(0,1fr);gap:8px;align-items:start;padding:8px 10px;border:1px solid var(--line);border-radius:8px;background:var(--card);cursor:pointer;font-size:.92rem}
+.check label:has(input:checked){border-color:var(--good);background:var(--good-soft)}
+.check input{width:17px;height:17px;margin-top:3px;accent-color:var(--good)}
+.check .how{display:block;color:var(--muted);font-size:.84rem;margin-top:2px}
+footer{margin-top:48px;padding:22px 0 0;border-top:1px solid var(--line);color:var(--muted);font-size:.86rem;display:grid;gap:8px}
+
+
+/* the theory in one read: a numbered chain of ideas */
+.chain{list-style:none;counter-reset:idea;margin:0;padding:0;display:grid;gap:0}
+.chain>li{counter-increment:idea;position:relative;padding:0 0 22px 52px;display:grid;gap:7px;margin:0}
+.chain>li::before{content:counter(idea);position:absolute;left:0;top:-2px;width:34px;height:34px;border-radius:50%;display:grid;place-items:center;
+  background:var(--accent-soft);color:var(--accent);border:1px solid var(--accent);font:600 .9rem/1 var(--f-body);font-variant-numeric:lining-nums}
+.chain>li::after{content:"";position:absolute;left:16.5px;top:36px;bottom:4px;width:1px;background:var(--rule)}
+.chain>li:last-child::after{display:none}
+.chain h3{font-size:1.08rem}
+.chain .formula{font-size:.86rem;padding:8px 12px;line-height:1.65}
+.chain .go{justify-self:start;font-size:.86rem;font-family:var(--f-body);text-decoration:none;border:1px solid var(--rule);border-radius:999px;padding:1px 10px;color:var(--accent)}
+.chain .go:hover{border-color:var(--accent)}
+
+/* ---------- small per-theme touches ---------- */
+[data-style="textbook"] section.s>.num{font-family:var(--f-head);font-size:.95rem;letter-spacing:.02em;font-style:italic;text-transform:none}
+[data-style="textbook"] #answer .lede::first-letter{float:left;font-size:3.1em;line-height:.9;padding:5px 8px 0 0;color:var(--accent);font-family:var(--f-head)}
+[data-style="textbook"] .call{border-left-width:2px;font-style:italic}
+[data-style="textbook"] .call b{font-style:normal}
+[data-style="editor"] h2::before{content:"## ";color:var(--muted)}
+[data-style="editor"] h1::before{content:"# ";color:var(--muted)}
+[data-style="editor"] .formula,[data-style="editor"] pre{border-left:3px solid var(--accent)}
+[data-style="minimal"] .card,[data-style="minimal"] .g,[data-style="minimal"] .rank,[data-style="minimal"] svg.chart{border-color:transparent}
+[data-style="minimal"] aside.side{border-right-color:transparent}
+[data-style="minimal"] .call{border-left-width:3px}
+[data-style="catalogue"] .g,[data-style="catalogue"] .card{box-shadow:0 1px 0 var(--line)}
+/* Reader themes: the rich typographic details */
+:is([data-style="reader"],[data-style="hyper"]){--content-w:720px}
+:is([data-style="reader"],[data-style="hyper"]) body{line-height:1.72;font-variant-numeric:lining-nums;text-rendering:optimizeLegibility;-webkit-font-smoothing:antialiased}
+:is([data-style="reader"],[data-style="hyper"]) :is(p,li){text-wrap:pretty;hanging-punctuation:first}
+:is([data-style="reader"],[data-style="hyper"]) section.s{border-top:1px solid var(--line);margin-top:30px}
+:is([data-style="reader"],[data-style="hyper"]) section.s>.num{font-family:var(--f-body);font-variant-caps:all-small-caps;font-size:1rem;letter-spacing:.09em;color:var(--accent)}
+:is([data-style="reader"],[data-style="hyper"]) .eyebrow{font-family:var(--f-body);font-variant-caps:all-small-caps;font-size:.95rem;text-transform:none;letter-spacing:.08em}
+:is([data-style="reader"],[data-style="hyper"]) h2{font-size:clamp(1.5rem,3vw,1.9rem);letter-spacing:-.005em}
+[data-style="reader"] h1{font-weight:720;font-size:clamp(2rem,5vw,3rem);letter-spacing:-.015em}
+:is([data-style="reader"],[data-style="hyper"]) #answer .lede{font-size:1.2em;line-height:1.62}
+[data-style="reader"] #answer .lede::first-letter{float:left;font-size:3.5em;line-height:.84;padding:6px 10px 0 0;color:var(--accent);font-weight:700}
+:is([data-style="reader"],[data-style="hyper"]) .call{border-left-width:3px;border-radius:0 8px 8px 0;padding:12px 16px}
+:is([data-style="reader"],[data-style="hyper"]) .call.proj::before{content:"✦ ";color:var(--good)}
+:is([data-style="reader"],[data-style="hyper"]) a{text-underline-offset:.18em;text-decoration-thickness:1px}
+:is([data-style="reader"],[data-style="hyper"]) ::selection{background:var(--accent-soft)}
+:is([data-style="reader"],[data-style="hyper"]) table{font-variant-numeric:lining-nums tabular-nums}
+:is([data-style="reader"],[data-style="hyper"]) :is(.g,.card,.rank){box-shadow:0 1px 2px rgba(0,0,0,.05)}
+:is([data-style="reader"],[data-style="hyper"]) .side nav a{font-size:.9rem}
+@media print{.top,aside.side,.totop,.ctl,.btn,.play input{display:none!important} html[data-depth] .full{display:grid!important} .shell{display:block} main{padding:0}}
+
+/* ---------- lesson additions (shared with P1) ---------- */
+.tk.mk{color:var(--muted);border-style:dashed}
+svg .fbox{fill:var(--paper);stroke:var(--rule);stroke-width:1.2}
+svg .fbox.hl{fill:var(--accent-soft);stroke:var(--accent);stroke-width:2}
+svg .farr{stroke:var(--muted);stroke-width:1.6}
+svg .fhead{fill:var(--muted)}
+svg .rb1{fill:var(--muted);opacity:.55}
+svg .rb2{fill:var(--accent)}
+svg .tbar{fill:var(--accent)}
+.sbar .pm{background:var(--muted);opacity:.55}
+.sbar .p3{background:var(--dense)}
+.sbar .ph,.legend i.hatch{background:repeating-linear-gradient(45deg,var(--warn) 0 3px,transparent 3px 7px);opacity:.8}
+.sbar .p4{background:var(--dense);opacity:.8}
+.sbar .p5{background:var(--good)}
+.sbar .pe{background:transparent}
+pre .c{color:var(--muted)}
+table.heat td.hc{text-align:center;font-weight:600}
+table.heat td.g2{background:var(--good-soft);color:var(--good)}
+table.heat td.g1{background:var(--warn-soft);color:var(--warn)}
+table.heat td.g0{background:var(--bad-soft);color:var(--bad)}
+/* grid children may shrink below their content, so wide code scrolls inside its box on phones */
+section.s>*,.two>*,.three>*,.full>*,.card>*,figure>*{min-width:0}
+main :not(pre)>code{overflow-wrap:anywhere}
+@media (max-width:620px){.badge{white-space:normal}}
+
+/* ---------- I4 additions ---------- */
+.badge.h{border-color:var(--dense);color:var(--dense)}
+.badge.a{border-color:var(--bad);color:var(--bad)}
+.units{display:grid;gap:3px;max-height:420px;overflow:auto;padding-right:4px}
+.unit{display:grid;grid-template-columns:52px 18px minmax(0,1fr) auto;gap:8px;align-items:baseline;font-size:.86rem;padding:4px 8px;border:1px solid var(--line);border-radius:6px;background:var(--paper)}
+.unit.uh .ut{font-style:italic;color:var(--muted)}
+.unit.hl{border-color:var(--accent);background:var(--accent-soft)}
+.uid{font-family:var(--f-mono);font-size:.78rem;color:var(--accent);font-weight:700;white-space:nowrap}
+.uk{font-family:var(--f-mono);font-size:.74rem;color:var(--muted)}
+.uo{font-family:var(--f-mono);font-size:.72rem;color:var(--muted);white-space:nowrap}
+@media (max-width:560px){.unit{grid-template-columns:44px minmax(0,1fr)}.unit .uk,.unit .uo{display:none}}
+.srcline{font-size:.92rem}
+.srcline .uid{margin-right:6px}
+.tk.bad{border-color:var(--bad);background:var(--bad-soft);color:var(--bad);font-weight:700}
+.ctl2{display:grid;gap:4px;font-size:.88rem;font-family:var(--f-body)}
+.ctl2 input{font:inherit;font-family:var(--f-mono);font-size:.88rem;padding:6px 8px;border:1px solid var(--rule);border-radius:8px;background:var(--paper);color:var(--ink);width:100%}
+.ctl2 select{justify-self:start}
+#scTable tr.top4 td{background:color-mix(in srgb,var(--accent-soft) 55%,transparent)}
+.muted{color:var(--muted)}
+#propPick .chip{font-size:.78rem;padding:2px 8px}
+.play select{max-width:100%}
+</style>
+</head>
+<body>
+<div class="top">
+  <a class="btn home" id="home" href="../../RAG_ROUTE_MAP.html" title="Back to all phases"><span aria-hidden="true">⌂</span><span class="lbl">All phases</span></a>
+  <button type="button" class="btn menu" id="menu" aria-expanded="true" aria-controls="side" title="Show or hide the contents (key: T)"><span aria-hidden="true">☰</span><span class="lbl">Contents</span></button>
+  <span class="t">I4 · Proposition chunking: one fact per vector<span class="crumb" id="crumb" aria-live="polite"></span></span>
+  <i class="topprog" id="topprog" aria-hidden="true"></i>
+  <div class="seg" id="depth" role="group" aria-label="Reading depth">
+    <button type="button" data-depth="short" aria-pressed="true">Short</button>
+    <button type="button" data-depth="full" aria-pressed="false">Full</button>
+  </div>
+  <select class="btn" id="style" aria-label="Theme">
+    <option value="reader">Reader · Literata (new)</option>
+    <option value="hyper">Reader · Atkinson Hyperlegible (new)</option>
+    <option value="notebook">Clean notebook</option>
+    <option value="textbook">Textbook</option>
+    <option value="editor">Editor (VS Code)</option>
+    <option value="minimal">Minimal reading</option>
+    <option value="catalogue">Card catalogue (first version)</option>
+  </select>
+  <button type="button" class="btn" id="color" aria-label="Switch light or dark">☾ Dark</button>
+</div>
+
+<div class="shell">
+<aside class="side" id="side" aria-label="Sections">
+  <div class="head"><div class="lab">On this page</div><button type="button" id="sidepos" title="Move the contents to the other side">⇆ Right</button></div>
+  <div class="prog"><span id="where">The answer first</span><span class="track" aria-hidden="true"><i id="bar"></i></span></div>
+  <nav id="toc">
+    <a href="#answer"><span class="n">→</span><span>The answer first</span></a>
+    <a href="#theory"><span class="n">◆</span><span>The theory in one read</span></a>
+    <a href="#glance"><span class="n">★</span><span>Formula sheet</span></a>
+    <div class="lab">Step by step</div>
+    <a href="#dilution"><span class="n">1</span><span>Many facts, one vector</span></a>
+    <a href="#proposition"><span class="n">2</span><span>What a proposition is</span></a>
+    <a href="#decontext"><span class="n">3</span><span>Names instead of pronouns</span></a>
+    <a href="#units"><span class="n">4</span><span>Number the sentences</span></a>
+    <a href="#prompt"><span class="n">5</span><span>Prompt and schema</span></a>
+    <a href="#anchor"><span class="n">6</span><span>Pointing back to the source</span></a>
+    <a href="#align"><span class="n">7</span><span>Checking the rewrite</span></a>
+    <a href="#grade"><span class="n">8</span><span>The grade is a filter</span></a>
+    <a href="#score"><span class="n">9</span><span>Three ways to score</span></a>
+    <a href="#relations"><span class="n">10</span><span>What atomic facts lose</span></a>
+    <a href="#cost"><span class="n">11</span><span>What it costs</span></a>
+    <a href="#project"><span class="n">12</span><span>For your project</span></a>
+    <a href="#repo" class="fullonly"><span class="n">13</span><span>The repo, read critically</span><span class="fo">Full</span></a>
+    <a href="#research" class="fullonly"><span class="n">14</span><span>What the research says</span><span class="fo">Full</span></a>
+    <a href="#book" class="fullonly"><span class="n">15</span><span>The book's pages</span><span class="fo">Full</span></a>
+    <div class="lab">Practise and apply</div>
+    <a href="#verify"><span class="n">✓</span><span>Verify it: the notebook</span></a>
+    <a href="#apply"><span class="n">⚙</span><span>Use it on your data</span></a>
+    <a href="#check"><span class="n">?</span><span>Check yourself</span></a>
+  </nav>
+  <div class="lab">Course</div>
+  <div class="course">
+    <a id="toRoute" href="../../RAG_ROUTE_MAP.html"><span class="n">⌂</span><span>All phases (the route)</span></a>
+    <a class="kitonly" data-route="#/c/I4" href="#"><span class="n">≡</span><span>I4 page: steps, quiz</span></a>
+    <a class="kitonly" data-route="#/c/I3" href="#"><span class="n">←</span><span>Previous topic: I3 semantic chunking</span></a>
+    <a class="kitonly" data-route="#/c/I5" href="#"><span class="n">→</span><span>Next topic: I5 contextual headers</span></a>
+  </div>
+</aside>
+
+<main id="main">
+<header class="hero" id="top">
+  <div class="eyebrow">RAG study kit · Phase 4 · concept I4</div>
+  <h1>Proposition chunking: one fact per vector</h1>
+  <p class="sub">Why a chunk with many facts can hide the one you ask about, how an LLM rewrites a page into single facts that point back to their sentences, how to check that rewrite, how to score it fairly, and what it costs.</p>
+  <p class="key"><span class="badge m">measured</span> local code on the climate PDF and the repo notebook (no API call) · <span class="badge h">hand-written</span> propositions written by the tutor, not by an LLM · <span class="badge t">toy</span> made-up data that shows a mechanism · <span class="badge a">assumed</span> a planning number, not measured · <span class="badge f">formula</span> computed on this page · <span class="badge">external</span> from a cited study</p>
+  <p class="call note"><b>What exists so far.</b> No LLM has written propositions for the course corpus yet: that needs recorded Groq calls (the course's <code>study/llmops/</code> cache, not built). So this lesson teaches the mechanism and the measurement plan with <b>40 propositions the tutor wrote by hand</b> from the PDF text, and six planted mistakes. Every ranked list below is a made-up order. The book pages (Ch4) are cited from the course's page notes; they were not re-opened in the session that wrote this page.</p>
+</header>
+
+<!-- ======================= ANSWER FIRST ======================= -->
+<section class="s" id="answer" aria-labelledby="h-answer">
+  <div class="num">THE ANSWER FIRST</div>
+  <h2 id="h-answer">Proposition chunking in five sentences</h2>
+  <p class="lede"><b>A chunk that holds many facts gets one vector that is a blend of all of them, so a question about one fact can rank that chunk low.</b> Proposition chunking asks an LLM to rewrite each passage as short statements that stand alone, one fact each, with pronouns replaced by names, and indexes those statements instead of the chunk. A rewrite is not text from the document, so every proposition must keep a pointer to the sentences it came from (<b>source_ids</b>): that pointer is what lets code check the rewrite, score it against span gold, and return the original chunk to the generator. It costs LLM calls at index time: one per page to write the propositions, plus one per page if you grade them in a batch, or one per proposition if you grade them one by one (66 against 1,433 calls on the climate PDF). Measure it as "does ranking by propositions bring the right chunk up earlier?", check by hand that the propositions say only what the source says, and expect no gain on contrast and multi-hop questions, where single facts lose the relation between them.</p>
+  <p>Next comes <b>the whole theory in one read</b>, then a <b>formula sheet</b>, then the <b>step-by-step</b> part. It follows one question from the project's draft seeds, <b>D-002 "In what year was the Paris Agreement adopted?"</b>, through page 10 of the climate PDF, and uses D-005 (coal against natural gas) and D-007 (a two-page question) as the hard cases. <b>Short</b> gives a complete first understanding. <b>Full</b> adds the research behind it, the repo notebook read critically, and the book's pages; its parts have a dashed border.</p>
+</section>
+
+<!-- ======================= THEORY IN ONE READ ======================= -->
+<section class="s" id="theory" aria-labelledby="h-theory">
+  <div class="num">THE THEORY IN ONE READ</div>
+  <h2 id="h-theory">The whole topic, idea by idea</h2>
+  <p>Twelve ideas, in the order they build on each other. This part is theory only, with no measurements. Each idea links to its step below.</p>
+  <ol class="chain">
+    <li><h3>Dilution: one vector for many facts</h3>
+      <p>A chunk gets one vector. If it states several unrelated facts, the vector sits between them, so its similarity to a question about one fact is lower than a vector for that fact alone. One unit per fact gives a sharper match.</p>
+      <div class="formula">toy: facts f₁…fₙ orthonormal, chunk = normalise(Σ fᵢ) → cos(f₁, chunk) = 1 / √n</div>
+      <a class="go" href="#dilution">Step 1 →</a></li>
+    <li><h3>A proposition</h3>
+      <p>A proposition states one fact, can be understood alone, uses full names instead of pronouns, keeps the dates and qualifiers that make the fact precise, and has one subject with one thing said about it. Dense X Retrieval's short form: distinct, minimal, self-contained.</p>
+      <a class="go" href="#proposition">Step 2 →</a></li>
+    <li><h3>Decontextualisation</h3>
+      <p>"It provides a framework…" means nothing alone. The rewrite replaces "it" with the name the page used earlier ("The UNFCCC provides…"). The name must come from the page itself, never from the model's own knowledge.</p>
+      <a class="go" href="#decontext">Step 3 →</a></li>
+    <li><h3>Number the units first</h3>
+      <p>Before any LLM call, code splits each page into numbered units (headings and sentences) and records where each one starts and ends. The model then refers to units by id instead of copying text.</p>
+      <div class="formula">unit u = (id "page:i", kind, [a, b))&nbsp;&nbsp;<span class="c">doc_text[a:b] == text</span></div>
+      <a class="go" href="#units">Step 4 →</a></li>
+    <li><h3>Structured generation</h3>
+      <p>The model returns JSON in a fixed shape: a list of {text, source_ids}. Code validates the shape, logs every failure (bad JSON, a reply cut off by the token limit), and never turns a failure into an empty list without saying so.</p>
+      <a class="go" href="#prompt">Step 5 →</a></li>
+    <li><h3>Every proposition points back</h3>
+      <p>A proposition's evidence is the union of its source units. Its parent is the chunk that contains that evidence. The proposition's text is what gets embedded; the span is what gets scored and returned.</p>
+      <div class="formula">span(p) = [ min aᵢ , max bᵢ ) over i ∈ source_ids&nbsp;&nbsp;·&nbsp;&nbsp;parent(p) = the chunk with span(p) ⊆ [start, end)</div>
+      <a class="go" href="#anchor">Step 6 →</a></li>
+    <li><h3>Checking the rewrite</h3>
+      <p>Code can catch added words: every content word of the proposition should appear in its sources (or in a name taken from earlier on the page). It cannot catch a dropped qualifier or a wrong referent. A person checks a sample.</p>
+      <div class="formula">align(p) = | W(p) ∩ (W(sources) ∪ W(names)) | / | W(p) |&nbsp;&nbsp;<span class="c">W = content-word stems</span></div>
+      <a class="go" href="#align">Step 7 →</a></li>
+    <li><h3>The quality grade is a filter</h3>
+      <p>An LLM grade (keep a proposition if all four 1–10 grades are at least 7) decides what enters the index. It is part of the system, not a measurement of faithfulness, and its threshold is a guess until you check it against your own labels.</p>
+      <div class="formula">keep-good = kept ∧ good / good&nbsp;&nbsp;·&nbsp;&nbsp;catch-bad = dropped ∧ bad / bad</div>
+      <a class="go" href="#grade">Step 8 →</a></li>
+    <li><h3>Three ways to score</h3>
+      <p>(a) Rank propositions, return their parent chunks without duplicates, and score the chunks as usual: the fair comparison with the chunk index. (b) Score the propositions' own spans: a diagnostic that over-credits a lossy rewrite unless you also check the text. (c) Page-sized parents: rejected, because almost any page overlaps the gold.</p>
+      <div class="formula">arm (a): MRR@10, CE@k on parents after dedup&nbsp;&nbsp;·&nbsp;&nbsp;arm (b): rel(p) = 1 ⇔ span(p) overlaps gold</div>
+      <a class="go" href="#score">Step 9 →</a></li>
+    <li><h3>What atomic facts lose</h3>
+      <p>A contrast ("coal is the most, gas the least carbon-intensive") or a two-step question needs two facts together. Single-fact units can fill the top k with one side. Near-duplicates crowd the list too. And no proposition can retrieve a sentence that never got one.</p>
+      <div class="formula">distinct-facts@k&nbsp;·&nbsp;sentence_coverage&nbsp;·&nbsp;gold_reachability</div>
+      <a class="go" href="#relations">Step 10 →</a></li>
+    <li><h3>Cost</h3>
+      <p>Index-time calls grow with pages (writing) and, if you grade one by one, with propositions. The index grows by the number of propositions per chunk. The daily token quota, not money, is the limit.</p>
+      <div class="formula">calls = pages + pages (batched grade) or + propositions (one by one)&nbsp;&nbsp;·&nbsp;&nbsp;size = n × dim × 4 bytes</div>
+      <a class="go" href="#cost">Step 11 →</a></li>
+    <li><h3>A fair test in the project</h3>
+      <p>Index the whole corpus, compare against the current best chunk index at the same k and the same token budget, check faithfulness by hand with an interval, guard the contrast and multi-hop questions, and expect "inconclusive" on a small test set.</p>
+      <a class="go" href="#project">Step 12 →</a></li>
+  </ol>
+</section>
+
+<!-- ======================= FORMULA SHEET ======================= -->
+<section class="s" id="glance" aria-labelledby="h-glance">
+  <div class="num">FORMULA SHEET</div>
+  <h2 id="h-glance">Every term and formula, on one screen</h2>
+  <div class="glance">
+    <div class="g"><h3>Dilution (toy) <a href="#dilution">§1</a></h3><div class="fx">cos(f₁, chunk of n facts) = 1/√n</div><p class="ex">n = 3: 0.577 · n = 14: 0.267</p></div>
+    <div class="g"><h3>Proposition <a href="#proposition">§2</a></h3><p>one fact · stands alone · full names · dates and qualifiers · one subject–predicate</p></div>
+    <div class="g"><h3>Unit id <a href="#units">§4</a></h3><div class="fx">"page:i", [a, b), heading or sentence</div><p class="ex">[10:7] the Paris sentence</p></div>
+    <div class="g"><h3>Output shape <a href="#prompt">§5</a></h3><div class="fx">{"propositions": [{"text", "source_ids"}]}</div></div>
+    <div class="g"><h3>span(p) <a href="#anchor">§6</a></h3><div class="fx">[min aᵢ, max bᵢ) over source_ids</div><p class="ex">all source units on one page</p></div>
+    <div class="g"><h3>Parent <a href="#anchor">§6</a></h3><div class="fx">chunk with span(p) inside it</div><p class="ex">two parents in the 200-char overlap</p></div>
+    <div class="g"><h3>align(p) <a href="#align">§7</a></h3><div class="fx">|W(p) ∩ (W(src) ∪ W(names))| / |W(p)|</div><p class="ex">list every p with align &lt; 1</p></div>
+    <div class="g"><h3>Faithfulness <a href="#align">§7</a></h3><div class="fx">supported / labelled, with a Wilson interval</div><p class="ex">57/60 → [0.863, 0.983]</p></div>
+    <div class="g"><h3>Filter error <a href="#grade">§8</a></h3><div class="fx">keep-good · catch-bad (with n)</div></div>
+    <div class="g"><h3>Arm (a) <a href="#score">§9</a></h3><div class="fx">rank props → parents, dedup → MRR@10, CE@k</div><p class="ex">the fair A/B against chunks</p></div>
+    <div class="g"><h3>Arm (b) · text check <a href="#score">§9</a></h3><div class="fx">rel(p) = span(p) overlaps gold · and text states it</div></div>
+    <div class="g"><h3>distinct-facts@k <a href="#relations">§10</a></h3><div class="fx">distinct normalised texts in the top k</div></div>
+    <div class="g"><h3>Coverage ceilings <a href="#relations">§10</a></h3><div class="fx">sentences with ≥ 1 p / sentences · reached gold / gold</div></div>
+    <div class="g"><h3>Calls <a href="#cost">§11</a></h3><div class="fx">pages + pages, or pages + propositions</div><p class="ex">Corpus D: 66 or 1,433</p></div>
+    <div class="g"><h3>Index size <a href="#cost">§11</a></h3><div class="fx">n × dim × 4 bytes</div><p class="ex">97 → about 1,400 vectors (×14.4)</p></div>
+  </div>
+  <p class="key"><b>Symbols:</b> <code>p</code> a proposition · <code>u</code> a unit (heading or sentence) · <code>[a, b)</code> character offsets, a included, b not · <code>W(x)</code> the set of content-word stems of x · <code>k</code> how many results are kept · <code>CE@k</code> complete evidence: every gold group covered by the returned text (P6) · <code>MRR@10</code> the mean of 1 / rank of the first right result (P6).</p>
+</section>
+
+<!-- 1 -->
+<section class="s" id="dilution" aria-labelledby="h-dilution">
+  <div class="num">STEP 1 · THE FAILURE IT FIXES</div>
+  <h2 id="h-dilution">One vector for many facts points at none of them</h2>
+  <p>D-002 asks "In what year was the Paris Agreement adopted?" The answer, 2015, is in one sentence on page 10. In v0's index that sentence sits in <b>chunk 27</b>, the first 951 characters of page 10. The same chunk also says what the UNFCCC is, that it frames the Kyoto Protocol and the Paris Agreement, that cooperation under it matters, the 2 °C and 1.5 °C goals, that countries submit NDCs, and how carbon pricing works. In the tutor's hand-written set, <b>14 propositions</b> come from chunk 27. The chunk gets <b>one</b> vector for all of them.</p>
+  <p>A toy shows why that hurts. Give each fact its own direction, at right angles to the others, and let the chunk's vector be the normalised sum of its n facts. A question that asks about exactly one fact then has cosine <b>1/√n</b> with the chunk. With one fact it is 1.000; with 3 it is 0.577; with 14 it is 0.267. A short distractor that is only fairly close to the question (cosine 0.60) beats the right chunk as soon as the chunk holds 3 facts.</p>
+  <figure class="card">
+    <div class="ctl"><label for="nFacts">facts in the chunk</label><input type="range" id="nFacts" min="1" max="14" step="1" value="3"><output id="nOut" for="nFacts">3</output></div>
+    <svg class="chart" id="dilChart" viewBox="0 0 640 260" role="img" aria-labelledby="dilTitle dilDesc"><title id="dilTitle">Cosine of a one-fact question with a chunk of n facts</title><desc id="dilDesc">The curve 1 over the square root of n falls from 1 at n = 1 to 0.267 at n = 14. A dashed line at 0.60 marks a distractor; the curve drops below it from n = 3.</desc></svg>
+    <div class="readout" id="dilRead" aria-live="polite"></div>
+    <figcaption><span class="badge t">toy · formula</span> Real facts are not at right angles: they share words and topic, so real cosines fall less steeply. The toy shows the direction of the effect, not its size.</figcaption>
+  </figure>
+  <p>So the fix is to give each fact its own vector. That is the retrieval half of the idea; the other half is that the generator still needs the surrounding text, which is why the propositions point back to their chunk ("retrieve small, generate big", step 9).</p>
+  <p class="call wrong"><b>Common mistake:</b> "bigger chunks give more context, so they also retrieve better." Retrieval and generation want different sizes: a small unit matches a question more sharply, a larger one gives the answer its context. Proposition indexing uses the small unit to find and the chunk to answer.</p>
+  <p class="call proj"><b>In your project:</b> this is I1's chunk-size question pushed to its limit. I1 changes the size of the chunk; I4 changes what gets a vector.</p>
+</section>
+
+<!-- 2 -->
+<section class="s" id="proposition" aria-labelledby="h-proposition">
+  <div class="num">STEP 2 · THE UNIT</div>
+  <h2 id="h-proposition">What counts as a proposition</h2>
+  <p>The repo's notebook gives the model five rules (<code>proposition_chunking.ipynb</code> cell 12), which match the book's description (<a data-book="chapter 4.pdf" data-page="5">Ch4 p.5–6/15</a>). In plain words:</p>
+  <div class="tw"><table>
+    <thead><tr><th>Rule</th><th>What it means</th><th>Fails if…</th></tr></thead>
+    <tbody>
+      <tr><td><b>1 · One fact</b></td><td>it states one specific fact or claim</td><td>it joins two facts with "and"</td></tr>
+      <tr><td><b>2 · Stands alone</b></td><td>a reader understands it with no surrounding text</td><td>it needs the paragraph to make sense</td></tr>
+      <tr><td><b>3 · Full names</b></td><td>no pronouns or vague references</td><td>it starts "It…" or "These policies…"</td></tr>
+      <tr><td><b>4 · Dates and qualifiers</b></td><td>it keeps what makes the fact precise</td><td>"well below 2 °C" becomes "below 2 °C"</td></tr>
+      <tr><td><b>5 · One subject–predicate</b></td><td>one thing, and one thing said about it</td><td>it has several clauses</td></tr>
+    </tbody></table></div>
+  <p>The research paper behind the idea, Dense X Retrieval (Chen et al., 2023, external), puts it in three words: <b>distinct</b> (one meaning), <b>minimal</b> (cannot be split further) and <b>self-contained</b> (all the context it needs is inside it).</p>
+  <p>Sentence 10:7 holds three facts. Written as propositions <span class="badge h">hand-written</span>:</p>
+  <div class="card"><p class="srcline"><span class="uid">10:7</span> The Paris Agreement, adopted in 2015, aims to limit global warming to well below 2 degrees Celsius above pre-industrial levels, with efforts to limit the increase to 1.5 degrees Celsius.</p>
+    <ul style="margin-top:8px">
+      <li><b>p10-07</b> The Paris Agreement was adopted in 2015.</li>
+      <li><b>p10-08</b> The Paris Agreement aims to limit global warming to well below 2 degrees Celsius above pre-industrial levels.</li>
+      <li><b>p10-09</b> Efforts under the Paris Agreement aim to limit the increase in global warming to 1.5 degrees Celsius.</li>
+    </ul>
+    <p style="margin-top:8px;font-size:.9rem">Each has one fact, a full name ("The Paris Agreement", never "it"), its qualifiers ("well below", "above pre-industrial levels"), and the page's own words. Only p10-07 answers D-002.</p></div>
+  <p>Across the whole sample the tutor wrote <b>40 propositions from 26 sentences: 1.54 per sentence</b>. Dense X reports 257 million propositions from 114 million Wikipedia sentences, <b>2.25 per sentence</b> (README, external). An LLM usually splits finer than a careful person does; step 11 plans with 2.25.</p>
+  <p class="call wrong"><b>Common mistake:</b> "a proposition is a short sentence cut out of the text." It is a rewrite. One sentence can give several propositions, and each must make sense alone, which a fragment cut from the middle of a sentence does not.</p>
+  <p class="call proj"><b>In your project:</b> keep the page's own wording where you can. It makes the code checks in step 7 work, and it makes the rewrite easy to compare with its source.</p>
+</section>
+
+<!-- 3 -->
+<section class="s" id="decontext" aria-labelledby="h-decontext">
+  <div class="num">STEP 3 · STANDING ALONE</div>
+  <h2 id="h-decontext">Replace "it" with the name the page used</h2>
+  <p>A sentence that starts with a pronoun leans on the sentence before it. Its proposition must name the thing. <b>Decontextualisation</b> means rewriting a statement so that it carries its own context. Three real cases from the PDF:</p>
+  <div class="tw"><table>
+    <thead><tr><th>Source unit</th><th>Proposition <span class="badge h">hand-written</span></th><th>Name taken from</th></tr></thead>
+    <tbody>
+      <tr><td><span class="uid">10:4</span> "<b>It</b> provides a framework for negotiating specific protocols and agreements, such as the Kyoto Protocol and the Paris Agreement."</td><td><b>The UNFCCC</b> provides a framework for negotiating the Paris Agreement. (and one each for the Kyoto Protocol and for "specific protocols and agreements")</td><td>the heading 10:2 and sentence 10:3</td></tr>
+      <tr><td><span class="uid">29:14</span> "<b>These meetings</b> play a crucial role in advancing global climate action."</td><td><b>COP meetings</b> play a crucial role in advancing global climate action.</td><td>29:12 and 29:13</td></tr>
+      <tr><td><span class="uid">2:2</span> "<b>It</b> is mined extensively in countries like China, India, and the United States…"</td><td><b>Coal</b> is mined extensively in countries like China, India, and the United States.</td><td>2:0 and 2:1</td></tr>
+    </tbody></table></div>
+  <p>The first case matters for a real question. D-007 asks for "the supreme decision-making body of the convention that provides the framework for negotiating the Kyoto Protocol and the Paris Agreement". The fact that links the question to the UNFCCC is in sentence 10:4, which never names the UNFCCC. Only after the rewrite does a unit say "The UNFCCC provides a framework for negotiating the Paris Agreement."</p>
+  <p>The name must come from the page, not from the model's memory. So each proposition records the names it brought in (<code>resolved</code>), and code checks that each one occurs <b>earlier on the same page</b> than the proposition's first source unit. In the tutor's set, 15 of the 40 propositions use a resolved name, and all 15 pass. A wrong name that does occur on the page (the Paris Agreement instead of the UNFCCC for 10:4) passes this check; only a person catches it (step 7).</p>
+  <p class="call wrong"><b>Common mistake:</b> "decontextualising means adding background so the fact is clearer." Adding background is adding facts. The rewrite only swaps a reference for the name the page already used.</p>
+  <p class="call proj"><b>In your project:</b> I5 (contextual chunk headers) solves the same problem for a whole chunk by putting the heading path in front of it. I4 does it inside every unit. Both are compared in I-CMP.</p>
+</section>
+
+<!-- 4 -->
+<section class="s" id="units" aria-labelledby="h-units">
+  <div class="num">STEP 4 · BEFORE ANY LLM CALL</div>
+  <h2 id="h-units">Number the sentences first</h2>
+  <p>Code splits each page into <b>units</b>: heading lines and sentences, each with an id <code>page:i</code> and its character offsets. A heading is a short line that starts with a capital letter, has no end punctuation and is not inside an unfinished sentence. A sentence ends at <code>.</code>, <code>!</code> or <code>?</code> followed by a space or a line end. Page 10 becomes 27 units:</p>
+  <figure class="card">
+    <div class="units" id="p10units"></div>
+    <figcaption><span class="badge m">measured · PyMuPDF text of page 10</span> 16 sentences (s) and 11 headings (h). Offsets are page-relative; the document offset adds the page's start (page 10 starts at character 20,555).</figcaption>
+  </figure>
+  <ul>
+    <li><b>Whole PDF:</b> 621 sentences and 286 heading lines, 907 units on 33 pages; 6 to 22 sentences per page, median 19. Every unit passes <code>doc_text[a:b] == text</code>.</li>
+    <li><b>Tests that pass:</b> "1.5 degrees" stays in one sentence (the full stop is followed by a digit, not a space); "pre-industrial" and the line break inside 10:7 stay put; "Paris Agreement" (10:6) is its own heading unit; a page that starts in lower case (29:0, the end of a p.28 sentence) is not a heading.</li>
+    <li><b>Known limits:</b> unit 23:0 is just <code>resources.</code>, the end of a sentence that began on page 22; a sentence that crosses a page is cut at the page end; "e.g." would split a sentence (it never occurs in this PDF).</li>
+  </ul>
+  <p>Why bother? The model can now say "this proposition comes from [10:7]" instead of copying text, and code can check the claim. Offsets turn ids into spans (step 6).</p>
+  <p class="call wrong"><b>Common mistake:</b> "split the text on every full stop." That breaks "1.5 degrees" into two sentences and glues headings onto the next sentence.</p>
+  <p class="call proj"><b>In your project:</b> the splitter is deterministic code with tests, versioned like the chunker. Its limits go in the run notes, because a split error becomes a wrong source id.</p>
+</section>
+
+<!-- 5 -->
+<section class="s" id="prompt" aria-labelledby="h-prompt">
+  <div class="num">STEP 5 · GENERATION</div>
+  <h2 id="h-prompt">A frozen prompt and a fixed output shape</h2>
+  <p>The course's prompt, <code>prop_gen_v1</code>, was written for I4. It gives the five rules, asks for the page's own wording, forbids outside knowledge, and asks for <code>source_ids</code>. Its one example is about a made-up town library, so it shares nothing with the corpus or the test questions:</p>
+  <pre>Example input:
+[0:0] (heading) Town library
+[0:1] The town library opened in 1998.
+[0:2] It lends books and audio recordings.
+[0:3] It also runs a weekly reading club for children.
+
+Example output:
+{"propositions": [
+ {"text": "The town library opened in 1998.", "source_ids": ["0:1"]},
+ {"text": "The town library lends books.", "source_ids": ["0:2"]},
+ {"text": "The town library lends audio recordings.", "source_ids": ["0:2"]},
+ {"text": "The town library runs a weekly reading club for children.", "source_ids": ["0:3"]}
+]}</pre>
+  <p>Compare the repo's example (cell 12). Its sentence says that Neil Armstrong first walked on the Moon in 1969 during Apollo 11; its first proposition is <b>"Neil Armstrong was an astronaut."</b> The sentence never says that. The example teaches the model to add what it knows, and the repo's grader (cell 15) gives that proposition 10 out of 10 for accuracy. Our example adds nothing.</p>
+  <p>The page goes in as numbered units. For page 10 the rendered prompt is 3,858 characters, about 682 tokens <span class="badge">derived from P1's tokens-per-character</span>. The reply must match a JSON schema: an object with a list <code>propositions</code>, each item with a string <code>text</code> and a list of strings <code>source_ids</code>, both required, nothing else allowed.</p>
+  <ul>
+    <li><b>Ask for strict JSON</b> where the provider supports it (Groq's <code>json_schema</code> with <code>strict: true</code> on gpt-oss-20b: search-checked, not confirmed), and <b>validate in code anyway</b>.</li>
+    <li><b>Log two different failures:</b> a reply that is not valid JSON, and a reply cut off because it hit the token limit (<code>finish_reason = "length"</code>). gpt-oss-20b writes reasoning tokens first and they count as output, so a small limit can leave an empty or half-written list (P1).</li>
+    <li><b>Never turn a failure into silence.</b> LangChain's propositional-retrieval template catches any error and returns an empty list, with no log (research, verified). The page then drops out of the index and nothing tells you.</li>
+    <li><b>Read the model id from the config</b> and record the id the provider returns. The repo's <code>llama-3.1-70b-versatile</code> is retired.</li>
+  </ul>
+  <div class="full"><span class="tag">Full · two framework defaults</span>
+    <p>LangChain's <code>with_structured_output</code> works by forcing a tool call (<code>tool_choice="any"</code>, langchain-core 1.6.6, verified by the research). Forced tool use is refused by Claude Opus 5.5 and Sonnet 5.5, so the course's adapter overrides it to use the provider's own JSON-schema output. Claude's structured output does not enforce <code>minimum</code> or <code>maximum</code> in a schema, so 1–10 grades need a code check.</p>
+  </div>
+  <p class="call wrong"><b>Common mistake:</b> "the reply passed the schema, so it is right." A schema checks the shape. A proposition can be perfectly shaped and say something the page never said.</p>
+  <p class="call proj"><b>In your project:</b> the prompt and schema files are frozen and hashed, and the cache key includes them, so a changed prompt is a new run, never a silent edit.</p>
+</section>
+
+<!-- 6 -->
+<section class="s" id="anchor" aria-labelledby="h-anchor">
+  <div class="num">STEP 6 · THE POINTER</div>
+  <h2 id="h-anchor">Every proposition points back to its source</h2>
+  <p>A proposition's <b>span</b> runs from the start of its first source unit to the end of its last (all on one page). Its <b>parent</b> is the v0 chunk that contains that span. Click a proposition to see its sources:</p>
+  <figure class="card">
+    <div class="chips" id="propPick" role="group" aria-label="Propositions from page 10"></div>
+    <div class="units" id="anchorUnits"></div>
+    <div class="readout" id="anchorRead" aria-live="polite"></div>
+    <figcaption><span class="badge h">hand-written</span> propositions · <span class="badge m">measured</span> spans, parents and align on the PyMuPDF text.</figcaption>
+  </figure>
+  <ul>
+    <li><b>All 40</b> of the tutor's propositions have source ids that exist and spans inside the document.</li>
+    <li><b>34 have one parent, 6 have two:</b> their sentence sits in the 200-character overlap between two chunks. The rule picks the lower chunk number as the primary parent.</li>
+  </ul>
+  <p>This is why a proposition is not a chunk. The course's chunk contract (06 §2.3) says <code>doc_text[char_start:char_end] == text</code>. A proposition's text is a rewrite, so the contract fails. The project needs an <b>IndexUnit</b>: the text that gets embedded (the proposition) kept apart from the evidence that gets scored and returned (the span, the source ids, the parent chunk ids), plus the prompt version and model that wrote it.</p>
+  <p class="call wrong"><b>Common mistake:</b> "store each proposition as a chunk with its own text, and score it like any chunk." Then span gold cannot be applied, and the generator receives rewritten text instead of the document's own words.</p>
+  <p class="call proj"><b>In your project:</b> v1.4 adds <code>IndexUnit {unit_id, embed_text, doc_id, char_start, char_end, source_ids, parent_chunk_ids, prompt_version, model}</code>. The scorer reads only the span fields.</p>
+</section>
+
+<!-- 7 -->
+<section class="s" id="align" aria-labelledby="h-align">
+  <div class="num">STEP 7 · TRUST, BUT CHECK</div>
+  <h2 id="h-align">Checking the rewrite: what code catches and what it cannot</h2>
+  <p><b>Alignment</b> asks: does every content word of the proposition appear in its sources? Content words are the words left after removing short function words ("the", "is", "of"…), cut to a rough stem ("negotiating" and "negotiate" both become <code>negotiat</code>). Names the proposition took from earlier on the page count as supported.</p>
+  <div class="formula">align(p) = | W(p) ∩ (W(sources) ∪ W(resolved names)) | / | W(p) |</div>
+  <figure class="card play">
+    <div class="chips" id="alPick" role="group" aria-label="Examples"></div>
+    <label>Source unit <select class="btn" id="alSrc" style="width:100%;max-width:100%;min-width:0"></select></label>
+    <label>Proposition <input type="text" id="alText" value="The Paris Agreement was adopted in 2016."></label>
+    <label>Names taken from earlier on the page (comma-separated, optional) <input type="text" id="alRes" value=""></label>
+    <div class="readout" id="alRead" aria-live="polite"></div>
+    <figcaption><span class="badge f">formula</span> computed on this page with the same word rule as the course's code. Green: found in the source. Red: not found.</figcaption>
+  </figure>
+  <p>Six planted mistakes show what this catches <span class="badge m">measured</span>:</p>
+  <div class="tw"><table>
+    <thead><tr><th>Planted mistake</th><th class="n">align</th><th>Caught by</th></tr></thead>
+    <tbody>
+      <tr><td><b>added fact:</b> "…was signed in Paris by 196 countries."</td><td class="n">0.400</td><td class="hit">align (any rule)</td></tr>
+      <tr><td><b>wrong year:</b> "…was adopted in 2016."</td><td class="n">0.750</td><td class="hit">align &lt; 1 only</td></tr>
+      <tr><td><b>repo example:</b> "Neil Armstrong was an astronaut."</td><td class="n">0.667</td><td class="hit">align &lt; 1 only</td></tr>
+      <tr><td><b>dropped qualifier:</b> "…to below 2 degrees Celsius." (was "well below")</td><td class="n">1.000</td><td class="miss">nothing in code</td></tr>
+      <tr><td><b>wrong referent:</b> "The Paris Agreement provides a framework…" (10:4 means the UNFCCC)</td><td class="n">1.000</td><td class="miss">nothing in code</td></tr>
+      <tr><td><b>pronoun start:</b> "It provides a framework…"</td><td class="n">1.000</td><td class="hit">the pronoun check</td></tr>
+      <tr><td><b>bad id:</b> source <code>10:31</code> (page 10 has units 0 to 26)</td><td class="n">—</td><td class="hit">the id check</td></tr>
+    </tbody></table></div>
+  <p>Two lessons. First, a cut-off such as "flag align below 0.5" misses the astronaut and the wrong year, so <b>list every proposition with any unsupported word</b> (align below 1) and read the list. Second, alignment sees only <b>added</b> words. A dropped qualifier or a wrong referent uses only words from the source, so no word check can see it. All 40 hand-written propositions score 1.000, which shows the check runs, not that they are right.</p>
+  <p>That is why a <b>person labels a sample</b>: each proposition is <i>supported</i>, <i>added</i> (says more than the source) or <i>distorted</i> (says something different). Report the share supported with a <b>Wilson interval</b> (P6), because a small sample is uncertain:</p>
+  <figure class="card">
+    <div class="ctl"><label for="wx">supported</label><input type="range" id="wx" min="0" max="60" step="1" value="57"><output id="wxOut" for="wx">57</output></div>
+    <div class="ctl"><label for="wn">labelled</label><input type="range" id="wn" min="10" max="120" step="1" value="60"><output id="wnOut" for="wn">60</output></div>
+    <div class="readout" id="wRead" aria-live="polite"></div>
+    <figcaption><span class="badge f">formula</span> 95% Wilson interval. 27/30 gives [0.744, 0.965] and 54/60 gives [0.799, 0.953]: both 0.900, both too uncertain to claim 0.85. Only 57/60 ([0.863, 0.983]) clears it.</figcaption>
+  </figure>
+  <p class="call wrong"><b>Common mistake:</b> "align is 1, so the proposition is faithful." Align 1 means no new words. It says nothing about words that went missing or a name swapped for another one from the same page.</p>
+  <p class="call proj"><b>In your project:</b> the code checks run on every proposition; a hand sample of at least 30 (better 60) is labelled with a Wilson lower bound. A proposition a person finds wrong becomes a test case that the checks must flag in future.</p>
+</section>
+
+<!-- 8 -->
+<section class="s" id="grade" aria-labelledby="h-grade">
+  <div class="num">STEP 8 · THE QUALITY GATE</div>
+  <h2 id="h-grade">The 7/10 grade is a filter, and a costly one</h2>
+  <p>The repo grades every proposition with a second LLM call on four scales from 1 to 10 (accuracy, clarity, completeness, conciseness) and keeps it only if all four reach 7 (cells 15–16; the book describes the same gate, <a data-book="chapter 4.pdf" data-page="7">Ch4 p.7–9/15</a>). On its essay the saved output drops <b>2 of 31</b> propositions (0.065): one for completeness 6, one for conciseness 6. 29 are embedded.</p>
+  <p>Read the grader before trusting it <span class="badge m">measured · cells 15–16</span>:</p>
+  <ul>
+    <li>All 5 of its examples are graded 10/10/10/10, so it has never seen a failing case. The astronaut proposition is one of them.</li>
+    <li>The same model writes and grades the propositions.</li>
+    <li>The message it grades is <code>"{proposition}, {original_text}"</code>, with no labels saying which part is which; the example labels have typos ("Propositons" five times, "Evaluation_3" twice).</li>
+    <li>The threshold 7 was never checked against anything (misconception <b>MC-006</b>: an uncalibrated LLM score treated as truth).</li>
+  </ul>
+  <p>So the grade is part of the system: it decides what enters the index. It is <b>not</b> a measurement of faithfulness. To know whether it helps, compare its keep/drop decisions with your own labels from step 7:</p>
+  <div class="formula">keep-good = kept and good / all good&nbsp;&nbsp;<span class="c">(does it keep what is right?)</span><br>catch-bad = dropped and bad / all bad&nbsp;&nbsp;<span class="c">(does it remove what is wrong?)</span></div>
+  <p>Report both with their n. A filter that drops 6% at random would also "drop 2 of 31".</p>
+  <p>It also costs the most. Grading <b>one proposition per call</b> means about 1,400 calls on the climate PDF; grading <b>all of a page's propositions in one call</b> means 33. Run the cheap code checks of step 7 first and grade only what passes.</p>
+  <p class="call wrong"><b>Common mistake (MC-006):</b> "the propositions scored at least 7 out of 10, so they are faithful." The score comes from a model that writes and grades with the same blind spots, against a threshold nobody checked.</p>
+  <p class="call proj"><b>In your project:</b> batched grading per page is the default; one-by-one grading is a measured ablation on one page. Grader on against grader off is an experiment arm, judged by retrieval metrics and your labels, never by the grader's own scores (D-10).</p>
+</section>
+
+<!-- 9 -->
+<section class="s" id="score" aria-labelledby="h-score">
+  <div class="num">STEP 9 · MEASURING IT</div>
+  <h2 id="h-score">Three ways to score propositions, and only one is a fair A/B</h2>
+  <p>The course's gold is a <b>character span</b> (06 §6.7). A chunk is relevant when it overlaps the span; complete evidence (CE@k) needs every gold group covered by what is returned (P6). A proposition's text is not in the document, so you score it through its pointer, in one of three ways:</p>
+  <div class="tw"><table>
+    <thead><tr><th>Scoring</th><th>How</th><th>What it measures</th></tr></thead>
+    <tbody>
+      <tr><td><b>(a) Parents</b> · primary</td><td>rank propositions by similarity; replace each by its parent chunk; keep the first time each parent appears; score the chunks with the usual rules</td><td>whether proposition vectors rank <b>the same chunks</b> better. The generator gets chunks either way, so this is the fair comparison with the chunk index</td></tr>
+      <tr><td><b>(b) Spans</b> · diagnostic</td><td>a proposition counts if its span overlaps the gold; CE@k over the union of the top-k spans</td><td>whether the retrieved units <b>come from</b> the evidence. It over-credits a rewrite that lost the fact, so pair it with a <b>text check</b>: count p only if its text states the fact</td></tr>
+      <tr><td><b>(c) Page parents</b> · rejected</td><td>the page a proposition came from</td><td>almost any page overlaps the gold, so Hit and MRR only measure which page was found</td></tr>
+    </tbody></table></div>
+  <p>Work it on a made-up ranked list for D-002 <span class="badge t">made-up order, not model output</span>. Choose a list:</p>
+  <figure class="card">
+    <div class="chips" id="scPick" role="group" aria-label="Ranked lists"></div>
+    <div class="tw"><table id="scTable"></table></div>
+    <div class="readout" id="scRead" aria-live="polite"></div>
+    <figcaption><span class="badge m">measured</span> spans, parents, overlap with the gold and CE@4 on the PyMuPDF text; the order is invented. Relevant chunks: D-002 → 27; D-007 → 27, 85; D-005 → 3, 4.</figcaption>
+  </figure>
+  <p>For D-002: arm (a) returns chunk 27 first, so RR = 1.000. Arm (b) also says 1.000, because p10-08 shares sentence 10:7 with the gold. But p10-08 talks about the 2 °C goal and never says "2015". The <b>text check</b> finds the first proposition that states the year at rank 3: RR = <b>0.333</b>. Arm (b) alone would have credited a unit that cannot answer the question.</p>
+  <p>Look at the parents too. The top 4 propositions give only <b>2 distinct parents</b> (27 and 68). LangChain's <code>MultiVectorRetriever</code> does the same: it asks for k child hits and keeps the first copy of each parent, so <b>k children give at most k parents, often fewer</b> (research, verified). The repo's own runs show it: in cells 20 and 32, all four proposition hits come from chunk 3, so a parent return would give one chunk, not four.</p>
+  <p class="call wrong"><b>Common mistake:</b> "both arms used k = 4, so the comparison is fair." Four propositions can return one or two chunks. Say whether k counts children or parents; to compare with a chunk index, read deeper until you have k parents, or compare at the same token budget.</p>
+  <p class="call proj"><b>In your project:</b> arm (a) is the v1.4 headline metric (MRR@10 and CE@4 on parents, the same scorer as v0). Arm (b) and the text check are logged diagnostics.</p>
+</section>
+
+<!-- 10 -->
+<section class="s" id="relations" aria-labelledby="h-relations">
+  <div class="num">STEP 10 · THE BOUNDARY</div>
+  <h2 id="h-relations">What atomic facts lose</h2>
+  <p>Splitting into single facts throws away the links between them. Three effects, each visible in the lists above:</p>
+  <ul>
+    <li><b>Contrast.</b> D-005 asks how the document contrasts coal and natural gas. Put the four coal propositions first: arm (b) has CE@4 = <b>0</b>, because no natural-gas proposition is in the top 4. Arm (a) returns chunk 3, which holds both sentences, so CE@4 = <b>1</b>. The parent brings the relation back.</li>
+    <li><b>Multi-hop.</b> D-007 needs two facts on two pages. With the "UNFCCC frames the Paris Agreement" proposition (p10-05) at rank 4, arm (b) has CE@4 = 1. Move it to rank 5 and CE@4 = <b>0</b>: the gold span on page 10 includes sentence 10:4, and no other proposition in the top 4 points to it. Arm (a) stays at 1, because chunk 27 holds the whole span.</li>
+    <li><b>Near-duplicates.</b> Pages 10 and 23 repeat the Paris paragraph, so p10-08 and p23-02 have the same text. In the D-002 list they fill two of the top 4: <b>distinct-facts@4 = 3</b>. The repo shows the same in cells 28 and 36: 3 of the top 4 hits say "Founder Mode is…". Parent dedup hides this in arm (a); distinct-facts@k shows it.</li>
+  </ul>
+  <p>Two ceilings limit arm (b) before any ranking happens:</p>
+  <div class="formula">sentence_coverage = sentences with ≥ 1 proposition / sentences<br>gold_reachability = gold alternatives overlapped by some span(p) / gold alternatives</div>
+  <p>The tutor's sample covers page 10 fully (16/16) but only 4 of 6 sentences in the coal and gas paragraphs of page 2: the methane sentence and the fracking sentence were left out on purpose, and no proposition can ever retrieve them. Its gold_reachability over the 8 answerable seeds is 6/12 = 0.500, simply because it covers only parts of four pages; a full run must cover every page.</p>
+  <p class="call wrong"><b>Common mistake:</b> "the more atomic the units, the better retrieval gets." Atomic units help single-fact lookups and hurt questions that need facts together. They also multiply near-duplicates.</p>
+  <p class="call proj"><b>In your project:</b> D-005 and D-007 are the guard questions for v1.4. Report CE@4 for both arms, distinct-facts@4, sentence_coverage and the uncovered sentences.</p>
+</section>
+
+<!-- 11 -->
+<section class="s" id="cost" aria-labelledby="h-cost">
+  <div class="num">STEP 11 · THE PRICE</div>
+  <h2 id="h-cost">What it costs to build and keep</h2>
+  <p>The counts come from the measured 621 sentences; the tokens per call are <span class="badge a">assumed</span> planning numbers from the research (writing: 1,050 in and 1,600 out per page, reasoning included; batched grade: 1,800 and 1,600 per page; one-by-one grade: 870 and 300 per proposition). Prices and limits: Groq gpt-oss-20b, $0.075 / $0.30 per million tokens, 200K tokens a day, 8K a minute (the plan row is not confirmed).</p>
+  <div class="tw"><table>
+    <thead><tr><th>Climate PDF, 33 pages, about 1,400 propositions</th><th class="n">calls</th><th class="n">tokens</th><th class="n">$</th><th class="n">days of quota</th><th class="n">at least</th></tr></thead>
+    <tbody>
+      <tr><td>write only, no grade</td><td class="n">33</td><td class="n">87,450</td><td class="n">0.018</td><td class="n">0.44</td><td class="n">11 min</td></tr>
+      <tr><td>write + batched grade</td><td class="n">66</td><td class="n">199,650</td><td class="n">0.039</td><td class="n">1.00</td><td class="n">25 min</td></tr>
+      <tr><td>write + one-by-one grade</td><td class="n">1,433</td><td class="n">1,725,450</td><td class="n">0.236</td><td class="n">8.63</td><td class="n">216 min</td></tr>
+    </tbody>
+    <caption><span class="badge a">assumed tokens</span> × <span class="badge m">measured counts</span>. A 5-page subset with batched grading: 10 calls, 30,250 tokens, $0.006, 0.15 of a day.</caption></table></div>
+  <figure class="card">
+    <div class="two">
+      <label class="ctl2">sentences in the collection <input type="number" id="cSent" value="621" min="1" step="1"></label>
+      <label class="ctl2">pages <input type="number" id="cPages" value="33" min="1" step="1"></label>
+      <label class="ctl2">propositions per sentence <input type="number" id="cRatio" value="2.254" min="0.5" step="0.01"></label>
+      <label class="ctl2">grading <select class="btn" id="cGrade"><option value="off">off</option><option value="batched" selected>batched per page</option><option value="per_prop">one call per proposition</option></select></label>
+    </div>
+    <div class="readout" id="cRead" aria-live="polite"></div>
+    <figcaption><span class="badge f">formula</span> with the assumed tokens above. The defaults reproduce the middle row.</figcaption>
+  </figure>
+  <ul>
+    <li><b>Index size:</b> about 1,400 vectors instead of 97, <b>×14.4</b>. As float32: MiniLM (384 numbers) 146 KiB → 2,100 KiB; Cohere embed-v4.0 at its default 1,536 numbers 582 KiB → 8,400 KiB. Search time grows with it.</li>
+    <li><b>Cost per 1k chunks</b> (the climate PDF's cost × 1,000 / 97): $0.19 without grading, <b>$0.40</b> with batched grading (680 calls), $2.43 one by one (14,773 calls).</li>
+    <li><b>Re-indexing:</b> a changed page costs its calls again. A corpus that changes every week pays the build cost every week.</li>
+  </ul>
+  <p>Money is not the obstacle here; the daily quota is. One batched build of the whole PDF uses about a full day of the free tier, and one-by-one grading more than a week.</p>
+  <p class="call wrong"><b>Common mistake:</b> "it is one LLM call per chunk, so it is cheap." The one-by-one quality grade is one call per <i>proposition</i>, about 14 for every chunk here, and it dominates the bill.</p>
+  <p class="call proj"><b>In your project:</b> the tool forecasts calls, tokens and quota days before any call, and the run refuses to start if it would cross the budget.</p>
+</section>
+
+<!-- 12 -->
+<section class="s" id="project" aria-labelledby="h-project">
+  <div class="num">STEP 12 · YOUR PROJECT</div>
+  <h2 id="h-project">v1.4: how to test it fairly, and when not to</h2>
+  <p><b>Index the whole corpus, not 5 pages.</b> The plan's wording (06 v1.4, "a subset, for example 5 pages") invites a trap. Five pages hold about 15 chunks, so k = 4 returns a quarter of the index, and almost anything scores well. The repo's comparison is the extreme case: its chunk index has 3 chunks and k = 4, so every query returns the whole index and nothing is ranked. A full build is affordable (66 calls, about one day of quota). If you need fewer questions, restrict the <b>questions</b>, never the index.</p>
+  <ol>
+    <li><b>The comparison:</b> arm (a) against the current best chunk index (and v0), on the same questions, at the same k and at the same token budget (choose k so the mean context tokens match).</li>
+    <li><b>The diagnostics:</b> arm (b) with the text check; distinct-facts@4; sentence_coverage and gold_reachability; parse-failure and cut-off rates.</li>
+    <li><b>The guards:</b> CE@4 on D-005 and D-007; the hand faithfulness sample (at least 30 units, Wilson lower bound reported).</li>
+    <li><b>The leakage test:</b> no 8 consecutive words shared between the prompt (with its example) and any eval question or gold quote. The clean prompt shares <b>0</b>; replacing the example sentence with D-002's gold quote gives <b>10</b> shared 8-word runs, so the test fails as it should. Book text never goes into a prompt.</li>
+    <li><b>The verdict:</b> pre-register "inconclusive" as a likely result. Dev holds about 12–16 answerable questions; the smallest CE@4 difference it can detect is about 0.4 (Phase 4 research).</li>
+  </ol>
+  <div class="tw"><table>
+    <thead><tr><th>v1.4 results</th><th class="n">MRR@10 (parents)</th><th class="n">CE@4</th><th class="n">context tokens</th><th class="n">faithfulness</th><th class="n">build calls</th></tr></thead>
+    <tbody>
+      <tr><td>v0 chunks</td><td class="n">—</td><td class="n">—</td><td class="n">—</td><td class="n">n/a</td><td class="n">0</td></tr>
+      <tr><td>current best chunks (v1.x)</td><td class="n">—</td><td class="n">—</td><td class="n">—</td><td class="n">n/a</td><td class="n">0</td></tr>
+      <tr><td>propositions, arm (a), fixed k</td><td class="n">—</td><td class="n">—</td><td class="n">—</td><td class="n">—</td><td class="n">—</td></tr>
+      <tr><td>propositions, arm (a), equal budget</td><td class="n">—</td><td class="n">—</td><td class="n">—</td><td class="n">—</td><td class="n">—</td></tr>
+    </tbody>
+    <caption>Empty until the recorded run exists. Fill it from your own run; do not copy numbers from papers.</caption></table></div>
+  <h3>When not to use it</h3>
+  <ul>
+    <li>Most questions <b>compare or summarise</b> (they need facts together, step 10).</li>
+    <li>The documents <b>change often</b>: every change pays the build again.</li>
+    <li>The embedder is <b>already strong and trained on passages</b>: Dense X's gains were small for such retrievers, and a 2026 reproduction found propositions worse than plain splitting (step 14, both external and not confirmed here).</li>
+    <li>The hand check finds the rewrite <b>unfaithful</b> (Wilson lower bound under 0.85, or many unsupported words).</li>
+    <li>A cheaper fix works: <b>contextual headers</b> (I5) also fix "it" and "these meetings", at one call per chunk or none.</li>
+  </ul>
+  <p class="call proj"><b>In your project:</b> v1.4 is adopted only if arm (a) improves on dev, holds on the one logged test run, keeps D-005 and D-007, and passes the faithfulness bound. Otherwise the result is recorded and the chunk index stays.</p>
+</section>
+
+<!-- 13 -->
+<section class="s full" id="repo" aria-labelledby="h-repo">
+  <span class="tag">Full only</span>
+  <div class="num">STEP 13 · READING THE REPO CRITICALLY</div>
+  <h2 id="h-repo">The repo's notebook, cell by cell</h2>
+  <p><code>all_rag_techniques/proposition_chunking.ipynb</code> at commit <code>009adba</code> (40 cells, counted from 0), read as data, never run <span class="badge m">measured</span>:</p>
+  <div class="tw"><table>
+    <thead><tr><th>Cell</th><th>What it does</th><th>Read it as</th></tr></thead>
+    <tbody>
+      <tr><td>9</td><td>splits the essay with <code>from_tiktoken_encoder(chunk_size=200, chunk_overlap=50)</code>; embedder <code>nomic-embed-text:v1.5</code> (Ollama)</td><td>no encoding is named, so "200 tokens" are GPT-2 tokens, the library default (MC-001)</td></tr>
+      <tr><td>12</td><td>the five rules; one few-shot example; <code>ChatGroq(model="llama-3.1-70b-versatile", temperature=0)</code></td><td>the example adds "Neil Armstrong was an astronaut."; the model id is retired</td></tr>
+      <tr><td>13</td><td>one generation call per chunk</td><td>no parse-failure handling, no source ids</td></tr>
+      <tr><td>15–16</td><td>a grader with four 1–10 scales; keep if all ≥ 7</td><td>all-10 examples, same model, unlabelled message; saved output: 2 of 31 dropped (the output matches the code)</td></tr>
+      <tr><td>18, 22</td><td>FAISS over 29 propositions; FAISS over 3 chunks; k = 4 for both</td><td>the chunk arm returns its whole index for every query: no ranking is tested</td></tr>
+      <tr><td>20, 32</td><td>top 4 propositions for two queries</td><td>all from chunk 3: one parent, not four</td></tr>
+      <tr><td>28, 36</td><td>top 4 propositions for two more queries</td><td>3 of 4 are rephrasings of one fact</td></tr>
+      <tr><td>38</td><td>a comparison table (precision "high", context "low")</td><td>opinions: no metric was computed</td></tr>
+    </tbody></table></div>
+</section>
+
+<!-- 14 -->
+<section class="s full" id="research" aria-labelledby="h-research">
+  <span class="tag">Full only</span>
+  <div class="num">STEP 14 · WHAT THE RESEARCH SAYS</div>
+  <h2 id="h-research">The evidence for and against</h2>
+  <ul>
+    <li><b>Dense X Retrieval</b> (Chen et al., 2023). English Wikipedia indexed as 41M passages, 114M sentences or 257M propositions (README, verified). Reported: Recall@20 up about 10 points on average for unsupervised retrievers and about 2.7 for supervised ones, more for rare entities, and more answers inside a fixed word budget (search-checked; the numbers were not opened). Limits: Wikipedia factoid questions; a propositionizer trained on Wikipedia; small gains for retrievers trained on passages. Their fixed-word-budget comparison is the same idea as the course's equal-token-budget rule.</li>
+    <li><b>The released propositionizer</b> (<code>chentong00/propositionizer-wiki-flan-t5-large</code>): a no-API option, about 3 GB of weights (not confirmed), slow on a CPU. Its input is "Title / Section / Content" and a parse failure gives an empty list. Not in the core path.</li>
+    <li><b>LangChain's propositional-retrieval template</b> (tag <code>langchain==0.2.0</code>, verified): a prompt adapted from the paper, a forced tool call, 10 calls at a time, any failure turned into an empty list without a log, and 8,000-character parents. With parents that large, the precision of the small unit is lost again at the context stage.</li>
+    <li><b>FActScore</b> (verified): splits text <b>one sentence at a time</b> into atomic facts and keeps the sentence → facts mapping. That is the cleanest answer to the span problem, and the reason the course asks for source ids.</li>
+    <li><b>Against:</b> Zhou, Wang, Koopman and Zuccon (2026) reproduced several chunking methods and report propositions worse than fixed-size, sentence and paragraph splitting for in-corpus retrieval (for example 0.3888 against 0.4849 with Jina-v3), and among the slowest (search-checked, not confirmed). LumberChunker (2024) found propositions weaker on narrative text. Expect the null result.</li>
+  </ul>
+</section>
+
+<!-- 15 -->
+<section class="s full" id="book" aria-labelledby="h-book">
+  <span class="tag">Full only</span>
+  <div class="num">STEP 15 · THE BOOK'S PAGES</div>
+  <h2 id="h-book">What the book covers, and what to check</h2>
+  <p class="call note">These pages come from the course's page notes (04 §3). They were not re-opened in the session that wrote this lesson: check them when you read the chapter.</p>
+  <div class="tw"><table>
+    <thead><tr><th>Book</th><th>Topic (in our words)</th><th>Our check</th></tr></thead>
+    <tbody>
+      <tr><td><a data-book="chapter 4.pdf" data-page="4">Ch4 p.4–5/15</a></td><td>start from moderate first chunks</td><td>the generation unit; the course uses one page per call</td></tr>
+      <tr><td><a data-book="chapter 4.pdf" data-page="5">Ch4 p.5–6/15</a></td><td>an LLM breaks each chunk into propositions</td><td>step 2; add source ids (step 6)</td></tr>
+      <tr><td><a data-book="chapter 4.pdf" data-page="7">Ch4 p.7–9/15</a></td><td>a quality check on four criteria, keep at 7/10 or more</td><td>a filter, not a measurement (step 8)</td></tr>
+      <tr><td><a data-book="chapter 4.pdf" data-page="9">Ch4 p.9–10/15</a></td><td>embed and store; retrieve and answer</td><td>return the parent chunk (step 9)</td></tr>
+      <tr><td><a data-book="chapter 4.pdf" data-page="10">Ch4 p.10–11/15</a></td><td>propositions against standard chunks</td><td>a fair test needs the same k and budget (steps 9 and 12)</td></tr>
+      <tr><td><a data-book="chapter 4.pdf" data-page="11">Ch4 p.11–12/15</a></td><td>where it helps and where it struggles</td><td>step 10 and "when not to use it"</td></tr>
+      <tr><td><a data-book="chapter 4.pdf" data-page="13">Ch4 p.13/15</a></td><td>one check per chunk (per 04 DV-14)</td><td>compare with one call per proposition (step 11)</td></tr>
+    </tbody></table></div>
+</section>
+
+<!-- VERIFY -->
+<section class="s" id="verify" aria-labelledby="h-verify">
+  <div class="num">PRACTISE · VERIFY IT YOURSELF</div>
+  <h2 id="h-verify">Rebuild every number in a notebook</h2>
+  <p>Nothing on this page needs to be taken on trust. The notebook <code>study/notebooks/I4_propositions_verify.ipynb</code> rebuilds the units, the tutor's propositions and their checks, the planted mistakes, the coverage numbers, the three scorings, the cost table and the leakage test from code, and compares each value with this page. It makes no API call.</p>
+  <ol>
+    <li>Open the notebook in VS Code (or from the I4 page of the study kit).</li>
+    <li>Choose the kernel: <b>Select Kernel → .venv (Python 3.12)</b> of <code>rag_learning</code>.</li>
+    <li><b>Run All</b>. Each step prints its checks (✓ or ✗); the last cell prints the total.</li>
+  </ol>
+  <div class="card" id="nbSummary"><b>What it rebuilds</b> <span class="badge m" id="nbBadge">110 checks · 9 interactive charts · a few seconds</span>
+    <ul style="margin-top:6px;font-size:.92rem">
+      <li><b>Steps 1–4</b> rebuild the dilution curve, the 97 v0 chunks, the units of every page and the splitter tests, and read the repo notebook's cells as data.</li>
+      <li><b>Steps 5–8</b> render the prompt, check every proposition (ids, spans, parents, align, pronouns, resolved names) and the planted mistakes, and compute Wilson intervals. One cell is yours: write propositions for page 29's "Monitoring and Enforcement" and run the checks.</li>
+      <li><b>Steps 9–12</b> recompute arms (a) and (b), the text check, distinct-facts@4, coverage, the cost table and the leakage test. With MiniLM in your local cache it also ranks the 40 propositions against the 97 chunks for D-002, D-005 and D-007 and prints the result as an observation, not a check.</li>
+    </ul>
+    <p style="margin-top:6px;font-size:.9rem;color:var(--muted)">A ✗ anywhere means the page and the code disagree: tell the tutor. Rebuild the notebook with <code>uv run python sources/verification/I4/i4_build_verify_nb.py</code>, then run it with <code>i4_verify_nb_run.py</code>.</p></div>
+</section>
+
+<!-- APPLY -->
+<section class="s" id="apply" aria-labelledby="h-apply">
+  <div class="num">APPLY · USE IT ON YOUR OWN DATA</div>
+  <h2 id="h-apply">Would propositions help on your documents?</h2>
+  <p>The tool <code>study/tools/proposition_fit_check.py</code> runs this lesson's checks on <b>your</b> documents and propositions: what would a build cost, are the propositions faithful to their sources, and (with questions) do they bring the right chunk up earlier? Run it from <code>rag_learning/</code>:</p>
+  <pre>uv run python study/tools/proposition_fit_check.py --docs my.pdf --props my_props.jsonl --report prop_report.md</pre>
+  <p>It makes <b>no API call</b>. You write propositions by hand (or export them from a recorded run) in the same format as the tutor's file: <code>prop_id, page, text, source_ids, resolved</code>. <code>--render-prompt</code> prints the <code>prop_gen_v1</code> prompt for one page, so you can see exactly what a model would receive. <code>--provider</code> is reserved for when the course's recorded-call cache exists.</p>
+  <div class="tw"><table>
+    <thead><tr><th>Report part</th><th>What it tells you</th><th>Lesson step</th></tr></thead>
+    <tbody>
+      <tr><td>1–2 Settings and units</td><td>documents, sentences and headings per page</td><td>4</td></tr>
+      <tr><td>3 Forecast</td><td>calls, tokens, $, quota days and index size for the whole collection</td><td>11</td></tr>
+      <tr><td>4 Proposition checks</td><td>ids, spans, align with the unsupported words, pronoun starts, parents, duplicates</td><td>5–7</td></tr>
+      <tr><td>5 Coverage</td><td>sentence_coverage per page, the sentences nothing covers, gold_reachability</td><td>10</td></tr>
+      <tr><td>6 Per question</td><td>with <code>--dense</code>: arm (a) against the plain chunks, arm (b), the text check</td><td>9</td></tr>
+      <tr><td>7 Checklist</td><td>the 12 checks below, ✓ / ✗ / ? with evidence</td><td>all</td></tr>
+      <tr><td>8 Recommendation</td><td>the first thing to fix, or whether to try it</td><td>12</td></tr>
+    </tbody></table></div>
+  <p>It also writes a labelling sheet (CSV) with each proposition next to its source text, ready for the supported / added / distorted labels of step 7.</p>
+  <h3>The real-world checklist</h3>
+  <p style="font-size:.92rem;color:var(--muted)">Tick each one for your own project. Your ticks stay in this browser only.</p>
+  <div class="check" id="checklist"></div>
+  <div class="card" id="example" style="display:grid;gap:10px"><div><b>The example</b> <span class="badge m">measured · climate PDF, the tutor's 40 propositions</span></div>
+    <p style="font-size:.92rem" id="exampleText">(filled in when the tool is finished)</p>
+    <p style="font-size:.86rem;color:var(--muted)">The example demonstrates the tool; it does not evaluate proposition indexing. Full report: <a data-kit="#/read/study/tools/examples/climate_prop_report.md" data-path="rag_learning/study/tools/examples/climate_prop_report.md">climate_prop_report.md</a>.</p></div>
+</section>
+
+<!-- CHECK -->
+<section class="s" id="check" aria-labelledby="h-check">
+  <div class="num">CHECK YOURSELF</div>
+  <h2 id="h-check">Can you use it on something new?</h2>
+  <p>Answer without scrolling back; then take the full quiz the next day.</p>
+  <div class="q" id="quick"></div>
+  <p>All questions, with hints, model answers and key points: <a data-kit="#/quiz/I4/next" data-path="rag_learning/study/questions/I4_questions.md">open the I4 quiz</a>. Text version: <a data-kit="#/read/study/reading/I4_proposition_chunking.md" data-path="rag_learning/study/reading/I4_proposition_chunking.md">short reading file</a>. Next topic: <a data-kit="#/c/I5" data-path="rag_learning/02_RAG_MASTER_LEARNING_PLAN.md">contextual chunk headers (I5)</a>.</p>
+</section>
+
+<footer>
+  <p><b>Where every number comes from.</b> <span class="badge m">measured</span> numbers come from <code>sources/verification/I4/i4_kit_measure.py</code> (output <code>out_i4_kit_measure.txt</code>, facts K1–K12 in <code>I4_FACTS.md</code>), run on the course's climate PDF and the repo notebook at <code>009adba</code>, with no API call; the notebook recomputes them. The 40 propositions and the six planted mistakes were written by the tutor (<code>i4_tutor_props.jsonl</code>, <code>i4_planted_props.jsonl</code>), not by an LLM. <span class="badge a">assumed</span> token sizes come from the Phase 4 research and will be replaced by measured provider usage. No API was called to build this page.</p>
+  <p><b>External, from the Phase 4 research (2026-10-17):</b> Chen et al., Dense X Retrieval, 2023 (README verified; result numbers search-checked); the factoid-wiki and propositionizer READMEs; LangChain's propositional-retrieval template (tag langchain==0.2.0) and <code>MultiVectorRetriever</code> (langchain-classic 1.0.8); FActScore (README and code); Zhou et al. 2026 and LumberChunker 2024 (search-checked). Book pages are page pointers only; no book text is quoted.</p>
+</footer>
+</main>
+</div>
+<button type="button" class="totop" id="totop" aria-label="Back to top">↑</button>
+
+<script>
+"use strict";
+(function () {
+  const $ = (s, el = document) => el.querySelector(s);
+  const $$ = (s, el = document) => [...el.querySelectorAll(s)];
+  const root = document.documentElement;
+  const store = { get(k, d) { try { return localStorage.getItem(k) ?? d; } catch { return d; } },
+                  set(k, v) { try { localStorage.setItem(k, v); } catch { /* private window */ } } };
+  const fmt = (x, d = 3) => Number.isFinite(x) ? x.toFixed(d) : "—";
+  const KIT = location.protocol.startsWith("http") && location.pathname.startsWith("/lesson/");
+  const esc = t => String(t).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/"/g, "&quot;");
+  const num = x => Number(x).toLocaleString("en-US");
+
+  /* ---------- depth, colour, theme ---------- */
+  function setDepth(m) {
+    root.dataset.depth = m;
+    $$("#depth button").forEach(b => b.setAttribute("aria-pressed", String(b.dataset.depth === m)));
+    store.set("lesson-depth", m);
+    spy();
+  }
+  $$("#depth button").forEach(b => b.addEventListener("click", () => setDepth(b.dataset.depth)));
+  function paintColor() {
+    const dark = root.dataset.theme === "dark";
+    $("#color").innerHTML = `<span aria-hidden="true">${dark ? "☀" : "☾"}</span><span class="lbl"> ${dark ? "Light" : "Dark"}</span>`;
+    $("#color").setAttribute("aria-label", dark ? "Switch to light" : "Switch to dark");
+  }
+  $("#color").addEventListener("click", () => { root.dataset.theme = root.dataset.theme === "dark" ? "light" : "dark"; store.set("lesson-color", root.dataset.theme); paintColor(); });
+  paintColor();
+  $("#style").value = root.dataset.style;
+  $("#style").addEventListener("change", e => { root.dataset.style = e.target.value; store.set("lesson-style", e.target.value); });
+
+  /* ---------- contents panel: where am I, hide/show, left/right, back to top ---------- */
+  const links = $$("#toc a");
+  const targets = links.map(a => document.getElementById(a.getAttribute("href").slice(1)));
+  const narrow = () => !!(window.matchMedia && window.matchMedia("(max-width: 980px)").matches);
+  let lastCur = -1;
+  function spy() {
+    const y = window.scrollY + 90;
+    let cur = 0;
+    targets.forEach((t, i) => { if (t && t.offsetParent !== null && t.getBoundingClientRect().top + window.scrollY <= y) cur = i; });
+    links.forEach((a, i) => a.classList.toggle("on", i === cur));
+    const visible = targets.filter(t => t && t.offsetParent !== null);
+    const pos = visible.indexOf(targets[cur]) + 1;
+    const name = links[cur].textContent.replace(/Full$/, "").replace(/^[^A-Za-z]+/, "").trim();
+    $("#where").textContent = `${name} · ${pos} of ${visible.length}`;
+    $("#crumb").textContent = ` › ${links[cur].querySelector(".n").textContent.trim()} ${name}`;
+    const h = document.documentElement.scrollHeight - innerHeight;
+    const pct = (h > 0 ? Math.min(100, 100 * window.scrollY / h) : 0) + "%";
+    $("#bar").style.width = pct; $("#topprog").style.width = pct;
+    $("#totop").classList.toggle("show", window.scrollY > 500);
+    if (cur !== lastCur) {                       // keep the current step visible inside a long panel
+      lastCur = cur;
+      const side = $("#side"), a = links[cur];
+      if (side.scrollHeight > side.clientHeight && (a.offsetTop < side.scrollTop + 40 || a.offsetTop + a.offsetHeight > side.scrollTop + side.clientHeight - 20))
+        side.scrollTop = Math.max(0, a.offsetTop - side.clientHeight / 3);
+    }
+  }
+  addEventListener("scroll", spy, { passive: true });
+  addEventListener("resize", spy);
+  function closeDrawer() { document.body.classList.remove("side-open"); if (narrow()) $("#menu").setAttribute("aria-expanded", "false"); }
+  links.forEach(a => a.addEventListener("click", () => {
+    const t = document.getElementById(a.getAttribute("href").slice(1));
+    if (t && t.closest(".full") && root.dataset.depth === "short") setDepth("full");
+    closeDrawer();
+  }));
+  function setToc(v) { root.dataset.toc = v; store.set("lesson-toc", v); $("#menu").setAttribute("aria-expanded", String(v === "shown")); spy(); }
+  $("#menu").addEventListener("click", () => {
+    if (narrow()) { const open = document.body.classList.toggle("side-open"); $("#menu").setAttribute("aria-expanded", String(open)); }
+    else setToc(root.dataset.toc === "hidden" ? "shown" : "hidden");
+  });
+  $("#main").addEventListener("click", () => { if (document.body.classList.contains("side-open")) closeDrawer(); });
+  function paintSide() { $("#sidepos").textContent = root.dataset.side === "right" ? "⇆ Left" : "⇆ Right"; }
+  $("#sidepos").addEventListener("click", () => { root.dataset.side = root.dataset.side === "right" ? "left" : "right"; store.set("lesson-side", root.dataset.side); paintSide(); });
+  paintSide();
+  $("#menu").setAttribute("aria-expanded", String(!narrow() && root.dataset.toc === "shown"));
+  addEventListener("keydown", e => {
+    if (e.key && e.key.toLowerCase() === "t" && !e.ctrlKey && !e.metaKey && !e.altKey && !/^(INPUT|TEXTAREA|SELECT)$/.test((document.activeElement || {}).tagName || "")) $("#menu").click();
+  });
+  $("#totop").addEventListener("click", () => { window.scrollTo({ top: 0, behavior: "smooth" }); $(".top .t").focus?.(); });
+  const qd = new URLSearchParams(location.search).get("mode");
+  setDepth(qd === "full" || location.hash === "#full" ? "full" : qd === "short" ? "short" : store.get("lesson-depth", "short"));
+
+  /* ---------- way back: all phases (kit Route page, or the offline route map) ---------- */
+  const HOME = KIT ? "/#/" : "../../RAG_ROUTE_MAP.html";
+  ["#home", "#toRoute"].forEach(s => { const a = $(s); if (a) a.href = HOME; });
+  $$(".kitonly").forEach(a => { if (KIT) a.href = "/" + a.dataset.route; else a.remove(); });
+
+  /* ---------- links: study kit routes, book PDFs ---------- */
+  $$("a[data-kit]").forEach(a => {
+    if (KIT) { a.href = "/" + a.dataset.kit; return; }
+    const c = document.createElement("code");
+    c.textContent = a.dataset.path; c.title = "Open from the study kit to get a link";
+    a.replaceWith(c);
+  });
+  $$("a[data-book]").forEach(a => {
+    a.href = (KIT ? "/book/" : "../../../RAG_Made_Simple_The_Complete_Visual_Guide/") + encodeURIComponent(a.dataset.book) + "#page=" + a.dataset.page;
+    a.target = "_blank"; a.rel = "noopener"; a.title = "Open the book at this page";
+  });
+
+  const keepMeta = svg => $$("title,desc", svg).map(e => e.outerHTML).join("");
+
+  /* ---------- data: units, the tutor's propositions, planted mistakes (I4_FACTS K3-K5) ---------- */
+  const D = {"units":{"10:0":{"k":"h","t":"Chapter 6: Global and Local Climate Action","a":0,"b":42,"da":20555,"db":20597},"10:1":{"k":"h","t":"International Collaboration","a":44,"b":71,"da":20599,"db":20626},"10:2":{"k":"h","t":"United Nations Framework Convention on Climate Change (UNFCCC)","a":73,"b":135,"da":20628,"db":20690},"10:3":{"k":"s","t":"The UNFCCC is an international treaty aimed at addressing climate change.","a":137,"b":210,"da":20692,"db":20765},"10:4":{"k":"s","t":"It provides a framework for negotiating specific protocols and agreements, such as the Kyoto Protocol and the Paris Agreement.","a":211,"b":339,"da":20766,"db":20894},"10:5":{"k":"s","t":"Global cooperation under the UNFCCC is crucial for coordinated climate action.","a":340,"b":419,"da":20895,"db":20974},"10:6":{"k":"h","t":"Paris Agreement","a":421,"b":436,"da":20976,"db":20991},"10:7":{"k":"s","t":"The Paris Agreement, adopted in 2015, aims to limit global warming to well below 2 degrees Celsius above pre-industrial levels, with efforts to limit the increase to 1.5 degrees Celsius.","a":438,"b":625,"da":20993,"db":21180},"10:8":{"k":"s","t":"Countries submit nationally determined contributions (NDCs) outlining their climate action plans and targets.","a":627,"b":737,"da":21182,"db":21292},"10:9":{"k":"h","t":"National Strategies","a":739,"b":758,"da":21294,"db":21313},"10:10":{"k":"h","t":"Carbon Pricing","a":760,"b":774,"da":21315,"db":21329},"10:11":{"k":"s","t":"Carbon pricing mechanisms, such as carbon taxes and cap-and-trade systems, incentivize emission reductions by assigning a cost to carbon emissions.","a":776,"b":924,"da":21331,"db":21479},"10:12":{"k":"s","t":"These policies encourage businesses and individuals to reduce their carbon footprints and invest in cleaner technologies.","a":925,"b":1048,"da":21480,"db":21603},"10:13":{"k":"h","t":"Renewable Energy Targets","a":1050,"b":1074,"da":21605,"db":21629},"10:14":{"k":"s","t":"Many countries have set ambitious targets for renewable energy adoption.","a":1076,"b":1148,"da":21631,"db":21703},"10:15":{"k":"s","t":"These targets are supported by policies such as subsidies, tax incentives, and mandates for renewable energy use.","a":1149,"b":1264,"da":21704,"db":21819},"10:16":{"k":"s","t":"Achieving these targets requires robust infrastructure and market development.","a":1265,"b":1343,"da":21820,"db":21898},"10:17":{"k":"h","t":"Emission Reduction Regulations","a":1345,"b":1375,"da":21900,"db":21930},"10:18":{"k":"s","t":"Governments implement regulations to limit emissions from key sectors such as energy, transportation, and industry.","a":1377,"b":1493,"da":21932,"db":22048},"10:19":{"k":"s","t":"These regulations can include efficiency standards, emission caps, and pollution controls.","a":1494,"b":1585,"da":22049,"db":22140},"10:20":{"k":"s","t":"Enforcement and compliance are critical for their effectiveness.","a":1586,"b":1650,"da":22141,"db":22205},"10:21":{"k":"h","t":"Local and Community Initiatives","a":1652,"b":1683,"da":22207,"db":22238},"10:22":{"k":"h","t":"Urban Climate Action","a":1685,"b":1705,"da":22240,"db":22260},"10:23":{"k":"s","t":"Cities play a pivotal role in climate action due to their high population densities and economic activities.","a":1707,"b":1816,"da":22262,"db":22371},"10:24":{"k":"s","t":"Urban climate initiatives include sustainable transportation systems, green building standards, and climate-resilient infrastructure.","a":1817,"b":1951,"da":22372,"db":22506},"10:25":{"k":"s","t":"Community engagement and participatory planning are essential for successful implementation.","a":1952,"b":2045,"da":22507,"db":22600},"10:26":{"k":"h","t":"Community-Based Conservation","a":2047,"b":2075,"da":22602,"db":22630},"29:10":{"k":"h","t":"International Climate Negotiations","a":894,"b":928,"da":63459,"db":63493},"29:11":{"k":"h","t":"Conference of the Parties (COP)","a":930,"b":961,"da":63495,"db":63526},"29:12":{"k":"s","t":"The Conference of the Parties (COP) is the supreme decision-making body of the United Nations Framework Convention on Climate Change (UNFCCC).","a":963,"b":1106,"da":63528,"db":63671},"29:13":{"k":"s","t":"COP meetings bring together representatives from all signatory countries to negotiate and review progress on climate agreements.","a":1107,"b":1237,"da":63672,"db":63802},"29:14":{"k":"s","t":"These meetings play a crucial role in advancing global climate action.","a":1238,"b":1308,"da":63803,"db":63873},"23:24":{"k":"h","t":"Paris Agreement","a":1790,"b":1805,"da":50999,"db":51014},"23:25":{"k":"s","t":"The Paris Agreement is a landmark international accord that aims to limit global warming to well below 2 degrees Celsius above pre-industrial levels, with efforts to limit the increase to 1.5 degrees Celsius.","a":1807,"b":2017,"da":51016,"db":51226},"23:26":{"k":"s","t":"Countries submit nationally determined contributions (NDCs) outlining their climate action plans.","a":2018,"b":2116,"da":51227,"db":51325},"23:27":{"k":"s","t":"Regular reviews and updates of NDCs are essential for meeting the agreement's goals.","a":2117,"b":2202,"da":51326,"db":51411},"2:0":{"k":"s","t":"Coal is the most carbon-intensive fossil fuel, and its use for electricity generation is a major source of CO2 emissions.","a":0,"b":122,"da":2425,"db":2547},"2:1":{"k":"s","t":"Despite a decline in some regions, coal remains a significant energy source globally.","a":123,"b":209,"da":2548,"db":2634},"2:2":{"k":"s","t":"It is mined extensively in countries like China, India, and the United States, contributing significantly to their energy supplies and CO2 footprints.","a":210,"b":361,"da":2635,"db":2786},"2:3":{"k":"h","t":"Oil","a":363,"b":366,"da":2788,"db":2791},"2:7":{"k":"h","t":"Natural Gas","a":733,"b":744,"da":3158,"db":3169},"2:8":{"k":"s","t":"Natural gas is the least carbon-intensive fossil fuel and is often seen as a \"bridge fuel\" to a lower-carbon future.","a":746,"b":863,"da":3171,"db":3288},"2:9":{"k":"s","t":"However, its extraction and use still contribute to greenhouse gas emissions, particularly methane, which is a potent greenhouse gas.","a":864,"b":998,"da":3289,"db":3423},"2:10":{"k":"s","t":"Innovations in fracking technology have made natural gas more accessible, but this comes with environmental and health concerns.","a":999,"b":1129,"da":3424,"db":3554}},"props":[{"id":"p10-01","t":"The United Nations Framework Convention on Climate Change (UNFCCC) is an international treaty.","src":["10:2","10:3"],"res":[],"span":[20628,20765],"par":[27],"al":1.0},{"id":"p10-02","t":"The UNFCCC is aimed at addressing climate change.","src":["10:3"],"res":[],"span":[20692,20765],"par":[27],"al":1.0},{"id":"p10-03","t":"The UNFCCC provides a framework for negotiating specific protocols and agreements.","src":["10:4"],"res":["UNFCCC"],"span":[20766,20894],"par":[27],"al":1.0},{"id":"p10-04","t":"The UNFCCC provides a framework for negotiating the Kyoto Protocol.","src":["10:4"],"res":["UNFCCC"],"span":[20766,20894],"par":[27],"al":1.0},{"id":"p10-05","t":"The UNFCCC provides a framework for negotiating the Paris Agreement.","src":["10:4"],"res":["UNFCCC"],"span":[20766,20894],"par":[27],"al":1.0},{"id":"p10-06","t":"Global cooperation under the UNFCCC is crucial for coordinated climate action.","src":["10:5"],"res":[],"span":[20895,20974],"par":[27],"al":1.0},{"id":"p10-07","t":"The Paris Agreement was adopted in 2015.","src":["10:7"],"res":[],"span":[20993,21180],"par":[27],"al":1.0},{"id":"p10-08","t":"The Paris Agreement aims to limit global warming to well below 2 degrees Celsius above pre-industrial levels.","src":["10:7"],"res":[],"span":[20993,21180],"par":[27],"al":1.0},{"id":"p10-09","t":"Efforts under the Paris Agreement aim to limit the increase in global warming to 1.5 degrees Celsius.","src":["10:7"],"res":[],"span":[20993,21180],"par":[27],"al":1.0},{"id":"p10-10","t":"Under the Paris Agreement, countries submit nationally determined contributions (NDCs).","src":["10:8"],"res":["Paris Agreement"],"span":[21182,21292],"par":[27],"al":1.0},{"id":"p10-11","t":"Nationally determined contributions (NDCs) outline countries' climate action plans and targets.","src":["10:8"],"res":[],"span":[21182,21292],"par":[27],"al":1.0},{"id":"p10-12","t":"Carbon taxes are a carbon pricing mechanism.","src":["10:11"],"res":[],"span":[21331,21479],"par":[27,28],"al":1.0},{"id":"p10-13","t":"Cap-and-trade systems are a carbon pricing mechanism.","src":["10:11"],"res":[],"span":[21331,21479],"par":[27,28],"al":1.0},{"id":"p10-14","t":"Carbon pricing mechanisms incentivize emission reductions by assigning a cost to carbon emissions.","src":["10:11"],"res":[],"span":[21331,21479],"par":[27,28],"al":1.0},{"id":"p10-15","t":"Carbon pricing policies encourage businesses and individuals to reduce their carbon footprints.","src":["10:12"],"res":["carbon pricing"],"span":[21480,21603],"par":[28],"al":1.0},{"id":"p10-16","t":"Carbon pricing policies encourage businesses and individuals to invest in cleaner technologies.","src":["10:12"],"res":["carbon pricing"],"span":[21480,21603],"par":[28],"al":1.0},{"id":"p10-17","t":"Many countries have set ambitious targets for renewable energy adoption.","src":["10:14"],"res":[],"span":[21631,21703],"par":[28],"al":1.0},{"id":"p10-18","t":"Renewable energy targets are supported by policies such as subsidies, tax incentives, and mandates for renewable energy use.","src":["10:15"],"res":["renewable energy"],"span":[21704,21819],"par":[28],"al":1.0},{"id":"p10-19","t":"Achieving renewable energy targets requires robust infrastructure and market development.","src":["10:16"],"res":["renewable energy"],"span":[21820,21898],"par":[28],"al":1.0},{"id":"p10-20","t":"Governments implement regulations to limit emissions from key sectors such as energy, transportation, and industry.","src":["10:18"],"res":[],"span":[21932,22048],"par":[28],"al":1.0},{"id":"p10-21","t":"Emission reduction regulations can include efficiency standards, emission caps, and pollution controls.","src":["10:19"],"res":["emission reduction"],"span":[22049,22140],"par":[28],"al":1.0},{"id":"p10-22","t":"Enforcement and compliance are critical for the effectiveness of emission reduction regulations.","src":["10:20"],"res":["emission reduction regulations"],"span":[22141,22205],"par":[28,29],"al":1.0},{"id":"p10-23","t":"Cities play a pivotal role in climate action due to their high population densities and economic activities.","src":["10:23"],"res":[],"span":[22262,22371],"par":[29],"al":1.0},{"id":"p10-24","t":"Urban climate initiatives include sustainable transportation systems, green building standards, and climate-resilient infrastructure.","src":["10:24"],"res":[],"span":[22372,22506],"par":[29],"al":1.0},{"id":"p10-25","t":"Community engagement and participatory planning are essential for successful implementation of urban climate initiatives.","src":["10:25"],"res":["urban climate initiatives"],"span":[22507,22600],"par":[29],"al":1.0},{"id":"p23-01","t":"The Paris Agreement is a landmark international accord.","src":["23:25"],"res":[],"span":[51016,51226],"par":[68],"al":1.0},{"id":"p23-02","t":"The Paris Agreement aims to limit global warming to well below 2 degrees Celsius above pre-industrial levels.","src":["23:25"],"res":[],"span":[51016,51226],"par":[68],"al":1.0},{"id":"p23-03","t":"Efforts under the Paris Agreement aim to limit the increase in global warming to 1.5 degrees Celsius.","src":["23:25"],"res":[],"span":[51016,51226],"par":[68],"al":1.0},{"id":"p23-04","t":"Under the Paris Agreement, countries submit nationally determined contributions (NDCs) outlining their climate action plans.","src":["23:26"],"res":["Paris Agreement"],"span":[51227,51325],"par":[68],"al":1.0},{"id":"p23-05","t":"Regular reviews and updates of NDCs are essential for meeting the Paris Agreement's goals.","src":["23:27"],"res":["Paris Agreement"],"span":[51326,51411],"par":[68],"al":1.0},{"id":"p29-01","t":"The Conference of the Parties (COP) is the supreme decision-making body of the United Nations Framework Convention on Climate Change (UNFCCC).","src":["29:12"],"res":[],"span":[63528,63671],"par":[85],"al":1.0},{"id":"p29-02","t":"COP meetings bring together representatives from all signatory countries.","src":["29:13"],"res":[],"span":[63672,63802],"par":[85],"al":1.0},{"id":"p29-03","t":"At COP meetings, representatives negotiate and review progress on climate agreements.","src":["29:13"],"res":[],"span":[63672,63802],"par":[85],"al":1.0},{"id":"p29-04","t":"COP meetings play a crucial role in advancing global climate action.","src":["29:14"],"res":["COP"],"span":[63803,63873],"par":[85],"al":1.0},{"id":"p02-01","t":"Coal is the most carbon-intensive fossil fuel.","src":["2:0"],"res":[],"span":[2425,2547],"par":[3],"al":1.0},{"id":"p02-02","t":"Coal use for electricity generation is a major source of CO2 emissions.","src":["2:0"],"res":[],"span":[2425,2547],"par":[3],"al":1.0},{"id":"p02-03","t":"Coal remains a significant energy source globally, despite a decline in some regions.","src":["2:1"],"res":[],"span":[2548,2634],"par":[3],"al":1.0},{"id":"p02-04","t":"Coal is mined extensively in countries like China, India, and the United States.","src":["2:2"],"res":["Coal"],"span":[2635,2786],"par":[3],"al":1.0},{"id":"p02-05","t":"Natural gas is the least carbon-intensive fossil fuel.","src":["2:8"],"res":[],"span":[3171,3288],"par":[3,4],"al":1.0},{"id":"p02-06","t":"Natural gas is often seen as a \"bridge fuel\" to a lower-carbon future.","src":["2:8"],"res":[],"span":[3171,3288],"par":[3,4],"al":1.0}],"plant":[{"id":"x-01","err":"added","t":"The Paris Agreement was signed in Paris by 196 countries.","src":["10:7"],"al":0.4,"un":["196","countri","sign"]},{"id":"x-02","err":"distorted","t":"The Paris Agreement was adopted in 2016.","src":["10:7"],"al":0.75,"un":["2016"]},{"id":"x-03","err":"distorted","t":"The Paris Agreement aims to limit global warming to below 2 degrees Celsius.","src":["10:7"],"al":1.0,"un":[]},{"id":"x-04","err":"distorted","t":"The Paris Agreement provides a framework for negotiating specific protocols and agreements.","src":["10:4"],"al":1.0,"un":[]},{"id":"x-05","err":"pronoun","t":"It provides a framework for negotiating specific protocols and agreements.","src":["10:4"],"al":1.0,"un":[]},{"id":"x-06","err":"bad_id","t":"The UNFCCC is an international treaty.","src":["10:31"],"al":null,"un":null}],"chunks":{"3":[2425,3357,2],"4":[3158,4067,2],"27":[20555,21506,10],"28":[21315,22262,10],"29":[22111,22632,10],"68":[50756,51413,23],"85":[63419,64381,29]},"stop":["a","about","all","also","an","and","another","any","are","as","at","be","been","being","both","but","by","can","could","did","do","does","down","each","every","for","from","had","has","have","he","her","here","his","how","i","if","in","into","is","it","its","just","least","less","many","may","might","more","most","much","no","nor","not","of","off","on","only","or","other","our","out","over","per","she","should","so","some","such","than","that","the","their","them","then","there","these","they","this","those","to","under","up","very","via","was","we","were","what","when","where","which","while","who","whom","whose","why","will","with","would","you","your"]};
+  window.__i4 = { D };
+
+  /* the course's word rule (i4_kit_measure.py: STOP, stem, words) */
+  const STOP = new Set(D.stop);
+  const stem = w => { for (const s of ["ing", "ed", "es", "s", "e"]) if (w.endsWith(s) && w.length - s.length >= 3) return w.slice(0, -s.length); return w; };
+  const words = t => {
+    const s = t.toLowerCase().replace(/-\s*\n\s*/g, "-");
+    const out = new Set();
+    for (const m of s.matchAll(/[a-z0-9]+(?:\.[0-9]+)?/g)) { const w = m[0]; if ((w.length > 1 || /^[0-9]+$/.test(w)) && !STOP.has(w)) out.add(stem(w)); }
+    return out;
+  };
+  const align = (text, srcText, names) => {
+    const W = words(text), allowed = words(srcText);
+    names.forEach(n => words(n).forEach(w => allowed.add(w)));
+    const sup = [...W].filter(w => allowed.has(w)), un = [...W].filter(w => !allowed.has(w)).sort();
+    return { a: W.size ? sup.length / W.size : NaN, un, W };
+  };
+  window.__i4.align = align; window.__i4.words = words;
+
+  /* ---------- step 1: dilution ---------- */
+  function drawDil() {
+    const n = Number($("#nFacts").value);
+    $("#nOut").textContent = n;
+    const svg = $("#dilChart"), L = 58, R = 18, T = 18, B = 46, W = 640, H = 260, X = k => L + (k - 1) / 13 * (W - L - R), Y = v => T + (1 - v) * (H - T - B);
+    let s = "";
+    [0, .25, .5, .75, 1].forEach(v => { s += `<line class="grid" x1="${L}" x2="${W - R}" y1="${Y(v)}" y2="${Y(v)}"/><text x="${L - 8}" y="${Y(v) + 4}" text-anchor="end">${v}</text>`; });
+    for (let k = 1; k <= 14; k++) s += `<text x="${X(k)}" y="${H - B + 18}" text-anchor="middle">${k}</text>`;
+    s += `<text x="${(L + W - R) / 2}" y="${H - 8}" text-anchor="middle">facts in the chunk (n)</text>`;
+    const pts = []; for (let k = 1; k <= 14; k++) pts.push(`${X(k)},${Y(1 / Math.sqrt(k))}`);
+    s += `<polyline class="s-bm25" points="${pts.join(" ")}"/>`;
+    s += `<line class="s-ceil" x1="${L}" x2="${W - R}" y1="${Y(.6)}" y2="${Y(.6)}"/><text class="lab" x="${W - R - 4}" y="${Y(.6) - 6}" text-anchor="end">a one-fact distractor at 0.60</text>`;
+    s += `<circle class="dot" cx="${X(n)}" cy="${Y(1 / Math.sqrt(n))}" r="7"/>`;
+    svg.innerHTML = keepMeta(svg) + s;
+    const c = 1 / Math.sqrt(n);
+    $("#dilRead").innerHTML = `cos = 1/√${n} = <b>${fmt(c)}</b> · ${c < .6 ? `<span class="miss">the distractor (0.60) ranks above the right chunk</span>` : `<span class="hit">the right chunk still beats the distractor</span>`}${n === 14 ? " · 14 is how many hand-written propositions come from chunk 27" : ""}`;
+  }
+  $("#nFacts").addEventListener("input", drawDil);
+  drawDil();
+
+  /* ---------- step 4: page 10 units ---------- */
+  const unitIds = page => Object.keys(D.units).filter(u => u.startsWith(page + ":")).sort((a, b) => Number(a.split(":")[1]) - Number(b.split(":")[1]));
+  const unitRow = (u, hl) => { const x = D.units[u];
+    return `<div class="unit ${x.k === "h" ? "uh" : ""} ${hl ? "hl" : ""}" data-u="${u}"><span class="uid">${u}</span><span class="uk">${x.k}</span><span class="ut">${esc(x.t)}</span><span class="uo">[${x.a}, ${x.b})</span></div>`; };
+  $("#p10units").innerHTML = unitIds(10).map(u => unitRow(u, false)).join("");
+
+  /* ---------- step 6: proposition → sources, span, parent ---------- */
+  const P10 = D.props.filter(p => p.id.startsWith("p10-"));
+  let curP = "p10-07";
+  function drawAnchor() {
+    const p = D.props.find(q => q.id === curP);
+    $("#propPick").innerHTML = P10.map(q => `<button type="button" class="chip" data-p="${q.id}" aria-pressed="${q.id === curP}" title="${esc(q.t)}">${q.id.slice(4)}</button>`).join("");
+    $$("#propPick .chip").forEach(c => c.addEventListener("click", () => { curP = c.dataset.p; drawAnchor(); }));
+    $("#anchorUnits").innerHTML = unitIds(10).map(u => unitRow(u, p.src.includes(u))).join("");
+    const ch = p.par.map(c => `chunk ${c} [${D.chunks[c][0]}, ${D.chunks[c][1]})`).join(" and ");
+    $("#anchorRead").innerHTML = `<b>${p.id}</b> “${esc(p.t)}”<br>source_ids <b>${p.src.join(", ")}</b> · span(p) = doc <b>[${p.span[0]}, ${p.span[1]})</b> · parent${p.par.length > 1 ? "s" : ""}: <b>${ch}</b>${p.par.length > 1 ? " (the overlap; primary = the lower number)" : ""} · align <b>${fmt(p.al)}</b>` +
+      (p.res.length ? ` · name taken from earlier on the page: <b>${esc(p.res.join(", "))}</b>` : "");
+  }
+  drawAnchor();
+
+  /* ---------- step 7: alignment playground ---------- */
+  const SRC = { "10:4": D.units["10:4"].t, "10:7": D.units["10:7"].t, "10:8": D.units["10:8"].t, "29:14": D.units["29:14"].t,
+                "repo cell 12": "In 1969, Neil Armstrong became the first person to walk on the Moon during the Apollo 11 mission." };
+  const AL_EX = [
+    ["added fact", "10:7", "The Paris Agreement was signed in Paris by 196 countries.", ""],
+    ["wrong year", "10:7", "The Paris Agreement was adopted in 2016.", ""],
+    ["astronaut", "repo cell 12", "Neil Armstrong was an astronaut.", ""],
+    ["dropped qualifier", "10:7", "The Paris Agreement aims to limit global warming to below 2 degrees Celsius.", ""],
+    ["wrong referent", "10:4", "The Paris Agreement provides a framework for negotiating specific protocols and agreements.", ""],
+    ["good: p10-07", "10:7", "The Paris Agreement was adopted in 2015.", ""],
+    ["good: p29-04", "29:14", "COP meetings play a crucial role in advancing global climate action.", "COP"]];
+  $("#alSrc").innerHTML = Object.keys(SRC).map(k => `<option value="${k}">${k}: ${esc(SRC[k].slice(0, 60))}…</option>`).join("");
+  $("#alSrc").value = "10:7";
+  $("#alPick").innerHTML = AL_EX.map((e, i) => `<button type="button" class="chip" data-i="${i}" aria-pressed="false">${e[0]}</button>`).join("");
+  $$("#alPick .chip").forEach(c => c.addEventListener("click", () => {
+    const e = AL_EX[Number(c.dataset.i)];
+    $("#alSrc").value = e[1]; $("#alText").value = e[2]; $("#alRes").value = e[3];
+    $$("#alPick .chip").forEach(x => x.setAttribute("aria-pressed", String(x === c)));
+    drawAlign();
+  }));
+  function drawAlign() {
+    const text = $("#alText").value, names = $("#alRes").value.split(",").map(s => s.trim()).filter(Boolean);
+    const r = align(text, SRC[$("#alSrc").value], names);
+    const pron = /^(it|its|they|their|them|this|these|those|that|he|she|his|her|such)\b/i.test(text.trim());
+    const tk = [...r.W].map(w => `<span class="tk ${r.un.includes(w) ? "bad" : "sh"}">${esc(w)}</span>`).join("");
+    $("#alRead").innerHTML = `content-word stems: ${tk || "—"}<br>align = <b>${Number.isFinite(r.a) ? `${r.W.size - r.un.length}/${r.W.size} = ${fmt(r.a)}` : "—"}</b> · ` +
+      (r.un.length ? `<span class="miss">unsupported: ${esc(r.un.join(", "))}: list it for reading</span>` : `<span class="hit">no added words</span> (which does not prove it is faithful)`) +
+      (pron ? ` · <span class="miss">starts with a pronoun</span>` : "");
+  }
+  ["#alSrc", "#alText", "#alRes"].forEach(s => $(s).addEventListener("input", drawAlign));
+  drawAlign();
+
+  /* ---------- step 7: Wilson interval ---------- */
+  function wilson(x, n, z = 1.959963984540054) {
+    const p = x / n, den = 1 + z * z / n, c = (p + z * z / (2 * n)) / den, h = z * Math.sqrt(p * (1 - p) / n + z * z / (4 * n * n)) / den;
+    return [c - h, c + h];
+  }
+  window.__i4.wilson = wilson;
+  function drawW() {
+    const n = Number($("#wn").value);
+    $("#wx").max = String(n);
+    const x = Math.min(Number($("#wx").value), n);
+    $("#wx").value = String(x); $("#wxOut").textContent = x; $("#wnOut").textContent = n;
+    const [lo, hi] = wilson(x, n);
+    $("#wRead").innerHTML = `${x}/${n} supported = <b>${fmt(x / n)}</b> · 95% Wilson <b>[${fmt(lo)}, ${fmt(hi)}]</b> · ` +
+      (lo >= .85 ? `<span class="hit">the lower bound clears 0.85</span>` : `<span class="miss">the lower bound is under 0.85: not enough evidence</span>`);
+  }
+  ["#wx", "#wn"].forEach(s => $(s).addEventListener("input", drawW));
+  drawW();
+
+  /* ---------- step 9: three scorings on made-up lists (I4_FACTS K7) ---------- */
+  const SC = [
+    { key: "D-002", label: "D-002 · Paris year", q: "In what year was the Paris Agreement adopted?", rel: [27],
+      rows: [["p10-08", 27, 1, 0], ["p23-02", 68, 0, 0], ["p10-07", 27, 1, 1], ["p10-10", 27, 0, 0], ["p23-01", 68, 0, 0], ["p10-09", 27, 1, 0]],
+      a: { parents: [27, 68], rr: 1, top4: 2, ce: 1 }, b: { rr: 1, ce: 1, df: 3 }, text: "0.333 (rank 3, the first that states 2015)" },
+    { key: "D-007a", label: "D-007 · p10-05 at rank 4", q: "What is the supreme decision-making body of the convention that provides the framework for negotiating the Kyoto Protocol and the Paris Agreement?", rel: [27, 85],
+      rows: [["p29-01", 85, 1, 1], ["p10-01", 27, 1, 0], ["p10-06", 27, 0, 0], ["p10-05", 27, 1, 0], ["p29-04", 85, 0, 0], ["p10-03", 27, 1, 0]],
+      a: { parents: [85, 27], rr: 1, top4: 2, ce: 1 }, b: { rr: 1, ce: 1, df: 4 } },
+    { key: "D-007b", label: "D-007 · p10-05 at rank 5", q: "the same question, with p10-05 and p29-04 swapped", rel: [27, 85],
+      rows: [["p29-01", 85, 1, 1], ["p10-01", 27, 1, 0], ["p10-06", 27, 0, 0], ["p29-04", 85, 0, 0], ["p10-05", 27, 1, 0], ["p10-03", 27, 1, 0]],
+      a: { parents: [85, 27], rr: 1, top4: 2, ce: 1 }, b: { rr: 1, ce: 0, df: 4 } },
+    { key: "D-005", label: "D-005 · coal first", q: "How does the document contrast coal and natural gas in terms of carbon intensity?", rel: [3, 4],
+      rows: [["p02-01", 3, 1, 0], ["p02-02", 3, 1, 0], ["p02-04", 3, 0, 0], ["p02-03", 3, 0, 0], ["p02-05", 3, 1, 0], ["p02-06", 3, 1, 0]],
+      a: { parents: [3], rr: 1, top4: 1, ce: 1 }, b: { rr: 1, ce: 0, df: 4 } }];
+  let sc = 0;
+  function drawSc() {
+    const L = SC[sc], txt = id => D.props.find(p => p.id === id).t;
+    $("#scPick").innerHTML = SC.map((x, i) => `<button type="button" class="chip" data-i="${i}" aria-pressed="${i === sc}">${x.label}</button>`).join("");
+    $$("#scPick .chip").forEach(c => c.addEventListener("click", () => { sc = Number(c.dataset.i); drawSc(); }));
+    const seen = [];
+    $("#scTable").innerHTML = `<thead><tr><th class="n">rank</th><th>proposition</th><th class="n">parent</th><th>new parent?</th><th>span overlaps gold</th>${L.key === "D-002" ? "<th>text states 2015</th>" : ""}</tr></thead><tbody>` +
+      L.rows.map(([id, par, ov, ts], i) => { const fresh = !seen.includes(par); if (fresh) seen.push(par);
+        return `<tr class="${i < 4 ? "top4" : ""}"><td class="n">${i + 1}</td><td><b>${id}</b> ${esc(txt(id))}</td><td class="n ${L.rel.includes(par) ? "hit" : ""}">${par}</td><td>${fresh ? "yes" : "<span class=\"muted\">duplicate, dropped</span>"}</td><td class="${ov ? "hit" : "miss"}">${ov ? "yes" : "no"}</td>${L.key === "D-002" ? `<td class="${ts ? "hit" : "miss"}">${ts ? "yes" : "no"}</td>` : ""}</tr>`; }).join("") + "</tbody>";
+    $("#scRead").innerHTML = `<b>${esc(L.q)}</b><br>Arm (a): parents after dedup <b>${L.a.parents.join(", ")}</b> · RR <b>${fmt(L.a.rr)}</b> · top 4 propositions → <b>${L.a.top4}</b> distinct parent${L.a.top4 > 1 ? "s" : ""} · CE@4 <b>${L.a.ce}</b><br>` +
+      `Arm (b): RR <b>${fmt(L.b.rr)}</b> · CE@4 on the top-4 spans <b>${L.b.ce}</b> · distinct-facts@4 <b>${L.b.df}</b>` + (L.text ? `<br>Text check: RR <b>${L.text}</b>` : "") + `<br><span class="muted">Shaded rows are the top 4.</span>`;
+  }
+  drawSc();
+
+  /* ---------- step 11: cost calculator (assumed tokens, I4_FACTS K9) ---------- */
+  const ASSUME = { gen: [1050, 1600], batched: [1800, 1600], per_prop: [870, 300] }, PIN = .075, POUT = .30, TPD = 200000, TPM = 8000;
+  function drawCost() {
+    const sent = Math.max(1, Number($("#cSent").value) || 1), pages = Math.max(1, Number($("#cPages").value) || 1), ratio = Math.max(0, Number($("#cRatio").value) || 0), gr = $("#cGrade").value;
+    const props = Math.round(sent * ratio);
+    const calls = { gen: pages, batched: gr === "batched" ? pages : 0, per_prop: gr === "per_prop" ? props : 0 };
+    const tin = Object.keys(calls).reduce((a, k) => a + calls[k] * ASSUME[k][0], 0), tout = Object.keys(calls).reduce((a, k) => a + calls[k] * ASSUME[k][1], 0);
+    const n = calls.gen + calls.batched + calls.per_prop, tok = tin + tout, usd = (tin * PIN + tout * POUT) / 1e6;
+    $("#cRead").innerHTML = `about <b>${num(props)}</b> propositions · <b>${num(n)}</b> calls · <b>${num(tok)}</b> tokens · <b>$${usd.toFixed(3)}</b> · <b>${(tok / TPD).toFixed(2)}</b> days of a 200K-token daily quota · at least <b>${Math.round(tok / TPM)}</b> min at 8K tokens a minute`;
+  }
+  ["#cSent", "#cPages", "#cRatio", "#cGrade"].forEach(s => $(s).addEventListener("input", drawCost));
+  drawCost();
+
+  /* ---------- apply: the real-world checklist (research I4 §8; C4 per I4_FACTS §3) ---------- */
+  const CHECKS = [
+    ["Forecast before any call: calls, tokens (reasoning included) and $ for the whole collection, against your budget and the daily quota.", "Count pages and sentences; multiply by the per-call token sizes; compare with the budget and the quota (step 11). The tool's section 3 does it."],
+    ["Every LLM reply is valid against the schema; parse failures and cut-off replies are under 2%, logged, and never silently emptied.", "Count failures by kind (bad JSON, finish_reason = length). A page with no propositions and no logged error is the silent-fallback trap (step 5)."],
+    ["Every source id exists, and every span lies inside the document text.", "Check each id against the unit table and each span against the text (step 6)."],
+    ["Every proposition with an unsupported content word (align below 1) is listed and read.", "Read the list against the sources; added facts and wrong numbers show up here (step 7)."],
+    ["At least 30 propositions are labelled by hand, with a Wilson lower bound reported.", "Use the labelling sheet: supported, added or distorted (step 7)."],
+    ["sentence_coverage is at least 0.9, and the uncovered sentences are listed.", "A sentence with no proposition can never be retrieved by one (step 10)."],
+    ["No proposition starts with a pronoun (It, They, This, These…).", "A pronoun start means decontextualisation failed (step 3)."],
+    ["Near-duplicates are measured: distinct-facts@4 and the share of repeated texts.", "Repeated paragraphs give identical propositions that crowd the top k (step 10)."],
+    ["If an LLM quality grade is used, its keep/drop is compared with your labels (keep-good, catch-bad, with n).", "The grade is a filter; measure its errors against your labels (step 8)."],
+    ["The prompt shares no 8-word run with your eval questions or gold quotes, and contains no book text.", "Run the 8-gram leakage test, including an injected leak to prove it works (step 12)."],
+    ["Your questions are mostly single-fact lookups, not compare or summarise.", "Count question types; contrast and synthesis questions lose with atomic units (step 10)."],
+    ["The corpus is stable enough to pay for the build: re-index cost = calls × changed pages.", "Ask how often the documents change (step 11)."]];
+  const saved = JSON.parse(store.get("i4-checklist", "[]") || "[]");
+  $("#checklist").innerHTML = CHECKS.map(([t, how], i) => `<label><input type="checkbox" data-i="${i}" ${saved.includes(i) ? "checked" : ""}><span><b>C${i + 1}.</b> ${esc(t)}<span class="how">How to check: ${esc(how)}</span></span></label>`).join("");
+  $$("#checklist input").forEach(c => c.addEventListener("change", () => store.set("i4-checklist", JSON.stringify($$("#checklist input:checked").map(x => Number(x.dataset.i))))));
+
+  /* ---------- check yourself ---------- */
+  const QS = [
+    { q: "A proposition's span overlaps the gold sentence, but its text talks about the 2 °C goal and never states the year asked for. How should arm (b) count it?", a: ["as a hit: the span overlaps the gold", "as a hit only after a text check confirms it states the fact; here it does not", "it cannot be scored at all"], ok: 1,
+      why: ["That is the over-credit: span overlap alone rewards a unit that cannot answer.", "Right: like p10-08 for D-002. The text check moves the first real answer to rank 3 (RR 0.333).", "It can: through its source span, plus a text check."] },
+    { q: "Every one of your propositions has align = 1. What can you conclude?", a: ["they are all faithful", "none adds a content word; dropped qualifiers and wrong referents are still possible", "the alignment check is broken"], ok: 1,
+      why: ["Align sees only added words.", "Right: that is why a person labels a sample, with a Wilson interval.", "It can be working: careful rewrites in the page's own words score 1."] },
+    { q: "You grade each proposition with its own LLM call on a 33-page PDF with about 1,400 propositions. Roughly how many index-time calls is that, with one writing call per page?", a: ["66", "about 1,433", "about 2,800"], ok: 1,
+      why: ["66 is writing plus one batched grade per page.", "Right: 33 writing calls plus one grading call per proposition.", "There is one writing call per page, not per proposition."] },
+  ];
+  $("#quick").innerHTML = QS.map((x, i) => `<fieldset><legend>${i + 1}. ${x.q}</legend>` + x.a.map((a, j) => `<label><input type="radio" name="q${i}" value="${j}"> ${a}</label>`).join("") + `<div class="fb" id="fb${i}" aria-live="polite"></div></fieldset>`).join("");
+  QS.forEach((x, i) => $$(`input[name=q${i}]`).forEach(r => r.addEventListener("change", () => {
+    const j = Number(r.value), fb = $("#fb" + i);
+    fb.className = "fb show " + (j === x.ok ? "ok" : "no"); fb.textContent = x.why[j];
+  })));
+  spy();
+})();
+</script>
+</body>
+</html>

@@ -1,0 +1,223 @@
+
+=== K1 environment, corpus, parents, seeds
+python 3.12.3 | {'pymupdf': '1.26.7', 'numpy': '2.5.4'}
+pdf sha256 1d58a0fac2435c2ce4129ff84906b93118d731e4a004e7a26f8ab8f749a92669 | pages 33 | doc chars 72593 | snapshot_id ea07572562ac
+parents = v0's 97 chunks (recursive 1000/200 per page, 07 H.1): count=97 params_hash=1ca9c5a3b548 chunks.jsonl sha256=d4108b8936093394c6eb50d4c22e8d4013d9a048fb38d5769281af4aadb3011b
+draft seeds: 10 (8 answerable, all llm-draft); relevant chunk seqs per answerable seed: {'D-001': [7], 'D-002': [27], 'D-003': [68], 'D-004': [23, 67, 68], 'D-005': [3, 4], 'D-006': [21], 'D-007': [27, 85], 'D-008': [69]}
+
+=== K2 upstream proposition_chunking.ipynb @ 009adba (cells 0-based; read as JSON, never run)
+file sha256 dbe9d464be6ddd61701f802926f3081dcd7fd737474ae83ede38925ef6c7f297 | cells 40
+cell 9: RecursiveCharacterTextSplitter.from_tiktoken_encoder(chunk_size=200, chunk_overlap=50); encoding_name given: False (library default 'gpt2'); embedder nomic-embed-text:v1.5
+cells 12 and 15: ChatGroq models ['llama-3.1-70b-versatile']; temperature=0 in both: True
+cell 12 system prompt rules: ['1. Express a Single Fact', '2. Be Understandable Without Context', '3. Use Full Names, Not Pronouns', '4. Include Relevant Dates/Qualifiers', '5. Contain One Subject-Predicate Relationship']
+cell 12 few-shot document: 'In 1969, Neil Armstrong became the first person to walk on the Moon during the Apollo 11 mission.'
+cell 12 few-shot propositions (5): ['Neil Armstrong was an astronaut.', 'Neil Armstrong walked on the Moon in 1969.', 'Neil Armstrong was the first person to walk on the Moon.', 'Neil Armstrong walked on the Moon during the Apollo 11 mission.', 'The Apollo 11 mission occurred in 1969.']
+cell 15 grader examples: 5, all 10/10/10/10: True; label typos: 'Propositons' x5, 'Evaluation_3' x2
+cell 15 human turn: '{proposition}, {original_text}'
+cell 16 thresholds: {"accuracy": 7, "clarity": 7, "completeness": 7, "conciseness": 7}; keep rule: every grade >= 7
+cell 16 saved output: 2 rejected: #17 {'accuracy': 8, 'clarity': 9, 'completeness': 6, 'conciseness': 8}; #31 {'accuracy': 10, 'clarity': 10, 'completeness': 8, 'conciseness': 6}
+cell 16 code prints exactly this '<n>) Propostion: ... Scores: ...' + 'Fail' format: True (so the saved output is consistent with the code)
+cell 18 embedding progress: 29/29 propositions embedded -> generated = 31 (kept + rejected), rejected share 2/31 = 0.065
+cell 18 retriever k: 4; cell 18 sets no model (the model is set in cell 9)
+cell 20 top-4 propositions: Brian Chesky was advised to run Airbnb in a traditional managerial style. [chunk 3] | Brian Chesky adopted a different approach to running Airbnb. [chunk 3] | Brian Chesky is a co-founder of Airbnb. [chunk 3] | Steve Jobs' management style at Apple influenced Brian Chesky's approach. [chunk 3]
+   distinct chunk ids ['3']; hits containing 'Founder Mode is': 0
+cell 28 top-4 propositions: Founder Mode is an emerging paradigm that is not yet fully understood or documented. [chunk 2] | Founder Mode is not yet fully understood or documented. [chunk 1] | Founder Mode is an emerging paradigm. [chunk 1] | Paul Graham's essay 'Founder Mode' challenges conventional wisdom about scaling startups. [chunk 1]
+   distinct chunk ids ['1', '2']; hits containing 'Founder Mode is': 3
+cell 32 top-4 propositions: Brian Chesky is a co-founder of Airbnb. [chunk 3] | Brian Chesky adopted a different approach to running Airbnb. [chunk 3] | Brian Chesky was advised to run Airbnb in a traditional managerial style. [chunk 3] | Running Airbnb in a traditional managerial style led to poor outcomes. [chunk 3]
+   distinct chunk ids ['3']; hits containing 'Founder Mode is': 0
+cell 36 top-4 propositions: Paul Graham published an essay called 'Founder Mode' in September 2024. [chunk 1] | Founder Mode is an emerging paradigm. [chunk 1] | Founder Mode is an emerging paradigm that is not yet fully understood or documented. [chunk 2] | Founder Mode is not yet fully understood or documented. [chunk 1]
+   distinct chunk ids ['1', '2']; hits containing 'Founder Mode is': 3
+cell 22 chunk index: 3 chunks embedded, retriever k = 4 -> k >= chunks: True
+
+=== K3 sentence splitter (regex, offsets kept; headings are their own units)
+sentences per page: {1: 18, 2: 20, 3: 20, 4: 22, 5: 21, 6: 21, 7: 16, 8: 18, 9: 21, 10: 16, 11: 18, 12: 18, 13: 19, 14: 20, 15: 19, 16: 19, 17: 20, 18: 18, 19: 19, 20: 18, 21: 20, 22: 19, 23: 19, 24: 19, 25: 19, 26: 21, 27: 18, 28: 21, 29: 20, 30: 18, 31: 19, 32: 21, 33: 6}
+total sentences 621, headings 286, units 907; sentences per page min 6 / median 19 / max 22
+sentences of >= 4 words: 614 (research rough pdftotext count: about 620)
+all units satisfy DOC[da:db] == text: True
+p.10 units:
+  [10:0] h page [0, 42) doc [20555, 20597) 'Chapter 6: Global and Local Climate Action'
+  [10:1] h page [44, 71) doc [20599, 20626) 'International Collaboration'
+  [10:2] h page [73, 135) doc [20628, 20690) 'United Nations Framework Convention on Climate Change (UNFCCC)'
+  [10:3] s page [137, 210) doc [20692, 20765) 'The UNFCCC is an international treaty aimed at addressing climate change.'
+  [10:4] s page [211, 339) doc [20766, 20894) 'It provides a \nframework for negotiating specific protocols and agreements, such as the Kyoto Protocol and \nthe Paris Agreement.'
+  [10:5] s page [340, 419) doc [20895, 20974) 'Global cooperation under the UNFCCC is crucial for coordinated \nclimate action.'
+  [10:6] h page [421, 436) doc [20976, 20991) 'Paris Agreement'
+  [10:7] s page [438, 625) doc [20993, 21180) 'The Paris Agreement, adopted in 2015, aims to limit global warming to well below 2 degrees \nCelsius above pre-industrial levels, with efforts to limit the increase to 1.5 degrees Celsius.'
+  [10:8] s page [627, 737) doc [21182, 21292) 'Countries submit nationally determined contributions (NDCs) outlining their climate action \nplans and targets.'
+  [10:9] h page [739, 758) doc [21294, 21313) 'National Strategies'
+  [10:10] h page [760, 774) doc [21315, 21329) 'Carbon Pricing'
+  [10:11] s page [776, 924) doc [21331, 21479) 'Carbon pricing mechanisms, such as carbon taxes and cap-and-trade systems, incentivize \nemission reductions by assigning a cost to carbon emissions.'
+  [10:12] s page [925, 1048) doc [21480, 21603) 'These policies encourage \nbusinesses and individuals to reduce their carbon footprints and invest in cleaner \ntechnologies.'
+  [10:13] h page [1050, 1074) doc [21605, 21629) 'Renewable Energy Targets'
+  [10:14] s page [1076, 1148) doc [21631, 21703) 'Many countries have set ambitious targets for renewable energy adoption.'
+  [10:15] s page [1149, 1264) doc [21704, 21819) 'These targets are \nsupported by policies such as subsidies, tax incentives, and mandates for renewable energy \nuse.'
+  [10:16] s page [1265, 1343) doc [21820, 21898) 'Achieving these targets requires robust infrastructure and market development.'
+  [10:17] h page [1345, 1375) doc [21900, 21930) 'Emission Reduction Regulations'
+  [10:18] s page [1377, 1493) doc [21932, 22048) 'Governments implement regulations to limit emissions from key sectors such as energy, \ntransportation, and industry.'
+  [10:19] s page [1494, 1585) doc [22049, 22140) 'These regulations can include efficiency standards, emission \ncaps, and pollution controls.'
+  [10:20] s page [1586, 1650) doc [22141, 22205) 'Enforcement and compliance are critical for their effectiveness.'
+  [10:21] h page [1652, 1683) doc [22207, 22238) 'Local and Community Initiatives'
+  [10:22] h page [1685, 1705) doc [22240, 22260) 'Urban Climate Action'
+  [10:23] s page [1707, 1816) doc [22262, 22371) 'Cities play a pivotal role in climate action due to their high population densities and \neconomic activities.'
+  [10:24] s page [1817, 1951) doc [22372, 22506) 'Urban climate initiatives include sustainable transportation systems, \ngreen building standards, and climate-resilient infrastructure.'
+  [10:25] s page [1952, 2045) doc [22507, 22600) 'Community engagement and \nparticipatory planning are essential for successful implementation.'
+  [10:26] h page [2047, 2075) doc [22602, 22630) 'Community-Based Conservation'
+  test: '1.5 degrees' stays inside one sentence (10:7): True
+  test: 'pre-industrial' and the line break stay inside 10:7: True
+  test: heading 'Paris Agreement' is its own unit (10:6): True
+  test: lower-case page start is not a heading (29:0): True
+  test: 'market-\nbased' kept inside 29:2: True
+known splitter limits (shown, not fixed): page-start fragment 23:0 = 'resources.' (the end of a p.22 sentence); a sentence that continues onto the next page is cut at the page end; 'e.g.' would split a sentence (occurrences of 'e.g.' in the document: 0)
+
+=== K4 the tutor-written proposition set (hand-written by the tutor 2026-10-18; NOT an LLM output)
+file i4_tutor_props.jsonl sha256 154a1e34c1fc13fa2af1394c2a1653623f419b495554e6c64691134708d87375; propositions 40; by page {2: 6, 10: 25, 23: 5, 29: 4}
+  p10-01 ids=['10:2', '10:3'] span=[20628, 20765] align=1.000 parents=[27] resolved=[] ok=True | The United Nations Framework Convention on Climate Change (UNFCCC) is an international treaty.
+  p10-02 ids=['10:3'] span=[20692, 20765] align=1.000 parents=[27] resolved=[] ok=True | The UNFCCC is aimed at addressing climate change.
+  p10-03 ids=['10:4'] span=[20766, 20894] align=1.000 parents=[27] resolved=['UNFCCC'] ok=True | The UNFCCC provides a framework for negotiating specific protocols and agreements.
+  p10-04 ids=['10:4'] span=[20766, 20894] align=1.000 parents=[27] resolved=['UNFCCC'] ok=True | The UNFCCC provides a framework for negotiating the Kyoto Protocol.
+  p10-05 ids=['10:4'] span=[20766, 20894] align=1.000 parents=[27] resolved=['UNFCCC'] ok=True | The UNFCCC provides a framework for negotiating the Paris Agreement.
+  p10-06 ids=['10:5'] span=[20895, 20974] align=1.000 parents=[27] resolved=[] ok=True | Global cooperation under the UNFCCC is crucial for coordinated climate action.
+  p10-07 ids=['10:7'] span=[20993, 21180] align=1.000 parents=[27] resolved=[] ok=True | The Paris Agreement was adopted in 2015.
+  p10-08 ids=['10:7'] span=[20993, 21180] align=1.000 parents=[27] resolved=[] ok=True | The Paris Agreement aims to limit global warming to well below 2 degrees Celsius above pre-industrial levels.
+  p10-09 ids=['10:7'] span=[20993, 21180] align=1.000 parents=[27] resolved=[] ok=True | Efforts under the Paris Agreement aim to limit the increase in global warming to 1.5 degrees Celsius.
+  p10-10 ids=['10:8'] span=[21182, 21292] align=1.000 parents=[27] resolved=['Paris Agreement'] ok=True | Under the Paris Agreement, countries submit nationally determined contributions (NDCs).
+  p10-11 ids=['10:8'] span=[21182, 21292] align=1.000 parents=[27] resolved=[] ok=True | Nationally determined contributions (NDCs) outline countries' climate action plans and targets.
+  p10-12 ids=['10:11'] span=[21331, 21479] align=1.000 parents=[27, 28] resolved=[] ok=True | Carbon taxes are a carbon pricing mechanism.
+  p10-13 ids=['10:11'] span=[21331, 21479] align=1.000 parents=[27, 28] resolved=[] ok=True | Cap-and-trade systems are a carbon pricing mechanism.
+  p10-14 ids=['10:11'] span=[21331, 21479] align=1.000 parents=[27, 28] resolved=[] ok=True | Carbon pricing mechanisms incentivize emission reductions by assigning a cost to carbon emissions.
+  p10-15 ids=['10:12'] span=[21480, 21603] align=1.000 parents=[28] resolved=['carbon pricing'] ok=True | Carbon pricing policies encourage businesses and individuals to reduce their carbon footprints.
+  p10-16 ids=['10:12'] span=[21480, 21603] align=1.000 parents=[28] resolved=['carbon pricing'] ok=True | Carbon pricing policies encourage businesses and individuals to invest in cleaner technologies.
+  p10-17 ids=['10:14'] span=[21631, 21703] align=1.000 parents=[28] resolved=[] ok=True | Many countries have set ambitious targets for renewable energy adoption.
+  p10-18 ids=['10:15'] span=[21704, 21819] align=1.000 parents=[28] resolved=['renewable energy'] ok=True | Renewable energy targets are supported by policies such as subsidies, tax incentives, and mandates for renewable energy use.
+  p10-19 ids=['10:16'] span=[21820, 21898] align=1.000 parents=[28] resolved=['renewable energy'] ok=True | Achieving renewable energy targets requires robust infrastructure and market development.
+  p10-20 ids=['10:18'] span=[21932, 22048] align=1.000 parents=[28] resolved=[] ok=True | Governments implement regulations to limit emissions from key sectors such as energy, transportation, and industry.
+  p10-21 ids=['10:19'] span=[22049, 22140] align=1.000 parents=[28] resolved=['emission reduction'] ok=True | Emission reduction regulations can include efficiency standards, emission caps, and pollution controls.
+  p10-22 ids=['10:20'] span=[22141, 22205] align=1.000 parents=[28, 29] resolved=['emission reduction regulations'] ok=True | Enforcement and compliance are critical for the effectiveness of emission reduction regulations.
+  p10-23 ids=['10:23'] span=[22262, 22371] align=1.000 parents=[29] resolved=[] ok=True | Cities play a pivotal role in climate action due to their high population densities and economic activities.
+  p10-24 ids=['10:24'] span=[22372, 22506] align=1.000 parents=[29] resolved=[] ok=True | Urban climate initiatives include sustainable transportation systems, green building standards, and climate-resilient infrastructure.
+  p10-25 ids=['10:25'] span=[22507, 22600] align=1.000 parents=[29] resolved=['urban climate initiatives'] ok=True | Community engagement and participatory planning are essential for successful implementation of urban climate initiatives.
+  p23-01 ids=['23:25'] span=[51016, 51226] align=1.000 parents=[68] resolved=[] ok=True | The Paris Agreement is a landmark international accord.
+  p23-02 ids=['23:25'] span=[51016, 51226] align=1.000 parents=[68] resolved=[] ok=True | The Paris Agreement aims to limit global warming to well below 2 degrees Celsius above pre-industrial levels.
+  p23-03 ids=['23:25'] span=[51016, 51226] align=1.000 parents=[68] resolved=[] ok=True | Efforts under the Paris Agreement aim to limit the increase in global warming to 1.5 degrees Celsius.
+  p23-04 ids=['23:26'] span=[51227, 51325] align=1.000 parents=[68] resolved=['Paris Agreement'] ok=True | Under the Paris Agreement, countries submit nationally determined contributions (NDCs) outlining their climate action plans.
+  p23-05 ids=['23:27'] span=[51326, 51411] align=1.000 parents=[68] resolved=['Paris Agreement'] ok=True | Regular reviews and updates of NDCs are essential for meeting the Paris Agreement's goals.
+  p29-01 ids=['29:12'] span=[63528, 63671] align=1.000 parents=[85] resolved=[] ok=True | The Conference of the Parties (COP) is the supreme decision-making body of the United Nations Framework Convention on Climate Change (UNFCCC).
+  p29-02 ids=['29:13'] span=[63672, 63802] align=1.000 parents=[85] resolved=[] ok=True | COP meetings bring together representatives from all signatory countries.
+  p29-03 ids=['29:13'] span=[63672, 63802] align=1.000 parents=[85] resolved=[] ok=True | At COP meetings, representatives negotiate and review progress on climate agreements.
+  p29-04 ids=['29:14'] span=[63803, 63873] align=1.000 parents=[85] resolved=['COP'] ok=True | COP meetings play a crucial role in advancing global climate action.
+  p02-01 ids=['2:0'] span=[2425, 2547] align=1.000 parents=[3] resolved=[] ok=True | Coal is the most carbon-intensive fossil fuel.
+  p02-02 ids=['2:0'] span=[2425, 2547] align=1.000 parents=[3] resolved=[] ok=True | Coal use for electricity generation is a major source of CO2 emissions.
+  p02-03 ids=['2:1'] span=[2548, 2634] align=1.000 parents=[3] resolved=[] ok=True | Coal remains a significant energy source globally, despite a decline in some regions.
+  p02-04 ids=['2:2'] span=[2635, 2786] align=1.000 parents=[3] resolved=['Coal'] ok=True | Coal is mined extensively in countries like China, India, and the United States.
+  p02-05 ids=['2:8'] span=[3171, 3288] align=1.000 parents=[3, 4] resolved=[] ok=True | Natural gas is the least carbon-intensive fossil fuel.
+  p02-06 ids=['2:8'] span=[3171, 3288] align=1.000 parents=[3, 4] resolved=[] ok=True | Natural gas is often seen as a "bridge fuel" to a lower-carbon future.
+C3 every source id exists: True; every span inside the document: True; every proposition's sources on one page: True
+every resolved name occurs earlier on the same page: True; propositions using a resolved name: 15
+align: min 1.000; propositions with align < 1: []
+C7 pronoun-initial propositions: []
+parents: span fully inside a chunk for 40/40; 1 parent 34, 2 parents (the 200-char overlap) 6; primary parent = lowest seq
+index units: 40 propositions from 26 source sentences -> 1.54 per sentence (Dense X README: 257M / 114M = 2.25)
+  normalised text p10-07: 'the paris agreement was adopted in 2015.'
+  normalised text p10-08: 'the paris agreement aims to limit global warming to well below 2 degrees celsius above pre industrial levels.'
+  normalised text p23-02: 'the paris agreement aims to limit global warming to well below 2 degrees celsius above pre industrial levels.'
+
+=== K5 planted mistakes: which check catches which (i4_planted_props.jsonl)
+upstream few-shot 'astronaut' proposition: words ['armstrong', 'astronaut', 'neil']; unsupported ['astronaut']; align = 2/3 = 0.667
+  x-01 [added] ids_ok=True align=0.400 unsupported=['196', 'countri', 'sign'] pronoun=False | flagged by align<0.5: True | by align<1: True | The Paris Agreement was signed in Paris by 196 countries.
+  x-02 [distorted] ids_ok=True align=0.750 unsupported=['2016'] pronoun=False | flagged by align<0.5: False | by align<1: True | The Paris Agreement was adopted in 2016.
+  x-03 [distorted] ids_ok=True align=1.000 unsupported=[] pronoun=False | flagged by align<0.5: False | by align<1: False | The Paris Agreement aims to limit global warming to below 2 degrees Celsius.
+  x-04 [distorted] ids_ok=True align=1.000 unsupported=[] pronoun=False | flagged by align<0.5: False | by align<1: False | The Paris Agreement provides a framework for negotiating specific protocols and agreements.
+  x-05 [pronoun] ids_ok=True align=1.000 unsupported=[] pronoun=True | flagged by align<0.5: False | by align<1: False | It provides a framework for negotiating specific protocols and agreements.
+  x-06 [bad_id] ids_ok=False align=nan unsupported=None pronoun=False | flagged by align<0.5: False | by align<1: False | The UNFCCC is an international treaty.
+not caught by any code check: x-03 (qualifier 'well' dropped: align only sees ADDED words) and x-04 (wrong referent: 'Paris Agreement' is in the source sentence, so every word is supported). Only a person reading against the source catches them.
+
+=== K6 coverage ceilings
+sentence_coverage p.10 (whole page): 16/16 = 1.000; sentences with no proposition: none
+sentence_coverage p.23 Paris section (23:25-23:27): 3/3 = 1.000; sentences with no proposition: none
+sentence_coverage p.29 COP section (29:12-29:14): 3/3 = 1.000; sentences with no proposition: none
+sentence_coverage p.2 coal and gas paragraphs (2:0-2:2, 2:8-2:10): 4/6 = 0.667; sentences with no proposition: [2:9] 'However, its extraction and use still contribute to greenhouse gas \nemissions, particularly methane, which is a potent greenhouse gas.'; [2:10] 'Innovations in fracking \ntechnology have made natural gas more accessible, but this comes with environmental and \nhealth concerns.'
+gold_reachability D-001: groups reachable [False] -> all groups False
+gold_reachability D-002: groups reachable [True] -> all groups True
+gold_reachability D-003: groups reachable [True] -> all groups True
+gold_reachability D-004: groups reachable [False] -> all groups False
+gold_reachability D-005: groups reachable [True, True] -> all groups True
+gold_reachability D-006: groups reachable [False, False] -> all groups False
+gold_reachability D-007: groups reachable [True, True] -> all groups True
+gold_reachability D-008: groups reachable [False] -> all groups False
+gold_reachability (alternatives overlapped by some span(p)): 6/12 = 0.500 (the tutor set covers only parts of pages 2, 10, 23 and 29, so this is a property of the sample, not of the method)
+
+=== K7 the three scorings on made-up ranked lists (orders are illustrative, NOT model output)
+  D-002 rank 1: p10-08 parent 27 (page 10) span-overlaps-gold=1 parent-relevant=1 | The Paris Agreement aims to limit global warming to well below 2 degrees Celsius above pre-industrial levels.
+  D-002 rank 2: p23-02 parent 68 (page 23) span-overlaps-gold=0 parent-relevant=0 | The Paris Agreement aims to limit global warming to well below 2 degrees Celsius above pre-industrial levels.
+  D-002 rank 3: p10-07 parent 27 (page 10) span-overlaps-gold=1 parent-relevant=1 | The Paris Agreement was adopted in 2015.
+  D-002 rank 4: p10-10 parent 27 (page 10) span-overlaps-gold=0 parent-relevant=1 | Under the Paris Agreement, countries submit nationally determined contributions (NDCs).
+  D-002 rank 5: p23-01 parent 68 (page 23) span-overlaps-gold=0 parent-relevant=0 | The Paris Agreement is a landmark international accord.
+  D-002 rank 6: p10-09 parent 27 (page 10) span-overlaps-gold=1 parent-relevant=1 | Efforts under the Paris Agreement aim to limit the increase in global warming to 1.5 degrees Celsius.
+  D-002 arm (a) parents after dedup [27, 68]; relevant parents [27]; RR = 1.000; top 4 propositions -> 2 distinct parents [27, 68]; CE@4 on those parents = 1
+  D-002 arm (b) RR = 1.000; CE@4 on the union of the top-4 spans = 1; distinct-facts@4 = 3
+  D-002 text check: the first proposition whose span overlaps gold AND whose text states '2015' is at rank 3: RR = 0.333
+  D-007 rank 1: p29-01 parent 85 (page 29) span-overlaps-gold=1 parent-relevant=1 | The Conference of the Parties (COP) is the supreme decision-making body of the United Nations Framework Convention on Climate Change (UNFCCC).
+  D-007 rank 2: p10-01 parent 27 (page 10) span-overlaps-gold=1 parent-relevant=1 | The United Nations Framework Convention on Climate Change (UNFCCC) is an international treaty.
+  D-007 rank 3: p10-06 parent 27 (page 10) span-overlaps-gold=0 parent-relevant=1 | Global cooperation under the UNFCCC is crucial for coordinated climate action.
+  D-007 rank 4: p10-05 parent 27 (page 10) span-overlaps-gold=1 parent-relevant=1 | The UNFCCC provides a framework for negotiating the Paris Agreement.
+  D-007 rank 5: p29-04 parent 85 (page 29) span-overlaps-gold=0 parent-relevant=1 | COP meetings play a crucial role in advancing global climate action.
+  D-007 rank 6: p10-03 parent 27 (page 10) span-overlaps-gold=1 parent-relevant=1 | The UNFCCC provides a framework for negotiating specific protocols and agreements.
+  D-007 arm (a) parents after dedup [85, 27]; relevant parents [27, 85]; RR = 1.000; top 4 propositions -> 2 distinct parents [85, 27]; CE@4 on those parents = 1
+  D-007 arm (b) RR = 1.000; CE@4 on the union of the top-4 spans = 1; distinct-facts@4 = 4
+  D-007 rank 1: p29-01 parent 85 (page 29) span-overlaps-gold=1 parent-relevant=1 | The Conference of the Parties (COP) is the supreme decision-making body of the United Nations Framework Convention on Climate Change (UNFCCC).
+  D-007 rank 2: p10-01 parent 27 (page 10) span-overlaps-gold=1 parent-relevant=1 | The United Nations Framework Convention on Climate Change (UNFCCC) is an international treaty.
+  D-007 rank 3: p10-06 parent 27 (page 10) span-overlaps-gold=0 parent-relevant=1 | Global cooperation under the UNFCCC is crucial for coordinated climate action.
+  D-007 rank 4: p29-04 parent 85 (page 29) span-overlaps-gold=0 parent-relevant=1 | COP meetings play a crucial role in advancing global climate action.
+  D-007 rank 5: p10-05 parent 27 (page 10) span-overlaps-gold=1 parent-relevant=1 | The UNFCCC provides a framework for negotiating the Paris Agreement.
+  D-007 rank 6: p10-03 parent 27 (page 10) span-overlaps-gold=1 parent-relevant=1 | The UNFCCC provides a framework for negotiating specific protocols and agreements.
+  D-007 arm (a) parents after dedup [85, 27]; relevant parents [27, 85]; RR = 1.000; top 4 propositions -> 2 distinct parents [85, 27]; CE@4 on those parents = 1
+  D-007 arm (b) RR = 1.000; CE@4 on the union of the top-4 spans = 0; distinct-facts@4 = 4
+  D-005 rank 1: p02-01 parent 3 (page 2) span-overlaps-gold=1 parent-relevant=1 | Coal is the most carbon-intensive fossil fuel.
+  D-005 rank 2: p02-02 parent 3 (page 2) span-overlaps-gold=1 parent-relevant=1 | Coal use for electricity generation is a major source of CO2 emissions.
+  D-005 rank 3: p02-04 parent 3 (page 2) span-overlaps-gold=0 parent-relevant=1 | Coal is mined extensively in countries like China, India, and the United States.
+  D-005 rank 4: p02-03 parent 3 (page 2) span-overlaps-gold=0 parent-relevant=1 | Coal remains a significant energy source globally, despite a decline in some regions.
+  D-005 rank 5: p02-05 parent 3 (page 2) span-overlaps-gold=1 parent-relevant=1 | Natural gas is the least carbon-intensive fossil fuel.
+  D-005 rank 6: p02-06 parent 3 (page 2) span-overlaps-gold=1 parent-relevant=1 | Natural gas is often seen as a "bridge fuel" to a lower-carbon future.
+  D-005 arm (a) parents after dedup [3]; relevant parents [3, 4]; RR = 1.000; top 4 propositions -> 1 distinct parents [3]; CE@4 on those parents = 1
+  D-005 arm (b) RR = 1.000; CE@4 on the union of the top-4 spans = 0; distinct-facts@4 = 4
+
+=== K8 dilution toy (made-up orthonormal fact vectors; the chunk vector is the normalised mean of n facts)
+cos(one-fact query, n-fact chunk) = 1/sqrt(n): n=1: 1.000, n=2: 0.707, n=3: 0.577, n=4: 0.500, n=5: 0.447, n=6: 0.408, n=7: 0.378, n=8: 0.354
+a one-fact distractor with cos 0.60 to the query beats the right chunk once n >= 3
+
+=== K9 cost and size forecast for Corpus D (sentence counts measured; per-call tokens ASSUMED from the research, section 9)
+sentences 621; propositions at the Dense X ratio 2.254: about 1400; at the tutor set's ratio: about 955
+page input tokens (DERIVED: chars x 0.1769, P1 o200k_harmony ratio): mean 389; p.10 367
+assumed tokens per call (research I4 section 9, not measured): generation (1050, 1600), batched grade (1800, 1600), per-proposition grade (870, 300) (in, out incl. reasoning)
+  subset 5 pages (about 212 propositions), grading off: 5 calls, 13,250 tokens, $0.003, 0.07 days of 200K TPD, at least 2 min at 8K TPM
+  subset 5 pages (about 212 propositions), grading batched: 10 calls, 30,250 tokens, $0.006, 0.15 days of 200K TPD, at least 4 min at 8K TPM
+  subset 5 pages (about 212 propositions), grading per_prop: 217 calls, 261,290 tokens, $0.036, 1.31 days of 200K TPD, at least 33 min at 8K TPM
+  Corpus D 33 pages (about 1400 propositions), grading off: 33 calls, 87,450 tokens, $0.018, 0.44 days of 200K TPD, at least 11 min at 8K TPM
+  Corpus D 33 pages (about 1400 propositions), grading batched: 66 calls, 199,650 tokens, $0.039, 1.00 days of 200K TPD, at least 25 min at 8K TPM
+  Corpus D 33 pages (about 1400 propositions), grading per_prop: 1433 calls, 1,725,450 tokens, $0.236, 8.63 days of 200K TPD, at least 216 min at 8K TPM
+index size float32 MiniLM dim 384: 97 chunks 146 KiB vs about 1400 propositions 2100 KiB (x14.4 vectors)
+index size float32 Cohere embed-v4.0 default dim 1536: 97 chunks 582 KiB vs about 1400 propositions 8400 KiB (x14.4 vectors)
+cost per 1k chunks (DERIVED: Corpus D cost x 1000 / 97 chunks), grading off: 340 calls, 901,546 tokens, $0.19
+cost per 1k chunks (DERIVED: Corpus D cost x 1000 / 97 chunks), grading batched: 680 calls, 2,058,247 tokens, $0.40
+cost per 1k chunks (DERIVED: Corpus D cost x 1000 / 97 chunks), grading per_prop: 14,773 calls, 17,788,144 tokens, $2.43
+
+=== K10 prompt prop_gen_v1: rendered size; 8-gram leakage test
+prop_gen_v1.txt sha256 bdff5976641a8a32316cc84425bd3ecd81ee22d556c95fd523296d6d50934dd1; proposition_set_v1.json sha256 9aaced8e41d8c531cfa68e2b8dba29a2e117fc95415afdfa6a97fc602ca9e64f; schema required ['text', 'source_ids']
+rendered prompt for p.10: 3858 chars, about 682 tokens (DERIVED ratio); template alone 1506 chars
+rendered p.10 units block, first 3 lines: [10:0] (heading) Chapter 6: Global and Local Climate Action || [10:1] (heading) International Collaboration || [10:2] (heading) United Nations Framework Convention on Climate Change (UNFCCC)
+eval texts checked: 22 (10 questions + 12 gold quotes), 172 distinct 8-grams
+clean: template + few-shot example share 0 8-grams with the eval texts
+injected leak (example sentence replaced by the D-002 quote): 10 shared 8-grams -> the test fails as it should
+
+=== K11 Wilson 95% intervals for a hand-checked faithfulness sample (formula outputs; no labels exist yet)
+  27/30 supported = 0.900: Wilson [0.744, 0.965]; lower bound >= 0.85: False
+  54/60 supported = 0.900: Wilson [0.799, 0.953]; lower bound >= 0.85: False
+  51/60 supported = 0.850: Wilson [0.739, 0.919]; lower bound >= 0.85: False
+  57/60 supported = 0.950: Wilson [0.863, 0.983]; lower bound >= 0.85: True
+smallest n (a multiple of 20) where 95% supported gives a Wilson lower bound >= 0.85: 60 (57/60)
+
+=== K12 the upstream k = 4 ceiling and parent dedup
+cell 20: 4 proposition hits -> 1 distinct parent chunk(s) ['3'] (a MultiVectorRetriever-style return would give 1 parent, not 4)
+cell 32: 4 proposition hits -> 1 distinct parent chunk(s) ['3'] (a MultiVectorRetriever-style return would give 1 parent, not 4)
+cell 22: chunk retriever k = 4 over 3 chunks: every query returns the whole chunk index, so its 'comparison' cannot rank
+DONE
