@@ -313,6 +313,10 @@ footer{margin-top:48px;padding:22px 0 0;border-top:1px solid var(--line);color:v
 :is([data-style="reader"],[data-style="hyper"]) :is(.g,.card,.rank){box-shadow:0 1px 2px rgba(0,0,0,.05)}
 :is([data-style="reader"],[data-style="hyper"]) .side nav a{font-size:.9rem}
 @media print{.top,aside.side,.totop,.ctl,.btn,.play input{display:none!important} html[data-depth] .full{display:grid!important} .shell{display:block} main{padding:0}}
+/* grid children may shrink below their content, so wide code scrolls inside its box on phones (fix 2026-10-18) */
+section.s>*,.two>*,.three>*,.full>*,.card>*,figure>*{min-width:0}
+main :not(pre)>code{overflow-wrap:anywhere}
+@media (max-width:620px){.badge{white-space:normal}}
 </style>
 </head>
 <body>
@@ -807,7 +811,7 @@ draft seed D-006 (a paraphrase)           a chunk containing "panels" 13.6205 ab
   <div class="full"><span class="tag">Full · the course's metrics</span>
     <ul>
       <li><b>Recall@k:</b> the share of <i>all</i> relevant chunks found in the top k (book glossary). With one relevant chunk per question it equals Hit@k.</li>
-      <li><b>CE@k (complete evidence):</b> the course's main metric (P6): a question counts only if <i>every</i> piece of evidence it needs is in the top k. For one-piece questions it equals Hit@k.</li>
+      <li><b>CE@k (complete evidence):</b> the course's main metric (P6): a question counts only if <i>every</i> piece of evidence it needs is in the top k. For one-piece questions it equals Hit@k only when the overlapping chunk holds the whole span.</li>
       <li><b>Per type ("slices"):</b> a tokenizer change should help the <code>exact-term</code> type without hurting the paraphrase type.</li>
       <li><b>An observation, not a result:</b> on the 8 answerable draft seeds (97 chunks), dense and BM25 both reach CE@4 = 8/8, and MRR@10 is 0.708 against 0.938. The questions were drafted by an LLM, not asked by users.</li>
     </ul>

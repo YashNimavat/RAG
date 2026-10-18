@@ -1,0 +1,13 @@
+{"qid": "q1", "doc": "d01", "grade": 2, "why": "names the main cause: burning fossil fuels releases carbon dioxide", "guideline_version": "v1"}
+{"qid": "q1", "doc": "d03", "grade": 1, "why": "explains the mechanism (greenhouse gases trap heat) but not what emits them", "guideline_version": "v1"}
+{"qid": "q1", "doc": "d09", "grade": 1, "why": "one source of a greenhouse gas: part of the cause, not the main one", "guideline_version": "v1"}
+{"qid": "q1", "doc": "d02", "grade": 0, "why": "repeats the question word for word but gives no answer", "guideline_version": "v1"}
+{"qid": "q1", "doc": "d08", "grade": 0, "why": "keyword-stuffed footer: the topic words without any content", "guideline_version": "v1"}
+{"qid": "q1", "doc": "d06", "grade": 0, "why": "a carbon sink, not a cause", "guideline_version": "v1"}
+{"qid": "q2", "doc": "d04", "grade": 2, "why": "gives the reasons: warm water expands and glaciers melt", "guideline_version": "v1"}
+{"qid": "q2", "doc": "d05", "grade": 1, "why": "one reason: melting ice sheets add water", "guideline_version": "v1"}
+{"qid": "q3", "doc": "d07", "grade": 2, "why": "solar and wind are renewable energy, although no query word appears", "guideline_version": "v1"}
+{"qid": "q4", "doc": "d09", "grade": 2, "why": "names the sources: cattle and rice paddies", "guideline_version": "v1"}
+{"qid": "q4", "doc": "d06", "grade": 0, "why": "shares only the word 'from'", "guideline_version": "v1"}
+{"qid": "q5", "doc": "d10", "grade": 2, "why": "heat waves are becoming more frequent: answers yes", "guideline_version": "v1"}
+{"qid": "q5", "doc": "d03", "grade": 0, "why": "about trapping heat in general, not about extreme heat events", "guideline_version": "v1"}

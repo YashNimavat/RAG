@@ -1,0 +1,90 @@
+
+=== K1 Environment
+python 3.12.8 | pymupdf 1.26.7 | unicodedata 15.0.0
+
+=== K2 The 37-character PyPDFLoader gap, by arithmetic on PyMuPDF text (S4, S11, LAB_FACTS §7)
+pages 33 | every page ends with \n: True
+sum of PyMuPDF page lengths 72561 | joined with \n 72593
+pypdf pages (= PyMuPDF page minus final \n, S11): sum 72528 | joined 72560
+.strip() per page: sum 72491 | joined 72523 | removed vs pypdf 37 | removed vs PyMuPDF 70
+joined stripped == LAB_FACTS §7 PyPDFLoader full_len 72523: True
+leading whitespace removed 0 | trailing whitespace before the final \n 37
+
+=== K3 Characters, bytes, normalisation (literal strings)
+name | code points | UTF-8 bytes | NFC | NFKC | NFKC length | delta
+ligature fi | U+FB01 | 3 | 'ﬁ' len 1 | 'fi' | 2 | +1
+ligature fl | U+FB02 | 3 | 'ﬂ' len 1 | 'fl' | 2 | +1
+ellipsis | U+2026 | 3 | '…' len 1 | '...' | 3 | +2
+one half | U+00BD | 2 | '½' len 1 | '1⁄2' | 3 | +2
+x squared | U+0078 U+00B2 | 3 | 'x²' len 2 | 'x2' | 2 | +0
+e acute, one code point | U+00E9 | 2 | 'é' len 1 | 'é' | 1 | +0
+e + combining acute | U+0065 U+0301 | 3 | 'é' len 1 | 'é' | 1 | -1
+em dash | U+2014 | 3 | '—' len 1 | '—' | 1 | +0
+soft hyphen | U+00AD | 2 | '\xad' len 1 | '\xad' | 1 | +0
+non-breaking space | U+00A0 | 2 | '\xa0' len 1 | ' ' | 1 | +0
+plain a | U+0061 | 1 | 'a' len 1 | 'a' | 1 | +0
+'file' in 'The \ufb01le': False | after NFKC: True
+Corpus D: characters NFKC would change 0 | length delta 0 | chars 72593 | UTF-8 bytes 72595 | non-ASCII ['—']
+
+=== K4 Offset shift after ligature decomposition (TOY)
+toy length 520 | ligatures at raw 100 and 300 | raw[500] = ' '
+after NFKC: length 522 | raw offset 500 is now at 502 | same character: True
+a ligature at 120 shifts every later offset by 1
+cleaned->raw map: cleaned 101 <- raw 100 | cleaned 102 <- raw 101 | cleaned 502 <- raw 500
+
+=== K5 A hash names exact bytes (toy strings)
+'Seas rise.\n' len 11 | sha256[:12] 63c2941c7f6b
+'Seas rise. \n' len 12 | sha256[:12] b1e07b17c9c7
+'Seas rise.\r\n' len 12 | sha256[:12] a71b05c14df5
+'seas rise.\n' len 11 | sha256[:12] 2d04a7947fc7
+page 2 of Part F with one extra space: id changes as the text hash changes (S3 row 'one extra space')
+
+=== K6 PyMuPDF text flags (as installed)
+TEXTFLAGS_TEXT 195 | bits: {'TEXT_PRESERVE_LIGATURES': True, 'TEXT_PRESERVE_WHITESPACE': True, 'TEXT_PRESERVE_IMAGES': False, 'TEXT_DEHYPHENATE': False, 'TEXT_MEDIABOX_CLIP': True, 'TEXT_CID_FOR_UNKNOWN_UNICODE': True}
+TEXT_DEHYPHENATE 16 | TEXT_PRESERVE_LIGATURES 1
+
+=== K7 Zoo (c1_zoo.py, TOY): per-page signals as a parse check sees them
+repeated-line threshold 3 | repeated {'ACME Technical Report': 3, 'Page #': 3}
+page | chars | images | ligatures | hyphen breaks | R->L jumps | tables (lines) | NFKC delta
+Consider using the pymupdf_layout package for a greatly improved page layout analysis.
+1 | 273 | 0 | 3 | 1 | 4 | 0 | 3
+2 | 74 | 0 | 0 | 0 | 0 | 1 | 0
+3 | 0 | 0 | 0 | 0 | 0 | 0 | 0
+4 | 0 | 1 | 0 | 0 | 0 | 0 | 0
+5 | 101 | 0 | 0 | 0 | 0 | 0 | 0
+zoo p.1 line order: ACME Technical Rep / Page 1 / Parsing comes befo / Two-column pages a / a bad parse cannot / in research papers / by any later extra / reading order must / tion or retrieval  / each column top to / The ﬁrst ﬂag: chec
+
+=== K8 A two-column 'paper' page drawn column by column (TOY, built here)
+default text, first 5 lines: ['A Toy Paper on Dense Retrieval', 'Dense retrieval maps each passage', 'to a vector and finds the nearest', 'ones to the question vector. We', 'train the encoder on question and']
+default: left column comes out before the right column: True
+default R->L jumps (body lines): 1
+sort=True: lines holding words of both columns: 3 | first: 'Dense retrieval maps each passage                   Table 1 shows the '
+line-end hyphen breaks (default): [('accu', 'racy'), ('mar', 'gin')]
+  accu-|racy: joined 'accuracy' attested elsewhere on the page: True
+  mar-|gin: joined 'margin' attested elsewhere on the page: False
+find_tables() default (ruling lines): 0 | strategy='text': 1 | first text-table shape: (23, 9)
+table as extracted, one cell per line: ['Method', 'NQ', 'TQA', 'SQuAD', 'BM25', '59.1', '66.9', '68.8', 'Dense', '78.4', '79.4', '63.2']
+ligatures 3 | characters NFKC would change 3 | length delta 3 | NFKC turns 'q·p' and '‖q‖ ≤ 1' into: 'q·p' '‖q‖ ≤ 1'
+'x²' NFKC: 'x2' | '10⁵' NFKC: '105'
+chars 575 | images 0
+
+=== K9 Corpus D per-page signals (the bars of the lesson's chart)
+chars per page [2424, 2410, 2183, 2269, 2255, 2389, 2137, 2225, 2254, 2077, 2116, 2216, 2215, 2252, 2217, 2125, 2144, 2035, 2494, 2257, 2298, 2195, 2204, 2266, 2167, 2388, 2087, 2238, 2468, 2309, 2166, 2445, 636]
+hyphen breaks per page {8: 1, 11: 1, 12: 1, 19: 1, 29: 2, 31: 1}
+images per page (all) [0] | R->L jumps per page (all) [0] | tables found (lines) total 0
+ligatures 0 | U+FFFD 0 | '(cid:' strings 0
+
+=== K10 Page-table arithmetic (TOY, C1-A-01 and C1-A-02)
+[100, 50, 80] -> [(1, 0, 100), (2, 101, 151), (3, 152, 232)] | len 232
+[100, 50, 80, 40] -> [(1, 0, 100), (2, 101, 151), (3, 152, 232), (4, 233, 273)] | len 273
+Part F rows [(1, 0, 11), (2, 12, 23), (3, 24, 33)] | page_of 11, 12, 17: [(1, 11), (2, 0), (2, 5)]
+
+=== K11 Edits with a map on the paper page (TOY): R2 + R3 only on body text
+edits 4 | R2 1 | R3 3 | raw 575 -> cleaned 576 | round trip: True
+
+=== K12 Snapshot ids of the paper page under three cleaning versions (TOY recipe of 06 §5.3)
+none | text sha256[:12] 4033785d96eb | snapshot_id 202926ae0c7b
+r3_ligatures_v1 | text sha256[:12] de3202cd0790 | snapshot_id 83b34428ba76
+r2r3_v1 | text sha256[:12] 2fc9105c0b44 | snapshot_id 63d18fdddf83
+
+DONE

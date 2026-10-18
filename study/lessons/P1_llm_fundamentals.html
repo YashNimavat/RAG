@@ -330,6 +330,10 @@ svg .tbar{fill:var(--accent)}
 .sbar .p5{background:var(--good)}
 .sbar .pe{background:transparent}
 pre .c{color:var(--muted)}
+/* grid children may shrink below their content, so wide code scrolls inside its box on phones */
+section.s>*,.two>*,.three>*,.full>*,.card>*,figure>*{min-width:0}
+main :not(pre)>code{overflow-wrap:anywhere}
+@media (max-width:620px){.badge{white-space:normal}}
 </style>
 </head>
 <body>
@@ -669,7 +673,7 @@ enc.encode("&lt;|endoftext|&gt;", disallowed_special=())  → 7 tokens</pre>
     "reasoning_tokens": …               <span class="c">← the hidden part of the output</span>
   },
   "prompt_tokens_details": {
-    "cached_tokens": …                  <span class="c">← input reused from a recent prompt, billed cheaper</span>
+    "cached_tokens": …                  <span class="c">← reused recent input, cheaper</span>
   },
   "total_tokens": 101                   <span class="c">← prompt + completion</span>
 }

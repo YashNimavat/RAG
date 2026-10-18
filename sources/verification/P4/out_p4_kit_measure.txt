@@ -1,0 +1,114 @@
+
+=== K1 environment, corpus, models
+python 3.12.8 | {'pymupdf': '1.26.7', 'sentence-transformers': '6.1.0', 'transformers': '5.19.0', 'torch': '2.14.1', 'numpy': '2.5.3', 'tokenizers': '0.23.2'}
+pdf sha256 1d58a0fac2435c2ce4129ff84906b93118d731e4a004e7a26f8ab8f749a92669
+97 chunks: count=97 chunks.jsonl sha256=d4108b8936093394c6eb50d4c22e8d4013d9a048fb38d5769281af4aadb3011b (P3 verify / C2 lab: d4108b89...)
+draft seeds: 10 (8 answerable); relevant chunk seqs per answerable seed: {'D-001': [7], 'D-002': [27], 'D-003': [68], 'D-004': [23, 67, 68], 'D-005': [3, 4], 'D-006': [21], 'D-007': [27, 85], 'D-008': [69]}
+sentence-transformers/all-MiniLM-L6-v2: snapshot=1110a243 modules=['Transformer', 'Pooling', 'Normalize'] max_seq_length=256 dim=384 similarity_fn_name='cosine' prompts={'query': '', 'document': ''}
+sentence-transformers/paraphrase-MiniLM-L3-v2: snapshot=4ca70771 modules=['Transformer', 'Pooling'] max_seq_length=128 dim=384 similarity_fn_name='cosine' prompts={'query': '', 'document': ''}
+sentence-transformers/all-MiniLM-L6-v2 pooling config: mean_tokens={'embedding_dimension': 384, 'pooling_mode': 'mean', 'include_prompt': True}
+cross-encoder/ms-marco-MiniLM-L-6-v2: snapshot=233902d2 max_seq_length=512
+
+=== K2 vector lengths on the 97 chunks
+L6 default (Transformer, Pooling, Normalize)   norm min=1.000000 max=1.000000 mean=1.0000
+L6 with Normalize removed                      norm min=2.048730 max=3.272804 mean=2.4917
+L3 default (no Normalize)                      norm min=2.363580 max=3.474059 mean=2.9495
+L6 max |norm - 1| = 1.19e-07; dtype=float32 shape=(97, 384)
+bytes per vector: float32 1536; whole index 148992 bytes
+
+=== K3 D-002 on the 97 chunks: one score per chunk; the wrong-model bug
+question: 'In what year was the Paris Agreement adopted?'; relevant seqs [27] (page [10])
+shapes: query (384,), index (97, 384), scores (97,); an all-pairs matrix would be 97x97 = 9409
+L6 cosine top5=[69, 68, 27, 17, 84] scores=['0.4606', '0.4513', '0.4386', '0.4385', '0.3387'] first relevant rank=3
+L6 L2 on unit vectors top5=[69, 68, 27, 17, 84] | identical full ranking=True | max |L2^2-(2-2cos)|=4.77e-07
+L6 raw (no Normalize): cosine top5=[69, 68, 27, 17, 84] | raw L2 top5=[69, 68, 17, 27, 84] rank=4 | raw dot top5=[27, 69, 68, 17, 84] rank=1
+WRONG MODEL (query L3, chunks L6; both 384-d; no error raised): top5=[51, 68, 96, 92, 17] first relevant rank=16 | cos range -0.1108..0.1858 (right model -0.1536..0.4606)
+L3 with its OWN index: top5=[69, 68, 17, 27, 0] first relevant rank=4
+
+=== K4 the 8 answerable draft seeds: right model, wrong model, other model (Hit@1, Hit@4 counts of 8; MRR@10)
+L6 cosine (right)                                          ranks D-001..D-008=[3, 3, 1, 1, 1, 1, 2, 2] Hit@1,Hit@4,MRR@10=(4, 8, 0.708)
+wrong model: L3 query vs L6 chunks                         ranks D-001..D-008=[21, 16, 7, 1, 1, 9, 1, 15] Hit@1,Hit@4,MRR@10=(3, 3, 0.407)
+L3 query vs L3 chunks (a different model, used correctly)  ranks D-001..D-008=[2, 4, 3, 1, 1, 1, 2, 1] Hit@1,Hit@4,MRR@10=(4, 8, 0.698)
+L6 raw vectors, raw dot                                    ranks D-001..D-008=[4, 1, 2, 1, 1, 1, 2, 2] Hit@1,Hit@4,MRR@10=(4, 8, 0.719)
+L6 raw vectors, raw L2 (low first)                         ranks D-001..D-008=[3, 4, 1, 1, 1, 1, 2, 2] Hit@1,Hit@4,MRR@10=(4, 8, 0.698)
+L6 top-1 cosine per seed: {'D-001': '0.4929', 'D-002': '0.4606', 'D-003': '0.6497', 'D-004': '0.4210', 'D-005': '0.4272', 'D-006': '0.5331', 'D-007': '0.7094', 'D-008': '0.2598', 'D-009': '0.3099', 'D-010': '0.5196'}
+answerable top-1 range 0.2598..0.7094; unanswerable D-009 0.3099, D-010 0.5196
+
+=== K5 score direction: one pair, every library convention (book's unrelated pair; and D-002 over 97 chunks)
+cosine=-0.0859 | L2=1.4737 | squared L2 (what FAISS IndexFlatL2 returns)=2.1719 | 2-2cos=2.1719
+sentence-transformers similarity(): cosine=-0.0859; euclidean=-1.4737 (= -L2)
+LangChain Euclidean relevance 1 - d/sqrt(2): on true L2 -0.0421; on squared L2 (FAISS) -0.5357
+worst case (opposite unit vectors, squared L2 = 4): -1.8284; on true L2 = 2: -0.4142
+relevance on squared L2 is negative when cos < 1 - 1/sqrt(2) = 0.2929; on true L2 when cos < 0
+D-002 over 97 chunks: cos min=-0.1536 max=0.4606; chunks with cos < 0.2929 (negative LangChain relevance on FAISS squared L2): 91 of 97; chunks with cos < 0: 33
+self-retrieval check on chunk 0: cos(chunk, itself)=1.000000; L2=0.000000; its rank among 97 = 1
+every chunk ranks itself first (cosine): 97/97
+
+=== K6 score scale: what a 'good' cosine looks like here (MiniLM L6)
+median cosine over the 97 chunks, per seed: {'D-001': '0.1751', 'D-002': '0.0289', 'D-003': '0.1835', 'D-004': '0.0492', 'D-005': '0.1332', 'D-006': '0.2216', 'D-007': '0.2202', 'D-008': '0.0963', 'D-009': '0.0662', 'D-010': '0.2500'}
+all 10 seeds x 97 chunks = 970 question-chunk scores: min=-0.1536 p50=0.1416 p90=0.3228 max=0.7094
+all-pairs analysis (chunk vs chunk, 97x97, 4656 distinct pairs): min=-0.0228 p50=0.3906 max=0.8590; pairs with cos > 0.98: 0; > 0.90: 0
+closest pair: seqs 4 and 5 (pages 2, 2) cos=0.8590
+histogram of the distinct pairs (bin edges -0.2..1.0 by 0.1): [0, 2, 70, 375, 787, 1201, 1139, 704, 286, 87, 5, 0]
+S5 re-check: cos('greenhouse gas emissions', 'carbon dioxide in the atmosphere') = 0.5356
+S5 re-check: cos('greenhouse gas emissions', 'a recipe for chocolate cake') = -0.0859
+S5 re-check: cos('Global temperatures have risen since the late 19th century.', 'Global temperatures have not risen since the late 19th century.') = 0.8436
+
+=== K7 length limit: the 97 chunks against MiniLM's 256-token cap (own tokenizer, [CLS]/[SEP] included)
+tokens per chunk: min=59 median=149 max=182; over 256: 0 of 97 []
+L6 was trained on sequences of at most 128 tokens (model card): chunks longer than 128: 70 of 97
+L3 (own tokenizer) max_seq_length=128: chunks over it: 70 of 97; same token counts as L6's tokenizer: True
+chars per chunk: min=393 median=935 max=1000
+
+=== K8 asymmetry: encode_query / encode_document, and question vs statement
+MiniLM prompts={'query': '', 'document': ''}; max |encode_query - encode| = 0.0e+00; max |encode_document - encode| (10 chunks) = 0.0e+00
+D-002 relevant chunk seq 27: cos(question, chunk)=0.4386; cos(statement, chunk)=0.4775; cos(question, statement)=0.8069
+rank of seq 27: with the question 3; with the statement-shaped text 1
+
+=== K9 bi-encoder shortlist (top-10) vs cross-encoder rerank, 97 chunks (illustration, not an evaluation)
+D-002 bi top10=[69, 68, 27, 17, 84, 85, 70, 35, 83, 71]; CE logits min=-11.056 max=3.272; reranked top3=[27, 68, 69]; first relevant rank bi 3 -> CE 1
+order matters: CE(q, d)=-4.361 vs CE(d, q)=-3.321 (seq 69)
+model passes per question: bi-encoder 1 (the question; 97 chunk vectors stored at index time); cross-encoder 10 to rerank a top-10, 97 to score every chunk
+8 seeds first relevant rank: bi [3, 3, 1, 1, 1, 1, 2, 2] (4, 8, 0.708) | bi top-10 + CE rerank [1, 1, 1, 1, 1, 1, 1, 1] (8, 8, 1.0) | CE over all 97 [1, 1, 1, 1, 1, 1, 1, 1] (8, 8, 1.0)
+
+=== K10 how the embedder learned: a toy training batch (B = 4 question/chunk pairs; TOY illustration)
+pairs: [('D-002', 27), ('D-004', 23), ('D-006', 21), ('D-008', 69)]
+S = Q P^T (rows: questions, columns: chunks):
+  D-002: ['0.4386', '-0.0065', '-0.0837', '0.4606']  row max on the diagonal: False
+  D-004: ['0.2136', '0.4035', '-0.0315', '0.0964']  row max on the diagonal: True
+  D-006: ['0.1202', '0.3313', '0.5331', '0.1391']  row max on the diagonal: True
+  D-008: ['0.1716', '-0.0716', '-0.0409', '0.2535']  row max on the diagonal: True
+scale  1 (tau = 1): softmax weight on the true pair per row ['0.3071', '0.3115', '0.3171', '0.2951']; mean loss -log p = 1.1789
+scale 20 (tau = 0.05): softmax weight on the true pair per row ['0.3917', '0.9759', '0.9820', '0.8343']; mean loss -log p = 0.2903
+same batch with the chunks shuffled (wrong 'true' pairs), scale 20: mean loss 7.0697
+
+=== K11 cutting dimensions (MiniLM is NOT Matryoshka-trained): lengths and ranks on the 8 seeds
+dim 384: chunk norms 1.0000..1.0000 | renormalised cosine ranks [3, 3, 1, 1, 1, 1, 2, 2] (4, 8, 0.708) | raw dot without renormalising ranks [3, 3, 1, 1, 1, 1, 2, 2] (4, 8, 0.708) | top-5 identical dot vs cosine: 8/8 | bytes float32 1536
+dim 256: chunk norms 0.7707..0.8690 | renormalised cosine ranks [2, 2, 1, 1, 1, 1, 2, 2] (4, 8, 0.75) | raw dot without renormalising ranks [2, 2, 2, 1, 1, 1, 2, 2] (3, 8, 0.688) | top-5 identical dot vs cosine: 4/8 | bytes float32 1024
+dim 128: chunk norms 0.5108..0.6417 | renormalised cosine ranks [2, 2, 2, 1, 2, 1, 2, 6] (2, 7, 0.583) | raw dot without renormalising ranks [1, 1, 2, 1, 2, 1, 2, 7] (4, 7, 0.705) | top-5 identical dot vs cosine: 2/8 | bytes float32 512
+dim  64: chunk norms 0.3256..0.4842 | renormalised cosine ranks [3, 2, 2, 1, 3, 1, 3, 6] (2, 7, 0.521) | raw dot without renormalising ranks [2, 2, 4, 1, 1, 1, 5, 9] (3, 6, 0.57) | top-5 identical dot vs cosine: 1/8 | bytes float32 256
+dim  32: chunk norms 0.2069..0.4035 | renormalised cosine ranks [6, 23, 5, 1, 2, 1, 11, 32] (2, 3, 0.358) | raw dot without renormalising ranks [2, 25, 12, 1, 2, 1, 12, 40] (2, 4, 0.375) | top-5 identical dot vs cosine: 0/8 | bytes float32 128
+
+=== K12 compressed vectors: int8 and binary vs float32 (8 seeds; top-5 overlap with float32)
+bytes per vector: float32 1536, int8 384, ubinary 48; dtypes int8 uint8
+D-002 top5: float [69, 68, 27, 17, 84] | int8 [68, 69, 27, 17, 84] | binary (Hamming) [17, 27, 68, 69, 84]
+float32 ranks [3, 3, 1, 1, 1, 1, 2, 2] (4, 8, 0.708)
+int8   ranks [4, 3, 1, 1, 1, 1, 2, 1] (5, 8, 0.76) | top-5 overlap with float per seed [4, 5, 5, 5, 4, 4, 5, 3] (mean 4.38 of 5)
+binary ranks [2, 2, 2, 1, 1, 1, 3, 4] (3, 8, 0.635) | top-5 overlap with float per seed [4, 5, 4, 4, 4, 4, 5, 3] (mean 4.12 of 5)
+
+=== K13 formula arithmetic for the lesson (FORMULA; the Cohere price is UNVERIFIED)
+Cohere calls for 97 texts at <= 96 per call: ceil(97/96) = 2
+Cohere calls for 1000 texts at <= 96 per call: ceil(1000/96) = 11
+Cohere calls for 10000 texts at <= 96 per call: ceil(10000/96) = 105
+10,000 chunks x 250 tokens = 2,500,000 tokens; at $0.12 per 1M tokens (UNVERIFIED) = $0.30
+dim 1536 Cohere default: float32  6144 B, int8 1536 B, binary 192 B per vector
+dim 1024               : float32  4096 B, int8 1024 B, binary 128 B per vector
+dim  512               : float32  2048 B, int8  512 B, binary  64 B per vector
+dim  256               : float32  1024 B, int8  256 B, binary  32 B per vector
+dim  384 MiniLM        : float32  1536 B, int8  384 B, binary  48 B per vector
+2,000,000 x float32 1536  = 12.288 GB (11.44 GiB)
+2,000,000 x int8 1536     = 3.072 GB (2.86 GiB)
+2,000,000 x binary 1536   = 0.384 GB (0.36 GiB)
+2,000,000 x float32 256   = 2.048 GB (1.91 GiB)
+
+DONE

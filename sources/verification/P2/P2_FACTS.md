@@ -18,6 +18,7 @@ Run date: **2026-10-08**. Every number in [`concepts/P2_ir_framing.md`](../../..
   | `out_p2_measure.txt` / `out_p2_measure.stderr.txt` | Its stdout / stderr (stderr holds only the model-loading progress bar) |
   | `p2_sources.py` → `out_p2_sources.txt` | S-src: every cited repo cell (0-based) and book page, plus absence checks |
   | `out_p2_labtest.txt` | The lab run in a Jupyter kernel with a throwaway solution (good) and a broken one (see §3) |
+  | `p2_kit_measure.py` → `out_p2_kit_measure.txt` (2026-10-18) | K1–K6 for the HTML lesson: ties, recall@k curves, the one-retriever pool demo, span-derived window labels, κ (§1b) |
 
 - **Re-run** (from `rag_learning/`, Git Bash):
   ```bash
@@ -145,6 +146,20 @@ tokenize per doc `043587a6e439e8a1` · index `a75adb6a2aa3ee3a` · AND `5375cb38
 | Book | Intro p.1/8; Ch1 p.8/14, p.10/14, p.12/14; Ch3 p.1/14; Ch12 p.2/14, p.3/14, p.5/14, p.6/14; Ch13 p.1/13, p.2/13, p.5/13, p.9/13; Ch22 p.4/19, p.5/19, p.6/19, p.7/19, p.12/19; App p.19/23, p.20/23, p.22/23 (page counts checked) |
 | Book absences | "inverted" and "qrel" never appear; "relevance judg…" only at App p.9/23 |
 
+## 1b. Added 2026-10-18: K1–K6 (`p2_kit_measure.py`) for the HTML lesson
+
+`K` = `p2_kit_measure.py` (section in `out_p2_kit_measure.txt`). Run from `rag_learning/`:
+`PYTHONIOENCODING=utf-8 uv run python sources/verification/P2/p2_kit_measure.py "C:/Yash/New-Work/Book RAG/upstream/RAG_Techniques/data/Understanding_Climate_Change.pdf"`. A second run gave byte-identical stdout (`cmp`); stderr holds only model-loading progress. Same toy corpus, tokenizer, overlap ranking and MiniLM ranking as S2–S8. No API call, no `.env` read. `p2_measure.py` is unchanged.
+
+| Id | Fact | Value |
+|---|---|---|
+| K1 | Environment | Python 3.12.8; pymupdf 1.26.7, numpy 2.5.3, sentence-transformers 6.1.0, scikit-learn 1.9.1 |
+| K2 | The tie rule decides a rank (q4: d06 and d09 both score 1; relevant = d09) | doc id ascending (S5): d06, d09 → first relevant rank **2**, RR 0.50; doc id descending: d09, d06 → rank **1**, RR 1.00 |
+| K3 | Set recall at k = 1…10 | lexical q1: 0.0, then 0.333 from k = 2 on (only 3 candidates); lexical mean: 0.3, then 0.567 from k = 2 on. MiniLM q1: 0.0, 0.333, 0.333, 0.667 (k 4–8), 1.0 (k 9–10); MiniLM mean: 0.7, 0.867, 0.867, 0.933 (k 4–8), 1.0 (k 9–10). Lexical candidates per query: q1 3, q2 1, q3 0, q4 2, q5 3 |
+| K4 | Labels built only from the lexical top 3 (one-retriever pool), scored at k = 4 | Pooled relevant: q1 d01 · q2 d04 · q3 none · q4 d09 · q5 d10 (full: q1 d01, d03, d09 · q2 d04, d05 · q3 d07 · q4 d09 · q5 d10). **Lexical:** mean P@4 0.433 full = 0.433 pooled; mean recall 0.567 full → 1.000 pooled. **MiniLM:** mean Judged@4 0.350 (of 4 slots); mean P@4 **0.350 full → 0.200 pooled**; mean recall 0.933 full → 1.000 pooled. q1 MiniLM top 4 = d02, d01, d04, d03: 2 of 4 judged; P@4 0.500 → 0.250 (d03 unjudged, so counted as not relevant). Pooled recall is averaged over the 4 queries that have a pooled relevant doc (q3 has none) |
+| K5 | 06 §6.7 draft seeds: evidence spans → relevant windows (91 windows of 1,000 chars, step 800; `any_overlap` on non-whitespace characters; window ids 0-based) | D-001 [7] · D-002 [25, 26] · D-003 [63, 64] · D-004 [22, 63] (alternatives: p.8 → 22, p.23 → 63) · D-005 [2, 3, 4] (group 1 → 2, 3; group 2 → 3, 4) · D-006 [20] · D-007 [25, 26, 79] · D-008 [64] · D-009 [] · D-010 []. Seeds are `llm-draft` (06 §6.7): illustration only |
+| K6 | κ on IIR Table 8.2 (counts yes-yes 300, yes-no 20, no-yes 10, no-no 70; confirmed on the IIR §8.5 page 2026-10-18) | P(A) 0.9250; P(relevant), pooled marginals, 0.7875; P(E) 0.6653; **κ 0.7759**; Cohen's κ with separate marginals (scikit-learn 1.9.1) 0.7761. IIR prints 0.776 (and P(relevant) 0.7878, a rounding slip: 630/800 = 0.7875) |
+
 ## 2. CITED, DERIVED and UNVERIFIED
 
 | Item | Status |
@@ -153,7 +168,7 @@ tokenize per doc `043587a6e439e8a1` · index `a75adb6a2aa3ee3a` · AND `5375cb38
 | Book numbers 0.6 (3 of 5) and 0.3 (3 of 10) | CITED: Ch22 p.4–5/19 (checked by S-src) |
 | 8 of 50 pairs relevant; 1/3 → 2/6 for MiniLM q1; Day-7 item (2/3, 2/3, rank 1) | DERIVED from S7–S8, shown in the lesson |
 | Whether the `reliable_rag` cell 14 grader would mark d02 or d08 relevant | UNVERIFIED (no API calls) |
-| Pooling in IR test collections; which IIR chapters cover the inverted index | UNVERIFIED (Source C, not fetched) |
+| Pooling in IR test collections; which IIR chapters cover the inverted index | Now verified (2026-10-17/18, external): IIR §1.1–1.3 (incidence matrix, inverted index, Boolean merge) and §8.5 (pooling, κ); see `study/research/phase_01_prerequisites.md`, Concept P2 sources [P2-1]–[P2-8]. The toy pool effect is measured in K4 |
 | How often similar-but-irrelevant chunks occur on the real corpus | UNVERIFIED (needs M1 labels) |
 
 ## 3. Lab test (`labs/P2_ir_framing_lab.ipynb`)

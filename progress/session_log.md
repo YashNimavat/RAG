@@ -398,3 +398,71 @@ All items: type R/A/T/X as shown, not scheduled, hint level H0, unassisted. "Con
   - From the kit these go to `/#/`, `/#/c/P3` and `/#/c/R1`. Opened as a file, ⌂ goes to `RAG_ROUTE_MAP.html` and the kit-only links are removed.
   - Tests 6/6 for the way-back links; the lesson suite passes; screenshots at 1000px and 390px.
   - The ML template copy was refreshed, and both guides now require a way back.
+
+## Session 2026-10-17/18 #2: Phase 2 research, then the P1 lesson in the P3 format (no tutoring)
+- **Tutor:** Claude (claude-opus-5-5). No study items were asked, so nothing is scored or scheduled.
+- **Phase 2 research** (RESEARCH_PROMPT session 2): [`study/research/phase_02_core_rag_baseline.md`](../study/research/phase_02_core_rag_baseline.md), the gap audit and build plan for C1–C7. Research only; nothing else was changed. Five decisions are waiting for the learner (Corpus T set, one `params_hash` recipe, recording ~15 Cohere calls, local-only apply tools, the first Claude model).
+- **Learner request:** "I want the lessons on an HTML view, like P3, so I can read and track." Agreed plan: one lesson per session, in study order: Phase 1 first (P1, P2, P4–P7), then C1–C7. The learner chose to start with **P1**.
+- **Built for P1** (from `study/research/phase_01_prerequisites.md`, Concept P1):
+  - `study/lessons/P1_llm_fundamentals.html` (Short/Full, the P3 shell and themes) and `P1_llm_fundamentals_gap_audit.md`: 17 gaps filled, 21 questions answerable from Short.
+  - `study/notebooks/P1_tokens_verify.ipynb`: 110 checks pass, 6 charts, about 15 s, no API call.
+  - `study/tools/token_budget_check.py` with an example report on the climate PDF: 91 tests pass; no API call.
+  - `study/questions/P1_questions.md` (21 items, two MIT interview items) and `study/reading/P1_llm_fundamentals.md`; `quiz.py --check` OK; `p1_md_check.py` 131/131.
+  - New measurements K1–K8 (`p1_kit_measure.py`, byte-identical on rerun), logged in P1_FACTS §1b. `study/kit.py` now links P1's tool.
+- **Checks on the lesson:** 39/39 browser interaction tests; no console errors; no horizontal scroll at 390px in all seven themes; it loads through the study kit (fonts, book links, kit routes); no 6-word run shared with either book; no hidden-seed wording; coach checks 182 PASS.
+- **Found on the way (not fixed):** P3's page scrolls sideways on phones (a grid child with a long code line). P1 has the fix (`min-width: 0` on grid children, wrapping inline code); P3 can take the same three CSS lines.
+- **Not committed.** Nothing pushed.
+
+### Next session
+1. Read the P1 lesson (Short first), then the lab `labs/P1_tokens_lab.ipynb`, then the P1 quiz the next day.
+2. The next lesson to build: **P2** (retrieval framing).
+
+## Session 2026-10-18 #3: P3 phone fix, then the P2 lesson (no tutoring)
+- **Learner request:** "apply [the phone fix] to P3 also, write P2 as P3 and P1".
+- **P3 fix:** three CSS lines in `study/lessons/P3_bm25.html` (grid children may shrink, inline code wraps, badges wrap on phones). No sideways scroll at 390px in all seven themes; no console errors.
+- **Built for P2** (from `study/research/phase_01_prerequisites.md`, Concept P2):
+  - `study/lessons/P2_ir_framing.html` (Short/Full, the shared shell) and `P2_ir_framing_gap_audit.md`: 12 gaps in the old files filled, plus 9 more found by checking every quiz key point against Short.
+  - Interactive parts: the similarity-vs-grade chart, the labels heat map, a Boolean explorer that builds the toy index live, the q4 tie toggle, recall@k curves, runs A/B/C, and the one-retriever pool demo with BEIR's measured holes (external).
+  - `study/notebooks/P2_ir_framing_verify.ipynb`: 95 checks pass, 10 charts, about 15 s, no API call.
+  - `study/tools/qrels_check.py` with a toy example (reproduces the pool demo) and a climate example (the draft seeds as spans): 114 tests pass; no API call.
+  - `study/questions/P2_questions.md` (17 items, one MIT interview item) and `study/reading/P2_ir_framing.md`; `quiz.py --check` 4/4 files OK; `p2_md_check.py` 123/123.
+  - New measurements K1–K6 (`p2_kit_measure.py`, byte-identical on rerun), logged in P2_FACTS §1b. `study/kit.py` now links P2's tool.
+- **Checks on the lesson:** 38/38 browser interaction tests (the Boolean explorer matches S4 for all five queries); no console errors; no sideways scroll at 390px in all seven themes; the longest run shared with the book is 8 words (the book's own example question); no coach-banned wording; coach checks pass.
+- **Not committed.** Nothing pushed.
+
+### Next session
+1. Read P1, then P2 (Short first), each followed by its lab and, the next day, its quiz.
+2. The next lesson to build: **P4** (embeddings and similarity).
+
+## Session 2026-10-18 #4: the P4 lesson in the P3 format (no tutoring)
+- **Tutor:** Claude (claude-opus-5-5). No study items were asked, so nothing is scored or scheduled.
+- **Learner request:** build P4 from `study/research/phase_01_prerequisites.md` (Concept P4) in the P3 style; plan approved as given.
+- **Running example switched to v0's 97 chunks**, as the phase notes (§2) decided; the blueprint had used the old 91 windows.
+- **New measurements K1–K13** (`sources/verification/P4/p4_kit_measure.py`, byte-identical on rerun), logged in P4_FACTS §1b. Among them:
+  - D-002: rank 3 of 97;
+  - wrong model: Hit@4 8 → 3 of 8, MRR@10 0.708 → 0.407;
+  - 91 of 97 chunks would get a negative LangChain relevance on FAISS;
+  - 0 chunks over 256 tokens, but 70 over 128;
+  - reranking puts all 8 right chunks first;
+  - MiniLM cut to 32 dims: MRR@10 0.358;
+  - int8: 0.760.
+  The research's "probe" numbers are now citable.
+- **Built for P4:**
+  - `study/lessons/P4_embeddings.html` (Short/Full, the shared shell) and `P4_embeddings_gap_audit.md`: 13 gaps filled; all 21 questions answerable from Short.
+  - Interactive parts: the arrow playground (drag), the unit-circle chord, the score-direction converter, the toy training batch, the truncation bar, the pass counter, the score strip, the dimension chart, and the cost/memory calculator.
+  - `study/notebooks/P4_embeddings_verify.ipynb`: 115 checks pass, 8 charts, about 30 s, no API call. The Cohere section is SKIPPED (no recorded pack).
+  - `study/tools/embed_fit_check.py`: chunks like v0 (its chunker reproduces the 97 chunks exactly), checks C1–C12, and `--rerank`/`--dims`/`--int8`/`--threshold`/`--manifest`. `--provider cohere` refuses until `study/llmops/` exists. Example report `study/tools/examples/climate_embed_report.md` reproduces the lesson's numbers. `p4_tool_test.py` 44/44. `study/kit.py` links it.
+  - `study/questions/P4_questions.md` (21 items, one MIT interview item, AIQ-04 Q15) and `study/reading/P4_embeddings.md`. `quiz.py --check` 5/5 files OK; `p4_md_check.py` 44/44 (links and anchors, book pages, 15-word copyright check across all three files, number tracing, coach-banned phrases).
+- **Checks on the lesson:**
+  - 54/54 browser interaction tests;
+  - no console errors;
+  - no sideways scroll at 390px in all seven themes, light and dark;
+  - loads through the study kit (fonts, book PDFs, P4 page sees lesson, notebook, tool, reading, quiz);
+  - longest run shared with the book: 7 words.
+- **Not built:** the P4 LLMOps notebook. It needs `study/llmops/` first; the lesson has a "planned" section, and its Cohere column stays empty.
+- **Not fixed (out of scope):** the one-sentence CE@k wording in P3 §12 (research P6 E3).
+- **Not committed.** Nothing pushed.
+
+### Next session
+1. Read P1, P2, then P4 (Short first), each followed by its lab and, the next day, its quiz. (Recommended study order: P1 → P2 → P6 → P3 → P4 → P5 → P7.)
+2. The next lesson to build: **P5** (vector search), or P6 if you want to follow the study order.

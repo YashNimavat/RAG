@@ -1,0 +1,48 @@
+
+=== K1 environment
+python 3.12.8 | {'pymupdf': '1.26.7', 'numpy': '2.5.3', 'sentence-transformers': '6.1.0', 'scikit-learn': '1.9.1'}
+
+=== K2 the tie rule decides the rank (q4, overlap ranking; relevant = d09)
+doc id ascending (S5 rule)   run=['d06', 'd09'] scores=[1, 1] first relevant rank=2 RR=0.50
+doc id descending            run=['d09', 'd06'] scores=[1, 1] first relevant rank=1 RR=1.00
+
+=== K3 set recall at k = 1..10 (lexical returns only its candidates; dense ranks all 10 docs)
+lexical  q1   recall@1..10 = [0.0, 0.333, 0.333, 0.333, 0.333, 0.333, 0.333, 0.333, 0.333, 0.333]
+lexical  mean recall@1..10 = [0.3, 0.567, 0.567, 0.567, 0.567, 0.567, 0.567, 0.567, 0.567, 0.567]
+MiniLM   q1   recall@1..10 = [0.0, 0.333, 0.333, 0.667, 0.667, 0.667, 0.667, 0.667, 1.0, 1.0]
+MiniLM   mean recall@1..10 = [0.7, 0.867, 0.867, 0.933, 0.933, 0.933, 0.933, 0.933, 1.0, 1.0]
+lexical candidates per query: {'q1': 3, 'q2': 1, 'q3': 0, 'q4': 2, 'q5': 3}
+
+=== K4 labels built only from the lexical top 3 (a one-retriever pool), scored at k = 4
+pool (judged docs) per query: {'q1': ['d01', 'd02', 'd08'], 'q2': ['d04'], 'q3': [], 'q4': ['d06', 'd09'], 'q5': ['d02', 'd03', 'd10']}
+relevant under pooled labels: {'q1': ['d01'], 'q2': ['d04'], 'q3': [], 'q4': ['d09'], 'q5': ['d10']} | under full labels: {'q1': ['d01', 'd03', 'd09'], 'q2': ['d04', 'd05'], 'q3': ['d07'], 'q4': ['d09'], 'q5': ['d10']}
+lexical  q1 top4=['d02', 'd01', 'd08'] judged@4=3/3 P@4 full=0.333 pooled=0.333 recall full=0.333 pooled=1.000
+lexical  q2 top4=['d04'] judged@4=1/1 P@4 full=1.000 pooled=1.000 recall full=0.500 pooled=1.000
+lexical  q3 top4=[] judged@4=0/0 P@4 full=0.000 pooled=0.000 recall full=0.000 pooled=nan
+lexical  q4 top4=['d06', 'd09'] judged@4=2/2 P@4 full=0.500 pooled=0.500 recall full=1.000 pooled=1.000
+lexical  q5 top4=['d10', 'd02', 'd03'] judged@4=3/3 P@4 full=0.333 pooled=0.333 recall full=1.000 pooled=1.000
+lexical  mean Judged@4 (out of 4 slots)=0.450  mean P@4 full=0.433 pooled=0.433  mean recall full=0.567 pooled=1.000 (pooled recall averaged over 4 queries with a pooled relevant doc)
+MiniLM   q1 top4=['d02', 'd01', 'd04', 'd03'] judged@4=2/4 P@4 full=0.500 pooled=0.250 recall full=0.667 pooled=1.000
+MiniLM   q2 top4=['d04', 'd05', 'd02', 'd01'] judged@4=1/4 P@4 full=0.500 pooled=0.250 recall full=1.000 pooled=1.000
+MiniLM   q3 top4=['d07', 'd01', 'd03', 'd08'] judged@4=0/4 P@4 full=0.250 pooled=0.000 recall full=1.000 pooled=nan
+MiniLM   q4 top4=['d09', 'd01', 'd06', 'd03'] judged@4=2/4 P@4 full=0.250 pooled=0.250 recall full=1.000 pooled=1.000
+MiniLM   q5 top4=['d10', 'd02', 'd01', 'd04'] judged@4=2/4 P@4 full=0.250 pooled=0.250 recall full=1.000 pooled=1.000
+MiniLM   mean Judged@4 (out of 4 slots)=0.350  mean P@4 full=0.350 pooled=0.200  mean recall full=0.933 pooled=1.000 (pooled recall averaged over 4 queries with a pooled relevant doc)
+
+=== K5 06 section 6.7 draft seeds: evidence spans -> relevant windows (any_overlap, non-whitespace), 91 windows of 1,000 / step 800
+windows=91 seeds=10
+D-001 (exact-term): relevant windows=[7]  g1/g1a p.3->[7]
+D-002 (factual-single-span): relevant windows=[25, 26]  g1/g1a p.10->[25, 26]
+D-003 (factual-single-span): relevant windows=[63, 64]  g1/g1a p.23->[63, 64]
+D-004 (exact-term): relevant windows=[22, 63]  g1/g1a p.8->[22]; g1/g1b p.23->[63]
+D-005 (multi-span): relevant windows=[2, 3, 4]  g1/g1a p.2->[2, 3]; g2/g2a p.2->[3, 4]
+D-006 (vocabulary-mismatch): relevant windows=[20]  g1/g1a p.8->[20]; g2/g2a p.8->[20]
+D-007 (multi-hop): relevant windows=[25, 26, 79]  g1/g1a p.10->[25, 26]; g2/g2a p.29->[79]
+D-008 (exact-term): relevant windows=[64]  g1/g1a p.24->[64]
+D-009 (unanswerable): relevant windows=[]  
+D-010 (unanswerable): relevant windows=[]  
+
+=== K6 agreement between two judges: IIR Table 8.2 counts (yes-yes 300, yes-no 20, no-yes 10, no-no 70)
+P(A)=0.9250 P(relevant, pooled marginals)=0.7875 P(E)=0.6653 kappa=0.7759
+Cohen's kappa (separate marginals, scikit-learn) = 0.7761
+DONE

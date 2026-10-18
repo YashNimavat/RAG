@@ -1,0 +1,133 @@
+=== 0 example inputs
+PASS  0 climate_seed_spans.jsonl is the 06 §6.7 JSONL block, byte for byte: got True | expected True
+PASS  0 toy chunks = p2_toy_corpus.json docs: got True | expected True
+PASS  0 toy questions = p2_toy_corpus.json queries: got True | expected True
+PASS  0 toy qrels = p2_toy_corpus.json qrels (+ guideline_version v1): got True | expected True
+
+=== 1 inverted index (S3, S4, S5, S9)
+PASS  1 toy: postings equal an independent scan: got True | expected True
+PASS  1 toy: equals_scan(): got True | expected True
+PASS  1 climate: postings equal an independent scan: got True | expected True
+PASS  1 climate: equals_scan(): got True | expected True
+PASS  1 toy vocabulary / postings / df = 1 (S3: 88 / 114 / 71): got [88, 114, 71] | expected [88, 114, 71]
+PASS  1 toy commonest terms (S3: and 6, the 5, in 4): got [('and', 6), ('the', 5), ('in', 4)] | expected [('and', 6), ('the', 5), ('in', 4)]
+PASS  1 tokenize('Sea-level RISE, 2019!') (S2): got ['sea', 'level', 'rise', '2019'] | expected ['sea', 'level', 'rise', '2019']
+PASS  1 toy q1 AND / OR / postings read (S4): got [1, 3, 10] | expected [1, 3, 10]
+PASS  1 toy q2 AND / OR / postings read (S4): got [0, 1, 2] | expected [0, 1, 2]
+PASS  1 toy q3 AND / OR / postings read (S4): got [0, 0, 0] | expected [0, 0, 0]
+PASS  1 toy q4 AND / OR / postings read (S4): got [0, 2, 2] | expected [0, 2, 2]
+PASS  1 toy q5 AND / OR / postings read (S4): got [0, 3, 5] | expected [0, 3, 5]
+PASS  1 toy q1 keyword ranking (S5): got [('d02', 5), ('d01', 3), ('d08', 2)] | expected [('d02', 5), ('d01', 3), ('d08', 2)]
+PASS  1 toy q4 keyword ranking (S5): got [('d06', 1), ('d09', 1)] | expected [('d06', 1), ('d09', 1)]
+PASS  1 toy q5 keyword ranking (S5): got [('d10', 3), ('d02', 1), ('d03', 1)] | expected [('d10', 3), ('d02', 1), ('d03', 1)]
+PASS  1 climate windows / vocabulary / postings / tokens / df = 1 (S9: 91 / 1,868 / 8,107 / 11,807 / 745): got [91, 1868, 8107, 11807, 745] | expected [91, 1868, 8107, 11807, 745]
+PASS  1 climate last window 593 characters (S9): got 593 | expected 593
+PASS  1 climate 'main cause of climate change' OR / AND / postings read (S9): got [90, 0, 213] | expected [90, 0, 213]
+PASS  1 climate 'methane emissions' OR / AND / postings read (S9): got [34, 5, 39] | expected [34, 5, 39]
+PASS  1 climate 'renewable energy' OR / AND / postings read (S9): got [42, 30, 72] | expected [42, 30, 72]
+PASS  1 climate df: and 91, climate 77, methane 5 (S9): got [91, 77, 5] | expected [91, 77, 5]
+
+=== 2 set metrics (S8, K3)
+PASS  2 run A precision / recall / first relevant rank (S8): got [0.3333, 0.3333, 2] | expected [0.3333, 0.3333, 2]
+PASS  2 run B precision / recall / first relevant rank (S8): got [0.3333, 0.3333, 1] | expected [0.3333, 0.3333, 1]
+PASS  2 run C precision / recall / first relevant rank (S8): got [1.0, 1.0, 1] | expected [1.0, 1.0, 1]
+PASS  2 precision([]) = 0.0; first_relevant_rank(['d02']) = None (S8): got [0.0, None] | expected [0.0, None]
+PASS  2 recall with no relevant chunk is undefined: got True | expected True
+PASS  2 mean recall@3 keyword / MiniLM (S8, K3: 0.567 / 0.867): got [0.567, 0.867] | expected [0.567, 0.867]
+PASS  2 mean recall@6 keyword / MiniLM (S8, K3: 0.567 / 0.933): got [0.567, 0.933] | expected [0.567, 0.933]
+PASS  2 MiniLM q1 precision / recall at k = 6 (S8: 0.333 / 0.667): got [0.333, 0.667] | expected [0.333, 0.667]
+PASS  2 MiniLM q1 ranking starts d02, d01, d04, d03 (S6, K4): got ['d02', 'd01', 'd04', 'd03'] | expected ['d02', 'd01', 'd04', 'd03']
+
+=== 3 span conversion (K5)
+PASS  3 91 windows of 1,000 / step 800: got [91, 800, 1000] | expected [91, 800, 1000]
+PASS  3 D-001 relevant windows (K5): got [7] | expected [7]
+PASS  3 D-002 relevant windows (K5): got [25, 26] | expected [25, 26]
+PASS  3 D-003 relevant windows (K5): got [63, 64] | expected [63, 64]
+PASS  3 D-004 relevant windows (K5): got [22, 63] | expected [22, 63]
+PASS  3 D-005 relevant windows (K5): got [2, 3, 4] | expected [2, 3, 4]
+PASS  3 D-006 relevant windows (K5): got [20] | expected [20]
+PASS  3 D-007 relevant windows (K5): got [25, 26, 79] | expected [25, 26, 79]
+PASS  3 D-008 relevant windows (K5): got [64] | expected [64]
+PASS  3 D-009 relevant windows (K5): got [] | expected []
+PASS  3 D-010 relevant windows (K5): got [] | expected []
+PASS  3 D-004 alternatives: p.8 -> 22, p.23 -> 63 (K5): got [[22], [63]] | expected [[22], [63]]
+PASS  3 D-005 groups: g1 -> 2, 3; g2 -> 3, 4 (K5): got [[2, 3], [3, 4]] | expected [[2, 3], [3, 4]]
+PASS  3 no span problems; Q11 passes: got [[], '✓'] | expected [[], '✓']
+PASS  3 every pair judged: 10 questions x 91 windows, 15 relevant: got [910, 15] | expected [910, 15]
+PASS  3 broken spans: 2 problems, Q11 fails -> labels not ready: got [2, '✗', 'labels not ready: fix the format and guideline first'] | expected [2, '✗', 'labels not ready: fix the format and guideline first']
+
+=== 4 one-retriever pool (K4)
+PASS  4 keyword: mean Judged@4 0.450; P@4 full 0.433 = pooled 0.433; recall 0.567 full -> 1.000 pooled: got [0.45, 0.433, 0.433, 0.567, 1.0] | expected [0.45, 0.433, 0.433, 0.567, 1.0]
+PASS  4 MiniLM: mean Judged@4 0.350; P@4 0.350 full -> 0.200 pooled; recall 0.933 full -> 1.000 pooled: got [0.35, 0.35, 0.2, 0.933, 1.0] | expected [0.35, 0.35, 0.2, 0.933, 1.0]
+PASS  4 pooled recall averaged over 4 questions (q3 has no pooled relevant doc): got [4, 4, 5] | expected [4, 4, 5]
+PASS  4 MiniLM q1: top 4 d02, d01, d04, d03; 2 of 4 judged; P@4 0.500 -> 0.250: got [['d02', 'd01', 'd04', 'd03'], 2, 0.5, 0.25] | expected [['d02', 'd01', 'd04', 'd03'], 2, 0.5, 0.25]
+PASS  4 pooled relevant (K4): q1 d01, q2 d04, q3 none, q4 d09, q5 d10: got {'q1': ['d01'], 'q2': ['d04'], 'q3': [], 'q4': ['d09'], 'q5': ['d10']} | expected {'q1': ['d01'], 'q2': ['d04'], 'q3': [], 'q4': ['d09'], 'q5': ['d10']}
+PASS  4 Hole@4: keyword 0, MiniLM 0.650; 13 holes; pool depth keyword 4, MiniLM 0: got [0.0, 0.65, 13, 4, 0] | expected [0.0, 0.65, 13, 4, 0]
+PASS  4 checklist: got 'Q1✓ Q2✓ Q3✓ Q4? Q5✗ Q6✗ Q7✗ Q8✓ Q9✗ Q10? Q11? Q12?' | expected 'Q1✓ Q2✓ Q3✓ Q4? Q5✗ Q6✗ Q7✗ Q8✓ Q9✗ Q10? Q11? Q12?'
+PASS  4 Q7 bounds: MiniLM 0.200 -> 0.850 swaps with keyword 0.433: got [0.85, True] | expected [0.85, True]
+PASS  4 Q9 lists q3 (vocabulary mismatch, S4): got True | expected True
+PASS  4 recommendation: pool is biased: got 'pool is biased: judge the listed holes (top-k chunks from every run that no one judged), then rerun' | expected 'pool is biased: judge the listed holes (top-k chunks from every run that no one judged), then rerun'
+PASS  4 pooling both retrievers (top 3 each): Q5 passes; MiniLM Hole@4 = 0.250 (each question's rank 4 is outside both top 3s): got ['✓', 0.25, [1, 1, 1, 1, 1]] | expected ['✓', 0.25, [1, 1, 1, 1, 1]]
+
+=== 5 TREC export and re-import
+PASS  5 climate: TREC re-import gives the same relevant windows: got True | expected True
+PASS  5 climate: re-export is identical: got True | expected True
+PASS  5 climate: TREC on window ids fails Q2 (no reasons) and Q11 (chunk ids): got ['✗', '✗', '✓'] | expected ['✗', '✗', '✓']
+PASS  5 toy JSONL export: 13 listed pairs, first line 'q1 0 d01 2': got [13, 'q1 0 d01 2'] | expected [13, 'q1 0 d01 2']
+PASS  5 toy: TREC round trip keeps every grade: got True | expected True
+PASS  5 toy --unlisted zero exports all 50 pairs, 8 relevant (S7): got [50, 8] | expected [50, 8]
+
+=== 6 ties at the cut-off (K2)
+PASS  6 k = 1: q4 tie reported (d06 and d09 both score 1; d06 kept by the rule, d09 relevant): got [1, ['d06'], ['d09'], True] | expected [1, ['d06'], ['d09'], True]
+PASS  6 k = 1: q4 first relevant rank within the top 1 = none (K2: rank 2 under the ascending rule): got None | expected None
+PASS  6 k = 1: Q8 fails and names q4: got ['✗', True] | expected ['✗', True]
+PASS  6 k = 2: q4 rank of d09 = 2, RR 0.50 (K2): got [2] | expected [2]
+PASS  6 k = 4: no tie straddles the cut; Q8 passes: got [None, '✓'] | expected [None, '✓']
+PASS  6 tie_at_cut: a tie of two non-relevant chunks does not change P@k: got False | expected False
+PASS  6 tie_at_cut: a relevant chunk just outside the cut does: got True | expected True
+
+=== 7 recommendation branches
+PASS  7 climate example: Q3 fails -> labels not ready (llm-draft note added): got ['labels not ready: fix the format and guideline first', True] | expected ['labels not ready: fix the format and guideline first', True]
+PASS  7 climate with --guideline-version and --dense: fit for metrics: got 'labels are fit for retrieval metrics (P6/M2); report Judged@k next to every number' | expected 'labels are fit for retrieval metrics (P6/M2); report Judged@k next to every number'
+PASS  7 TREC qrels (no reasons): labels not ready: got 'labels not ready: fix the format and guideline first' | expected 'labels not ready: fix the format and guideline first'
+PASS  7 a one-word reason fails Q2 -> labels not ready: got ['✗', 'labels not ready: fix the format and guideline first'] | expected ['✗', 'labels not ready: fix the format and guideline first']
+PASS  7 q3 with no label and no 'answerable: false' fails Q1: got ['✗', True] | expected ['✗', True]
+PASS  7 ... marked answerable: false and judged (unlisted = 0): Q1 passes: got '✓' | expected '✓'
+PASS  7 a label on a chunk id that does not exist fails Q1: got '✗' | expected '✗'
+PASS  7 full toy labels + dense: Q5 Q6 Q7 pass -> fit for metrics: got ['✓', '✓', '✓', 'labels are fit for retrieval metrics (P6/M2); report Judged@k next to every number'] | expected ['✓', '✓', '✓', 'labels are fit for retrieval metrics (P6/M2); report Judged@k next to every number']
+PASS  7 one run only: Q5 and Q7 are '?': got ['?', '?'] | expected ['?', '?']
+PASS  7 κ on IIR Table 8.2 (K6: P(A) 0.9250, κ 0.7761 with separate marginals): got [0.925, 0.7761] | expected [0.925, 0.7761]
+PASS  7 relabel with 6 of 50 flipped: agreement 0.880 < 0.90, Q10 fails -> rewrite the guideline: got [0.88, 50, '✗', 'rewrite the guideline sentence for the disagreeing category; relabel; bump the guideline version'] | expected [0.88, 50, '✗', 'rewrite the guideline sentence for the disagreeing category; relabel; bump the guideline version']
+PASS  7 identical relabel: agreement 1.000, κ 1.000, Q10 passes -> fit: got [1.0, 1.0, '✓', 'labels are fit for retrieval metrics (P6/M2); report Judged@k next to every number'] | expected [1.0, 1.0, '✓', 'labels are fit for retrieval metrics (P6/M2); report Judged@k next to every number']
+PASS  7 relabel of 2 pairs: Q10 '?' (needs 10): got '?' | expected '?'
+PASS  7 run B: 2 holes in its top 4 (Hole@4 0.500), pool depth 1; P@4 0.250 -> 0.750 vs run A 0.500: got [0.5, 1, 0.25, 0.75, 0.5] | expected [0.5, 1, 0.25, 0.75, 0.5]
+PASS  7 Q5 and Q6 pass, Q7 fails -> do not report a winner: got ['✓', '✓', '✗', 'your comparison is decided by unjudged chunks: do not report a winner'] | expected ['✓', '✓', '✗', 'your comparison is decided by unjudged chunks: do not report a winner']
+PASS  7 Q4: labels dated before the run file pass: got '✓' | expected '✓'
+PASS  7 Q4: labels dated after the run file fail: got '✗' | expected '✗'
+PASS  7 Q4: no timestamps -> '?': got '?' | expected '?'
+PASS  7 failing ['Q3', 'Q5', 'Q7', 'Q10']: got 'labels not ready: fix the format and guideline first' | expected 'labels not ready: fix the format and guideline first'
+PASS  7 failing ['Q11']: got 'labels not ready: fix the format and guideline first' | expected 'labels not ready: fix the format and guideline first'
+PASS  7 failing ['Q6', 'Q7', 'Q10']: got 'pool is biased: judge the listed holes (top-k chunks from every run that no one judged), then rerun' | expected 'pool is biased: judge the listed holes (top-k chunks from every run that no one judged), then rerun'
+PASS  7 failing ['Q5']: got 'pool is biased: judge the listed holes (top-k chunks from every run that no one judged), then rerun' | expected 'pool is biased: judge the listed holes (top-k chunks from every run that no one judged), then rerun'
+PASS  7 failing ['Q7', 'Q10']: got 'your comparison is decided by unjudged chunks: do not report a winner' | expected 'your comparison is decided by unjudged chunks: do not report a winner'
+PASS  7 failing ['Q10', 'Q8', 'Q9']: got 'rewrite the guideline sentence for the disagreeing category; relabel; bump the guideline version' | expected 'rewrite the guideline sentence for the disagreeing category; relabel; bump the guideline version'
+PASS  7 failing ['Q4', 'Q8', 'Q9', 'Q12']: got 'labels are fit for retrieval metrics (P6/M2); report Judged@k next to every number' | expected 'labels are fit for retrieval metrics (P6/M2); report Judged@k next to every number'
+PASS  7 failing []: got 'labels are fit for retrieval metrics (P6/M2); report Judged@k next to every number' | expected 'labels are fit for retrieval metrics (P6/M2); report Judged@k next to every number'
+
+=== 8 CLI and saved examples
+PASS  8 CLI exit 0 (twice): got [0, 0] | expected [0, 0]
+PASS  8 CLI summary line: got 'chunks 91, vocabulary 1,868, postings 8,107' | expected 'chunks 91, vocabulary 1,868, postings 8,107'
+PASS  8 a second run is byte-identical: got True | expected True
+PASS  8 the saved climate example equals the CLI report: got True | expected True
+PASS  8 the saved climate_qrels.trec equals the CLI export: got True | expected True
+PASS  8 the climate report equals render_report(run_check(...)): got True | expected True
+PASS  8 report has the 7 parts: got [True, True, True, True, True, True, True] | expected [True, True, True, True, True, True, True]
+PASS  8 report marks the seeds as llm-draft: got True | expected True
+PASS  8 climate checklist without --dense (one run: Q5, Q7 '?'): got 'Q1✓ Q2✓ Q3✗ Q4? Q5? Q6✓ Q7? Q8✗ Q9? Q10? Q11✓ Q12?' | expected 'Q1✓ Q2✓ Q3✗ Q4? Q5? Q6✓ Q7? Q8✗ Q9? Q10? Q11✓ Q12?'
+PASS  8 climate checklist with --dense: got 'Q1✓ Q2✓ Q3✗ Q4? Q5✓ Q6✓ Q7✓ Q8✗ Q9? Q10? Q11✓ Q12?' | expected 'Q1✓ Q2✓ Q3✗ Q4? Q5✓ Q6✓ Q7✓ Q8✗ Q9? Q10? Q11✓ Q12?'
+PASS  8 the saved toy example equals the CLI report: got [0, True] | expected [0, True]
+PASS  8 the tool imports no network or API client: got [] | expected []
+PASS  8 the tool forces the offline Hugging Face mode: got True | expected True
+PASS  8 no coach-banned phrase in the tool or the example reports: got [] | expected []
+
+114/114 tool checks passed

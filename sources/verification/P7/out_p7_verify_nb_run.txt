@@ -1,0 +1,5 @@
+SKIPPED: study/llmops/ is not built yet; the 4 recorded Groq calls (D-009 and D-001, permissive vs v0) will replay here with no key
+cells with errors: 0
+Plotly figures saved: 5; runtime 8.8 s; file study\notebooks\P7_grounded_prompt_verify.ipynb 92 KiB
+95 checks passed / 0 failed
+SKIPPED lines: 1

@@ -146,7 +146,7 @@ Run date: **2026-10-08**. Every number in [`concepts/C1_document_parsing.md`](..
 | pymupdf page == pypdf page + `"\n"` | 33/33 |
 | pypdf lines ending with space | 1,093 of 1,100 |
 | CITED: PyPDFLoader total (07 lab) | 72,523 (LAB_FACTS §7); `page` metadata 0-based |
-| Cause of the 37-character gap PyPDFLoader vs raw pypdf | **UNVERIFIED** |
+| Cause of the 37-character gap PyPDFLoader vs raw pypdf | **UNVERIFIED** on 2026-10-08; settled 2026-10-18 by K2 (per-page `.strip()`) |
 
 ### S12 Part F toy (M; TOY ILLUSTRATION)
 `["Ice melts.\n", "Seas rise.\n", "Act now.\n"]`: `doc_text` 33 chars; rows (1, 0, 11), (2, 12, 23), (3, 24, 33); page_of 10 → (1, 10), 11 → (1, 11), 12 → (2, 0), 17 → (2, 5), 30 → (3, 6). Page 1 doubled: page 2 starts at 23, length 44, id changes. `"later extrac-\ntion\n"` with "extraction" on another page: R2 edit [12, 14); cleaned `"later extraction\n"`, cleaned offset 12 ← raw 14.
@@ -165,6 +165,28 @@ Run date: **2026-10-08**. Every number in [`concepts/C1_document_parsing.md`](..
 | Same, real Jupyter kernel (project `.venv`) | 9/9 |
 | Empty solutions | 0/9, no crash |
 | Broken variants (each fails at the intended CHECK) | 0-based pages → T1; no join offset → T2 (+T4, T5 cascade); real newline in recipe → T3; plain `open` on Windows → T4; validate only the doc hash → T4; join char to next page → T5; lines by `split("\n")` → T6; columns by `sort=True` → T7 (+T8); naive de-hyphenation → T8 |
+
+## 1b. Added 2026-10-18: K1–K12 (`c1_kit_measure.py`) for the HTML lesson
+
+`K` = `c1_kit_measure.py` (section in `out_c1_kit_measure.txt`). Run from `rag_learning/`:
+`PYTHONIOENCODING=utf-8 uv run python sources/verification/C1/c1_kit_measure.py "C:/Yash/New-Work/Book RAG" <scratch dir>`. A second run gave byte-identical stdout (`cmp`); stderr is empty. The stdout contains PyMuPDF's advisory line "Consider using the pymupdf_layout package…" once (research E-C1-8: that package cannot be installed next to the 1.26.7 pin). Same Corpus D, pin and `c1_ref.py` functions as S1–S12; no book PDF is opened; no API call, no `.env` read. `c1_measure.py` and its output are unchanged.
+
+| Id | Fact | Value |
+|---|---|---|
+| K1 | Environment | Python 3.12.8; pymupdf 1.26.7; Unicode database 15.0.0 |
+| K2 | **The 37-character PyPDFLoader gap is per-page `.strip()`** (settles S11's UNVERIFIED and research E-C1-7) | PyMuPDF pages sum 72,561; minus each page's final `"\n"` (= the pypdf pages, S11) 72,528, joined 72,560; `.strip()` per page sum 72,491, joined with `"\n"` **72,523 = LAB_FACTS §7's PyPDFLoader `full_len`** (that run joined `page_content` with `"\n"`). Removed: 37 vs pypdf (all trailing whitespace before the final newline; 0 leading), 70 vs PyMuPDF. DERIVED from S11's equality, so it holds for pypdf 6.19.0 on Corpus D |
+| K3 | Characters, UTF-8 bytes, NFKC (literal strings) | `ﬁ` U+FB01: 3 bytes, NFKC `fi` (+1) · `ﬂ` +1 · `…` 3 bytes, `...` (+2) · `½` 2 bytes, `1⁄2` (+2) · `x²` → `x2` (+0, the exponent is lost) · `é` one code point (2 bytes) unchanged · `e` + U+0301 (3 bytes) → `é` (−1) · `—` 3 bytes, unchanged · soft hyphen U+00AD unchanged · no-break space U+00A0 → space (+0). "file" in "The ﬁle": False; after NFKC: True. **Corpus D: 0 characters NFKC would change, delta 0**; 72,593 characters, 72,595 UTF-8 bytes; only non-ASCII character `—` |
+| K4 | Offset shift (TOY, 520 characters, ligatures at raw 100 and 300) | After NFKC: 522 characters; raw offset 500 lands at **502**, same character; one ligature shifts every later offset by +1; map: cleaned 101 ← raw 100, cleaned 102 ← raw 101, cleaned 502 ← raw 500 |
+| K5 | A hash names exact bytes (TOY) | `"Seas rise.\n"` `63c2941c7f6b` · one extra space `b1e07b17c9c7` · `"\r\n"` `a71b05c14df5` · lower-case s `2d04a7947fc7` (sha256, first 12 hex) |
+| K6 | PyMuPDF flags (installed source) | `TEXTFLAGS_TEXT` = 195: PRESERVE_LIGATURES, PRESERVE_WHITESPACE, MEDIABOX_CLIP, CID_FOR_UNKNOWN_UNICODE on; DEHYPHENATE (16) and PRESERVE_IMAGES off |
+| K7 | Zoo per-page signals (TOY, `c1_zoo.py`) | Repeated lines (threshold 3): "ACME Technical Report", "Page #" (3 pages each). Page: chars / images / ligatures / hyphen breaks / right→left jumps / ruled tables / NFKC delta = p.1 273/0/3/1/**4**/0/3 · p.2 74/0/0/0/0/**1**/0 · p.3 0/0/… (blank) · p.4 0/**1**/… (image-only) · p.5 101/0/0/0/0/0/0. p.1 line order: header, "Page 1", then L1 R1 L2 R2 L3 R3 L4 R4, then the ligature line. Jumps count body lines only (top and bottom 10% of the page excluded) |
+| K8 | A two-column "paper" page drawn **column by column** (TOY, built in the script: title, 7 left lines, 7 right lines, an unruled 3 × 4 results table, a ligature line) | Default `get_text()`: true reading order (left column before right), **1** right→left jump (right column → table). `sort=True`: **3** lines hold words of both columns (e.g. "Dense retrieval maps each passage … Table 1 shows the …"). Line-end hyphens: `accu-/racy` (joined "accuracy" occurs elsewhere: R2 joins it) and `mar-/gin` ("margin" does not occur elsewhere: R2 leaves it). `find_tables()` default (ruling lines) 0; `strategy="text"` 1 "table" of 23 × 9 cells (it takes in the page's text, not just the table). The table comes out one cell per line: Method, NQ, TQA, SQuAD, BM25, 59.1, … 3 ligatures; NFKC changes 3 characters (+3); NFKC leaves `q·p` and `‖q‖ ≤ 1` alone but turns `x²` into `x2` and `10⁵` into `105`. 575 characters, 0 images. The table's numbers are made up |
+| K9 | Corpus D per-page signals | chars per page: 2424, 2410, 2183, 2269, 2255, 2389, 2137, 2225, 2254, 2077, 2116, 2216, 2215, 2252, 2217, 2125, 2144, 2035, 2494, 2257, 2298, 2195, 2204, 2266, 2167, 2388, 2087, 2238, 2468, 2309, 2166, 2445, 636. Hyphen breaks on pages 8, 11, 12, 19 (1 each), 29 (2), 31 (1). Images 0 on every page; right→left jumps 0 on every page; ruled tables 0; ligatures 0; U+FFFD 0; `(cid:` 0 |
+| K10 | Page-table arithmetic (TOY) | lengths 100, 50, 80 → rows (1, 0, 100), (2, 101, 151), (3, **152**, 232), total 232; a 4th page of 40 → row (4, 233, 273) added, rows 1–3 unchanged, total 273. Part F: rows (1, 0, 11), (2, 12, 23), (3, 24, 33); `page_of` 11 → (1, 11), 12 → (2, 0), 17 → (2, 5) (= S12) |
+| K11 | Logged edits on the paper page (TOY) | R2 1 (accu-racy only), R3 3; 575 → 576 characters; `undo(apply(edits)) == raw`: True |
+| K12 | Snapshot ids of the paper page (TOY; 06 §5.3 recipe, doc id `paper`) | cleaning `none` `202926ae0c7b` · `r3_ligatures_v1` `83b34428ba76` · `r2r3_v1` `63d18fdddf83` (text sha256[:12] `4033785d96eb`, `de3202cd0790`, `2fc9105c0b44`) |
+
+**Corpus T numbers are not measured here.** The lesson quotes the research probe of 8 candidate arXiv papers (`study/research/phase_02_core_rag_baseline.md`, C1 §5.6, PyMuPDF 1.26.7, 2026-10-17; PDFs in the scratchpad only, deleted) as "research probe": line-end hyphens 15–323 per paper, ligatures 0–157, two-column pages 1–15, NFKC +108 characters on DPR and +160 on BERT, 1–4 right→left jumps per paper, RAPTOR's running header on every page. They become course facts only once DEC-3 freezes Corpus T and a script re-measures them.
 
 ## 2. Interface handed on (C2/C3)
 `pages: list[Page(doc_id, page, text, parser)]`; `doc_text = "\n".join(...)`; page-table rows `{page, doc_char_start, doc_char_end, text_sha256}`; manifest `evaluation/snapshots/D_ea07572562ac.json`; text `evaluation/snapshots/ea07572562ac/climate.txt` (UTF-8, `"\n"`). The lab writes these only when the learner runs it; the tests wrote to the scratchpad.

@@ -45,12 +45,37 @@ Ideas that were already taught well stayed, rewritten for clarity: the tokenizer
 
 ## What step 4 found: the quiz against the lesson
 
-QUIZ_TABLE
+All 21 questions are answerable from the lesson's **Short** mode and from the short reading file. The check caught **6 more gaps in Short mode**, which were fixed in both:
 
+| Question | Needs | Was | Fix |
+|---|---|---|---|
+| P1-R-05 (why Hindi costs more) | rare scripts fall back to short pieces, down to bytes | Full only (tokenizer families) | one sentence in step 3 |
+| P1-R-07 (interview: `finish_reason`) | one action per stop reason; log the length-stop rate | `stop` and `length` only | a stop-reason table in step 7 |
+| P1-R-08 (interview: reasoning effort) | choose effort per task with a small evaluation; gpt-oss has no "off" | missing | "Choosing the effort" in step 7 |
+| P1-T-01 (Japanese tickets) | check the embedder supports the language; verify with truncation rate and CE@k | missing | one paragraph in step 5 |
+| P1-T-02 (switch to Claude Haiku) | `stop_reason` and `max_tokens` names; record a few calls; a new experiment arm | partly | two table rows and the project note in step 9 |
+| P1-T-03 (completion tokens 10× the answer) | read `reasoning_tokens`, check effort, chart the reasoning share at p50/p95 | missing | "reading a surprising bill" in step 7 |
+
+| Question | Taught in (lesson step) |
+|---|---|
+| P1-PRE-01, P1-R-01 | 1, 2, 4 |
+| P1-PRE-02, P1-A-01 | 3 |
+| P1-PRE-03, P1-A-04, P1-T-03, P1-R-07 | 7 |
+| P1-R-02 | 6, 7 |
+| P1-R-03, P1-A-03 | 8 |
+| P1-R-04 | 5 |
+| P1-R-05 | 2, 3 |
+| P1-R-06 | 7, 10 |
+| P1-R-08 | 7, 10 |
+| P1-A-02, P1-A-05 | 10 |
+| P1-A-06 | 4 |
+| P1-A-07 | 11 |
+| P1-T-01 | 3, 4, 5 |
+| P1-T-02 | 8, 9, 10 |
 ## Left to other concepts on purpose (link only)
 
 - **How embeddings are compared, and Cohere's input limits in detail:** P4 and C3.
-- **Position effects in long prompts (lost in the middle), and whether to retrieve when everything fits:** P7 and X3.
+- **Position effects in long prompts (lost in the middle):** P7 and X3.
 - **Latency words (time to first token, p50/p95) and caching prices:** D2.
 - **How often generated answers flip between runs:** M4.
 

@@ -1,0 +1,1135 @@
+<!doctype html>
+<html lang="en" data-style="notebook" data-theme="light">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Relevance and Qrels</title>
+<meta name="description" content="P2: similarity vs relevance, qrels, the inverted index, Boolean search, set vs ranking metrics and incomplete labels. Short and full depths, seven themes, light and dark. Works offline.">
+<script>
+/* Apply saved choices before the page paints (no flash). Shared by every lesson. */
+(function () {
+  var d = document.documentElement, get = function (k) { try { return localStorage.getItem(k); } catch (e) { return null; } };
+  var p = new URLSearchParams(location.search), styles = ["reader", "hyper", "notebook", "textbook", "editor", "minimal", "catalogue"];
+  var dark = !!(window.matchMedia && window.matchMedia("(prefers-color-scheme: dark)").matches);
+  var pick = function (key, allowed, stored, dflt) { var v = p.get(key); return allowed.indexOf(v) >= 0 ? v : (allowed.indexOf(stored) >= 0 ? stored : dflt); };
+  d.dataset.style = pick("style", styles, get("lesson-style"), "notebook");
+  d.dataset.theme = pick("color", ["light", "dark"], get("lesson-color"), dark ? "dark" : "light");
+  d.dataset.toc = pick("toc", ["shown", "hidden"], get("lesson-toc"), "shown");
+  d.dataset.side = pick("side", ["left", "right"], get("lesson-side"), "left");
+})();
+</script>
+<style>
+/* ---------- themes: five styles, each light and dark. Colours and fonts live in variables. ---------- */
+:root{--content-w:800px;--f-mono:"Cascadia Mono",Consolas,ui-monospace,monospace;--radius:8px;--body-size:16.5px;--h-weight:650;--sec-pad:40px}
+:root[data-style="notebook"]{--f-head:"Segoe UI Variable Display","Segoe UI",system-ui,sans-serif;--f-body:"Segoe UI Variable Text","Segoe UI",system-ui,sans-serif;
+  --paper:#FFFFFF;--card:#F6F8FA;--side:#F6F8FA;--ink:#1F2328;--muted:#59636E;--line:#D1D9E0;--rule:#BFC8D2;--code:#F2F4F7;
+  --accent:#0969DA;--accent-soft:#DDF4FF;--dense:#8250DF;--dense-soft:#F4EDFF;--good:#1A7F37;--good-soft:#DAFBE1;--warn:#9A6700;--warn-soft:#FFF8C5;--bad:#CF222E;--bad-soft:#FFEBE9}
+:root[data-style="notebook"][data-theme="dark"]{--paper:#0D1117;--card:#161B22;--side:#010409;--ink:#E6EDF3;--muted:#9198A1;--line:#30363D;--rule:#3D444D;--code:#1B2129;
+  --accent:#4493F8;--accent-soft:#0C2D6B;--dense:#AB7DF8;--dense-soft:#2A1F45;--good:#3FB950;--good-soft:#12261E;--warn:#D29922;--warn-soft:#2E2410;--bad:#F85149;--bad-soft:#3A1418}
+:root[data-style="textbook"]{--f-head:Cambria,"Palatino Linotype",Georgia,serif;--f-body:Cambria,"Palatino Linotype",Georgia,serif;--body-size:17.5px;--radius:3px;--h-weight:700;
+  --paper:#FFFDF8;--card:#FFFFFF;--side:#FAF6EE;--ink:#1B1B1B;--muted:#5E5A55;--line:#E4DED3;--rule:#CFC6B6;--code:#F5F1E8;
+  --accent:#9E1B32;--accent-soft:#F7E4E7;--dense:#1F4E79;--dense-soft:#E3ECF5;--good:#2E6B3A;--good-soft:#E3F0E5;--warn:#8A5A00;--warn-soft:#FAF0D7;--bad:#9E1B32;--bad-soft:#F7E4E7}
+:root[data-style="textbook"][data-theme="dark"]{--paper:#1A1917;--card:#22201D;--side:#1F1D1A;--ink:#ECE7DE;--muted:#A8A196;--line:#3A3631;--rule:#4E4840;--code:#2A2723;
+  --accent:#E26D7E;--accent-soft:#3D1C22;--dense:#8DB4DE;--dense-soft:#1B2A3A;--good:#86C48F;--good-soft:#1C2D1F;--warn:#E0B65A;--warn-soft:#33290F;--bad:#E26D7E;--bad-soft:#3D1C22}
+:root[data-style="editor"]{--f-head:"Cascadia Code","Cascadia Mono",Consolas,monospace;--f-body:"Segoe UI",system-ui,sans-serif;--radius:4px;--h-weight:600;
+  --paper:#FFFFFF;--card:#F3F3F3;--side:#F3F3F3;--ink:#1E1E1E;--muted:#6E6E6E;--line:#E0E0E0;--rule:#CCCCCC;--code:#F8F8F8;
+  --accent:#005FB8;--accent-soft:#E5F0FB;--dense:#AF00DB;--dense-soft:#F7E6FB;--good:#008000;--good-soft:#E8F5E8;--warn:#795E26;--warn-soft:#FBF4E2;--bad:#A31515;--bad-soft:#FBE9E9}
+:root[data-style="editor"][data-theme="dark"]{--paper:#1E1E1E;--card:#252526;--side:#181818;--ink:#D4D4D4;--muted:#9D9D9D;--line:#3C3C3C;--rule:#4A4A4A;--code:#1A1A1A;
+  --accent:#569CD6;--accent-soft:#1B2B3A;--dense:#C586C0;--dense-soft:#33243A;--good:#6A9955;--good-soft:#1F2A1C;--warn:#DCDCAA;--warn-soft:#2E2E22;--bad:#CE9178;--bad-soft:#3A2820}
+:root[data-style="minimal"]{--f-head:"Segoe UI Variable Display","Segoe UI",system-ui,sans-serif;--f-body:Charter,"Bitstream Charter",Georgia,serif;--body-size:19px;--radius:12px;--h-weight:700;--sec-pad:60px;
+  --paper:#FFFFFF;--card:#FAFAFA;--side:#FFFFFF;--ink:#242424;--muted:#6B6B6B;--line:#EEEEEE;--rule:#E2E2E2;--code:#F6F6F6;
+  --accent:#1A8917;--accent-soft:#E9F5E9;--dense:#2F6FDB;--dense-soft:#EAF1FD;--good:#1A8917;--good-soft:#E9F5E9;--warn:#B26B00;--warn-soft:#FFF4E0;--bad:#C94A4A;--bad-soft:#FBECEC}
+:root[data-style="minimal"][data-theme="dark"]{--paper:#191919;--card:#202020;--side:#191919;--ink:#E6E6E6;--muted:#9B9B9B;--line:#2E2E2E;--rule:#3A3A3A;--code:#252525;
+  --accent:#5DBB63;--accent-soft:#1E2E20;--dense:#6EA8FE;--dense-soft:#1C2638;--good:#5DBB63;--good-soft:#1E2E20;--warn:#E3A33B;--warn-soft:#33270F;--bad:#E57373;--bad-soft:#3A1F1F}
+:root[data-style="catalogue"]{--f-head:"Iowan Old Style","Palatino Linotype","Book Antiqua",Palatino,Georgia,serif;--f-body:"Segoe UI",system-ui,sans-serif;--h-weight:700;
+  --paper:#FBF7EF;--card:#FFFDF8;--side:#F6F0E3;--ink:#231F18;--muted:#6B6457;--line:#E2D9C7;--rule:#C9BBA0;--code:#F1EBDD;
+  --accent:#B0431A;--accent-soft:#F6E2D6;--dense:#355C8C;--dense-soft:#E0E8F2;--good:#2D7549;--good-soft:#DDEFE2;--warn:#8F6200;--warn-soft:#F6EBCB;--bad:#B0431A;--bad-soft:#F6E2D6}
+:root[data-style="catalogue"][data-theme="dark"]{--paper:#16140F;--card:#1F1C16;--side:#1B1813;--ink:#EDE6D6;--muted:#A99F8D;--line:#38322A;--rule:#5A5040;--code:#29251D;
+  --accent:#F08B5E;--accent-soft:#3B2318;--dense:#8DB2E3;--dense-soft:#1C2939;--good:#7BCB97;--good-soft:#18301F;--warn:#E3B653;--warn-soft:#352A12;--bad:#F08B5E;--bad-soft:#3B2318}
+/* Reader themes: research-based reading typography (bundled OFL fonts, so they work offline).
+   Lines about 68 characters, line height about 1.7, off-white paper; dark mode on dark grey with off-white text (no pure black or white). */
+@font-face{font-family:"Literata";src:url("fonts/literata-latin-opsz-normal.woff2") format("woff2");font-weight:200 900;font-style:normal;font-display:swap}
+@font-face{font-family:"Literata";src:url("fonts/literata-latin-opsz-italic.woff2") format("woff2");font-weight:200 900;font-style:italic;font-display:swap}
+@font-face{font-family:"Atkinson Hyperlegible";src:url("fonts/atkinson-hyperlegible-latin-400-normal.woff2") format("woff2");font-weight:400;font-style:normal;font-display:swap}
+@font-face{font-family:"Atkinson Hyperlegible";src:url("fonts/atkinson-hyperlegible-latin-400-italic.woff2") format("woff2");font-weight:400;font-style:italic;font-display:swap}
+@font-face{font-family:"Atkinson Hyperlegible";src:url("fonts/atkinson-hyperlegible-latin-700-normal.woff2") format("woff2");font-weight:700;font-style:normal;font-display:swap}
+@font-face{font-family:"Atkinson Hyperlegible";src:url("fonts/atkinson-hyperlegible-latin-700-italic.woff2") format("woff2");font-weight:700;font-style:italic;font-display:swap}
+:root[data-style="reader"],:root[data-style="hyper"]{
+  --paper:#FBF8F1;--card:#F5F1E8;--side:#F3EEE3;--ink:#2A2723;--muted:#6B655B;--line:#E4DCCD;--rule:#CFC4AF;--code:#F0EADF;
+  --accent:#8C3A12;--accent-soft:#F5E3D6;--dense:#24588A;--dense-soft:#E2ECF6;--good:#2F6B3B;--good-soft:#E3F0E3;--warn:#8A5B00;--warn-soft:#F8EDCF;--bad:#A1271B;--bad-soft:#F8E1DD;
+  --radius:6px;--sec-pad:56px}
+:root[data-style="reader"][data-theme="dark"],:root[data-style="hyper"][data-theme="dark"]{
+  --paper:#1C1B19;--card:#24221F;--side:#191816;--ink:#DEDAD2;--muted:#A39E93;--line:#36332E;--rule:#4A463F;--code:#2A2825;
+  --accent:#E3A178;--accent-soft:#3A2A20;--dense:#94BCE6;--dense-soft:#1F2B38;--good:#8CC79A;--good-soft:#1F2D22;--warn:#E2BD6A;--warn-soft:#352B14;--bad:#EE8E80;--bad-soft:#3B2420}
+:root[data-style="reader"]{--f-head:"Literata",Cambria,Georgia,serif;--f-body:"Literata",Cambria,Georgia,serif;--body-size:19px;--h-weight:650}
+:root[data-style="hyper"]{--f-head:"Atkinson Hyperlegible","Segoe UI",system-ui,sans-serif;--f-body:"Atkinson Hyperlegible","Segoe UI",system-ui,sans-serif;--body-size:18.5px;--h-weight:700}
+:root[data-theme="dark"]{color-scheme:dark}
+
+/* ---------- base ---------- */
+*{box-sizing:border-box}
+html{scroll-behavior:smooth;scroll-padding-top:72px}
+body{margin:0;background:var(--paper);color:var(--ink);font:var(--body-size)/1.62 var(--f-body)}
+a{color:var(--accent)}
+a:focus-visible,button:focus-visible,input:focus-visible,select:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+h1,h2,h3{font-family:var(--f-head);font-weight:var(--h-weight);line-height:1.2;margin:0;text-wrap:balance}
+h1{font-size:clamp(1.8rem,4.2vw,2.6rem);letter-spacing:-.01em}
+h2{font-size:clamp(1.3rem,2.8vw,1.65rem)}
+h3{font-size:1.06rem}
+p{margin:0}
+code,.mono{font-family:var(--f-mono);font-size:.86em}
+:not(pre)>code{background:var(--code);padding:.08em .35em;border-radius:4px}
+pre{font-family:var(--f-mono);font-size:.84rem;background:var(--code);padding:12px 14px;border-radius:var(--radius);overflow-x:auto;margin:0;line-height:1.5;border:1px solid var(--line)}
+ul,ol{margin:0;padding-left:1.25em}
+li+li{margin-top:4px}
+
+/* ---------- top bar, sidebar, layout ---------- */
+.top{position:sticky;top:0;z-index:30;height:56px;display:flex;align-items:center;gap:10px;padding:0 16px;background:color-mix(in srgb,var(--paper) 92%,transparent);backdrop-filter:blur(8px);border-bottom:1px solid var(--line)}
+.top .t{font-family:var(--f-head);font-weight:var(--h-weight);margin-right:auto;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;min-width:0}
+.menu,.home{display:inline-flex;gap:4px;align-items:center;flex:none}
+.home{text-decoration:none}
+.side .course a{display:grid;grid-template-columns:26px minmax(0,1fr);gap:4px;padding:5px 8px;border-radius:6px;color:var(--ink);text-decoration:none;font-size:.88rem;line-height:1.35}
+.side .course a .n{font-family:var(--f-mono);font-size:.74rem;color:var(--muted)}
+.side .course a:hover{background:color-mix(in srgb,var(--accent) 10%,transparent)}
+.top .btn,.top .seg{flex:none;white-space:nowrap}
+.crumb{display:none;color:var(--muted);font-weight:400;font-family:var(--f-body)}
+html[data-toc="hidden"] .crumb{display:inline}
+.topprog{position:absolute;left:0;bottom:-1px;height:3px;width:0;background:var(--accent);transition:width .15s}
+html:not([data-toc="hidden"]) .topprog{display:none}
+.seg{display:inline-flex;border:1px solid var(--rule);border-radius:999px;overflow:hidden;flex:none}
+.seg button{font:inherit;font-family:var(--f-body);font-size:.88rem;border:0;background:transparent;color:var(--ink);padding:5px 12px;cursor:pointer}
+.seg button[aria-pressed="true"]{background:var(--ink);color:var(--paper)}
+.btn,select.btn{font:inherit;font-family:var(--f-body);font-size:.88rem;border:1px solid var(--rule);background:var(--card);color:var(--ink);border-radius:8px;padding:5px 10px;cursor:pointer}
+.btn:hover{border-color:var(--ink)}
+/* Panel docked to the window edge (like VS Code); the text starts right beside it; spare space goes to the far side only. */
+.shell{--side-w:260px;display:grid;grid-template-columns:var(--side-w) minmax(0,var(--content-w));justify-content:start;column-gap:48px;padding:0 24px 0 0}
+aside.side{position:sticky;top:56px;height:calc(100vh - 56px);overflow:auto;background:var(--side);border-right:1px solid var(--line);padding:20px 12px 24px;font-family:var(--f-body)}
+.side .lab{font-size:.72rem;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);margin:14px 8px 6px}
+.side .head{display:flex;justify-content:space-between;align-items:center;gap:8px;margin:0 8px 8px}
+.side .head .lab{margin:0}
+.side .head button{font:inherit;font-family:var(--f-body);font-size:.74rem;border:1px solid var(--rule);background:var(--paper);color:var(--muted);border-radius:6px;padding:2px 7px;cursor:pointer}
+.side .head button:hover{color:var(--ink);border-color:var(--ink)}
+html[data-side="right"] .shell{grid-template-columns:minmax(0,var(--content-w)) var(--side-w);justify-content:end;padding:0 0 0 24px}
+html[data-side="right"] aside.side{order:2;border-right:0;border-left:1px solid var(--line)}
+html[data-toc="hidden"] .shell{grid-template-columns:minmax(0,var(--content-w));justify-content:center;padding:0 24px}
+html[data-toc="hidden"] aside.side{display:none}
+.prog{margin:0 8px 6px;display:grid;gap:4px;font-size:.8rem;color:var(--muted)}
+.prog .track{height:5px;border-radius:3px;background:var(--line);overflow:hidden}
+.prog .track i{display:block;height:100%;width:0;background:var(--accent);transition:width .15s}
+.side nav a{display:grid;grid-template-columns:26px minmax(0,1fr) auto;gap:4px;align-items:baseline;padding:5px 8px;border-radius:6px;color:var(--ink);text-decoration:none;font-size:.88rem;line-height:1.35}
+.side nav a .n{font-family:var(--f-mono);font-size:.74rem;color:var(--muted)}
+.side nav a:hover{background:color-mix(in srgb,var(--accent) 10%,transparent)}
+.side nav a.on{background:var(--accent-soft);color:var(--accent);font-weight:600}
+.side nav a.on .n{color:var(--accent)}
+.side nav a .fo{font-size:.66rem;font-family:var(--f-mono);color:var(--dense);border:1px solid var(--dense);border-radius:4px;padding:0 4px}
+html[data-depth="short"] .side nav a.fullonly{opacity:.55}
+main{padding:8px 0 90px;min-width:0;width:100%}
+@media (max-width:980px){
+  .shell,html[data-side="right"] .shell,html[data-toc="hidden"] .shell{grid-template-columns:minmax(0,1fr);padding:0}
+  aside.side,html[data-toc="hidden"] aside.side,html[data-side="right"] aside.side{display:block;position:fixed;left:0;top:56px;bottom:0;height:auto;width:min(300px,86vw);z-index:25;transform:translateX(-104%);transition:transform .2s;box-shadow:0 10px 30px rgba(0,0,0,.25);background:var(--side);padding:16px 12px 24px}
+  html[data-side="right"] aside.side{left:auto;right:0;transform:translateX(104%)}
+  body.side-open aside.side{transform:none!important}
+  .topprog{display:block!important}
+  .crumb{display:inline}
+  main{padding:8px 16px 90px}
+}
+@media (max-width:620px){.top .t{display:none}.top .seg{margin-left:auto}.top select.btn{max-width:118px}}
+@media (max-width:480px){.top{gap:6px;padding:0 10px}.top .lbl{display:none}.top select.btn{max-width:100px}.seg button{padding:5px 10px}}
+.totop{position:fixed;right:20px;bottom:20px;width:46px;height:46px;border-radius:50%;border:1px solid var(--rule);background:var(--ink);color:var(--paper);font-size:1.3rem;line-height:1;cursor:pointer;box-shadow:0 4px 14px rgba(0,0,0,.2);opacity:0;pointer-events:none;transform:translateY(8px);transition:opacity .2s,transform .2s;z-index:20}
+.totop.show{opacity:1;pointer-events:auto;transform:none}
+
+/* ---------- content blocks ---------- */
+header.hero{padding:28px 0 4px;display:grid;gap:10px}
+.eyebrow{font-family:var(--f-mono);font-size:.72rem;letter-spacing:.08em;text-transform:uppercase;color:var(--muted)}
+.sub{color:var(--muted);font-size:1.05rem}
+section.s{padding-top:var(--sec-pad);display:grid;gap:14px}
+section.s>.num{font-family:var(--f-mono);font-size:.74rem;letter-spacing:.08em;color:var(--accent)}
+.lede{font-size:1.1rem}
+.badge{font-size:.72rem;font-family:var(--f-mono);padding:1px 7px;border-radius:999px;border:1px solid var(--rule);color:var(--muted);background:var(--card);white-space:nowrap;vertical-align:1px}
+.badge.m{border-color:var(--good);color:var(--good)}
+.badge.t{border-color:var(--warn);color:var(--warn)}
+.badge.f{border-color:var(--dense);color:var(--dense)}
+.card{background:var(--card);border:1px solid var(--line);border-radius:var(--radius);padding:14px 16px}
+.call{padding:10px 14px;border-radius:0 var(--radius) var(--radius) 0;border-left:4px solid}
+.call.proj{border-color:var(--good);background:var(--good-soft)}
+.call.wrong{border-color:var(--bad);background:var(--bad-soft)}
+.call.wrong>b:first-child{color:var(--bad)}
+.call.note{border-color:var(--warn);background:var(--warn-soft)}
+.full{border:1px dashed var(--dense);border-radius:var(--radius);padding:14px 16px;display:grid;gap:12px;background:color-mix(in srgb,var(--dense-soft) 50%,transparent)}
+.full>.tag{font-family:var(--f-mono);font-size:.7rem;letter-spacing:.08em;text-transform:uppercase;color:var(--dense)}
+html[data-depth="short"] .full{display:none}
+.two{display:grid;gap:12px}
+@media (min-width:760px){.two{grid-template-columns:1fr 1fr}}
+.three{display:grid;gap:10px}
+@media (min-width:760px){.three{grid-template-columns:repeat(3,1fr)}}
+table{border-collapse:collapse;width:100%;font-size:.92rem;font-family:var(--f-body)}
+th,td{text-align:left;padding:7px 9px;border-bottom:1px solid var(--line);vertical-align:top}
+th{font-size:.78rem;color:var(--muted);font-weight:600}
+td.n,th.n{text-align:right;font-variant-numeric:tabular-nums;font-family:var(--f-mono);font-size:.84rem}
+.tw{overflow-x:auto}
+caption,figcaption{caption-side:bottom;text-align:left;color:var(--muted);font-size:.84rem;padding-top:6px;font-family:var(--f-body)}
+figure{margin:0;display:grid;gap:8px}
+.hit{color:var(--good);font-weight:700}
+.miss{color:var(--bad);font-weight:700}
+.formula{font-family:var(--f-mono);font-size:.92rem;background:var(--code);padding:12px 14px;border-radius:var(--radius);overflow-x:auto;line-height:1.75;border:1px solid var(--line)}
+.formula .w{color:var(--accent);font-weight:700}
+.formula .c{color:var(--muted)}
+
+/* at a glance */
+.glance{display:grid;gap:10px;grid-template-columns:repeat(auto-fill,minmax(240px,1fr))}
+.g{background:var(--card);border:1px solid var(--line);border-radius:var(--radius);padding:10px 12px;display:grid;gap:5px;align-content:start}
+.g h3{font-size:.95rem;display:flex;justify-content:space-between;gap:8px;align-items:baseline}
+.g h3 a{font-family:var(--f-mono);font-size:.72rem;font-weight:400;text-decoration:none}
+.g .fx{font-family:var(--f-mono);font-size:.8rem;background:var(--code);border:1px solid var(--line);padding:5px 8px;border-radius:6px;white-space:normal;overflow-wrap:anywhere;line-height:1.45}
+.g p{font-size:.88rem}
+.g .ex{font-size:.8rem;color:var(--muted)}
+.key{font-size:.86rem;color:var(--muted)}
+.key code{color:var(--ink)}
+
+/* rank cards, index explorer */
+.ranks{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.rank{border-radius:var(--radius);padding:14px;border:1px solid var(--line);background:var(--card);display:grid;gap:4px}
+.rank .big{font-family:var(--f-head);font-size:2.5rem;line-height:1;font-weight:700}
+.rank.d .big{color:var(--dense)}
+.rank.k .big{color:var(--accent)}
+.idx-docs{display:grid;gap:6px}
+.doc{font-family:var(--f-mono);font-size:.8rem;padding:6px 10px;border:1px solid var(--line);border-radius:8px;background:var(--paper);display:flex;gap:10px;align-items:baseline}
+.doc .id{font-weight:700;min-width:2.2em}
+.doc .tok{padding:0 2px;border-radius:3px}
+.doc .tok.on{background:var(--accent-soft);color:var(--accent);font-weight:700}
+.doc.cand{border-color:var(--accent)}
+.chips{display:flex;flex-wrap:wrap;gap:6px}
+.chip{font:inherit;font-family:var(--f-mono);font-size:.82rem;border:1px solid var(--rule);background:var(--paper);color:var(--ink);border-radius:999px;padding:3px 10px;cursor:pointer}
+.chip[aria-pressed="true"]{background:var(--accent);border-color:var(--accent);color:var(--paper)}
+.cards{display:grid;gap:8px;grid-template-columns:repeat(auto-fill,minmax(190px,1fr))}
+.icard{background:var(--paper);border:1px solid var(--rule);border-radius:4px;padding:8px 10px 10px;position:relative}
+.icard::before{content:"";position:absolute;left:0;right:0;top:28px;border-top:1px solid var(--accent);opacity:.55}
+.icard h4{margin:0 0 10px;font-family:var(--f-mono);font-size:.92rem}
+.icard p{font-size:.82rem;font-family:var(--f-mono)}
+.icard .meta{color:var(--muted);font-family:var(--f-body);font-size:.78rem;margin-top:4px}
+
+/* controls and charts */
+.ctl{display:grid;grid-template-columns:160px minmax(0,1fr) 64px;gap:10px;align-items:center;font-size:.9rem;font-family:var(--f-body)}
+.ctl input[type=range]{width:100%;accent-color:var(--accent)}
+.ctl output{font-family:var(--f-mono);text-align:right}
+@media (max-width:560px){.ctl{grid-template-columns:110px minmax(0,1fr) 54px}}
+svg.chart{width:100%;height:auto;display:block;background:var(--card);border:1px solid var(--line);border-radius:var(--radius)}
+svg .ax{stroke:var(--rule);stroke-width:1}
+svg .grid{stroke:var(--line);stroke-width:1}
+svg text{fill:var(--muted);font-family:"Segoe UI",system-ui,sans-serif;font-size:12px}
+svg .lab{fill:var(--ink);font-size:12.5px}
+svg .s-bm25{stroke:var(--accent);stroke-width:3;fill:none}
+svg .s-tfidf{stroke:var(--muted);stroke-width:2;fill:none;stroke-dasharray:6 5}
+svg .s-raw{stroke:var(--accent);stroke-width:1.5;fill:none;stroke-dasharray:2 4;opacity:.8}
+svg .s-ceil{stroke:var(--warn);stroke-width:1.5;stroke-dasharray:5 4}
+svg .s-ref{stroke:var(--dense);stroke-width:2;fill:none;opacity:.55}
+svg .dot{fill:var(--accent);stroke:var(--card);stroke-width:2}
+svg .dot2{fill:var(--dense);stroke:var(--card);stroke-width:2}
+svg .zero{stroke:var(--ink);stroke-width:1;opacity:.45}
+.readout{font-size:.9rem;background:var(--card);border:1px solid var(--line);border-radius:8px;padding:8px 12px;font-family:var(--f-body)}
+.readout b{font-family:var(--f-mono)}
+.sbars{display:grid;gap:8px}
+.sbar{display:grid;grid-template-columns:130px minmax(0,1fr) 64px;gap:10px;align-items:center;font-size:.88rem;font-family:var(--f-body)}
+.sbar .track{display:flex;height:22px;background:var(--paper);border:1px solid var(--line);border-radius:4px;overflow:hidden}
+.sbar .p1{background:var(--accent)}
+.sbar .p2{background:var(--warn);opacity:.75}
+.sbar .v{font-family:var(--f-mono);text-align:right}
+@media (max-width:560px){.sbar{grid-template-columns:92px minmax(0,1fr) 54px}}
+.legend{display:flex;flex-wrap:wrap;gap:12px;font-size:.82rem;color:var(--muted);font-family:var(--f-body)}
+.legend i{display:inline-block;width:12px;height:12px;border-radius:2px;margin-right:5px;vertical-align:-1px}
+.play{display:grid;gap:10px}
+.play label{display:grid;gap:4px;font-size:.88rem;font-family:var(--f-body)}
+.play input[type=text]{font:inherit;font-family:var(--f-mono);font-size:.86rem;padding:8px 10px;border:1px solid var(--rule);border-radius:8px;background:var(--paper);color:var(--ink);width:100%}
+.toks{display:grid;gap:8px}
+.tokrow{border:1px solid var(--line);border-radius:10px;padding:8px 10px;background:var(--paper);display:grid;gap:6px}
+.tokrow .h{display:flex;flex-wrap:wrap;gap:8px;align-items:baseline;justify-content:space-between;font-family:var(--f-body)}
+.tokrow .h b{font-family:var(--f-mono);font-size:.84rem}
+.tk{display:inline-block;font-family:var(--f-mono);font-size:.78rem;padding:1px 6px;margin:2px 3px 2px 0;border:1px solid var(--line);border-radius:4px;background:var(--card)}
+.tk.sh{border-color:var(--good);background:var(--good-soft);color:var(--good);font-weight:700}
+.verdict{font-size:.86rem;font-weight:600}
+.verdict.yes{color:var(--good)}
+.verdict.no{color:var(--bad)}
+.ov{position:relative;height:84px;border:1px solid var(--line);border-radius:var(--radius);background:var(--card);overflow:hidden}
+.ov .w{position:absolute;height:24px;border-radius:4px;font-size:.76rem;font-family:var(--f-mono);display:flex;align-items:center;justify-content:center;color:var(--ink);background:var(--dense-soft);border:1px solid var(--dense)}
+.ov .w82{top:12px;left:4%;width:56%}
+.ov .w83{top:46px;left:40%;width:56%}
+.ov .pin{position:absolute;top:4px;bottom:4px;left:44.1%;width:3px;background:var(--accent)}
+.ov .pinl{position:absolute;top:2px;left:45.3%;font-size:.74rem;font-family:var(--f-mono);color:var(--accent);font-weight:700}
+.q{display:grid;gap:8px}
+.q fieldset{border:1px solid var(--line);border-radius:var(--radius);padding:10px 14px;background:var(--card);margin:0;display:grid;gap:6px}
+.q legend{font-weight:600;padding:0 4px}
+.q label{display:flex;gap:8px;align-items:flex-start;font-size:.94rem;cursor:pointer}
+.q .fb{font-size:.9rem;padding:6px 10px;border-radius:6px;display:none}
+.q .fb.show{display:block}
+.q .fb.ok{background:var(--good-soft);color:var(--good)}
+.q .fb.no{background:var(--bad-soft);color:var(--bad)}
+.check{display:grid;gap:6px}
+.check label{display:grid;grid-template-columns:22px minmax(0,1fr);gap:8px;align-items:start;padding:8px 10px;border:1px solid var(--line);border-radius:8px;background:var(--card);cursor:pointer;font-size:.92rem}
+.check label:has(input:checked){border-color:var(--good);background:var(--good-soft)}
+.check input{width:17px;height:17px;margin-top:3px;accent-color:var(--good)}
+.check .how{display:block;color:var(--muted);font-size:.84rem;margin-top:2px}
+footer{margin-top:48px;padding:22px 0 0;border-top:1px solid var(--line);color:var(--muted);font-size:.86rem;display:grid;gap:8px}
+
+
+/* the theory in one read: a numbered chain of ideas */
+.chain{list-style:none;counter-reset:idea;margin:0;padding:0;display:grid;gap:0}
+.chain>li{counter-increment:idea;position:relative;padding:0 0 22px 52px;display:grid;gap:7px;margin:0}
+.chain>li::before{content:counter(idea);position:absolute;left:0;top:-2px;width:34px;height:34px;border-radius:50%;display:grid;place-items:center;
+  background:var(--accent-soft);color:var(--accent);border:1px solid var(--accent);font:600 .9rem/1 var(--f-body);font-variant-numeric:lining-nums}
+.chain>li::after{content:"";position:absolute;left:16.5px;top:36px;bottom:4px;width:1px;background:var(--rule)}
+.chain>li:last-child::after{display:none}
+.chain h3{font-size:1.08rem}
+.chain .formula{font-size:.86rem;padding:8px 12px;line-height:1.65}
+.chain .go{justify-self:start;font-size:.86rem;font-family:var(--f-body);text-decoration:none;border:1px solid var(--rule);border-radius:999px;padding:1px 10px;color:var(--accent)}
+.chain .go:hover{border-color:var(--accent)}
+
+/* ---------- small per-theme touches ---------- */
+[data-style="textbook"] section.s>.num{font-family:var(--f-head);font-size:.95rem;letter-spacing:.02em;font-style:italic;text-transform:none}
+[data-style="textbook"] #answer .lede::first-letter{float:left;font-size:3.1em;line-height:.9;padding:5px 8px 0 0;color:var(--accent);font-family:var(--f-head)}
+[data-style="textbook"] .call{border-left-width:2px;font-style:italic}
+[data-style="textbook"] .call b{font-style:normal}
+[data-style="editor"] h2::before{content:"## ";color:var(--muted)}
+[data-style="editor"] h1::before{content:"# ";color:var(--muted)}
+[data-style="editor"] .formula,[data-style="editor"] pre{border-left:3px solid var(--accent)}
+[data-style="minimal"] .card,[data-style="minimal"] .g,[data-style="minimal"] .rank,[data-style="minimal"] svg.chart{border-color:transparent}
+[data-style="minimal"] aside.side{border-right-color:transparent}
+[data-style="minimal"] .call{border-left-width:3px}
+[data-style="catalogue"] .g,[data-style="catalogue"] .card{box-shadow:0 1px 0 var(--line)}
+/* Reader themes: the rich typographic details */
+:is([data-style="reader"],[data-style="hyper"]){--content-w:720px}
+:is([data-style="reader"],[data-style="hyper"]) body{line-height:1.72;font-variant-numeric:lining-nums;text-rendering:optimizeLegibility;-webkit-font-smoothing:antialiased}
+:is([data-style="reader"],[data-style="hyper"]) :is(p,li){text-wrap:pretty;hanging-punctuation:first}
+:is([data-style="reader"],[data-style="hyper"]) section.s{border-top:1px solid var(--line);margin-top:30px}
+:is([data-style="reader"],[data-style="hyper"]) section.s>.num{font-family:var(--f-body);font-variant-caps:all-small-caps;font-size:1rem;letter-spacing:.09em;color:var(--accent)}
+:is([data-style="reader"],[data-style="hyper"]) .eyebrow{font-family:var(--f-body);font-variant-caps:all-small-caps;font-size:.95rem;text-transform:none;letter-spacing:.08em}
+:is([data-style="reader"],[data-style="hyper"]) h2{font-size:clamp(1.5rem,3vw,1.9rem);letter-spacing:-.005em}
+[data-style="reader"] h1{font-weight:720;font-size:clamp(2rem,5vw,3rem);letter-spacing:-.015em}
+:is([data-style="reader"],[data-style="hyper"]) #answer .lede{font-size:1.2em;line-height:1.62}
+[data-style="reader"] #answer .lede::first-letter{float:left;font-size:3.5em;line-height:.84;padding:6px 10px 0 0;color:var(--accent);font-weight:700}
+:is([data-style="reader"],[data-style="hyper"]) .call{border-left-width:3px;border-radius:0 8px 8px 0;padding:12px 16px}
+:is([data-style="reader"],[data-style="hyper"]) .call.proj::before{content:"✦ ";color:var(--good)}
+:is([data-style="reader"],[data-style="hyper"]) a{text-underline-offset:.18em;text-decoration-thickness:1px}
+:is([data-style="reader"],[data-style="hyper"]) ::selection{background:var(--accent-soft)}
+:is([data-style="reader"],[data-style="hyper"]) table{font-variant-numeric:lining-nums tabular-nums}
+:is([data-style="reader"],[data-style="hyper"]) :is(.g,.card,.rank){box-shadow:0 1px 2px rgba(0,0,0,.05)}
+:is([data-style="reader"],[data-style="hyper"]) .side nav a{font-size:.9rem}
+@media print{.top,aside.side,.totop,.ctl,.btn,.play input{display:none!important} html[data-depth] .full{display:grid!important} .shell{display:block} main{padding:0}}
+
+/* ---------- lesson additions (shared with P1) ---------- */
+.tk.mk{color:var(--muted);border-style:dashed}
+svg .fbox{fill:var(--paper);stroke:var(--rule);stroke-width:1.2}
+svg .fbox.hl{fill:var(--accent-soft);stroke:var(--accent);stroke-width:2}
+svg .farr{stroke:var(--muted);stroke-width:1.6}
+svg .fhead{fill:var(--muted)}
+svg .rb1{fill:var(--muted);opacity:.55}
+svg .rb2{fill:var(--accent)}
+svg .tbar{fill:var(--accent)}
+.sbar .pm{background:var(--muted);opacity:.55}
+.sbar .p3{background:var(--dense)}
+.sbar .ph,.legend i.hatch{background:repeating-linear-gradient(45deg,var(--warn) 0 3px,transparent 3px 7px);opacity:.8}
+.sbar .p4{background:var(--dense);opacity:.8}
+.sbar .p5{background:var(--good)}
+.sbar .pe{background:transparent}
+pre .c{color:var(--muted)}
+table.heat td.hc{text-align:center;font-weight:600}
+table.heat td.g2{background:var(--good-soft);color:var(--good)}
+table.heat td.g1{background:var(--warn-soft);color:var(--warn)}
+table.heat td.g0{background:var(--bad-soft);color:var(--bad)}
+/* grid children may shrink below their content, so wide code scrolls inside its box on phones */
+section.s>*,.two>*,.three>*,.full>*,.card>*,figure>*{min-width:0}
+main :not(pre)>code{overflow-wrap:anywhere}
+@media (max-width:620px){.badge{white-space:normal}}
+</style>
+</head>
+<body>
+<div class="top">
+  <a class="btn home" id="home" href="../../RAG_ROUTE_MAP.html" title="Back to all phases"><span aria-hidden="true">⌂</span><span class="lbl">All phases</span></a>
+  <button type="button" class="btn menu" id="menu" aria-expanded="true" aria-controls="side" title="Show or hide the contents (key: T)"><span aria-hidden="true">☰</span><span class="lbl">Contents</span></button>
+  <span class="t">P2 · Retrieval framing: relevance, qrels and the index<span class="crumb" id="crumb" aria-live="polite"></span></span>
+  <i class="topprog" id="topprog" aria-hidden="true"></i>
+  <div class="seg" role="group" aria-label="Reading depth">
+    <button type="button" data-depth="short" aria-pressed="true">Short</button>
+    <button type="button" data-depth="full" aria-pressed="false">Full</button>
+  </div>
+  <select class="btn" id="style" aria-label="Theme">
+    <option value="reader">Reader · Literata (new)</option>
+    <option value="hyper">Reader · Atkinson Hyperlegible (new)</option>
+    <option value="notebook">Clean notebook</option>
+    <option value="textbook">Textbook</option>
+    <option value="editor">Editor (VS Code)</option>
+    <option value="minimal">Minimal reading</option>
+    <option value="catalogue">Card catalogue (first version)</option>
+  </select>
+  <button type="button" class="btn" id="color" aria-label="Switch light or dark">☾ Dark</button>
+</div>
+
+<div class="shell">
+<aside class="side" id="side" aria-label="Sections">
+  <div class="head"><div class="lab">On this page</div><button type="button" id="sidepos" title="Move the contents to the other side">⇆ Right</button></div>
+  <div class="prog"><span id="where">The answer first</span><span class="track" aria-hidden="true"><i id="bar"></i></span></div>
+  <nav id="toc">
+    <a href="#answer"><span class="n">→</span><span>The answer first</span></a>
+    <a href="#theory"><span class="n">◆</span><span>The theory in one read</span></a>
+    <a href="#glance"><span class="n">★</span><span>Formula sheet</span></a>
+    <div class="lab">Step by step</div>
+    <a href="#need"><span class="n">1</span><span>The need behind the question</span></a>
+    <a href="#similar"><span class="n">2</span><span>Similar is not relevant</span></a>
+    <a href="#judge"><span class="n">3</span><span>A person judges: qrels</span></a>
+    <a href="#meanings"><span class="n">4</span><span>Three meanings of "relevance"</span></a>
+    <a href="#index"><span class="n">5</span><span>The inverted index</span></a>
+    <a href="#boolean"><span class="n">6</span><span>Boolean AND and OR</span></a>
+    <a href="#rank"><span class="n">7</span><span>Ranking, candidates, ties</span></a>
+    <a href="#cut"><span class="n">8</span><span>Cut at k: precision, recall</span></a>
+    <a href="#setrank"><span class="n">9</span><span>Set vs ranking</span></a>
+    <a href="#holes"><span class="n">10</span><span>Holes in the labels</span></a>
+    <a href="#pdf"><span class="n">11</span><span>The real PDF</span></a>
+    <a href="#project"><span class="n">12</span><span>For your project</span></a>
+    <a href="#repo" class="fullonly"><span class="n">13</span><span>The repo, read critically</span><span class="fo">Full</span></a>
+    <a href="#book" class="fullonly"><span class="n">14</span><span>The book, checked</span><span class="fo">Full</span></a>
+    <div class="lab">Practise and apply</div>
+    <a href="#verify"><span class="n">✓</span><span>Verify it: the notebook</span></a>
+    <a href="#apply"><span class="n">⚙</span><span>Use it on your data</span></a>
+    <a href="#check"><span class="n">?</span><span>Check yourself</span></a>
+  </nav>
+  <div class="lab">Course</div>
+  <div class="course">
+    <a id="toRoute" href="../../RAG_ROUTE_MAP.html"><span class="n">⌂</span><span>All phases (the route)</span></a>
+    <a class="kitonly" data-route="#/c/P2" href="#"><span class="n">≡</span><span>P2 page: steps, lab, quiz</span></a>
+    <a class="kitonly" data-route="#/c/P1" href="#"><span class="n">←</span><span>Previous topic: P1 tokens and cost</span></a>
+    <a class="kitonly" data-route="#/c/P3" href="#"><span class="n">→</span><span>Next topic: P3 keyword search</span></a>
+  </div>
+</aside>
+
+<main id="main">
+<header class="hero" id="top">
+  <div class="eyebrow">RAG study kit · Phase 1 · concept P2</div>
+  <h1>Retrieval framing: relevance, qrels and the index</h1>
+  <p class="sub">What it means for a chunk to be relevant, who decides, how a search engine finds candidates, and how you measure a retriever without fooling yourself.</p>
+  <p class="key"><span class="badge m">measured</span> from a 10-document toy corpus written for P2 and the course's climate PDF (local code, no API call) · <span class="badge t">toy</span> made-up data that shows a mechanism · <span class="badge f">formula</span> computed on this page · <span class="badge">external</span> from a cited study</p>
+</header>
+
+<!-- ======================= ANSWER FIRST ======================= -->
+<section class="s" id="answer" aria-labelledby="h-answer">
+  <div class="num">THE ANSWER FIRST</div>
+  <h2 id="h-answer">Retrieval framing in five sentences</h2>
+  <p class="lede"><b>A retriever never sees relevance: it computes a similarity score for each pair of question and chunk, sorts the chunks, and cuts the list at k.</b> Relevance is a person's judgment about the need behind the question (does this chunk help answer it?), written down under a guideline and stored as <b>qrels</b>: question, chunk, grade. Similarity is only the system's stand-in for relevance, and it fails in known ways: a chunk that echoes the question, a footer stuffed with keywords, an answer written in other words. Keyword search finds its candidates through an <b>inverted index</b> (word → chunks), so a chunk that shares no word with the question can never be returned. You measure retrieval by comparing a run with the qrels, asking two separate questions (what is in the set, and how high it sits), and the numbers are only as good as the labels, because a chunk nobody judged counts as irrelevant.</p>
+  <p>Next comes <b>the whole theory in one read</b>, then a <b>formula sheet</b>, then the <b>step-by-step</b> part. It follows the book's own example question, <b>"What is the main cause of climate change?"</b> (<a data-book="chapter 1.pdf" data-page="8">Ch1 p.8/14</a>), through a 10-document toy collection whose labels were written by hand, then shows the same ideas on the 91 windows of the climate PDF. <b>Short</b> gives a complete first understanding. <b>Full</b> adds the index algorithms, the five kinds of relevance, label agreement and the checks against the repo and the book; its parts have a dashed border.</p>
+</section>
+
+<!-- ======================= THEORY IN ONE READ ======================= -->
+<section class="s" id="theory" aria-labelledby="h-theory">
+  <div class="num">THE THEORY IN ONE READ</div>
+  <h2 id="h-theory">The whole topic, idea by idea</h2>
+  <p>Twelve ideas, in the order they build on each other. This part is theory only, with no measurements. Each idea links to its step below, where the toy collection and the climate PDF show it working.</p>
+  <ol class="chain">
+    <li><h3>Collection, document, need, query</h3>
+      <p>The <b>collection</b> is everything you can search; each searchable unit is a <b>document</b> (in RAG, a chunk). The <b>information need</b> is what the person wants to know; the <b>query</b> is the words they typed. One query can hide two different needs, so relevance is judged against the need.</p>
+      <div class="formula">C = { d₁ … d_N }&nbsp;&nbsp;<span class="c">need ≠ query text</span></div>
+      <a class="go" href="#need">Step 1 →</a></li>
+    <li><h3>A retriever scores, sorts and cuts</h3>
+      <p>For one query, a retriever computes one score per document, sorts the documents by score with a stated rule for ties, and keeps the first k. The result is a <b>run</b>. Nothing in it says "relevant".</p>
+      <div class="formula">run_q = sort_desc( s(q, d) for d in C ) → R_k = the first k</div>
+      <a class="go" href="#similar">Step 2 →</a></li>
+    <li><h3>Similarity is not relevance</h3>
+      <p>The score measures how alike the query and the chunk look, by shared words or by close vectors. Relevance is whether the chunk helps a person with the need. The score is the system's stand-in for relevance, and it can be fooled.</p>
+      <div class="formula">s(q, d) is computed&nbsp;&nbsp;·&nbsp;&nbsp;rel(q, d) ∈ {0, 1, 2} is judged</div>
+      <a class="go" href="#similar">Step 2 →</a></li>
+    <li><h3>Relevance labels: qrels</h3>
+      <p>A person reads each (query, document) pair under a written guideline and gives a grade: 2 answers it, 1 is part of the answer, 0 does not help. The labels are stored as <b>qrels</b>. Any pair not listed counts as 0, and "relevant" means a grade of at least 1.</p>
+      <div class="formula">qrels line = (qid, doc, grade)&nbsp;&nbsp;·&nbsp;&nbsp;unlisted ⇒ 0&nbsp;&nbsp;·&nbsp;&nbsp;relevant ⇔ grade ≥ 1</div>
+      <a class="go" href="#judge">Step 3 →</a></li>
+    <li><h3>"Relevance" means different things</h3>
+      <p>The same word is used for the retriever's score (system relevance), for being about the topic (topical relevance), and for actually helping answer (situational relevance). Your labels must say which one they measure; in this course it is the third.</p>
+      <a class="go" href="#meanings">Step 4 →</a></li>
+    <li><h3>The inverted index</h3>
+      <p>Keyword search does not read every document for every query. It keeps, for each word, the sorted list of documents that contain it (its <b>postings</b>). A word's document frequency is simply the length of its list.</p>
+      <div class="formula">P(t) = sorted { d : t ∈ d }&nbsp;&nbsp;·&nbsp;&nbsp;df(t) = | P(t) |</div>
+      <a class="go" href="#index">Step 5 →</a></li>
+    <li><h3>Boolean AND and OR</h3>
+      <p>The oldest kind of search combines postings lists: AND keeps documents that contain every word (often too few), OR keeps documents that contain any word (often too many). The work done is the number of postings read.</p>
+      <div class="formula">AND = ∩ P(t)&nbsp;&nbsp;·&nbsp;&nbsp;OR = ∪ P(t)&nbsp;&nbsp;·&nbsp;&nbsp;cost = Σ | P(t) |</div>
+      <a class="go" href="#boolean">Step 6 →</a></li>
+    <li><h3>Ranking from the index, and ties</h3>
+      <p>Ranked keyword search adds a weight for each matched word, but only documents in at least one postings list can score above 0: those are its <b>candidates</b>. When two documents score the same, a tie rule decides their order, and that rule can change a metric.</p>
+      <div class="formula">score(d) = Σ over query words t with d ∈ P(t) of w(t, d)&nbsp;&nbsp;<span class="c">here w = 1</span></div>
+      <a class="go" href="#rank">Step 7 →</a></li>
+    <li><h3>Set quality: precision and recall</h3>
+      <p>Treat the top k as a set. <b>Precision</b> asks how much of what you returned is relevant; <b>recall</b> asks how much of what is relevant you returned. Recall needs to know how many relevant documents exist.</p>
+      <div class="formula">precision = | R ∩ Rel | / | R |&nbsp;&nbsp;·&nbsp;&nbsp;recall = | R ∩ Rel | / | Rel |</div>
+      <a class="go" href="#cut">Step 8 →</a></li>
+    <li><h3>Ranking quality</h3>
+      <p>Two runs can return the same set in a different order. The rank of the first relevant document, and its reciprocal, measure how high the evidence sits. P6 builds the full family of ranking metrics on this.</p>
+      <div class="formula">r₁ = rank of the first relevant document&nbsp;&nbsp;·&nbsp;&nbsp;RR = 1 / r₁</div>
+      <a class="go" href="#setrank">Step 9 →</a></li>
+    <li><h3>Labels are incomplete and noisy</h3>
+      <p>Nobody judges every pair. A document nobody judged counts as not relevant, so a retriever that finds unjudged documents is under-scored. Two careful judges also disagree; agreement beyond chance is measured with κ.</p>
+      <div class="formula">Judged@k = judged in top k / k&nbsp;&nbsp;·&nbsp;&nbsp;Hole@k = 1 − Judged@k&nbsp;&nbsp;·&nbsp;&nbsp;κ = (P(A) − P(E)) / (1 − P(E))</div>
+      <a class="go" href="#holes">Step 10 →</a></li>
+    <li><h3>A test collection</h3>
+      <p>Documents, needs and labels together form a <b>test collection</b>. The classic rule of thumb is about 50 needs; you tune on one part (dev) and report on another (test). Labels measure retrieval only: a reference answer is not a relevance label.</p>
+      <div class="formula">test collection = ( C, needs, qrels )</div>
+      <a class="go" href="#project">Step 12 →</a></li>
+  </ol>
+</section>
+
+<!-- ======================= FORMULA SHEET ======================= -->
+<section class="s" id="glance" aria-labelledby="h-glance">
+  <div class="num">FORMULA SHEET</div>
+  <h2 id="h-glance">Every term and formula, on one screen</h2>
+  <div class="glance">
+    <div class="g"><h3>Need vs query <a href="#need">§1</a></h3><p>The query is the words; the need is what the person wants. Judge against the need.</p></div>
+    <div class="g"><h3>Run <a href="#similar">§2</a></h3><div class="fx">score, sort (tie rule), cut at k</div><p class="ex">q1, keyword: d02, d01, d08</p></div>
+    <div class="g"><h3>qrels line <a href="#judge">§3</a></h3><div class="fx">(qid, doc, grade)</div><p class="ex">q1 d01 2 · unlisted = 0</p></div>
+    <div class="g"><h3>Grade scale <a href="#judge">§3</a></h3><p>2 answers it · 1 part of the answer · 0 does not help</p><div class="fx">relevant ⇔ grade ≥ 1</div></div>
+    <div class="g"><h3>Three relevances <a href="#meanings">§4</a></h3><p>score (system) · about the topic · helps answer</p></div>
+    <div class="g"><h3>Postings · df <a href="#index">§5</a></h3><div class="fx">P(t) sorted doc ids · df = | P(t) |</div><p class="ex">toy: "the" → 5 docs</p></div>
+    <div class="g"><h3>AND · OR · cost <a href="#boolean">§6</a></h3><div class="fx">∩ P(t) · ∪ P(t) · Σ | P(t) |</div><p class="ex">q1: AND d02 · OR 3 docs · 10 read</p></div>
+    <div class="g"><h3>Candidates <a href="#rank">§7</a></h3><div class="fx">only d ∈ ∪ P(t) can score &gt; 0</div><p class="ex">q3 "renewable energy": none</p></div>
+    <div class="g"><h3>Tie rule <a href="#rank">§7</a></h3><p>Equal scores need a stated order; it can move a relevant document.</p><p class="ex">q4: rank 2 or rank 1</p></div>
+    <div class="g"><h3>Precision <a href="#cut">§8</a></h3><div class="fx">| R ∩ Rel | / | R |</div></div>
+    <div class="g"><h3>Recall <a href="#cut">§8</a></h3><div class="fx">| R ∩ Rel | / | Rel |</div><p>needs the number of relevant documents</p></div>
+    <div class="g"><h3>First relevant rank · RR <a href="#setrank">§9</a></h3><div class="fx">r₁ · RR = 1 / r₁</div></div>
+    <div class="g"><h3>Judged@k · Hole@k <a href="#holes">§10</a></h3><div class="fx">judged in top k / k · 1 − Judged@k</div></div>
+    <div class="g"><h3>κ (Full) <a href="#holes">§10</a></h3><div class="fx">(P(A) − P(E)) / (1 − P(E))</div><p class="ex">&gt; 0.8 good · 0.67–0.8 fair</p></div>
+  </div>
+  <p class="key"><b>Symbols:</b> <code>C</code> the collection · <code>d</code> a document (a chunk) · <code>q</code> a query · <code>R</code> the returned set (top k) · <code>Rel</code> the relevant set from the qrels · <code>P(t)</code> the postings of word t · <code>| … |</code> the size of a set · <code>∩</code> in both · <code>∪</code> in either.</p>
+</section>
+
+<!-- 1 -->
+<section class="s" id="need" aria-labelledby="h-need">
+  <div class="num">STEP 1 · WHAT THE PERSON WANTS</div>
+  <h2 id="h-need">The words are not the need</h2>
+  <p>The book's first example retrieves the chunks nearest to <b>"What is the main cause of climate change?"</b> and simply calls them relevant (<a data-book="chapter 1.pdf" data-page="8">Ch1 p.8/14</a>). This lesson tests that claim instead of assuming it. The vocabulary first:</p>
+  <div class="tw"><table>
+    <thead><tr><th>Term</th><th>Meaning</th><th>In our example</th></tr></thead>
+    <tbody>
+      <tr><td><b>Collection</b></td><td>everything that can be searched</td><td>10 short toy documents (later: 91 windows of the climate PDF)</td></tr>
+      <tr><td><b>Document</b></td><td>one searchable unit; in RAG, a chunk</td><td>d01 … d10</td></tr>
+      <tr><td><b>Information need</b></td><td>what the person wants to know</td><td>what mainly drives climate change</td></tr>
+      <tr><td><b>Query</b></td><td>the words they typed</td><td>q1: <code>main cause of climate change</code></td></tr>
+    </tbody></table></div>
+  <p>The need and the query are not the same thing. Type <code>carbon dioxide</code> into the toy collection: one person wants to know what puts it into the air (d01: burning coal, oil and gas), another what takes it out (d06: forests absorb it). Both documents contain the words, but each helps only one of the two needs. The IR textbook's classic example is "python", which can mean the snake or the language (Manning et al., §8.1, external). So <b>relevance is judged against the need</b>, which is why each test question carries a note on what the person wants.</p>
+  <p class="call wrong"><b>Common mistake:</b> "a chunk is relevant if it contains the query's words." Containing the words is what the retriever checks. Whether it helps with the need is what a person checks.</p>
+  <p class="call proj"><b>In your project:</b> every eval question gets a one-line need note, and labels are written against that note, not against the question's wording.</p>
+</section>
+
+<!-- 2 -->
+<section class="s" id="similar" aria-labelledby="h-similar">
+  <div class="num">STEP 2 · WHAT THE RETRIEVER DOES</div>
+  <h2 id="h-similar">Two retrievers score q1, and both put an echo first</h2>
+  <p>Score q1 against the 10 documents with two very different retrievers. The first counts how many distinct query words a document shares with the query. The second is search by meaning (<b>dense retrieval</b>): an embedding model turns each text into a list of 384 numbers (a <b>vector</b>), and the score is the cosine between the query's vector and the document's (P4 explains vectors properly). Both compute <b>one score for each (query, document) pair</b>; there is no table of every document against every other.</p>
+  <figure>
+    <svg class="chart" id="simChart" viewBox="0 0 640 300" role="img" aria-labelledby="simTitle simDesc"><title id="simTitle">MiniLM cosine against the human grade for query q1</title><desc id="simDesc">Ten documents. The highest cosine, d02, has grade 0. The grade-2 document d01 is second. The grade-1 document d09 sits ninth.</desc></svg>
+    <figcaption><span class="badge m">measured · MiniLM, toy</span> What to notice: the most similar document, d02, has grade <b>0</b>; one relevant document, d09, is ninth of ten.</figcaption>
+  </figure>
+  <div class="tw"><table>
+    <thead><tr><th>Rank</th><th>Keyword overlap</th><th>MiniLM cosine</th><th>What the document is</th></tr></thead>
+    <tbody>
+      <tr><td class="n">1</td><td>d02 · 5 words</td><td>d02 · 0.8402</td><td><b>d02</b> repeats the question and answers nothing</td></tr>
+      <tr><td class="n">2</td><td>d01 · 3 words</td><td>d01 · 0.6342</td><td><b>d01</b> names the cause: burning fossil fuels</td></tr>
+      <tr><td class="n">3</td><td>d08 · 2 words</td><td>d04 · 0.5139</td><td><b>d08</b> is a footer stuffed with "climate change"</td></tr>
+    </tbody>
+    <caption><span class="badge m">measured · toy</span> The keyword retriever has only these three candidates for q1.</caption>
+  </table></div>
+  <p>The book makes the same point twice: a chunk full of navigation links can score well and help nothing (<a data-book="chapter 3.pdf" data-page="1">Ch3 p.1/14</a>), and three chunks about France can sit closest to a question about its capital while none of them names the city (<a data-book="chapter 13.pdf" data-page="1">Ch13 p.1–2/13</a>).</p>
+  <p class="call wrong"><b>Common mistake (MC-002):</b> "the system builds a similarity matrix." Retrieval embeds the question with the same model as the chunks and computes one score per chunk for that question; it never compares all documents with each other.</p>
+  <p class="call proj"><b>In your project:</b> a high score is a reason to look, not a label. Every retrieval result is checked against labels written by a person.</p>
+</section>
+
+<!-- 3 -->
+<section class="s" id="judge" aria-labelledby="h-judge">
+  <div class="num">STEP 3 · WHO DECIDES RELEVANCE</div>
+  <h2 id="h-judge">A person judges each pair, under a written guideline</h2>
+  <p>Relevance comes from a person reading each (query, document) pair and asking: does this help with the need? To keep the answers consistent, the judge follows a written <b>guideline</b>. The toy uses guideline v1:</p>
+  <div class="three">
+    <div class="card"><h3>2 · answers it</h3><p style="margin-top:4px">The document alone answers the query.</p></div>
+    <div class="card"><h3>1 · part of it</h3><p style="margin-top:4px">It gives part of the answer, or a necessary piece.</p></div>
+    <div class="card"><h3>0 · does not help</h3><p style="margin-top:4px">Even if it shares the words or the topic.</p></div>
+  </div>
+  <figure class="card">
+    <div class="tw"><table class="heat" id="qrelsHeat"></table></div>
+    <figcaption><span class="badge m">measured · toy labels, guideline v1</span> Each cell is a grade; a blank cell is a pair nobody listed, which counts as 0. 8 of the 50 pairs are relevant (grade ≥ 1).</figcaption>
+  </figure>
+  <p>Read one row. For q2, "why do sea levels rise", d04 gets 2 (warm water expands and glaciers melt: that is the answer), d05 gets 1 (melting ice sheets add water: one reason), and everything else 0, including d10, which is about heat but not about the sea. The ten toy texts are listed in step 6's explorer, so you can try labelling a query yourself.</p>
+  <p>The labels are stored as <b>qrels</b> (from "query relevance judgments"), one line per judged pair: <code>q1 d01 2</code>. Three rules keep them honest:</p>
+  <ul>
+    <li><b>Any pair not listed counts as 0</b>, and "relevant" means a grade of at least 1.</li>
+    <li><b>Write a reason</b> for every non-zero label and for every tempting zero: d02 got 0 because "it repeats the question word for word but gives no answer".</li>
+    <li><b>Judge before you look at any run</b>, so the retriever's ranking cannot steer you; when the guideline changes, it gets a new version number.</li>
+  </ul>
+  <p class="call wrong"><b>Common mistake:</b> "the retriever's top results are the relevant ones." That is circular: the labels exist precisely to check the retriever.</p>
+  <p class="call proj"><b>In your project:</b> the course stores labels as evidence spans (06 <code>evidence_groups</code>) with a guideline version, written before any run is inspected (M1).</p>
+</section>
+
+<!-- 4 -->
+<section class="s" id="meanings" aria-labelledby="h-meanings">
+  <div class="num">STEP 4 · ONE WORD, SEVERAL MEANINGS</div>
+  <h2 id="h-meanings">Three meanings of "relevance"</h2>
+  <p>Books, libraries and papers use "relevance" for different things. Take d02 for q1:</p>
+  <div class="tw"><table>
+    <thead><tr><th>Meaning</th><th>Question it answers</th><th>d02 for q1</th></tr></thead>
+    <tbody>
+      <tr><td><b>System relevance</b> (the score)</td><td>How alike do the texts look to the retriever?</td><td class="hit">highest of all</td></tr>
+      <tr><td><b>Topical relevance</b></td><td>Is it about the same subject?</td><td class="hit">yes</td></tr>
+      <tr><td><b>Situational relevance</b> (usefulness)</td><td>Does it help this person with this need?</td><td class="miss">no: grade 0</td></tr>
+    </tbody></table></div>
+  <p>The course's labels measure the <b>third</b> kind. The book uses the word in yet more ways: "context relevance" is an LLM scoring each retrieved chunk at evaluation time (<a data-book="chapter 22.pdf" data-page="4">Ch22 p.4/19</a>), and "relevancy grading" is an LLM filter that drops chunks before generation (<a data-book="Appendix.pdf" data-page="20">App p.20/23</a>). <b>A filter is not a label</b>: it is part of the system being tested. And an LLM that <i>writes</i> labels is a judge, so in this course it runs only once, in the end-of-course judge batch, checked against your own labels (D-10).</p>
+  <div class="full"><span class="tag">Full · five manifestations, and LLM assessors</span>
+    <p>Saracevic's review of relevance research (JASIST 2007, external) lists five manifestations: system (algorithmic), topical (aboutness), cognitive (pertinence to what the person knows), situational (utility for the task) and affective (satisfaction). Evaluation always compares one kind (the system's score) with another (a person's judgment).</p>
+    <p>Since 2023, LLMs have been used to <i>write</i> qrels. A Bing team reported LLM labels as good as careful human labellers and cheaper, but sensitive to small changes in the prompt (Thomas et al. 2023, abstract, external); UMBRELA is an open reproduction with a 0–3 scale (2024, external). The repo's <code>open-rag-eval-example.ipynb</code> uses that scale. An LLM that writes labels is a <b>judge</b>, so in this course it waits for the end-of-course judge batch and is validated against human labels (D-10).</p>
+  </div>
+  <p class="call proj"><b>In your project:</b> write the guideline in terms of usefulness ("helps answer"), and never let a pipeline's own grader produce the labels that measure that pipeline.</p>
+</section>
+
+<!-- 5 -->
+<section class="s" id="index" aria-labelledby="h-index">
+  <div class="num">STEP 5 · HOW KEYWORD SEARCH FINDS CANDIDATES</div>
+  <h2 id="h-index">The inverted index: word → documents</h2>
+  <p>Picture a table with one row per word and one column per document, a tick where the word occurs (a <b>term–document incidence matrix</b>). Almost every cell is empty, so search engines store only the ticks, row by row: for each word, the sorted list of documents that contain it. That list is the word's <b>postings</b>, and the whole structure is an <b>inverted index</b>, inverted because it turns "document → its words" into "word → its documents".</p>
+  <figure class="card" style="display:grid;gap:8px">
+    <div class="tw"><table class="heat" id="incidence"></table></div>
+    <figcaption><span class="badge m">measured · toy, the five words of q1</span> Each row, read left to right, is a postings list; its length is the word's document frequency (df).</figcaption>
+  </figure>
+  <p>It is the same idea as the index at the back of a cookbook, which lists for each ingredient the pages that mention it (<a data-book="chapter 12.pdf" data-page="3">Ch12 p.3/14</a>): organised by word, not by page. On the toy collection the index has 88 distinct words and 114 postings, and 71 words appear in only one document. Before any of this, a <b>tokenizer</b> cuts each text into words; here it lower-cases and keeps runs of letters and digits, so "Sea-level RISE, 2019!" becomes <code>sea</code> <code>level</code> <code>rise</code> <code>2019</code>. The whole build fits in a few lines:</p>
+  <pre>def build_index(docs):                       # docs: {doc_id: text}
+    index = {}
+    for d in sorted(docs):
+        for t in sorted(set(re.findall(r"[a-z0-9]+", docs[d].lower()))):
+            index.setdefault(t, []).append(d)   # postings come out sorted by doc id
+    return index                             # df(t) = len(index[t])</pre>
+  <p class="call wrong"><b>Common mistake (MC-001 in another form):</b> "the index uses the model's tokens." An index token is whatever your index tokenizer outputs (here, whole words); an LLM's sub-word tokens are a different thing (P1, P3 step 9).</p>
+  <div class="full"><span class="tag">Full · a library that does not invert</span>
+    <p>The course's BM25 library, <code>rank_bm25</code> 0.2.2, has no inverted index at all: it keeps one word counter per document and scans every document for each query, which is fine at 91 windows.</p>
+  </div>
+  <p class="call proj"><b>In your project:</b> an index belongs to one tokenizer and one chunking; change either and every postings list changes.</p>
+</section>
+
+<!-- 6 -->
+<section class="s" id="boolean" aria-labelledby="h-boolean">
+  <div class="num">STEP 6 · THE OLDEST SEARCH</div>
+  <h2 id="h-boolean">Boolean AND is too strict, OR is too loose</h2>
+  <p>With postings in hand, Boolean search is set arithmetic. <b>AND</b> keeps the documents in every word's list (an intersection); <b>OR</b> keeps those in any list (a union). The work is the number of postings read. Try it on the toy collection:</p>
+  <figure class="card play">
+    <div><b>Boolean explorer</b> <span class="badge m">toy · index built on this page</span></div>
+    <div class="chips" id="bqPick" role="group" aria-label="Queries"></div>
+    <div class="seg" id="bqMode" role="group" aria-label="Operator" style="justify-self:start"><button type="button" data-op="and" aria-pressed="true">AND</button><button type="button" data-op="or" aria-pressed="false">OR</button></div>
+    <div class="cards" id="bqCards" aria-live="polite"></div>
+    <div class="idx-docs" id="bqDocs"></div>
+    <div class="readout" id="bqRead" aria-live="polite"></div>
+    <figcaption>What to notice: AND finds something for only one query of five; OR returns every document that shares any word; "renewable energy" finds nothing either way, because the right document (d07, about solar and wind) uses none of its words.</figcaption>
+  </figure>
+  <div class="tw"><table>
+    <thead><tr><th>Query</th><th>AND</th><th>OR</th><th class="n">Postings read</th></tr></thead>
+    <tbody>
+      <tr><td>q1 main cause of climate change</td><td>d02</td><td>d01, d02, d08</td><td class="n">10</td></tr>
+      <tr><td>q2 why do sea levels rise</td><td>—</td><td>d04</td><td class="n">2</td></tr>
+      <tr><td>q3 renewable energy</td><td>—</td><td>—</td><td class="n">0</td></tr>
+      <tr><td>q4 where does methane come from</td><td>—</td><td>d06, d09</td><td class="n">2</td></tr>
+      <tr><td>q5 is extreme heat becoming more common</td><td>—</td><td>d02, d03, d10</td><td class="n">5</td></tr>
+    </tbody>
+    <caption><span class="badge m">measured · toy</span> The explorer recomputes these from the documents.</caption>
+  </table></div>
+  <p><b>Why AND is cheap.</b> Postings are kept sorted by document id, so two lists are intersected in one pass, walking both at once: the cost grows with the two lengths added, O(x + y). With several words, intersect the shortest lists first (smallest df first), so the intermediate result stays small (Manning, Raghavan and Schütze, <i>Introduction to Information Retrieval</i> §1.3, external).</p>
+  <p>The q3 row is <b>vocabulary mismatch</b>: the answer exists, but in other words. No amount of keyword cleverness finds it; that is the job of dense retrieval (P4), or of hybrid search (R1).</p>
+  <p class="call wrong"><b>Common mistake:</b> "AND is safer because it is precise." It is precise only when it returns anything; for 4 of our 5 queries it returns nothing.</p>
+  <p class="call proj"><b>In your project:</b> list the questions whose words never occur in the collection; they need a meaning-based retriever.</p>
+</section>
+
+<!-- 7 -->
+<section class="s" id="rank" aria-labelledby="h-rank">
+  <div class="num">STEP 7 · FROM SETS TO A RANKING</div>
+  <h2 id="h-rank">Ranking adds up matched words, and ties need a rule</h2>
+  <p>Ranked keyword search reads the same postings but gives each document a score: here, the number of distinct query words it contains (BM25, in P3, weights each word instead). Two consequences follow. First, <b>only documents in at least one postings list can score above 0</b>; those are the retriever's candidates, and no k can reach past them. Second, <b>equal scores need a tie rule</b>, and the rule is part of the result:</p>
+  <figure class="card" style="display:grid;gap:10px">
+    <div><b>q4 "where does methane come from"</b> <span class="badge m">measured · toy</span> d06 shares "from", d09 shares "methane": both score 1. Only d09 is relevant.</div>
+    <div class="seg" id="tieMode" role="group" aria-label="Tie rule" style="justify-self:start"><button type="button" data-tie="asc" aria-pressed="true">ties by id ascending</button><button type="button" data-tie="desc" aria-pressed="false">ties by id descending</button></div>
+    <div class="idx-docs" id="tieRun"></div>
+    <div class="readout" id="tieRead" aria-live="polite"></div>
+  </figure>
+  <p>Nothing about the documents changed, yet the relevant one moved from rank 2 to rank 1. The standard scoring tool, <code>trec_eval</code>, re-sorts each run by score and breaks ties by document id, so the order you wrote for tied documents is not necessarily the order that gets scored; tie order is an uncontrolled setting unless you give tied documents distinct scores or state the rule (Cabanac et al., CLEF 2010, external; which direction the tool breaks ties is reported differently by sources, UNVERIFIED).</p>
+  <p class="call wrong"><b>Common mistake:</b> "ties are rare, so the order doesn't matter." With small integer scores (word counts) ties are common, and the tie rule changes rank-based metrics.</p>
+  <p class="call proj"><b>In your project:</b> break ties by chunk id and write the rule down (v0 does), so two runs give the same order.</p>
+</section>
+
+<!-- 8 -->
+<section class="s" id="cut" aria-labelledby="h-cut">
+  <div class="num">STEP 8 · CUT AT K</div>
+  <h2 id="h-cut">Set precision and set recall</h2>
+  <p>A RAG system passes the top k chunks to the LLM, so first treat them as a set R and compare it with the relevant set Rel from the qrels:</p>
+  <div class="formula">precision = | R ∩ Rel | / | R |&nbsp;&nbsp;<span class="c">how much of what you returned helps</span><br>recall&nbsp;&nbsp;&nbsp;&nbsp;= | R ∩ Rel | / | Rel |&nbsp;&nbsp;<span class="c">how much of what helps you returned</span></div>
+  <p>For q1, Rel = {d01, d03, d09}. Raise k from 3 to 6 and watch the two retrievers differ:</p>
+  <figure>
+    <div class="seg" id="recQ" role="group" aria-label="Which queries" style="justify-self:start"><button type="button" data-q="q1" aria-pressed="true">q1 only</button><button type="button" data-q="mean" aria-pressed="false">mean of 5 queries</button></div>
+    <svg class="chart" id="recChart" viewBox="0 0 640 290" role="img" aria-labelledby="recTitle recDesc"><title id="recTitle">Set recall as k grows, keyword overlap against MiniLM</title><desc id="recDesc">The keyword line goes flat after k = 2 because it has only three candidates; the MiniLM line keeps rising and reaches 1 at k = 9.</desc></svg>
+    <figcaption><span class="badge m">measured · toy</span> What to notice: the keyword line goes flat once its candidates run out; a bigger k cannot help a retriever that never found the document.</figcaption>
+  </figure>
+  <div class="tw"><table>
+    <thead><tr><th>q1</th><th class="n">k = 3</th><th class="n">k = 6</th></tr></thead>
+    <tbody>
+      <tr><td>Keyword: precision / recall</td><td class="n">0.333 / 0.333</td><td class="n">only 3 candidates: 0.333 / 0.333</td></tr>
+      <tr><td>MiniLM: precision / recall</td><td class="n">0.333 / 0.333</td><td class="n">0.333 / 0.667 (d03 arrives at rank 4)</td></tr>
+    </tbody>
+    <caption><span class="badge m">measured · toy</span></caption>
+  </table></div>
+  <p>Two warnings. <b>Accuracy is useless here</b>: almost every document is irrelevant to any one question, so a retriever that returns nothing is "right" about nearly everything. On the toy it would be right on 42 of the 50 pairs (84%), the 42 irrelevant ones. And <b>recall needs the number of relevant documents</b>, which you only know from your labels; step 10 shows what happens when the labels miss some.</p>
+  <p class="call wrong"><b>Common mistake (MC-005):</b> "a bigger k is always better" or "always worse". It raises recall only if the retriever has more relevant candidates to give, and it always adds noise and tokens.</p>
+  <p class="call proj"><b>In your project:</b> RAG usually favours recall in the first stage, because the LLM can skim a few extra chunks but cannot use a chunk it never received; a reranker then restores precision (R3).</p>
+</section>
+
+<!-- 9 -->
+<section class="s" id="setrank" aria-labelledby="h-setrank">
+  <div class="num">STEP 9 · TWO DIFFERENT QUESTIONS</div>
+  <h2 id="h-setrank">Same set, different ranking; same rank, different set</h2>
+  <p>Three made-up runs for q1 show that set metrics and rank metrics answer different questions:</p>
+  <figure class="card">
+    <div class="sbars" id="abcRuns"></div>
+    <div class="tw" style="margin-top:10px"><table>
+      <thead><tr><th>Run</th><th>Returned</th><th class="n">Precision</th><th class="n">Recall</th><th class="n">First relevant rank</th></tr></thead>
+      <tbody>
+        <tr><td>A</td><td>d02, <b>d01</b>, d08</td><td class="n">0.333</td><td class="n">0.333</td><td class="n">2</td></tr>
+        <tr><td>B</td><td><b>d01</b>, d08, d02</td><td class="n">0.333</td><td class="n">0.333</td><td class="n">1</td></tr>
+        <tr><td>C</td><td><b>d01</b>, <b>d03</b>, <b>d09</b></td><td class="n">1.000</td><td class="n">1.000</td><td class="n">1</td></tr>
+      </tbody></table></div>
+    <figcaption><span class="badge m">measured · toy runs</span> A and B hold the same set in a different order; B and C share a first rank but not a set.</figcaption>
+  </figure>
+  <p>So a full picture needs both: what is in the top k (precision, recall), and how high the first useful chunk sits (the <b>first relevant rank</b>, or its reciprocal, RR = 1 / rank: 0.5 for A, 1 for B and C). P6 builds the rest of the family on these two ideas (Hit@k, MRR, nDCG, and the course's main metric, CE@k).</p>
+  <p class="call proj"><b>In your project:</b> report a set metric and a rank metric side by side for every retriever, per question type.</p>
+</section>
+
+<!-- 10 -->
+<section class="s" id="holes" aria-labelledby="h-holes">
+  <div class="num">STEP 10 · THE TRAP IN EVERY TEST SET</div>
+  <h2 id="h-holes">Unjudged chunks count as misses</h2>
+  <p>Nobody judges every pair in a real collection. Evaluation tools follow one convention: <b>a document nobody judged counts as not relevant</b>. That is fine when the labels found every relevant document. It is not fine when the labels came from one retriever's results, because another retriever's finds are then mostly unjudged.</p>
+  <p>Try it on the toy. Suppose labels had been written only for the documents in the keyword retriever's top 3 for each query (a "pool" built from one retriever), and both retrievers are scored at k = 4:</p>
+  <figure class="card" style="display:grid;gap:10px">
+    <div class="seg" id="poolMode" role="group" aria-label="Which labels" style="justify-self:start"><button type="button" data-pool="full" aria-pressed="true">full labels</button><button type="button" data-pool="pool" aria-pressed="false">labels from keyword top 3 only</button></div>
+    <div><b>MiniLM's top 4 for q1</b></div>
+    <div class="idx-docs" id="poolRun"></div>
+    <div style="font-size:.88rem;color:var(--muted)">Mean precision@4 over the 5 queries:</div>
+    <div class="sbars" id="poolBars"></div>
+    <div class="readout" id="poolRead" aria-live="polite"></div>
+    <figcaption><span class="badge m">measured · toy</span> What to notice: the keyword retriever's number does not move, MiniLM's drops from 0.350 to 0.200, and recall looks perfect (1.000) for both, because recall's denominator shrank to the relevant documents that happened to be judged.</figcaption>
+  </figure>
+  <p>The same effect has been measured at scale. On the TREC-COVID collection, the BEIR authors counted how much of each system's top 10 had never been judged (Hole@10): 6.4% for BM25 but 30.6% for the dense retriever DPR. When they judged the holes, the dense model ANCE rose from 0.654 to 0.735 nDCG@10 and overtook BM25, which rose only from 0.656 to 0.668 (Thakur et al., NeurIPS 2021, external).</p>
+  <figure class="card">
+    <div class="sbars" id="beirBars"></div>
+    <figcaption><span class="badge">external · BEIR Table 4, TREC-COVID</span> Hole@10: the share of each system's top 10 that the original labels never judged. The authors conclude the pool was biased toward lexical systems.</figcaption>
+  </figure>
+  <p>Three things to take from this:</p>
+  <ul>
+    <li><b>Precision drops and recall rises, both falsely.</b> Unjudged finds count as misses, and recall's denominator shrinks to the relevant documents that happened to be judged, so recall is overestimated. In the toy, 65% of MiniLM's top-4 slots are holes (Hole@4 = 1 − 0.350 = 0.650).</li>
+    <li><b>Check whether the holes decide the result.</b> Score again with every hole counted as relevant; if the order of two systems flips between the two scorings, the labels, not the systems, decide the winner.</li>
+    <li><b>Fill the holes blind.</b> Judge the unjudged top-k chunks without seeing which system found them, then make a new label version.</li>
+  </ul>
+  <p>Labels are also <b>noisy</b>: two careful judges agree only fairly well. Agreement beyond chance is measured with Cohen's κ, where P(A) is how often they agree and P(E) how often they would agree by chance:</p>
+  <div class="formula">κ = ( P(A) − P(E) ) / ( 1 − P(E) )&nbsp;&nbsp;<span class="c">above 0.8 good · 0.67–0.8 fair · below that, doubtful</span></div>
+  <p>Changing who judges usually changes the absolute scores much more than the order of the systems being compared.</p>
+  <p class="call wrong"><b>Common mistake:</b> "if a chunk isn't labelled relevant, it isn't relevant." It may simply never have been looked at. Report how much of each top k was judged (<b>Judged@k</b>, or its complement <b>Hole@k</b>) next to every metric.</p>
+  <div class="full"><span class="tag">Full · κ worked through</span>
+    <pre>IIR Table 8.2: two judges, 400 pairs: both yes 300, yes/no 20, no/yes 10, both no 70
+P(A) = 370 / 400                          = 0.9250
+P(relevant), pooled over both judges      = 630 / 800 = 0.7875
+P(E) = 0.7875² + 0.2125²                  = 0.6653
+κ    = (0.9250 − 0.6653) / (1 − 0.6653)   = 0.7759
+Cohen's κ with each judge's own marginals (scikit-learn) = 0.7761</pre>
+    <p>The thresholds above come from the same textbook (IIR §8.5). The textbook prints P(relevant) as 0.7878; 630/800 is 0.7875 (κ is unaffected at three decimals). The course checks a single judge against themself instead: a blind re-label of a sample (06 §6.5).</p>
+  </div>
+  <p class="call proj"><b>In your project:</b> when you label, pool candidates from <b>both</b> keyword and dense retrieval, judge every chunk in each run's top k, and report Judged@k beside every retrieval number.</p>
+</section>
+
+<!-- 11 -->
+<section class="s" id="pdf" aria-labelledby="h-pdf">
+  <div class="num">STEP 11 · AT REAL SIZE</div>
+  <h2 id="h-pdf">The same ideas on the climate PDF</h2>
+  <p>Build the same index over the course's climate PDF, cut into 91 windows of 1,000 characters (overlap 200): 1,868 distinct words and 8,107 postings. Now the book's question behaves very differently:</p>
+  <div class="tw"><table>
+    <thead><tr><th>Query</th><th class="n">OR (any word)</th><th class="n">AND (all words)</th><th class="n">Postings read</th></tr></thead>
+    <tbody>
+      <tr><td>main cause of climate change</td><td class="n">90 of 91</td><td class="n">0</td><td class="n">213</td></tr>
+      <tr><td>methane emissions</td><td class="n">34</td><td class="n">5</td><td class="n">39</td></tr>
+      <tr><td>renewable energy</td><td class="n">42</td><td class="n">30</td><td class="n">72</td></tr>
+    </tbody>
+    <caption><span class="badge m">measured · 91 windows</span> "and" occurs in all 91 windows, "the" in 80, "climate" in 77.</caption>
+  </table></div>
+  <p>Common words make OR useless as a filter (90 of 91 windows) and AND too strict (none). That is why real keyword search ranks with weights that downplay common words (P3).</p>
+  <p><b>Labels from spans.</b> The course labels evidence as character spans in the text, not as chunk ids, and derives which chunks are relevant for each chunking: a chunk is relevant if it overlaps any part of the span (06 §7.2). Applied to the draft seed questions on the 91 windows:</p>
+  <div class="tw"><table>
+    <thead><tr><th>Seed</th><th>Evidence</th><th>Relevant windows</th></tr></thead>
+    <tbody>
+      <tr><td>D-002 Paris Agreement year</td><td>one span on p.10</td><td>25 and 26: the span sits in the 200-character overlap</td></tr>
+      <tr><td>D-004 what DAC stands for</td><td>two alternative spans, p.8 or p.23</td><td>22 or 63</td></tr>
+      <tr><td>D-005 coal vs natural gas</td><td>two facts on p.2, both needed</td><td>2, 3 and 4 (window 3 holds parts of both)</td></tr>
+      <tr><td>D-009 when the IPCC was founded</td><td>none: the PDF does not say</td><td>none (an unanswerable question)</td></tr>
+    </tbody>
+    <caption><span class="badge m">measured · 91 windows</span> The seeds are drafts written by an LLM and not yet checked by you: they illustrate, they do not evaluate.</caption>
+  </table></div>
+  <p class="call proj"><b>In your project:</b> spans survive a change of chunking; chunk-id labels go stale the moment you re-chunk.</p>
+</section>
+
+<!-- 12 -->
+<section class="s" id="project" aria-labelledby="h-project">
+  <div class="num">STEP 12 · PUTTING IT TOGETHER</div>
+  <h2 id="h-project">What this means for your test set</h2>
+  <p>Documents, needs and labels together form a <b>test collection</b>, the design behind decades of search evaluation (the "Cranfield" approach, named after the first such experiments). The textbook rule of thumb is about 50 needs, tuned on one part (dev) and reported on another (test). The course follows it at a learning scale:</p>
+  <div class="tw"><table>
+    <thead><tr><th>Idea from P2</th><th>Where it lives in the course</th></tr></thead>
+    <tbody>
+      <tr><td>Needs and queries</td><td>06 eval items, each with a need note; at least 40 answerable and 6 unanswerable to start</td></tr>
+      <tr><td>Labels with a guideline</td><td>evidence spans (<code>evidence_groups</code>), written before any run is seen, guideline versioned (M1)</td></tr>
+      <tr><td>Chunk relevance</td><td>derived from spans per chunking, by overlap (06 §7.2)</td></tr>
+      <tr><td>Holes</td><td>pool from keyword and dense retrieval; report Judged@k (M2)</td></tr>
+      <tr><td>Dev and test</td><td>tune on dev, confirm once on test, keep a holdout (06 §9.4)</td></tr>
+    </tbody></table></div>
+  <p><b>Small sets compare; they do not certify.</b> With fewer than about 50 needs, the labels are still useful for comparing two versions of your system on the same questions, but weak for absolute claims such as "recall is 0.9".</p>
+  <p><b>Qrels measure retrieval only.</b> A reference answer says what a good answer contains; it does not say which chunks hold the evidence, so it cannot score a retriever. The repo's <code>data/q_a.json</code> is exactly that: 44 question–answer pairs with no relevant documents. The book's own evaluation set pairs each question with its expected relevant documents and a reference answer, two different things (<a data-book="chapter 22.pdf" data-page="12">Ch22 p.12/19</a>).</p>
+  <p class="call wrong"><b>Common mistake:</b> "my labels are complete because I labelled carefully." Careful labels of the wrong pool are still incomplete; the check is Judged@k on every run you compare.</p>
+</section>
+
+<!-- 13 -->
+<section class="s full" id="repo" aria-labelledby="h-repo">
+  <span class="tag">Full only</span>
+  <div class="num">STEP 13 · READING THE REPO CRITICALLY</div>
+  <h2 id="h-repo">How the repo frames relevance</h2>
+  <div class="tw"><table>
+    <thead><tr><th>Cell</th><th>What it does</th><th>Read it as</th></tr></thead>
+    <tbody>
+      <tr><td><code>simple_rag.ipynb</code> cell 13</td><td>a retriever cut at k = 2</td><td>a run of size 2; recall is capped before anything is measured</td></tr>
+      <tr><td><code>fusion_retrieval.ipynb</code> cells 14, 17</td><td>calls <code>BM25Okapi</code> an index; scores every document, then cuts</td><td>a scan, not an inverted index (step 5, Full)</td></tr>
+      <tr><td><code>reliable_rag.ipynb</code> cell 14</td><td>an LLM grader that calls a chunk relevant if keywords <i>or</i> meaning are related</td><td>a lenient filter inside the system, not a label (step 4)</td></tr>
+      <tr><td><code>evaluation/define_evaluation_metrics.ipynb</code> cells 3, 9</td><td>the "ground truth" is an answer; a 0 / 0.33 / 0.66 / 1 LLM rubric, averaged</td><td>answer-side scoring, not retrieval labels (step 12)</td></tr>
+      <tr><td><code>evaluation/open-rag-eval-example.ipynb</code> cells 0, 4, 5, 7</td><td>a BEIR dataset, a TREC-style evaluator and the UMBRELA 0–3 relevance scale, judged by an LLM (OpenAI)</td><td>real IR framing, but LLM-written labels: a judge under D-10, and OpenAI is outside the course decisions</td></tr>
+    </tbody></table></div>
+</section>
+
+<!-- 14 -->
+<section class="s full" id="book" aria-labelledby="h-book">
+  <span class="tag">Full only</span>
+  <div class="num">STEP 14 · READING THE BOOK CRITICALLY</div>
+  <h2 id="h-book">What the book says, checked</h2>
+  <div class="tw"><table>
+    <thead><tr><th>Book</th><th>Claim (in our words)</th><th>Our check</th></tr></thead>
+    <tbody>
+      <tr><td><a data-book="chapter 1.pdf" data-page="8">Ch1 p.8/14</a></td><td>the nearest 2–5 chunks are the ones most likely to hold the answer</td><td>a hypothesis: on q1 the nearest document is the grade-0 echo (step 2)</td></tr>
+      <tr><td><a data-book="chapter 3.pdf" data-page="1">Ch3 p.1/14</a>, <a data-book="chapter 13.pdf" data-page="1">Ch13 p.1–2/13</a></td><td>closest is not always relevant; similarity is a rough proxy</td><td class="hit">confirmed on the toy (d02, d08)</td></tr>
+      <tr><td><a data-book="chapter 13.pdf" data-page="9">Ch13 p.9/13</a></td><td>a cross-encoder learns from pairs labelled relevant or not, and inherits that definition</td><td>the labels define relevance, also for models (R3)</td></tr>
+      <tr><td><a data-book="chapter 22.pdf" data-page="4">Ch22 p.4–7/19</a></td><td>precision at K, recall at K over all relevant documents in the knowledge base, then rank-aware metrics</td><td>right; it never says what happens when labels are incomplete (step 10)</td></tr>
+      <tr><td><a data-book="chapter 22.pdf" data-page="12">Ch22 p.12/19</a></td><td>an evaluation set pairs questions with expected relevant documents and reference answers</td><td>qrels in all but name</td></tr>
+      <tr><td>whole book</td><td>(no inverted index, no Boolean search, no word "qrels")</td><td>checked by search: "inverted" and "qrel" never appear</td></tr>
+    </tbody></table></div>
+</section>
+
+<!-- VERIFY -->
+<section class="s" id="verify" aria-labelledby="h-verify">
+  <div class="num">PRACTISE · VERIFY IT YOURSELF</div>
+  <h2 id="h-verify">Rebuild every number and chart in a notebook</h2>
+  <p>Nothing on this page needs to be taken on trust. The notebook <code>study/notebooks/P2_ir_framing_verify.ipynb</code> rebuilds the toy index, both retrievers, the labels, every metric and the PDF facts from code, checks each value against this page, and redraws the charts as interactive Plotly charts. It makes no API call.</p>
+  <ol>
+    <li>Open the notebook in VS Code (or from the P2 page of the study kit).</li>
+    <li>Choose the kernel: <b>Select Kernel → .venv (Python 3.12)</b> of <code>rag_learning</code>.</li>
+    <li><b>Run All</b>. Each step prints its checks (✓ or ✗); the last cell prints the total.</li>
+  </ol>
+  <div class="card" id="nbSummary"><b>What it rebuilds</b> <span class="badge m">95 checks · 10 interactive charts · about 15 seconds</span>
+    <ul style="margin-top:6px;font-size:.92rem">
+      <li><b>Steps 1–4</b> rebuild the toy collection, both retrievers (keyword overlap and MiniLM, offline), the labels and the similarity-vs-grade chart for all 50 pairs.</li>
+      <li><b>Steps 5–7</b> rebuild the inverted index (and check it against a full scan), Boolean AND/OR with postings read, and the q4 tie flip.</li>
+      <li><b>Steps 8–10</b> recompute precision, recall and recall@k curves, runs A/B/C, and the one-retriever pool demo; BEIR's Hole@10 is drawn but labelled external.</li>
+      <li><b>Steps 11–12</b> rebuild the 91-window index of the climate PDF and turn the draft seeds' evidence spans into relevant windows.</li>
+    </ul>
+    <p style="margin-top:6px;font-size:.9rem;color:var(--muted)">A ✗ anywhere means the page and the code disagree: tell the tutor. Rebuild the notebook with <code>uv run python sources/verification/P2/p2_build_verify_nb.py</code>, then run it with <code>p2_verify_nb_run.py</code>.</p></div>
+</section>
+
+<!-- APPLY -->
+<section class="s" id="apply" aria-labelledby="h-apply">
+  <div class="num">APPLY · USE IT ON YOUR OWN DATA</div>
+  <h2 id="h-apply">Are your labels good enough to measure with?</h2>
+  <p>The tool <code>study/tools/qrels_check.py</code> runs this lesson's checks on <b>your</b> documents, questions and labels: are they good enough to measure a retriever with? Run it from <code>rag_learning/</code>:</p>
+  <pre>uv run python study/tools/qrels_check.py --docs "D:\my-project\docs" --questions q.jsonl --qrels labels.jsonl --dense --k 4 --report qrels_report.md
+# labels as spans instead: --spans evidence.jsonl · your own runs: --runs run.trec · a blind second pass: --relabel labels2.jsonl
+# see what a one-retriever pool hides: --pool-from keyword:3</pre>
+  <p>It makes <b>no API call</b>. It builds its own keyword run from an inverted index and, with <code>--dense</code>, a MiniLM run on your machine. Labels can be JSON lines (<code>qid, doc, grade, why, judge, guideline_version, ts</code>), a TREC qrels file, or evidence spans in the course's <code>evidence_groups</code> form, which it turns into chunk labels by overlap. It also writes a clean <code>qrels.trec</code> file.</p>
+  <div class="tw"><table>
+    <thead><tr><th>Report part</th><th>What it tells you</th><th>Lesson step</th></tr></thead>
+    <tbody>
+      <tr><td>1 Collection and index</td><td>chunks, words, postings, the most common words</td><td>5, 11</td></tr>
+      <tr><td>2 Questions vs the index</td><td>questions with no keyword candidate; OR sets that cover most chunks</td><td>6</td></tr>
+      <tr><td>3 Label audit</td><td>missing reasons and versions; spans turned into chunks; 5 pairs to re-read</td><td>3, 11</td></tr>
+      <tr><td>4 Pool and holes</td><td>Judged@k and Hole@k per run; precision with holes counted both ways; the hole list; ties at the cut</td><td>7, 10</td></tr>
+      <tr><td>5 Set vs ranking</td><td>precision, recall and first relevant rank per question and run</td><td>8, 9</td></tr>
+      <tr><td>6 Checklist</td><td>the 12 checks below, ✓ / ✗ / ? with evidence</td><td>all</td></tr>
+      <tr><td>7 Recommendation</td><td>the first thing to fix, or "fit for measuring"</td><td>12</td></tr>
+    </tbody></table></div>
+  <h3>The real-world checklist</h3>
+  <p style="font-size:.92rem;color:var(--muted)">Tick each one for your own project. Your ticks stay in this browser only.</p>
+  <div class="check" id="checklist"></div>
+  <div class="card" id="example" style="display:grid;gap:10px"><div><b>Two examples</b> <span class="badge m">measured · toy and climate PDF</span></div>
+    <p style="font-size:.92rem"><b>The toy, with a one-retriever pool</b> (<code>--pool-from keyword:3</code>): it reproduces step 10 exactly. MiniLM: Judged@4 0.350 (Hole@4 65%), precision@4 0.350 → 0.200, recall 0.933 → 1.000; the keyword retriever's precision stays 0.433. Checklist ✗ on Q5, Q6, Q7 and Q9, so the recommendation is <b>"pool is biased: judge the listed holes, then rerun"</b>, with the 13 holes listed.</p>
+    <p style="font-size:.92rem"><b>The climate PDF, with the 10 draft seeds as spans</b> (<code>--spans study/tools/examples/climate_seed_spans.jsonl --dense --k 4</code>): the index matches step 11 and the derived windows match its table. Spans label every chunk, so there are no holes. Checklist ✗ on Q3 (no guideline version on the seeds) and Q8 (keyword ties at the cut change precision@4 for D-004 and D-007); ? on Q9, because every OR set covers 80 to 91 of the 91 chunks. Recommendation: <b>"labels not ready: fix the format and guideline first"</b>, which is right: all 10 seeds are LLM drafts you have not checked yet.</p>
+    <p style="font-size:.86rem;color:var(--muted)">The examples demonstrate the tool; they do not evaluate a retriever. Full reports: <a data-kit="#/read/study/tools/examples/toy_qrels_report.md" data-path="rag_learning/study/tools/examples/toy_qrels_report.md">toy_qrels_report.md</a> · <a data-kit="#/read/study/tools/examples/climate_qrels_report.md" data-path="rag_learning/study/tools/examples/climate_qrels_report.md">climate_qrels_report.md</a>.</p></div>
+</section>
+
+<!-- CHECK -->
+<section class="s" id="check" aria-labelledby="h-check">
+  <div class="num">CHECK YOURSELF</div>
+  <h2 id="h-check">Can you use it on something new?</h2>
+  <p>Answer without scrolling back; then take the full quiz the next day.</p>
+  <div class="q" id="quick"></div>
+  <p>All questions, with hints, model answers and key points: <a data-kit="#/quiz/P2/next" data-path="rag_learning/study/questions/P2_questions.md">open the P2 quiz</a>. Text versions: <a data-kit="#/read/study/reading/P2_ir_framing.md" data-path="rag_learning/study/reading/P2_ir_framing.md">short</a> · <a data-kit="#/read/concepts/P2_ir_framing.md" data-path="rag_learning/concepts/P2_ir_framing.md">full, with the lab</a>. Next topic: <a data-kit="#/c/P3" data-path="rag_learning/concepts/P3_bm25.md">keyword search with BM25 (P3)</a>.</p>
+</section>
+
+<footer>
+  <p><b>Where every number comes from.</b> <span class="badge m">measured</span> numbers come from the course's local runs on the toy corpus written for P2 and on the repo's climate PDF (<code>sources/verification/P2/P2_FACTS.md</code>, sections S1–S11 and K1–K6); the notebook recomputes them. The toy documents and their labels were written for this lesson. <span class="badge f">formula</span> values are computed on this page. No API was called to build this page.</p>
+  <p><b>External, read 2026-10-17/18:</b> Manning, Raghavan and Schütze, <i>Introduction to Information Retrieval</i> (§1.1–1.3, §8.1–8.5); Thakur et al., BEIR, NeurIPS 2021; Saracevic, JASIST 2007; Thomas et al. 2023 and UMBRELA 2024 (abstracts); Cabanac et al., CLEF 2010 (project page); Voorhees 2002 and Buckley and Voorhees 2004 (abstracts; their numbers are not used). Book text is paraphrased, never copied; book pages open the PDF when this page is opened from the study kit.</p>
+</footer>
+</main>
+</div>
+<button type="button" class="totop" id="totop" aria-label="Back to top">↑</button>
+
+<script>
+"use strict";
+(function () {
+  const $ = (s, el = document) => el.querySelector(s);
+  const $$ = (s, el = document) => [...el.querySelectorAll(s)];
+  const root = document.documentElement;
+  const store = { get(k, d) { try { return localStorage.getItem(k) ?? d; } catch { return d; } },
+                  set(k, v) { try { localStorage.setItem(k, v); } catch { /* private window */ } } };
+  const fmt = (x, d = 3) => Number.isFinite(x) ? x.toFixed(d) : "—";
+  const KIT = location.protocol.startsWith("http") && location.pathname.startsWith("/lesson/");
+  const esc = t => String(t).replace(/&/g, "&amp;").replace(/</g, "&lt;");
+
+  /* ---------- depth, colour, theme ---------- */
+  function setDepth(m) {
+    root.dataset.depth = m;
+    $$(".seg button").forEach(b => b.setAttribute("aria-pressed", String(b.dataset.depth === m)));
+    store.set("lesson-depth", m);
+    spy();
+  }
+  $$(".seg button").forEach(b => b.addEventListener("click", () => setDepth(b.dataset.depth)));
+  function paintColor() {
+    const dark = root.dataset.theme === "dark";
+    $("#color").innerHTML = `<span aria-hidden="true">${dark ? "☀" : "☾"}</span><span class="lbl"> ${dark ? "Light" : "Dark"}</span>`;
+    $("#color").setAttribute("aria-label", dark ? "Switch to light" : "Switch to dark");
+  }
+  $("#color").addEventListener("click", () => { root.dataset.theme = root.dataset.theme === "dark" ? "light" : "dark"; store.set("lesson-color", root.dataset.theme); paintColor(); });
+  paintColor();
+  $("#style").value = root.dataset.style;
+  $("#style").addEventListener("change", e => { root.dataset.style = e.target.value; store.set("lesson-style", e.target.value); });
+
+  /* ---------- contents panel: where am I, hide/show, left/right, back to top ---------- */
+  const links = $$("#toc a");
+  const targets = links.map(a => document.getElementById(a.getAttribute("href").slice(1)));
+  const narrow = () => !!(window.matchMedia && window.matchMedia("(max-width: 980px)").matches);
+  let lastCur = -1;
+  function spy() {
+    const y = window.scrollY + 90;
+    let cur = 0;
+    targets.forEach((t, i) => { if (t && t.offsetParent !== null && t.getBoundingClientRect().top + window.scrollY <= y) cur = i; });
+    links.forEach((a, i) => a.classList.toggle("on", i === cur));
+    const visible = targets.filter(t => t && t.offsetParent !== null);
+    const pos = visible.indexOf(targets[cur]) + 1;
+    const name = links[cur].textContent.replace(/Full$/, "").replace(/^[^A-Za-z]+/, "").trim();
+    $("#where").textContent = `${name} · ${pos} of ${visible.length}`;
+    $("#crumb").textContent = ` › ${links[cur].querySelector(".n").textContent.trim()} ${name}`;
+    const h = document.documentElement.scrollHeight - innerHeight;
+    const pct = (h > 0 ? Math.min(100, 100 * window.scrollY / h) : 0) + "%";
+    $("#bar").style.width = pct; $("#topprog").style.width = pct;
+    $("#totop").classList.toggle("show", window.scrollY > 500);
+    if (cur !== lastCur) {                       // keep the current step visible inside a long panel
+      lastCur = cur;
+      const side = $("#side"), a = links[cur];
+      if (side.scrollHeight > side.clientHeight && (a.offsetTop < side.scrollTop + 40 || a.offsetTop + a.offsetHeight > side.scrollTop + side.clientHeight - 20))
+        side.scrollTop = Math.max(0, a.offsetTop - side.clientHeight / 3);
+    }
+  }
+  addEventListener("scroll", spy, { passive: true });
+  addEventListener("resize", spy);
+  function closeDrawer() { document.body.classList.remove("side-open"); if (narrow()) $("#menu").setAttribute("aria-expanded", "false"); }
+  links.forEach(a => a.addEventListener("click", () => {
+    const t = document.getElementById(a.getAttribute("href").slice(1));
+    if (t && t.closest(".full") && root.dataset.depth === "short") setDepth("full");
+    closeDrawer();
+  }));
+  function setToc(v) { root.dataset.toc = v; store.set("lesson-toc", v); $("#menu").setAttribute("aria-expanded", String(v === "shown")); spy(); }
+  $("#menu").addEventListener("click", () => {
+    if (narrow()) { const open = document.body.classList.toggle("side-open"); $("#menu").setAttribute("aria-expanded", String(open)); }
+    else setToc(root.dataset.toc === "hidden" ? "shown" : "hidden");
+  });
+  $("#main").addEventListener("click", () => { if (document.body.classList.contains("side-open")) closeDrawer(); });
+  function paintSide() { $("#sidepos").textContent = root.dataset.side === "right" ? "⇆ Left" : "⇆ Right"; }
+  $("#sidepos").addEventListener("click", () => { root.dataset.side = root.dataset.side === "right" ? "left" : "right"; store.set("lesson-side", root.dataset.side); paintSide(); });
+  paintSide();
+  $("#menu").setAttribute("aria-expanded", String(!narrow() && root.dataset.toc === "shown"));
+  addEventListener("keydown", e => {
+    if (e.key && e.key.toLowerCase() === "t" && !e.ctrlKey && !e.metaKey && !e.altKey && !/^(INPUT|TEXTAREA|SELECT)$/.test((document.activeElement || {}).tagName || "")) $("#menu").click();
+  });
+  $("#totop").addEventListener("click", () => { window.scrollTo({ top: 0, behavior: "smooth" }); $(".top .t").focus?.(); });
+  const qd = new URLSearchParams(location.search).get("mode");
+  setDepth(qd === "full" || location.hash === "#full" ? "full" : qd === "short" ? "short" : store.get("lesson-depth", "short"));
+
+  /* ---------- way back: all phases (kit Route page, or the offline route map) ---------- */
+  const HOME = KIT ? "/#/" : "../../RAG_ROUTE_MAP.html";
+  ["#home", "#toRoute"].forEach(s => { const a = $(s); if (a) a.href = HOME; });
+  $$(".kitonly").forEach(a => { if (KIT) a.href = "/" + a.dataset.route; else a.remove(); });
+
+  /* ---------- links: study kit routes, book PDFs ---------- */
+  $$("a[data-kit]").forEach(a => {
+    if (KIT) { a.href = "/" + a.dataset.kit; return; }
+    const c = document.createElement("code");
+    c.textContent = a.dataset.path; c.title = "Open from the study kit to get a link";
+    a.replaceWith(c);
+  });
+  $$("a[data-book]").forEach(a => {
+    a.href = (KIT ? "/book/" : "../../../RAG_Made_Simple_The_Complete_Visual_Guide/") + encodeURIComponent(a.dataset.book) + "#page=" + a.dataset.page;
+    a.target = "_blank"; a.rel = "noopener"; a.title = "Open the book at this page";
+  });
+
+  /* ---------- tiny SVG chart helpers ---------- */
+  const keepMeta = svg => $$("title,desc", svg).map(e => e.outerHTML).join("");
+
+  /* ---------- the toy collection (written for P2) ---------- */
+  const DOCS = {
+    d01: "Burning coal, oil and gas releases carbon dioxide, the main cause of recent global warming.",
+    d02: "What is the main cause of climate change? Students often ask this question in class.",
+    d03: "Greenhouse gases trap heat in the atmosphere like a blanket around the Earth.",
+    d04: "Sea levels are rising because warmer ocean water expands and glaciers melt.",
+    d05: "Melting ice sheets in Greenland and Antarctica add water to the oceans.",
+    d06: "Forests absorb carbon dioxide from the air as trees grow.",
+    d07: "Solar panels and wind turbines generate electricity without burning fuel.",
+    d08: "Climate change news, climate change videos, climate change quiz: subscribe now!",
+    d09: "Cattle and rice paddies release methane, a powerful greenhouse gas.",
+    d10: "Heat waves are becoming longer and more frequent in many regions."};
+  const QUERIES = { q1: "main cause of climate change", q2: "why do sea levels rise", q3: "renewable energy", q4: "where does methane come from", q5: "is extreme heat becoming more common" };
+  const GRADES = { q1: { d01: 2, d03: 1, d09: 1, d02: 0, d08: 0, d06: 0 }, q2: { d04: 2, d05: 1 }, q3: { d07: 2 }, q4: { d09: 2, d06: 0 }, q5: { d10: 2, d03: 0 } };
+  const DIDS = Object.keys(DOCS).sort(), QIDS = Object.keys(QUERIES).sort();
+  const tokenize = s => s.toLowerCase().match(/[a-z0-9]+/g) || [];
+  const INDEX = {};
+  DIDS.forEach(d => [...new Set(tokenize(DOCS[d]))].sort().forEach(t => (INDEX[t] = INDEX[t] || []).push(d)));
+  const relOf = q => DIDS.filter(d => (GRADES[q][d] || 0) >= 1);
+  window.__p2 = { INDEX, tokenize, relOf };
+
+  /* ---------- step 2: similarity vs grade (MiniLM cosines, P2_FACTS S6; grades S7) ---------- */
+  (function sim() {
+    const svg = $("#simChart"), pts = [["d02", .8402], ["d01", .6342], ["d04", .5139], ["d03", .4904], ["d10", .4318], ["d08", .3992], ["d05", .3927], ["d06", .2736], ["d09", .2469], ["d07", .1341]];
+    const L = 64, R = 20, T = 34, B = 50, W = 640, H = 300, X = v => L + (v - .1) / .8 * (W - L - R), Y = g => T + (1 - g / 2) * (H - T - B);
+    let s = "";
+    [0, 1, 2].forEach(g => { s += `<line class="grid" x1="${L}" x2="${W - R}" y1="${Y(g)}" y2="${Y(g)}"/><text x="${L - 8}" y="${Y(g) + 4}" text-anchor="end">grade ${g}</text>`; });
+    s += `<line class="ax" x1="${L}" x2="${W - R}" y1="${H - B + 8}" y2="${H - B + 8}"/>`;
+    [.1, .3, .5, .7, .9].forEach(v => { s += `<text x="${X(v)}" y="${H - B + 24}" text-anchor="middle">${v}</text>`; });
+    s += `<text x="${(L + W - R) / 2}" y="${H - 6}" text-anchor="middle">MiniLM cosine with q1</text>`;
+    const seen = {};
+    pts.slice().sort((a, b) => a[1] - b[1]).forEach(([d, c]) => { const g = GRADES.q1[d] || 0, n = seen[g] = (seen[g] || 0) + 1, dy = n % 2 ? -11 : -26;
+      s += `<circle class="${g ? "dot" : "dot2"}" cx="${X(c)}" cy="${Y(g)}" r="6"/><text class="lab" x="${X(c)}" y="${Y(g) + dy}" text-anchor="middle">${d}</text>`; });
+    svg.innerHTML = keepMeta(svg) + s;
+  })();
+
+  /* ---------- step 3: qrels heat table ---------- */
+  $("#qrelsHeat").innerHTML = `<thead><tr><th></th>${DIDS.map(d => `<th class="n">${d}</th>`).join("")}</tr></thead><tbody>` +
+    QIDS.map(q => `<tr><td><b>${q}</b></td>${DIDS.map(d => { const g = GRADES[q][d]; return `<td class="n hc g${g ?? "x"}">${g ?? ""}</td>`; }).join("")}</tr>`).join("") + "</tbody>";
+
+  /* ---------- step 5: incidence rows for q1's words ---------- */
+  const Q1W = ["main", "cause", "of", "climate", "change"];
+  $("#incidence").innerHTML = `<thead><tr><th>word</th>${DIDS.map(d => `<th class="n">${d}</th>`).join("")}<th class="n">df</th></tr></thead><tbody>` +
+    Q1W.map(t => `<tr><td><code>${t}</code></td>${DIDS.map(d => `<td class="n hc ${(INDEX[t] || []).includes(d) ? "g2" : "gx"}">${(INDEX[t] || []).includes(d) ? "✓" : ""}</td>`).join("")}<td class="n">${(INDEX[t] || []).length}</td></tr>`).join("") + "</tbody>";
+
+  /* ---------- step 6: Boolean explorer (index built above from the toy docs) ---------- */
+  let bq = "q1", bop = "and";
+  function drawBool() {
+    $("#bqPick").innerHTML = QIDS.map(q => `<button type="button" class="chip" data-q="${q}" aria-pressed="${q === bq}">${q}: ${QUERIES[q]}</button>`).join("");
+    $$("#bqPick .chip").forEach(c => c.addEventListener("click", () => { bq = c.dataset.q; drawBool(); }));
+    $$("#bqMode button").forEach(b => b.setAttribute("aria-pressed", String(b.dataset.op === bop)));
+    const terms = [...new Set(tokenize(QUERIES[bq]))].sort(), lists = terms.map(t => INDEX[t] || []);
+    let res = bop === "or" ? [...new Set(lists.flat())].sort() : lists.reduce((a, l) => a.filter(d => l.includes(d)), DIDS.slice());
+    if (!terms.length) res = [];
+    const read = lists.reduce((a, l) => a + l.length, 0);
+    $("#bqCards").innerHTML = terms.map((t, i) => `<div class="icard"><h4>${t}</h4><p>${lists[i].length ? lists[i].join(", ") : "—"}</p><p class="meta">df ${lists[i].length}</p></div>`).join("");
+    $("#bqDocs").innerHTML = DIDS.map(d => `<div class="doc ${res.includes(d) ? "cand" : ""}"><span class="id">${d}</span><span>${esc(DOCS[d])}</span></div>`).join("");
+    $("#bqRead").innerHTML = `<b>${bop.toUpperCase()}</b> → ${res.length ? `<b>${res.join(", ")}</b>` : "<b>nothing</b>"} · postings read: <b>${read}</b> · relevant (grade ≥ 1): ${relOf(bq).join(", ")}`;
+  }
+  $$("#bqMode button").forEach(b => b.addEventListener("click", () => { bop = b.dataset.op; drawBool(); }));
+  drawBool();
+
+  /* ---------- step 7: the tie rule on q4 (P2_FACTS K2) ---------- */
+  let tie = "asc";
+  function drawTie() {
+    $$("#tieMode button").forEach(b => b.setAttribute("aria-pressed", String(b.dataset.tie === tie)));
+    const run = tie === "asc" ? ["d06", "d09"] : ["d09", "d06"], r = run.indexOf("d09") + 1;
+    $("#tieRun").innerHTML = run.map((d, i) => `<div class="doc ${d === "d09" ? "cand" : ""}"><span class="id">#${i + 1}</span><span>${d} · score 1 · ${esc(DOCS[d])}</span></div>`).join("");
+    $("#tieRead").innerHTML = `First relevant rank = <b>${r}</b> · RR = <b>${(1 / r).toFixed(2)}</b>`;
+  }
+  $$("#tieMode button").forEach(b => b.addEventListener("click", () => { tie = b.dataset.tie; drawTie(); }));
+  drawTie();
+
+  /* ---------- step 8: recall@k curves (P2_FACTS K3) ---------- */
+  const REC = { q1: { lex: [0, .333, .333, .333, .333, .333, .333, .333, .333, .333], den: [0, .333, .333, .667, .667, .667, .667, .667, 1, 1] },
+                mean: { lex: [.3, .567, .567, .567, .567, .567, .567, .567, .567, .567], den: [.7, .867, .867, .933, .933, .933, .933, .933, 1, 1] } };
+  let recQ = "q1";
+  function drawRec() {
+    $$("#recQ button").forEach(b => b.setAttribute("aria-pressed", String(b.dataset.q === recQ)));
+    const svg = $("#recChart"), L = 58, R = 18, T = 18, B = 46, W = 640, H = 290, X = k => L + (k - 1) / 9 * (W - L - R), Y = v => T + (1 - v) * (H - T - B);
+    let s = "";
+    [0, .25, .5, .75, 1].forEach(v => { s += `<line class="grid" x1="${L}" x2="${W - R}" y1="${Y(v)}" y2="${Y(v)}"/><text x="${L - 8}" y="${Y(v) + 4}" text-anchor="end">${v}</text>`; });
+    for (let k = 1; k <= 10; k++) s += `<text x="${X(k)}" y="${H - B + 18}" text-anchor="middle">${k}</text>`;
+    s += `<text x="${(L + W - R) / 2}" y="${H - 8}" text-anchor="middle">k (documents kept)</text><text transform="translate(14 ${(T + H - B) / 2}) rotate(-90)" text-anchor="middle">set recall</text>`;
+    const d = REC[recQ];
+    s += `<polyline class="s-tfidf" points="${d.lex.map((v, i) => `${X(i + 1)},${Y(v)}`).join(" ")}"/><polyline class="s-bm25" points="${d.den.map((v, i) => `${X(i + 1)},${Y(v)}`).join(" ")}"/>`;
+    s += `<text class="lab" x="${X(10) - 4}" y="${Y(d.lex[9]) + 18}" text-anchor="end">keyword overlap (dashed)</text><text class="lab" x="${X(10) - 4}" y="${Y(d.den[9]) - 8}" text-anchor="end">MiniLM</text>`;
+    s += `<line class="s-ceil" x1="${X(4)}" x2="${X(4)}" y1="${T}" y2="${H - B}"/><text class="lab" x="${X(4) + 4}" y="${T + 12}">v0 uses k = 4</text>`;
+    svg.innerHTML = keepMeta(svg) + s;
+  }
+  $$("#recQ button").forEach(b => b.addEventListener("click", () => { recQ = b.dataset.q; drawRec(); }));
+  drawRec();
+
+  /* ---------- stacked bars helper ---------- */
+  function bars(el, rows, max) {
+    el.innerHTML = rows.map(r => `<div class="sbar"><span>${r.label}</span><span class="track" role="img" aria-label="${r.aria}">` +
+      r.parts.map(p => `<span class="${p.cls}" style="width:${(100 * Math.max(0, p.v) / max).toFixed(2)}%"></span>`).join("") + `</span><span class="v">${r.total}</span></div>`).join("");
+  }
+
+  /* ---------- step 9: runs A, B, C ---------- */
+  $("#abcRuns").innerHTML = [["A", ["d02", "d01", "d08"]], ["B", ["d01", "d08", "d02"]], ["C", ["d01", "d03", "d09"]]].map(([n, run]) =>
+    `<div class="sbar"><span>run ${n}</span><span class="track" role="img" aria-label="run ${n}: ${run.join(", ")}">` +
+    run.map(d => `<span class="${relOf("q1").includes(d) ? "p5" : "pm"}" style="width:33.33%;display:flex;align-items:center;justify-content:center;font-size:.74rem;font-family:var(--f-mono);color:var(--ink)">${d}</span>`).join("") + `</span><span class="v"></span></div>`).join("");
+
+  /* ---------- step 10: the pool demo (P2_FACTS K4) and BEIR (external) ---------- */
+  let pm = "full";
+  function drawPool() {
+    $$("#poolMode button").forEach(b => b.setAttribute("aria-pressed", String(b.dataset.pool === pm)));
+    const top = ["d02", "d01", "d04", "d03"], pool = ["d01", "d02", "d08"], rel = pm === "full" ? relOf("q1") : relOf("q1").filter(d => pool.includes(d));
+    $("#poolRun").innerHTML = top.map((d, i) => { const judged = pm === "full" || pool.includes(d), r = rel.includes(d);
+      return `<div class="doc ${r ? "cand" : ""}"><span class="id">#${i + 1}</span><span>${d} · ${!judged ? "<i>never judged → counted as not relevant</i>" : r ? "<b>relevant</b>" : "judged not relevant"}</span></div>`; }).join("");
+    const P = pm === "full" ? { lex: .433, den: .350 } : { lex: .433, den: .200 };
+    bars($("#poolBars"), [
+      { label: "keyword", parts: [{ cls: "p2", v: P.lex }], total: P.lex.toFixed(3), aria: `keyword mean precision at 4: ${P.lex}` },
+      { label: "MiniLM", parts: [{ cls: "p1", v: P.den }], total: P.den.toFixed(3), aria: `MiniLM mean precision at 4: ${P.den}` }], .5);
+    const p4 = top.filter(d => rel.includes(d)).length / 4;
+    $("#poolRead").innerHTML = `q1, MiniLM: precision@4 = <b>${p4.toFixed(3)}</b>` + (pm === "full" ? " (d01 and d03 relevant)" : ` · judged ${top.filter(d => pool.includes(d)).length} of 4 · d03 is relevant but was never judged`) + ` · mean recall@4: keyword <b>${pm === "full" ? "0.567" : "1.000"}</b>, MiniLM <b>${pm === "full" ? "0.933" : "1.000"}</b>`;
+  }
+  $$("#poolMode button").forEach(b => b.addEventListener("click", () => { pm = b.dataset.pool; drawPool(); }));
+  drawPool();
+  bars($("#beirBars"), [["BM25", 6.4, "p2"], ["docT5query", 2.8, "p2"], ["ANCE", 14.4, "p1"], ["DPR", 30.6, "p1"], ["TAS-B", 31.8, "p1"]].map(([n, v, c]) =>
+    ({ label: n, parts: [{ cls: c, v }], total: v.toFixed(1) + "%", aria: `${n} Hole at 10: ${v} percent` })), 35);
+
+  /* ---------- apply: the real-world checklist ---------- */
+  const CHECKS = [["Every question has at least one label, and \"no answer\" is marked explicitly.", "Give every question at least one label; mark a question with no relevant chunk \"answerable\": false, so 'no answer' is a decision, not a gap. Every label must point at an existing chunk, once."], ["Every label has a reason in your own words.", "Write `why` in your own words (more than 3 words): what in the chunk meets the need, or why a look-alike does not. With spans, the group's `fact` is the reason; an unanswerable item needs a `notes` line."], ["Every label carries the guideline version.", "Put `guideline_version` on every label (or --guideline-version for a TREC file); bump it whenever a guideline sentence changes."], ["Labels were written before you looked at any run.", "Record `ts` when you label and keep each run file's time; label from the need and the chunks, before you open any ranked list."], ["The pool covers more than one retriever (keyword and dense).", "Pool the top k (10 is common) of both the keyword run and the dense run, judge the union, rerun. --pool-from keyword:3 shows what a one-retriever pool hides."], ["Hole@k is under your limit for every run you compare.", "Hole@k = unjudged chunks in a run's top k ÷ k. Judge the holes listed in section 4, then rerun."], ["Counting holes as relevant or not does not swap the order of two runs.", "Compute each run's P@k twice: holes as not relevant (lower bound) and holes as relevant (upper bound). If two runs swap order, the unjudged chunks decide the winner."], ["Ties at the cut-off are reported, and the tie rule is stated.", "Compare the score at rank k with the score at rank k + 1. State the tie rule, and say whether another order would change P@k."], ["Questions no keyword can find, and questions whose OR set is most of the collection, are listed.", "Look up each question token's postings: no postings at all = vocabulary mismatch (keyword search can never find it); an OR set over half the chunks = common words dominate."], ["A blind re-label agrees with your first labels (raw ≥ 0.90, κ ≥ 0.67).", "After 7 days or more, re-label at least 10 items with the old labels hidden (--relabel); raw agreement ≥ 0.90 (06 §6.5) and κ ≥ 0.67."], ["Labels are evidence spans, not chunk ids of one chunker.", "Label evidence spans (06 evidence_groups) and let the tool derive chunk labels with any_overlap; chunk-id labels are void as soon as you re-chunk."], ["You re-read a sample of \"relevant\" pairs against the need, not the words.", "Re-read the 5 pairs listed in section 3: does the chunk help answer the need, or does it only share words? Then check one ambiguous question in full."]];
+  const saved = JSON.parse(store.get("p2-checklist", "[]") || "[]");
+  $("#checklist").innerHTML = CHECKS.map(([t, how], i) => `<label><input type="checkbox" data-i="${i}" ${saved.includes(i) ? "checked" : ""}><span><b>Q${i + 1}.</b> ${esc(t)}<span class="how">How to check: ${esc(how)}</span></span></label>`).join("");
+  $$("#checklist input").forEach(c => c.addEventListener("change", () => store.set("p2-checklist", JSON.stringify($$("#checklist input:checked").map(x => Number(x.dataset.i))))));
+
+  /* ---------- check yourself ---------- */
+  const QS = [
+    { q: "A chunk repeats your question word for word and nothing else. Its cosine is the highest of all. What grade does it get under the guideline?", a: ["2: it matches best", "0: it does not help with the need", "1: it is about the topic"], ok: 1,
+      why: ["The score is system relevance; the grade asks whether it helps.", "Right: like d02 for q1, it echoes the question and answers nothing.", "Being on topic is not enough for grade 1, which needs part of the answer."] },
+    { q: "Labels were written only for the keyword retriever's top 3. The dense retriever finds a relevant chunk nobody judged. How is it counted?", a: ["as relevant, because it is", "as not relevant, because it is unjudged", "it is skipped in the metric"], ok: 1,
+      why: ["Nobody labelled it, so the tools cannot know.", "Right: unjudged counts as not relevant, so the dense retriever is under-scored. Report Judged@k.", "Evaluation tools do not skip it; they count it as a miss."] },
+    { q: "Two runs return the same three chunks in a different order. Which number can tell them apart?", a: ["set precision", "set recall", "the first relevant rank"], ok: 2,
+      why: ["The set is the same, so precision is the same.", "The set is the same, so recall is the same.", "Right: like runs A and B for q1 (rank 2 vs 1)."] },
+  ];
+  $("#quick").innerHTML = QS.map((x, i) => `<fieldset><legend>${i + 1}. ${x.q}</legend>` + x.a.map((a, j) => `<label><input type="radio" name="q${i}" value="${j}"> ${a}</label>`).join("") + `<div class="fb" id="fb${i}" aria-live="polite"></div></fieldset>`).join("");
+  QS.forEach((x, i) => $$(`input[name=q${i}]`).forEach(r => r.addEventListener("change", () => {
+    const j = Number(r.value), fb = $("#fb" + i);
+    fb.className = "fb show " + (j === x.ok ? "ok" : "no"); fb.textContent = x.why[j];
+  })));
+  spy();
+})();
+</script>
+</body>
+</html>

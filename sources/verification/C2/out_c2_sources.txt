@@ -1,0 +1,47 @@
+PASS repo HEAD 009adba2be1bef49780ef73b6dd3c18fd24b035b
+PASS all_rag_techniques/simple_rag.ipynb cell 10: 6/6 needles
+PASS all_rag_techniques/simple_rag.ipynb cell 11: 2/2 needles
+PASS all_rag_techniques/simple_rag.ipynb cell 13: 1/1 needles
+PASS all_rag_techniques/context_enrichment_window_around_chunk.ipynb cell 13: 2/2 needles
+PASS all_rag_techniques/proposition_chunking.ipynb cell 9: 3/3 needles
+PASS all_rag_techniques/reliable_rag.ipynb cell 6: 4/4 needles
+PASS all_rag_techniques/document_augmentation.ipynb cell 6: 2/2 needles
+PASS all_rag_techniques/choose_chunk_size.ipynb cell 10: 3/3 needles
+PASS all_rag_techniques/proposition_chunking.ipynb cell 9: imports from the pre-1.0 path langchain.text_splitter
+PASS all_rag_techniques/reliable_rag.ipynb cell 6: imports from the pre-1.0 path langchain.text_splitter
+PASS context_enrichment cell 13: no overlap/size validation (no raise)
+PASS context_enrichment cell 13: stores the whole text in metadata
+PASS helper_functions.py L48-L76 contains 'def encode_pdf(path, chunk_size=1000, chunk_overlap=200)'
+PASS helper_functions.py L48-L76 contains 'PyPDFLoader(path)'
+PASS helper_functions.py L48-L76 contains 'RecursiveCharacterTextSplitter('
+PASS helper_functions.py L48-L76 contains 'length_function=len'
+PASS helper_functions.py L48-L76 contains 'split_documents(documents)'
+PASS helper_functions.py L48-L76 contains 'replace_t_with_space(texts)'
+PASS helper_functions.py L48-L76 contains 'OpenAIEmbeddings()'
+PASS helper_functions.py L48-L76 contains 'FAISS.from_documents('
+PASS helper_functions.py L73 = OpenAIEmbeddings()
+PASS helper_functions.py L18-L31 replace_t_with_space replaces tabs only
+PASS chapter 1.pdf p.4/14: /1,000/ x1
+PASS chapter 1.pdf p.4/14: /\b200\b/ x2
+PASS chapter 1.pdf p.4/14: /overlap/ x4
+PASS chapter 1.pdf p.5/14: /clean/ x2
+PASS chapter 1.pdf p.5/14: /\btabs?\b/ x1
+PASS chapter 1.pdf p.7/14: /\b1000\b/ x1
+PASS chapter 1.pdf p.7/14: /\bclean\b/ x1
+PASS chapter 1.pdf p.10/14: /most important/ x1
+PASS chapter 1.pdf p.10/14: /\b100\b/ x1
+PASS chapter 1.pdf p.11/14: /5,000/ x1
+PASS chapter 1.pdf p.11/14: /just right/ x2
+PASS chapter 1.pdf p.12/14: /overkill/ x1
+PASS chapter 1.pdf p.13/14: /overlap/ x1
+PASS Appendix.pdf p.14/23: /chunk overlap/ x1
+PASS Appendix.pdf p.16/23: /fixed-size chunking/ x1
+PASS chapter 4.pdf p.2/15: /blur/ x1
+PASS chapter 7.pdf p.2/11: /pronoun/ x2
+PASS chapter 7.pdf p.2/11: /heading/ x1
+PASS chapter 8.pdf p.1/11: /partial/ x1
+PASS chapter 8.pdf p.2/11: /character counter/ x1
+PASS chapter 9.pdf p.2/14: /topic/ x5
+PASS Appendix glossary pages 13-20: no 'Token' entry
+
+ALL PASS

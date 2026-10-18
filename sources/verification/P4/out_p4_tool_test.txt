@@ -1,0 +1,52 @@
+=== 1 chunking
+PASS  1 v0 chunker: 97 chunks: got 97 | expected 97
+PASS  1 v0 chunker: every text equals v0's chunks (06 + 07 recipe): got True | expected True
+PASS  1 v0 chunker: pages equal v0's: got True | expected True
+PASS  1 windows chunker: P3's 91 windows (1000 / step 800): got [91, True] | expected [91, True]
+PASS  1 bad sizes raise: got [True, True, True] | expected [True, True, True]
+PASS  1 recursive_spans tile a text within the size: got True | expected True
+=== 2 inputs
+PASS  2 .txt questions skip comments and blanks: got ['first question', 'second question'] | expected ['first question', 'second question']
+PASS  2 .jsonl questions: string expect becomes a list; ids default to Q<n>: got [['x'], 'Q1', ['y', 'z'], 'B', 't'] | expected [['x'], 'Q1', ['y', 'z'], 'B', 't']
+PASS  2 bad JSON names the line: got True | expected True
+PASS  2 a missing q raises: got True | expected True
+PASS  2 unsupported file type raises: got True | expected True
+PASS  2 a missing path raises: got True | expected True
+=== 3 the climate example
+PASS  3 setup: dim, limit, pooling, Normalize, prompts (K1): got [384, 256, 'mean', True, {'query': '', 'document': ''}] | expected [384, 256, 'mean', True, {'query': '', 'document': ''}]
+PASS  3 tokens per chunk min / median / max; over 256; over 128 (K7): got [59, 149, 182, 0, 70] | expected [59, 149, 182, 0, 70]
+PASS  3 vector lengths as returned (K2): got [0.9999998807907104, 1.0000001192092896] | expected [1.0, 1.0]
+PASS  3 self-retrieval 5/5 (K5); no near-duplicates; pair median (K6): got [5, 0, 0.39059579372406006] | expected [5, 0, 0.3906]
+PASS  3 right chunks found per draft question (K1, opening words of each span): got [[7], [27], [23, 67], [3, 4], [27, 85]] | expected [[7], [27], [23, 67], [3, 4], [27, 85]]
+PASS  3 base ranks D-001..D-008 (K4): got [3, 3, 1, 1, 1, 1, 2, 2] | expected [3, 3, 1, 1, 1, 1, 2, 2]
+PASS  3 base: Hit@1, Hit@4, MRR@10 (K4): got [4, 8, 0.7083333333333334] | expected [4, 8, 0.708]
+PASS  3 rerank: every right chunk first (K9): got [1, 1, 1, 1, 1, 1, 1, 1] | expected [1, 1, 1, 1, 1, 1, 1, 1]
+PASS  3 dims 256, 128: MRR@10 (K11): got [0.75, 0.5833333333333334] | expected [0.75, 0.583]
+PASS  3 int8: ranks and MRR@10 (K12): got [[4, 3, 1, 1, 1, 1, 2, 1], 0.7604166666666666] | expected [[4, 3, 1, 1, 1, 1, 2, 1], 0.76]
+PASS  3 best score of D-002, D-009, D-010 (K4): got [0.4606130123138428, 0.3098912835121155, 0.5195779800415039] | expected [0.4606, 0.3099, 0.5196]
+PASS  3 D-002 top 4 = chunks 69, 68, 27, 17 (K3): got ['#69', '#68', '#27', '#17'] | expected ['#69', '#68', '#27', '#17']
+PASS  3 8 labelled questions: got 8 | expected 8
+=== 4 checklist
+PASS  4 example verdicts: got 'C1✓ C2✓ C3? C4? C5✓ C6✗ C7✓ C8? C9✓ C10✗ C11? C12?' | expected 'C1✓ C2✓ C3? C4? C5✓ C6✗ C7✓ C8? C9✓ C10✗ C11? C12?'
+PASS  4 recommendation: mechanism only (8 < 10 labelled): got True | expected True
+PASS  4 no threshold: C6 ✓; C9, C10 not run: got ['✓', '?', '?'] | expected ['✓', '?', '?']
+PASS  4 threshold 0.9 (outside the spread): C6 ?: got '?' | expected '?'
+PASS  4 the licence is read from the local model card: got True | expected True
+=== 5 branches
+PASS  5 chunks over 256 tokens: C1 ✗, recommendation shorten: got ['✗', True] | expected ['✗', True]
+PASS  5 the ignored characters are counted: got True | expected True
+PASS  5 a model without Normalize: C2 ✗, recommendation normalise: got ['✗', False, True] | expected ['✗', False, True]
+PASS  5 a manifest with another model id: C3 ✗, recommendation re-embed: got ['✗', True] | expected ['✗', True]
+PASS  5 a matching manifest: C3 ✓: got '✓' | expected '✓'
+PASS  5 a repeated paragraph: C7 ✗ with one pair: got ['✗', 1] | expected ['✗', 1]
+PASS  5 12 labelled questions: C8 judged (✓), recommendation not 'mechanism only': got [12, '✓', False] | expected [12, '✓', False]
+PASS  5 an expect text found nowhere is flagged: got [True, 0] | expected [True, 0]
+PASS  5 recommendation rule order (C1 > C5 > C3 > C2 > data > C8 > rerank > C10 > default): got [True, True, True, True, True, True, True] | expected [True, True, True, True, True, True, True]
+=== 6 CLI
+PASS  6 the CLI exits 0 and equals the saved example report: got [0, True] | expected [0, True]
+PASS  6 a second run is byte-identical: got True | expected True
+PASS  6 --provider cohere refuses (exit 2) and names the missing llmops cache: got [2, True] | expected [2, True]
+PASS  6 the tool imports no network or API client: got [] | expected []
+PASS  6 the tool forces the offline Hugging Face mode: got True | expected True
+
+44/44 tool checks passed

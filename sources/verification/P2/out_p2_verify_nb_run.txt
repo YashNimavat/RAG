@@ -1,0 +1,4 @@
+cells with errors: 0
+Plotly figures saved: 10; runtime 15.5 s; file study\notebooks\P2_ir_framing_verify.ipynb 146 KiB
+95 checks passed / 0 failed
+SKIPPED lines: 0

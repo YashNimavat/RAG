@@ -1,0 +1,5 @@
+SKIPPED  §11 Cohere column (dimension, raw lengths, search_query vs search_document, Hit@4): no recorded pack at study\llmops\replay\P4_cohere_pack.json: the LLMOps notebook is not built yet, so the lesson's Cohere column stays empty
+cells with errors: 0
+Plotly figures saved: 8; runtime 25.8 s; file study\notebooks\P4_embeddings_verify.ipynb 137 KiB
+115 checks passed / 0 failed
+SKIPPED lines: 1

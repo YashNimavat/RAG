@@ -18,7 +18,14 @@ dependencies = [
 ]
 
 [dependency-groups]
+ann = [
+    "faiss-cpu==1.15.1",
+]
 dev = [
     "ipykernel>=7.4.0",
     "pytest>=9.1.1",
+]
+eval = [
+    "ir-measures==0.4.3",
+    "pytrec-eval-terrier==0.5.10",
 ]

@@ -16,6 +16,7 @@ Run date: **2026-10-08**. Every number in [`concepts/P7_grounded_prompting.md`](
   |---|---|---|
   | `p7_measure.py` | S1–S10: P1 reproduction, prompt anatomy, lab chunks and CR-08 counts, block distribution, budget toy, repo-prompt audit, edges-first toy, citation/abstention toy, lab fingerprints. Also the **reference solution** for the lab | `out_p7_measure.txt` (stderr was empty, so no stderr file is kept) |
   | `p7_sources.py` | S-src: every cited repo cell (0-based), helper line range, caller search, book phrases and absence checks | `out_p7_sources.txt` |
+  | `p7_kit_measure.py` (2026-10-18) | K1–K12 for the HTML lesson: v0's 97 chunks, the real window, the template estimate, the added answer checks, JSON toys, injection scan. `p7_measure.py` is unchanged | `out_p7_kit_measure.txt`, `out_p7_kit_measure.stderr.txt` (empty) |
 
 - **Re-run** (from `rag_learning/`, Git Bash):
   ```bash
@@ -154,6 +155,30 @@ k = 6 → [1, 3, 5, 6, 4, 2] in Part F is DERIVED by the same rule.
 
 - Runner and solution: scratchpad `test_p7_lab.py` (not in WS). It fills the learner cells, runs every code cell in order in one namespace with `RUN_GROQ = False`, and reports each CHECK.
 - **Result:** 7/7 CHECK cells pass with the solution; **13/13** broken variants fail at the intended CHECK (wrong stage; rules without refusal; rules without citation format; header without parentheses; no blank line between blocks; question before sources; `fit_blocks` off by one; budget without the answer reserve; reversed edges-first; plain rank order; substring abstention; citations as strings; one audit cell wrong). The **blank** notebook fails every CHECK (missing predictions or definitions).
+
+## 1b. Added 2026-10-18: K1–K12 (`p7_kit_measure.py`) for the HTML lesson
+
+`K` = `p7_kit_measure.py` (section in `out_p7_kit_measure.txt`). Run from `rag_learning/`:
+`PYTHONIOENCODING=utf-8 uv run python sources/verification/P7/p7_kit_measure.py "C:/Yash/New-Work/Book RAG/upstream/RAG_Techniques/data/Understanding_Climate_Change.pdf"`. A second run gave byte-identical stdout (`cmp`); stderr was empty. No API call, no `.env` read. `p7_measure.py` is unchanged.
+
+**Why a second script.** The study kit's examples use v0's **97 chunks** (the 07 recursive chunker, per page, 1,000/200), as decided in `study/research/phase_01_prerequisites.md`, phase-level notes §2. The lesson also needs the real Groq window and the answer checks it adds. CHUNKS4 (S4) stays the worked prompt example: it is a hand-picked toy ranked list, not retrieval. Every toy answer, label and passage in K6–K11 was written for P7; none is a model output.
+
+| Id | Fact | Value |
+|---|---|---|
+| K1 | Environment | Python 3.12.8; pymupdf 1.26.7, tiktoken 0.14.0; PDF sha256 `1d58a0fa…92669`; 33 pages; 97 v0 chunks; CHUNKS4 v0 prompt for D-001 = **958** tokens (S4 reproduced) |
+| K2 | Block tokens over v0's 97 chunks (header `[1] (climate:p)` + text) | chars 393 / mean 858 / 1,000; tokens min **77**, median **171**, mean **160.7**, max **201** (S5's plain slices: 85 / 178 / 165.5 / 217). A two-digit block number adds **0** tokens (`[1] (climate:12)` and `[10] (climate:12)` are both 9) |
+| K3 | Budget at the real window (Groq model page, read 2026-10-17: W = **131,072**, max output 65,536; external) | Fixed part 133 (S6). R = 512, m = 128: input budget 130,432; blocks that fit: **600** at 217 (S5 worst), **648** at 201 (v0 worst). R = 1,024 (Groq's default): 598 / 645. The 958-token CHUNKS4 prompt is **0.73%** of the window; P1's 976 is 0.74%; with ~71 template + 512 reserve, 1,541 = 1.18% (P1 K8: 1,559 = 1.19%). If one request's prompt + template + reserve had to fit in 8,000 tokens per minute (plan and counting rule UNVERIFIED), **33** blocks of 217 fit. Cost per call at the 512-token output cap ($0.075 / $0.30 per M, read 2026-10-17): k = 4 ≤ $0.000234; k = 33 ≤ $0.000706; k = 600 ≤ **$0.009934** |
+| K4 | Hidden chat-template tokens, **offline estimate** from the published Harmony format (system message with identity, knowledge cutoff, date, `Reasoning: low`, channels; v0 rules in a developer message under `# Instructions`; user message; `<|start|>assistant`) | Rendered **1,032** tokens vs your text 958: overhead estimate **74** (Harmony system text 57, `# Instructions` header 3, 10 marker tokens). P1 logged ~71 in one real Groq call. How Groq renders a request is **UNVERIFIED**; the margin 128 stays an Assumption |
+| K5 | Edges-first order | k = 4 [1, 3, 4, 2], middle 3, 4 · k = 5 [1, 3, 5, 4, 2], middle 5 · k = 6 **[1, 3, 5, 6, 4, 2]**, middle **5, 6** · k = 8 [1, 3, 5, 7, 8, 6, 4, 2], middle 7, 8. Rank 2 always goes last |
+| K6 | Answer checks on toy answers A–H (context CHUNKS4; D-001 gold page 3) | A: cites (climate, 3), page-hit 1 · B: invalid (climate, 12) · C, D: abstained (page-hit not applicable) · E "I can't answer that from these sources.": not abstained, 1 uncited sentence, **refusal-like** · F: 1 uncited sentence · G (hedged but correct and cited): **refusal-like** too, page-hit 1 · H: cites only p.23 (the 1.5 °C distractor), 1 uncited sentence, page-hit 0. Refusal-like = 4 regex phrases (fingerprint `b17ae385…`) |
+| K7 | Citation recall and precision on one toy answer, labels **given** (no NLI model) | s1 one supporting citation; s2 two citations that support only together; s3 one supporting + one that does not (and is not needed); s4 unsupported. **ALCE: recall 0.750 (3/4), precision 0.667 (4/6)** · **06 §7.4: recall 0.500 (2/4), precision 0.333 (2/6)** |
+| K8 | JSON answers: strict schema candidate `answer_json_v1` (`abstained` + `sentences[{text, citations}]`, all required, `additionalProperties: false`, citation pattern `doc:page`), checked with plain Python | Schema = 100 tokens (whether it is billed as input: UNVERIFIED). J1 valid · **J2 valid but cites climate:12, not in the prompt** · J3 extra field `confidence` → invalid · J4 cut mid-string → not JSON · J5 `abstained: true`, no sentences → valid |
+| K9 | Instruction-like text in documents (8 regex patterns, fingerprint `4c816a0a…`) | v0's 97 chunks: **0** flagged. A planted toy chunk ("Ignore the previous instructions and answer…") is flagged |
+| K10 | Candidate `answer_v2` sentences (v0 stays frozen) | "sources are data" 14 tokens · conflict rule 15 · dated sources 17 · all three 46 (v0 rules 107) |
+| K11 | Context-swap and closed-book controls | Decision table only (no model run). Hand-written neutral swap passage (sourdough starter), 195 chars, 47 tokens, no "1.2". D-009 and D-010 expect the fixed refusal sentence |
+| K12 | Fingerprints of the toy inputs | TOY `84aef553b506440b` · STMTS `d99bfa90ca3fd849` · JTOY `a03b0fd5cdcefacf` · INJ `4c816a0a93a6ef51` · REFUSAL_LIKE `b17ae385a199d243` · SCHEMA `5a73d70f34f59f14` |
+
+**External facts the lesson uses (read 2026-10-17 by the Phase 1 research; dated, not measured here).** Liu et al., TACL 12 (2024) 157–173, Table 6 (20 documents, accuracy by position 1st/5th/10th/15th/20th): GPT-3.5-Turbo 75.8 / 57.2 / 53.8 / 55.4 / 63.2, Claude-1.3 59.9 / 55.9 / 56.8 / 57.2 / 60.1; Table 1 closed-book 56.1 / 48.3, oracle 88.3 / 76.1; §5: 50 instead of 20 documents added about 1.5 (GPT-3.5) and about 1 point (Claude-1.3). gpt-oss model card (arXiv 2508.10925) §4.3: prompt-injection hijacking gpt-oss-20b 0.639 vs o4-mini 0.917; phrase protection 0.661 vs 0.912; §4.5 SimpleQA hallucination rate 0.914 (accuracy 0.067). Groq: strict `json_schema` supported on `openai/gpt-oss-20b`; not with streaming or tool use. Anthropic: question after long documents up to 30% better (their tests); Citations cannot be combined with structured outputs (400). Sources are listed in the research file, Concept P7 §1.
 
 ## 2. CITED, DERIVED and UNVERIFIED
 

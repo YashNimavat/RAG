@@ -294,6 +294,25 @@ wheels = [
 ]
 
 [[package]]
+name = "faiss-cpu"
+version = "1.15.1"
+source = { registry = "https://pypi.org/simple" }
+dependencies = [
+    { name = "numpy" },
+    { name = "packaging" },
+]
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/9b/ed/d1b8e6720e9947469cab45dbfbf1b82e1d5acf9fe063dc97a6e82db83094/faiss_cpu-1.15.1-cp310-abi3-macosx_14_0_arm64.whl", hash = "sha256:ea9e12d540ca8ac0347b831d034c0f6d7ff5eed20523a247db44b3543ad2aad4", size = 4987669, upload-time = "2026-09-16T18:33:29.409Z" },
+    { url = "https://files.pythonhosted.org/packages/ef/75/eb2f36334a58b343a87a2c1feaa747655fde7efdaad9c5d9eb367da89f15/faiss_cpu-1.15.1-cp310-abi3-macosx_15_0_x86_64.whl", hash = "sha256:f52e727992ce86a783f61657f0c4f3498a235883083b982ba1be49d05f924450", size = 7237206, upload-time = "2026-09-16T18:33:31.404Z" },
+    { url = "https://files.pythonhosted.org/packages/a3/90/695eeab44921bb475611fc71ec0a74af82080f496cb7586c6490e4f322d2/faiss_cpu-1.15.1-cp310-abi3-manylinux_2_27_aarch64.manylinux_2_28_aarch64.whl", hash = "sha256:ffa71b14b3090bc076f8b026554178868fdbfe2f26fe644da629405836369039", size = 9890446, upload-time = "2026-09-16T18:33:33.451Z" },
+    { url = "https://files.pythonhosted.org/packages/6c/f4/098bd9d178ae36fa078c66068d3264e27fff4308d5131655e5e743153d4c/faiss_cpu-1.15.1-cp310-abi3-manylinux_2_27_x86_64.manylinux_2_28_x86_64.whl", hash = "sha256:f2c31b7f2f6647eb76829a5cfe3c398fb9346df9f26b1d4db35269c91eb58c33", size = 18834180, upload-time = "2026-09-16T18:33:36.023Z" },
+    { url = "https://files.pythonhosted.org/packages/3c/a7/d9e88b337f9636e0e80b651bfd27dbff533820d26c250bb60d2122de18a9/faiss_cpu-1.15.1-cp310-abi3-musllinux_1_2_aarch64.whl", hash = "sha256:2d0a59d8ee9ffcac34608f591d16b617d9056e12a26a8b8cf0015b6b334e33e1", size = 11447194, upload-time = "2026-09-16T18:33:38.883Z" },
+    { url = "https://files.pythonhosted.org/packages/01/28/0855b161a081556a1df0ff14d5e7e73db23bd24ed85505009387fb61762e/faiss_cpu-1.15.1-cp310-abi3-musllinux_1_2_x86_64.whl", hash = "sha256:d4a250000112ac26ae79530e67a18fa986c8b7b0329154aefeb7692b270ed366", size = 19574480, upload-time = "2026-09-16T18:33:42.213Z" },
+    { url = "https://files.pythonhosted.org/packages/69/19/a4bd07c73f17556eff1599e27918b8a97eaab468aea7b143bd49ca0535eb/faiss_cpu-1.15.1-cp312-cp312-win_amd64.whl", hash = "sha256:38d192695210a51ff72449d8802ff62601568fcfc6372222a64a069da0ecdb10", size = 16293368, upload-time = "2026-09-16T18:33:55.001Z" },
+    { url = "https://files.pythonhosted.org/packages/56/35/c79cd7321c6d8af277691e7a7ca1dd362e0fff24a9697aa944781cdb8c75/faiss_cpu-1.15.1-cp312-cp312-win_arm64.whl", hash = "sha256:4fd6623ed931d16256b268ac2984f672cdf1929702e24b3e741798d0bb08804f", size = 9039754, upload-time = "2026-09-16T18:33:57.835Z" },
+]
+
+[[package]]
 name = "fastavro"
 version = "1.13.1"
 source = { registry = "https://pypi.org/simple" }
@@ -497,6 +516,18 @@ dependencies = [
 sdist = { url = "https://files.pythonhosted.org/packages/ef/4c/5dd1d8af08107f88c7f741ead7a40854b8ac24ddf9ae850afbcf698aa552/ipython_pygments_lexers-1.1.1.tar.gz", hash = "sha256:09c0138009e56b6854f9535736f4171d855c8c08a563a0dcd8022f78355c7e81", size = 8393, upload-time = "2025-01-17T11:24:34.505Z" }
 wheels = [
     { url = "https://files.pythonhosted.org/packages/d9/33/1f075bf72b0b747cb3288d011319aaf64083cf2efef8354174e3ed4540e2/ipython_pygments_lexers-1.1.1-py3-none-any.whl", hash = "sha256:a9462224a505ade19a605f71f8fa63c2048833ce50abc86768a0d81d876dc81c", size = 8074, upload-time = "2025-01-17T11:24:33.271Z" },
+]
+
+[[package]]
+name = "ir-measures"
+version = "0.4.3"
+source = { registry = "https://pypi.org/simple" }
+dependencies = [
+    { name = "pytrec-eval-terrier" },
+]
+sdist = { url = "https://files.pythonhosted.org/packages/81/b4/d931aa71a73353cf0b8446b3d7ce9ed789e7fe595778d7e061e86faea28d/ir_measures-0.4.3.tar.gz", hash = "sha256:869a6019efefb02dda8b77ca0f68d6d57b01fe34998a46c76425b9fbb396e827", size = 51224, upload-time = "2025-11-25T17:36:52.06Z" }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/76/62/15199767ad9f1e3f793dec253ba6f662cb36e7197fc647bc844a6ecb99bf/ir_measures-0.4.3-py3-none-any.whl", hash = "sha256:3d8b3b5283e4a77df85f9f6c8a1c2c99a7421b78fa014ef97f2ddab3037d3dcf", size = 61311, upload-time = "2025-11-25T17:36:51.183Z" },
 ]
 
 [[package]]
@@ -1115,6 +1146,22 @@ wheels = [
 ]
 
 [[package]]
+name = "pytrec-eval-terrier"
+version = "0.5.10"
+source = { registry = "https://pypi.org/simple" }
+dependencies = [
+    { name = "numpy" },
+    { name = "scipy" },
+]
+sdist = { url = "https://files.pythonhosted.org/packages/04/96/4925a95e4865a647bc74d3bb052243d12a3c8e8a34909d7d097b5a4d08c5/pytrec_eval_terrier-0.5.10.tar.gz", hash = "sha256:eaaf20580d17b5575a233e04dab8a4cbcc01a7e45be8cf547c07f0a2bb3e7eb9", size = 18634, upload-time = "2025-10-20T16:50:18.098Z" }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/d3/ca/f0edd9df08c08c96d2f088c298cfb824c3ee816302ac1f911ecb1bfdd681/pytrec_eval_terrier-0.5.10-cp312-cp312-macosx_10_13_universal2.whl", hash = "sha256:e28c3c14728713cdbad165964e2d1aba96b0fc7445a5a13168b398e9bd3bbd08", size = 137179, upload-time = "2025-10-20T16:51:07.809Z" },
+    { url = "https://files.pythonhosted.org/packages/73/55/e02a14b0d3ac520849f66391f03c6783b3383fd23a19372d07a2280b815e/pytrec_eval_terrier-0.5.10-cp312-cp312-manylinux_2_24_x86_64.manylinux_2_28_x86_64.whl", hash = "sha256:689ee541d72c27d14ae15cd1f11d2cb86cf9bdc880f5e8af9c5dbbdd47663d4d", size = 304845, upload-time = "2025-10-20T16:54:17.791Z" },
+    { url = "https://files.pythonhosted.org/packages/76/9c/9020b700199b09ebdfc6dbadae81641a49555c4ee21dedbe2aa98af601b5/pytrec_eval_terrier-0.5.10-cp312-cp312-musllinux_1_2_x86_64.whl", hash = "sha256:3f02118dadd3c09b71462bb26e405e49bd10fe0c60bcc169fcd31454a4256dc2", size = 1327965, upload-time = "2025-10-20T16:54:18.743Z" },
+    { url = "https://files.pythonhosted.org/packages/39/9e/6e7c2b89f52e1cebeef6c3bb47272f5bd69766ddbc6e9e5445da0c876899/pytrec_eval_terrier-0.5.10-cp312-cp312-win_amd64.whl", hash = "sha256:202e48fe24948453fe45dcd73261f9865f99cb2ff4c8a3255ac2ab4c993a64ba", size = 58641, upload-time = "2025-10-20T16:51:26.148Z" },
+]
+
+[[package]]
 name = "pyyaml"
 version = "6.0.3"
 source = { registry = "https://pypi.org/simple" }
@@ -1173,9 +1220,16 @@ dependencies = [
 ]
 
 [package.dev-dependencies]
+ann = [
+    { name = "faiss-cpu" },
+]
 dev = [
     { name = "ipykernel" },
     { name = "pytest" },
+]
+eval = [
+    { name = "ir-measures" },
+    { name = "pytrec-eval-terrier" },
 ]
 
 [package.metadata]
@@ -1194,9 +1248,14 @@ requires-dist = [
 ]
 
 [package.metadata.requires-dev]
+ann = [{ name = "faiss-cpu", specifier = "==1.15.1" }]
 dev = [
     { name = "ipykernel", specifier = ">=7.4.0" },
     { name = "pytest", specifier = ">=9.1.1" },
+]
+eval = [
+    { name = "ir-measures", specifier = "==0.4.3" },
+    { name = "pytrec-eval-terrier", specifier = "==0.5.10" },
 ]
 
 [[package]]

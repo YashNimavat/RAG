@@ -1,0 +1,224 @@
+
+=== K1 environment, corpus, models
+python 3.12.8 | {'pymupdf': '1.26.7', 'sentence-transformers': '6.1.0', 'torch': '2.14.1', 'numpy': '2.5.3', 'faiss-cpu': '1.15.1'}
+faiss.__version__=1.15.1; faiss threads set to 1 (reproducible builds)
+pdf sha256 1d58a0fac2435c2ce4129ff84906b93118d731e4a004e7a26f8ab8f749a92669
+97 chunks: count=97 chunks.jsonl sha256=d4108b8936093394c6eb50d4c22e8d4013d9a048fb38d5769281af4aadb3011b (P3 verify / C2 lab / P4 K1: d4108b89...)
+draft seeds: 10 (8 answerable); relevant seqs {'D-001': [7], 'D-002': [27], 'D-003': [68], 'D-004': [23, 67, 68], 'D-005': [3, 4], 'D-006': [21], 'D-007': [27, 85], 'D-008': [69]}
+verification queries: 10 draft-seed questions + 33 page heads (first 200 characters of each page) = 43
+TIME machine: 11th Gen Intel(R) Core(TM) i7-11800H @ 2.30GHz | logical cpus 16
+V (97, 384) float32; max |norm-1| = 1.19e-07
+
+=== K2 shapes and memory: one score per chunk
+q (384,); V (97, 384); s = V @ q -> (97,): one score per chunk
+batch of the 10 seed questions: Q @ V.T -> (10, 97) (questions x chunks)
+an all-pairs chunk matrix V @ V.T would be 97x97 = 9,409 numbers; retrieval for one question needs 97
+index bytes float32: 97 x 384 x 4 = 148,992; per vector 1536
+
+=== K3 D-002 'In what year was the Paris Agreement adopted?' over the 97 chunks: top-10
+rank  1: seq 69 page 24 score 0.4606 gap to next 0.0093
+rank  2: seq 68 page 23 score 0.4513 gap to next 0.0127
+rank  3: seq 27 page 10 score 0.4386 gap to next 0.0001  <- relevant (evidence)
+rank  4: seq 17 page  6 score 0.4385 gap to next 0.0998
+rank  5: seq 84 page 29 score 0.3387 gap to next 0.0273
+rank  6: seq 85 page 29 score 0.3114 gap to next 0.0548
+rank  7: seq 70 page 24 score 0.2567 gap to next 0.0119
+rank  8: seq 35 page 12 score 0.2448 gap to next 0.0718
+rank  9: seq 83 page 28 score 0.1730 gap to next 0.0040
+rank 10: seq 71 page 24 score 0.1690 gap to next 0.0095
+first relevant rank 3; top-4 = [69, 68, 27, 17]; gap rank1-rank2 0.0093; gap rank3-rank4 0.000081; gap rank4-rank5 0.0998
+score range over the 97 chunks -0.1536..0.4606
+all 97 scores in seq order: [0.0951, 0.0998, 0.0336, -0.0642, -0.0425, -0.0198, 0.0413, 0.062, 0.0275, -0.0439, -0.0768, -0.0546, -0.0045, -0.0827, -0.0751, -0.04, 0.0297, 0.4385, 0.0344, -0.0106, 0.06, -0.0837, -0.1536, -0.0065, -0.0513, -0.0459, -0.0591, 0.4386, 0.1538, 0.1333, 0.005, 0.0609, -0.0509, 0.0268, 0.1595, 0.2448, 0.0222, 0.0289, -0.0332, -0.0855, -0.066, 0.0225, 0.0397, 0.0281, -0.0153, 0.0814, 0.0178, -0.0315, 0.0012, 0.0044, 0.0659, 0.1442, 0.0665, 0.1304, 0.0595, 0.0656, 0.0797, -0.0312, 0.055, 0.1056, 0.0423, -0.0131, -0.0325, -0.0001, -0.0414, -0.058, -0.1149, 0.0057, 0.4513, 0.4606, 0.2567, 0.169, 0.1191, 0.1355, 0.0593, 0.0223, 0.0165, -0.0035, 0.022, 0.1589, 0.0688, 0.0561, 0.1448, 0.173, 0.3387, 0.3114, 0.1418, 0.1015, -0.0333, 0.0141, 0.0528, 0.1425, 0.0473, -0.0106, 0.0066, 0.0764, 0.0948]
+exact search, 8 answerable seeds: first relevant ranks [3, 3, 1, 1, 1, 1, 2, 2]; (Hit@1, Hit@4, MRR@10) = (4, 8, 0.708)
+
+=== K4 ties: the tie-aware cut vs tempting variants
+TOY scores [0.699999988079071, 0.8999999761581421, 0.800000011920929, 0.800000011920929, 0.800000011920929, 0.10000000149011612]
+  k=1: top_k (course) [1] | brute [1] | argsort()[::-1] (InMemoryVectorStore) [1] | faiss IndexFlatIP (1-d vectors, query [1]) [1] | argpartition only [1] | sort the picked k [1] | stable argsort(-s) [1]
+  k=2: top_k (course) [1, 2] | brute [1, 2] | argsort()[::-1] (InMemoryVectorStore) [1, 4] | faiss IndexFlatIP (1-d vectors, query [1]) [1, 2] | argpartition only [1, 2] | sort the picked k [1, 2] | stable argsort(-s) [1, 2]
+  k=3: top_k (course) [1, 2, 3] | brute [1, 2, 3] | argsort()[::-1] (InMemoryVectorStore) [1, 4, 2] | faiss IndexFlatIP (1-d vectors, query [1]) [1, 3, 2] | argpartition only [1, 2, 3] | sort the picked k [1, 2, 3] | stable argsort(-s) [1, 2, 3]
+  k=4: top_k (course) [1, 2, 3, 4] | brute [1, 2, 3, 4] | argsort()[::-1] (InMemoryVectorStore) [1, 4, 2, 3] | faiss IndexFlatIP (1-d vectors, query [1]) [1, 4, 3, 2] | argpartition only [1, 2, 3, 4] | sort the picked k [1, 2, 3, 4] | stable argsort(-s) [1, 2, 3, 4]
+  k=5: top_k (course) [1, 2, 3, 4, 0] | brute [1, 2, 3, 4, 0] | argsort()[::-1] (InMemoryVectorStore) [1, 4, 2, 3, 0] | faiss IndexFlatIP (1-d vectors, query [1]) [1, 4, 3, 2, 0] | argpartition only [1, 2, 3, 4, 0] | sort the picked k [1, 2, 3, 4, 0] | stable argsort(-s) [1, 2, 3, 4, 0]
+  k=6: top_k (course) [1, 2, 3, 4, 0, 5] | brute [1, 2, 3, 4, 0, 5] | argsort()[::-1] (InMemoryVectorStore) [1, 4, 2, 3, 0, 5] | faiss IndexFlatIP (1-d vectors, query [1]) [1, 4, 3, 2, 0, 5] | argpartition only [1, 2, 3, 4, 0, 5] | sort the picked k [1, 2, 3, 4, 0, 5] | stable argsort(-s) [1, 2, 3, 4, 0, 5]
+  ids tied with the 2nd-best score: [2, 3, 4]
+300 TOY tie-heavy arrays (20 scores each from {0, 0.2, ..., 1.0}, seed 5): equal to brute force (same ids, same order)
+  k= 1: top_k 300/300; argpartition only 256/300; argpartition, then sort the picked k 256/300; argsort()[::-1] (InMemoryVectorStore) 71/300; stable argsort(-s) 300/300; faiss IndexFlatIP 300/300 | 'sort the picked k' has the right SET for 256/300
+  k= 4: top_k 300/300; argpartition only 107/300; argpartition, then sort the picked k 237/300; argsort()[::-1] (InMemoryVectorStore) 12/300; stable argsort(-s) 300/300; faiss IndexFlatIP 0/300 | 'sort the picked k' has the right SET for 237/300
+  k=10: top_k 300/300; argpartition only 6/300; argpartition, then sort the picked k 138/300; argsort()[::-1] (InMemoryVectorStore) 0/300; stable argsort(-s) 300/300; faiss IndexFlatIP 0/300 | 'sort the picked k' has the right SET for 138/300
+43 real queries: gap between rank 4 and 5: min 0.00060 median 0.01416 max 0.09978; queries with a gap < 1e-6: 0; < 0.001: 1
+max |score float32 - score float64| over the 43 queries: 1.32e-07
+43 real queries: top_k == brute {1: 43, 4: 43, 10: 43}; argsort()[::-1] == brute {1: 43, 4: 43, 10: 43} (no exact ties in real scores)
+duplicated index (5 copies, 485 rows), D-002 top-4 rows: top_k [69, 166, 263, 360] | argsort()[::-1] [457, 69, 166, 263] | distinct chunks in top-4: 1
+
+=== K5 rows and metadata: alignment
+D-002 top-4: row 69 = 00069 p.24, row 68 = 00068 p.23, row 27 = 00027 p.10, row 17 = 00017 p.6
+misaligned (row 0 deleted from the vectors only; metadata unchanged), D-002 top-4:
+  row 68: metadata says seq 68 p.23; the vector is really seq 69 p.24
+  row 67: metadata says seq 67 p.23; the vector is really seq 68 p.23
+  row 26: metadata says seq 26 p.9; the vector is really seq 27 p.10
+  row 16: metadata says seq 16 p.6; the vector is really seq 17 p.6
+guard len(V) == len(meta): False
+
+=== K6 filters: pre-filter vs post-filter (fetch_k = 20, LangChain FAISS default)
+filter page >= 25 keeps 25/97 chunks: selectivity 0.2577; expected passers among fetch_k=20: 5.15
+43 queries: pre-filter returned < 4 for 0; post-filter < 4 for 10, 0 for 0; histogram {1: 2, 2: 3, 3: 5, 4: 33}
+passers among the top 20: mean 6.21, min 1, max 11
+pre and post give the same ids for 33/43 (where post is short it is a prefix of pre: 43/43)
+D-002: pre [84, 85, 83, 79] pages [29, 29, 28, 27]; post [84, 85, 83, 79]
+example of a short post-filter: query 'D-005': top-20 (seq:page) 3:2 4:2 2:1 5:2 67:23 88:30* 84:29* 1:1 12:5 28:10 23:8 68:23 56:19 27:10 50:17 19:7 16:6 85:29* 0:1 49:17 (* passes); post [88, 84, 85]; pre [88, 84, 85, 92] pages [30, 29, 29, 31]; pre-filter ranks of its results in the unfiltered list [6, 7, 18, 23]
+  post-filter fetch_k= 4: short for 43/43, empty for 18/43
+  post-filter fetch_k=10: short for 28/43, empty for 3/43
+  post-filter fetch_k=20: short for 10/43, empty for 0/43
+  post-filter fetch_k=40: short for 0/43, empty for 0/43
+
+=== K7 library conventions on the 97 chunks (faiss run; LangChain rules replayed in NumPy from the source lines)
+IndexFlatL2 D-002 top-10 ids [69, 68, 27, 17, 84, 85, 70, 35, 83, 71] distances ['1.0788', '1.0974', '1.1228', '1.1229']...
+  == 2 - 2cos (squared L2): max abs diff 3.58e-07; true L2 would be 1.0386 for rank 1
+IndexFlatIP D-002 top-10 ids [69, 68, 27, 17, 84, 85, 70, 35, 83, 71] scores ['0.4606', '0.4513', '0.4386', '0.4385']...; equals cosine: max abs diff 2.98e-08; same ids as brute True; same as IndexFlatL2 True
+LangChain relevance 1 - d/sqrt(2) on faiss squared L2, D-002: rank 1 0.2372 (cos 0.4606); negative for 91 of 97 chunks; crossing at cos = 1 - 1/sqrt(2) = 0.2929
+  cos 0.8: squared L2 0.4000 -> relevance 0.7172; on true L2 0.5528
+  cos 0.5: squared L2 1.0000 -> relevance 0.2929; on true L2 0.2929
+  cos 0.2934: squared L2 1.4132 -> relevance 0.0007; on true L2 0.1594
+  cos 0.2: squared L2 1.6000 -> relevance -0.1314; on true L2 0.1056
+faiss IndexFlatIP top-10 == brute force for 43/43 real queries
+defaults read from the objects: IndexHNSWFlat(d, 32) efConstruction 40, efSearch 16; IndexIVFFlat nprobe 1; IndexHNSWFlat metric default L2: True
+
+=== K8 exact search cost (NumPy V @ q + top_k; SYNTHETIC clustered unit vectors beyond 97; TIME lines vary by run)
+TIME real N=97 d=384: p50 24.9 us p95 49.6 us (215 queries)
+memory N=  1,000 d= 384:     1,536,000 bytes (1.5 MB)
+TIME N=  1,000 d= 384: p50 0.085 ms p95 0.214 ms (200 queries)
+memory N= 10,000 d= 384:    15,360,000 bytes (15.4 MB)
+TIME N= 10,000 d= 384: p50 1.302 ms p95 4.848 ms (200 queries)
+memory N=100,000 d= 384:   153,600,000 bytes (153.6 MB)
+TIME N=100,000 d= 384: p50 9.959 ms p95 15.687 ms (200 queries)
+TIME   same index, k=8: p50 9.481 ms (ratio k8/k4 0.95)
+TIME   batch of 100 queries (Q @ A.T then top_k per row): 152.6 ms total, 1.526 ms per query
+memory N=200,000 d= 384:   307,200,000 bytes (307.2 MB)
+TIME N=200,000 d= 384: p50 18.173 ms p95 27.718 ms (200 queries)
+memory N=  1,000 d=1536:     6,144,000 bytes (6.1 MB)
+TIME N=  1,000 d=1536: p50 0.266 ms p95 0.436 ms (200 queries)
+memory N= 10,000 d=1536:    61,440,000 bytes (61.4 MB)
+TIME N= 10,000 d=1536: p50 3.118 ms p95 4.553 ms (200 queries)
+memory N=100,000 d=1536:   614,400,000 bytes (614.4 MB)
+TIME N=100,000 d=1536: p50 36.249 ms p95 44.282 ms (200 queries)
+memory N=200,000 d=1536: 1,228,800,000 bytes (1228.8 MB)
+TIME N=200,000 d=1536: p50 64.382 ms p95 96.087 ms (200 queries)
+TIME doubling N 100k -> 200k, d=384: p50 ratio 1.82; d 384 -> 1536 at 100k: ratio 3.64
+TIME doubling N 100k -> 200k, d=1536: p50 ratio 1.78; d 384 -> 1536 at 100k: ratio 3.64
+TIME N_max for a 10 ms p50 budget (linear from the 200k point): d=384 110,055; d=1536 31,065
+TIME N_max for a 50 ms p50 budget (linear from the 200k point): d=384 550,273; d=1536 155,323
+TIME projected p50 at 1,000,000 x 384 (linear from 200k): 90.9 ms; at 2,000,000 x 1,536: 643.8 ms
+
+=== K9 IVF on a 2-D TOY (the lesson's slider picture): 24 points, 4 cells
+points [[2.0, 2.48], [1.74, 1.35], [1.57, 1.26], [2.06, 3.47], [1.53, 1.61], [2.47, 2.54], [6.9, 1.12], [6.77, 2.66], [5.52, 1.57], [4.99, 0.77], [5.05, 1.78], [5.6, 2.26], [2.55, 6.42], [0.01, 6.09], [2.35, 6.71], [0.95, 6.15], [1.47, 5.83], [3.41, 5.83], [6.57, 7.24], [6.05, 6.29], [6.7, 6.46], [5.44, 6.47], [7.89, 4.93], [7.42, 6.51]]
+centroids [[1.9, 2.12], [5.8, 1.69], [1.79, 6.17], [6.68, 6.32]] cell sizes [6, 6, 6, 6]
+query [4.25, 4.25]: cells by centroid distance [1, 2, 0, 3] (distances [2.993, 3.121, 3.172, 3.192]); true nearest point #17 [3.41, 5.83] in cell 2 at distance 1.789
+  nprobe=1: scans 6/24 points; returns #11 -> MISSES the true nearest
+  nprobe=2: scans 12/24 points; returns #17 -> correct
+  nprobe=3: scans 18/24 points; returns #17 -> correct
+  nprobe=4: scans 24/24 points; returns #17 -> correct
+
+=== K10 IVF from scratch in NumPy: climate windows (real MiniLM vectors), then SYNTHETIC 100k
+climate windows: 300 characters, stride 100 -> 726 windows; nlist rule 10*sqrt(N) = 269 (about 2.7 vectors per cell, too few)
+nlist=8: cell sizes min 45 median 89 max 188
+  nprobe= 1: recall@4 0.843 (queries with a miss 12/43); scanned 0.162 of the vectors
+  nprobe= 2: recall@4 0.924 (queries with a miss 4/43); scanned 0.313 of the vectors
+  nprobe= 4: recall@4 0.983 (queries with a miss 1/43); scanned 0.592 of the vectors
+  nprobe= 8: recall@4 1.000 (queries with a miss 0/43); scanned 1.000 of the vectors
+nlist=32: cell sizes min 4 median 21 max 51
+  nprobe= 1: recall@4 0.709 (queries with a miss 23/43); scanned 0.039 of the vectors
+  nprobe= 2: recall@4 0.837 (queries with a miss 16/43); scanned 0.079 of the vectors
+  nprobe= 4: recall@4 0.936 (queries with a miss 5/43); scanned 0.156 of the vectors
+  nprobe= 8: recall@4 1.000 (queries with a miss 0/43); scanned 0.313 of the vectors
+  nprobe=16: recall@4 1.000 (queries with a miss 0/43); scanned 0.587 of the vectors
+  nprobe=32: recall@4 1.000 (queries with a miss 0/43); scanned 1.000 of the vectors
+SYNTHETIC: 100,000 x 384 unit vectors around 1,000 random centres (noise 0.8), 200 queries from the same generator
+TIME NumPy k-means nlist=1024, 10 iterations: 13.7 s
+nlist=1024 (rule 10*sqrt(N) = 3162): cell sizes min 0 median 99 max 402
+  nprobe= 1: recall@10 0.989 recall@4 0.989; scanned 0.0012 of the vectors
+  nprobe= 2: recall@10 1.000 recall@4 1.000; scanned 0.0039 of the vectors
+  nprobe= 4: recall@10 1.000 recall@4 1.000; scanned 0.0096 of the vectors
+  nprobe= 8: recall@10 1.000 recall@4 1.000; scanned 0.0191 of the vectors
+  nprobe=16: recall@10 1.000 recall@4 1.000; scanned 0.0342 of the vectors
+  nprobe=32: recall@10 1.000 recall@4 1.000; scanned 0.0605 of the vectors
+  nprobe=64: recall@10 1.000 recall@4 1.000; scanned 0.1147 of the vectors
+
+=== K11 faiss IVF and HNSW on the same SYNTHETIC 100k (1 thread; inner product on unit vectors = cosine)
+faiss IndexFlatIP (exact): top-10 == NumPy brute force for 200/200
+TIME exact: faiss IndexFlatIP 1 thread p50 30.118 ms p95 46.044 ms | NumPy (OpenBLAS threads) p50 10.948 ms p95 16.389 ms
+TIME IVFFlat nlist=1024: train + add 4.9 s
+IVFFlat nprobe default after construction: 1
+  nprobe=   1: recall@10 0.967 recall@4 0.963
+TIME   nprobe=   1: p50 0.119 ms p95 0.174 ms
+  nprobe=   2: recall@10 1.000 recall@4 1.000
+TIME   nprobe=   2: p50 0.162 ms p95 0.268 ms
+  nprobe=   4: recall@10 1.000 recall@4 1.000
+TIME   nprobe=   4: p50 0.197 ms p95 0.352 ms
+  nprobe=   8: recall@10 1.000 recall@4 1.000
+TIME   nprobe=   8: p50 0.305 ms p95 0.542 ms
+  nprobe=  16: recall@10 1.000 recall@4 1.000
+TIME   nprobe=  16: p50 0.440 ms p95 0.761 ms
+  nprobe=  32: recall@10 1.000 recall@4 1.000
+TIME   nprobe=  32: p50 0.879 ms p95 1.454 ms
+  nprobe=  64: recall@10 1.000 recall@4 1.000
+TIME   nprobe=  64: p50 2.723 ms p95 6.119 ms
+TIME HNSWFlat M=16 (efConstruction 40): build 24.1 s
+HNSWFlat M=16: efSearch default 16; top level 4
+  efSearch=  16: recall@10 0.821 recall@4 0.823
+TIME   efSearch=  16: p50 0.114 ms p95 0.227 ms
+  efSearch=  64: recall@10 0.988 recall@4 0.988
+TIME   efSearch=  64: p50 0.195 ms p95 0.397 ms
+TIME HNSWFlat M=32 (efConstruction 40): build 31.8 s
+HNSWFlat M=32: efSearch default 16; top level 3
+  efSearch=  16: recall@10 0.892 recall@4 0.891
+TIME   efSearch=  16: p50 0.098 ms p95 0.211 ms
+  efSearch=  32: recall@10 0.953 recall@4 0.953
+TIME   efSearch=  32: p50 0.148 ms p95 0.354 ms
+  efSearch=  64: recall@10 0.996 recall@4 0.996
+TIME   efSearch=  64: p50 0.198 ms p95 0.375 ms
+  efSearch= 128: recall@10 0.996 recall@4 0.996
+TIME   efSearch= 128: p50 0.536 ms p95 0.928 ms
+  efSearch= 256: recall@10 0.996 recall@4 0.996
+TIME   efSearch= 256: p50 1.112 ms p95 1.621 ms
+serialized bytes IndexFlatIP: 153,600,045 (1536.0 per vector; raw float32 vector 1536)
+serialized bytes IndexIVFFlat nlist 1024: 155,981,195 (1559.8 per vector; raw float32 vector 1536)
+serialized bytes IndexHNSWFlat M 16: 168,033,274 (1680.3 per vector; raw float32 vector 1536)
+serialized bytes IndexHNSWFlat M 32: 180,820,834 (1808.2 per vector; raw float32 vector 1536)
+
+=== K12 filtered ANN on the SYNTHETIC 100k: a tenant filter keeping 1% (tenant = row % 100 == 7)
+allowed rows 1000 of 100000 (selectivity 1.00%)
+TIME exact on the 1,000-row subset: p50 0.079 ms | exact pre-filter by masking all 100k: p50 11.896 ms
+HNSW post-filter (efSearch 16, fetch 16, then keep tenant 7): results per query mean 0.17 of 4; empty 169/200; full 4 0/200
+HNSW post-filter (efSearch 64, fetch 64, then keep tenant 7): results per query mean 0.60 of 4; empty 111/200; full 4 0/200
+HNSW post-filter (efSearch 256, fetch 256, then keep tenant 7): results per query mean 2.23 of 4; empty 21/200; full 4 42/200
+HNSW with the filter inside the search (IDSelectorBatch, efSearch 16): results mean 2.12 of 4; full 4 48/200; recall@4 vs exact-on-subset 0.240
+TIME   IDSelector efSearch 16: p50 0.111 ms
+HNSW with the filter inside the search (IDSelectorBatch, efSearch 64): results mean 3.04 of 4; full 4 106/200; recall@4 vs exact-on-subset 0.300
+TIME   IDSelector efSearch 64: p50 0.245 ms
+HNSW with the filter inside the search (IDSelectorBatch, efSearch 256): results mean 4.00 of 4; full 4 200/200; recall@4 vs exact-on-subset 0.599
+TIME   IDSelector efSearch 256: p50 1.201 ms
+
+=== K13 does ANN change retrieval on the 97 chunks? 8 answerable seeds (first relevant rank; Hit@1, Hit@4, MRR@10)
+exact: [3, 3, 1, 1, 1, 1, 2, 2] (4, 8, 0.708)
+HNSW M=32 efSearch=16: ranks [3, 3, 1, 1, 1, 1, 2, 2] (4, 8, 0.708); recall@4 vs exact: 8 seeds 1.000, 43 queries 1.000
+IVF nlist=10 nprobe=1: ranks [3, 3, 1, 1, 1, 1, 2, None] (4, 7, 0.646); recall@4 vs exact: 8 seeds 0.750, 43 queries 0.686
+IVF nlist=10 nprobe=2: ranks [3, 3, 1, 1, 1, 1, 2, None] (4, 7, 0.646); recall@4 vs exact: 8 seeds 0.938, 43 queries 0.860
+IVF nlist=10 nprobe=3: ranks [3, 3, 1, 1, 1, 1, 2, 2] (4, 8, 0.708); recall@4 vs exact: 8 seeds 0.969, 43 queries 0.959
+IVF nlist=10 nprobe=10: ranks [3, 3, 1, 1, 1, 1, 2, 2] (4, 8, 0.708); recall@4 vs exact: 8 seeds 1.000, 43 queries 1.000
+
+=== K14 FORMULA arithmetic for the lesson
+float32 index        97 x  384 x 4 =        148,992 bytes (0.0001 GB)
+float32 index    50,000 x 1024 x 4 =    204,800,000 bytes (0.2048 GB)
+float32 index 1,000,000 x  384 x 4 =  1,536,000,000 bytes (1.5360 GB)
+float32 index 2,000,000 x 1536 x 4 = 12,288,000,000 bytes (12.2880 GB)
+float32 index   100,000 x 1536 x 4 =    614,400,000 bytes (0.6144 GB)
+bytes per vector d=384: float32 1536, int8 384, binary 48
+bytes per vector d=1024: float32 4096, int8 1024, binary 128
+bytes per vector d=1536: float32 6144, int8 1536, binary 192
+nlist rule 10*sqrt(N): N=97 -> 98
+nlist rule 10*sqrt(N): N=726 -> 269
+nlist rule 10*sqrt(N): N=100,000 -> 3,162
+nlist rule 10*sqrt(N): N=1,000,000 -> 10,000
+LangChain relevance crossing: 1 - (2 - 2c)/sqrt(2) = 0  <=>  c = 1 - 1/sqrt(2) = 0.292893
+TOY ANN recall@5: exact [3, 7, 12, 18, 25], ANN [3, 7, 18, 30, 41]: overlap 3 -> 0.60
+
+DONE
