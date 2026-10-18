@@ -1,0 +1,175 @@
+
+=== K1 environment, corpus, chunks
+python 3.12.3 | {'pymupdf': '1.26.7', 'numpy': '2.5.3', 'rank-bm25': '0.2.2'}
+pdf sha256 1d58a0fac2435c2ce4129ff84906b93118d731e4a004e7a26f8ab8f749a92669
+pages=33 doc_chars=72593 snapshot_id=ea07572562ac
+chunks=97 params_hash=1ca9c5a3b548 chunks.jsonl sha256=d4108b8936093394
+span invariant DOC[char_start:char_end] == text: OK for all 97
+chunk chars min/median/max 393/935/1000
+relevant chunks (any_overlap) per answerable seed: {'D-001': [7], 'D-002': [27], 'D-003': [68], 'D-004': [23, 67, 68], 'D-005': [3, 4], 'D-006': [21], 'D-007': [27, 85], 'D-008': [69]}
+
+=== K2 heading tree from font size + bold (PyMuPDF get_text('dict'))
+PDF metadata title: ''
+  lines  814  (size, bold) ((12.0, False),)
+  lines  192  (size, bold) ((12.0, True),)
+  lines   68  (size, bold) ((13.56, True),)
+  lines   22  (size, bold) ((18.0, True),)
+  lines    1  (size, bold) ((24.0, True),)
+headings by level: {'title': 1, 'chapter': 21, 'section': 68, 'subsection': 192} total 282
+title: 'Understanding Climate Change' 28 chars
+chapters: 21 | merged two-line chapter: ['Chapter 5: The Role of Technology in Climate Change Mitigation']
+headings (levels 1-3) per page min/median/max 1/9/11; pages with >= 1: 33 of 33
+one heading every 257 characters on average (282 headings, 72593 chars)
+12 pt bold subsections as a share of chapter+section+subsection headings: 192/281 = 0.68 (a size-only detector that needs size > body misses these)
+
+=== K3 reused heading names under different chapters, and the two Paris paths
+names reused under different chapters: 11
+  'Marine Ecosystems': p.5 Chapter 3; p.13 Chapter 9
+  'International Agreements': p.6 Chapter 4; p.23 Chapter 16
+  'Research and Innovation': p.7 Chapter 4; p.16 Chapter 10
+  'Smart Grids': p.8 Chapter 5; p.22 Chapter 15
+  'Carbon Capture and Utilization': p.8 Chapter 5; p.23 Chapter 15
+  'Carbon Utilization': p.8 Chapter 5; p.23 Chapter 15
+  'International Collaboration': p.10 Chapter 6; p.16 Chapter 10
+  'Paris Agreement': p.10 Chapter 6; p.23 Chapter 16
+  'Policy and Governance': p.12 Chapter 8; p.18 Chapter 12
+  'Youth Engagement': p.13 Chapter 8; p.32 Chapter 21
+  'Nature-Based Solutions': p.14 Chapter 9; p.26 Chapter 17
+  Paris Agreement heading p.10 path: Understanding Climate Change › Chapter 6: Global and Local Climate Action › International Collaboration › Paris Agreement
+  Paris Agreement heading p.23 path: Understanding Climate Change › Chapter 16: Global Cooperation and Governance › International Agreements › Paris Agreement
+path header length over 260 section/subsection headings, chars min/median/max 75/120/168 = about 12/19/27 WordPiece tokens (DERIVED, 6.21 chars/token)
+
+=== K4 which heading a chunk gets: path at the chunk start vs majority vs all headings inside
+chunks with no heading line inside: 0 of 97: []
+chunks whose first non-space character starts a heading: 21 of 97
+chunks where start-rule path != majority-rule path: 84 of 97: [0, 1, 2, 3, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 33, 34, 35, 36, 37, 40, 41, 42, 43, 44, 45, 46, 48, 49, 50, 51, 52, 53, 54, 56, 57, 58, 59, 60, 61, 62, 63, 64, 65, 66, 67, 68, 69, 70, 71, 72, 73, 76, 77, 78, 79, 80, 81, 82, 83, 84, 85, 87, 89, 90, 91, 92, 93, 94, 95]
+chunks containing >= 2 headings: 94 of 97
+chunks whose last non-empty line is a heading (orphaned heading, its body is in the next chunk): 31 of 97: [2, 5, 6, 8, 11, 12, 13, 14, 16, 17, 18, 20, 21, 23, 25, 28, 29, 32, 34, 42, 50, 53, 59, 61, 79, 80, 81, 84, 89, 91, 92]
+  of which at a page end (07 D.8 counts 16 page-end orphans): 16: [2, 5, 8, 11, 14, 17, 20, 23, 29, 32, 50, 53, 59, 80, 89, 92]
+  chunk 27 p.10 [20555,21506) start: Chapter 6: Global and Local Climate Action
+           majority: Chapter 6: Global and Local Climate Action › International Collaboration › Paris Agreement
+           inside: ['Chapter 6: Global and Local Climate Action', 'International Collaboration', 'United Nations Framework Convention on Climate Change (UNFCCC)', 'Paris Agreement', 'National Strategies', 'Carbon Pricing']
+  chunk 28 p.10 [21315,22262) start: Chapter 6: Global and Local Climate Action › National Strategies › Carbon Pricing
+           majority: Chapter 6: Global and Local Climate Action › National Strategies › Emission Reduction Regulations
+           inside: ['Carbon Pricing', 'Renewable Energy Targets', 'Emission Reduction Regulations', 'Local and Community Initiatives', 'Urban Climate Action']
+  chunk 29 p.10 [22111,22632) start: Chapter 6: Global and Local Climate Action › National Strategies › Emission Reduction Regulations
+           majority: Chapter 6: Global and Local Climate Action › Local and Community Initiatives › Urban Climate Action
+           inside: ['Local and Community Initiatives', 'Urban Climate Action', 'Community-Based Conservation']
+  chunk 34 p.12 [25535,26463) start: Chapter 8: Future Directions and Innovations › Emerging Technologies › Blockchain for Climate Action
+           majority: Chapter 8: Future Directions and Innovations › Policy and Governance › Integrated Climate Policies
+           inside: ['Bioengineering', 'Policy and Governance', 'Integrated Climate Policies', 'International Cooperation']
+  chunk 68 p.23 [50756,51413) start: Chapter 15: Climate Change and Technology › Carbon Capture and Utilization › Direct Air Capture (DAC)
+           majority: Chapter 16: Global Cooperation and Governance › International Agreements › Paris Agreement
+           inside: ['Chapter 16: Global Cooperation and Governance', 'International Agreements', 'Paris Agreement']
+  rule start     : header chars min/median/max 28/120/168; distinct 97; header+chunk over 256 (DERIVED) 0
+  rule majority  : header chars min/median/max 67/123/168; distinct 96; header+chunk over 256 (DERIVED) 0
+  rule all-inside: header chars min/median/max 93/198/306; distinct 97; header+chunk over 256 (DERIVED) 0
+  D-002 gold chunk 27: start -> Chapter 6: Global and Local Climate Action | majority -> Chapter 6: Global and Local Climate Action › International Collaboration › Paris Agreement
+  D-003 gold chunk 68: start -> Chapter 15: Climate Change and Technology | majority -> Chapter 16: Global Cooperation and Governance › International Agreements › Paris Agreement
+
+=== K5 header arms: distinct headers, the header magnet, lengths
+  none   distinct headers   1 / 97 | largest group sharing one header  97 (1.00) | header chars min/median/max 0/0/0
+  title  distinct headers   1 / 97 | largest group sharing one header  97 (1.00) | header chars min/median/max 28/28/28
+  path   distinct headers  97 / 97 | largest group sharing one header   1 (0.01) | header chars min/median/max 28/120/168
+  major  distinct headers  96 / 97 | largest group sharing one header   2 (0.02) | header chars min/median/max 67/123/168
+  path arm, the 3 largest groups: [('Understanding Climate Change', 1), ('Historical Context', 1), ('Chapter 2: Causes of Climate Change', 1)]
+  path arm, header used by exactly 1 chunk: 97
+  leaf-only arm distinct: 97 / 97
+  example embed_text (path arm, chunk 34):
+    'Understanding Climate Change › Chapter 8: Future Directions and Innovations › Emerging Technologies › Blockchain for Climate Action\n\nIt can be used for tracking carbon credits, verifying renewable ene'
+
+=== K6 dilution s = h/(h+c) and truncation at 256 (DERIVED token estimates)
+  path arm, header share by characters: min/median/max 0.029/0.119/0.201
+  header 120 chars (~19 tok) + chunk 1000 chars (~161 tok): s = 0.106
+  header 120 chars (~19 tok) + chunk 935 chars (~151 tok): s = 0.112
+  header 120 chars (~19 tok) + chunk 400 chars (~64 tok): s = 0.229
+  truncation examples (MiniLM max_seq_length 256 incl. [CLS]/[SEP]; chunk max 182 tokens incl. specials, C2 K2):
+    182 +  27 = 209 -> fits
+    182 +  27 = 209 -> fits
+    182 + 100 = 282 -> over by 26: the chunk TAIL is cut
+  path arm embed_text estimate over 256: 0 of 97 (DERIVED; max est 188)
+  a 100-token LLM context + chunk over 256: about 29 of 97 (DERIVED)
+
+=== K7 the near-duplicate pages: chunks on p.6, 10, 23, 24 and the seeds D-002 / D-003
+  chunk 15 p. 6 paris=- path: Chapter 4: Mitigation and Adaptation › Energy Efficiency › Building Efficiency
+  chunk 16 p. 6 paris=- path: Chapter 4: Mitigation and Adaptation › Energy Efficiency › Industrial Efficiency
+  chunk 17 p. 6 paris=Y path: Chapter 4: Mitigation and Adaptation › Reforestation and Afforestation › Afforestation Initiatives
+  chunk 27 p.10 paris=Y path: Chapter 6: Global and Local Climate Action
+  chunk 28 p.10 paris=- path: Chapter 6: Global and Local Climate Action › National Strategies › Carbon Pricing
+  chunk 29 p.10 paris=- path: Chapter 6: Global and Local Climate Action › National Strategies › Emission Reduction Regulations
+  chunk 66 p.23 paris=- path: Chapter 15: Climate Change and Technology › Digital Technologies › Smart Grids
+  chunk 67 p.23 paris=- path: Chapter 15: Climate Change and Technology › Digital Technologies › Artificial Intelligence (AI)
+  chunk 68 p.23 paris=Y path: Chapter 15: Climate Change and Technology › Carbon Capture and Utilization › Direct Air Capture (DAC)
+  chunk 69 p.24 paris=- path: Chapter 16: Global Cooperation and Governance › International Agreements › Kyoto Protocol
+  chunk 70 p.24 paris=Y path: Chapter 16: Global Cooperation and Governance › Regional and National Initiatives › European Green Deal
+  chunk 71 p.24 paris=- path: Chapter 16: Global Cooperation and Governance › Global Climate Finance
+  D-002 relevant chunks [27] -> paths ['Chapter 6: Global and Local Climate Action']
+  D-003 relevant chunks [68] -> paths ['Chapter 15: Climate Change and Technology › Carbon Capture and Utilization › Direct Air Capture (DAC)']
+  D-004 relevant chunks [23, 67, 68] -> paths ['Chapter 5: The Role of Technology in Climate Change Mitigation › Energy Storage and Grid Management › Pumped Hydro Storage', 'Chapter 15: Climate Change and Technology › Digital Technologies › Artificial Intelligence (AI)', 'Chapter 15: Climate Change and Technology › Carbon Capture and Utilization › Direct Air Capture (DAC)']
+  D-006 relevant chunks [21] -> paths ['Chapter 5: The Role of Technology in Climate Change Mitigation › Advanced Renewable Energy Solutions › Next-Generation Solar Technologies']
+
+=== K8 header-query leakage on the draft seeds (question content words in the gold chunk's header, not in its text)
+  D-001 chunk  7: header-only [] | in header and text []
+  D-002 chunk 27: header-only [] | in header and text []
+  D-003 chunk 68: header-only [] | in header and text []
+  D-004 chunk 23: header-only [] | in header and text []
+  D-005 chunk  3: header-only [] | in header and text ['coal']
+  D-006 chunk 21: header-only [] | in header and text ['solar']
+  D-007 chunk 27: header-only [] | in header and text []
+  D-008 chunk 69: header-only [] | in header and text []
+
+=== K9 'anonymous' chunks: no heading inside and the first word is a pronoun or determiner
+  0 of 97:
+  chunks that start mid-sentence (first character lower-case): 46 of 97
+
+=== K10 BM25 preview (v2.0 field, not v1.2): the same three header arms in an inverted index
+  none   first relevant rank {'D-001': 1, 'D-002': 1, 'D-003': 1, 'D-004': 1, 'D-005': 1, 'D-006': 2, 'D-007': 1, 'D-008': 1} | Hit@4 8/8 CE@4 8/8 MRR@10 0.938
+  title  first relevant rank {'D-001': 1, 'D-002': 1, 'D-003': 1, 'D-004': 1, 'D-005': 1, 'D-006': 2, 'D-007': 1, 'D-008': 1} | Hit@4 8/8 CE@4 8/8 MRR@10 0.938
+     idf[understanding] = 0.8565 (floor = 0.25 x average_idf = 0.8565) | df = 97 of 97
+     idf[climate] = 0.8565 (floor = 0.25 x average_idf = 0.8565) | df = 97 of 97
+     idf[change] = 0.8565 (floor = 0.25 x average_idf = 0.8565) | df = 97 of 97
+  path   first relevant rank {'D-001': 1, 'D-002': 1, 'D-003': 1, 'D-004': 1, 'D-005': 1, 'D-006': 2, 'D-007': 1, 'D-008': 1} | Hit@4 8/8 CE@4 8/8 MRR@10 0.938
+  major  first relevant rank {'D-001': 1, 'D-002': 1, 'D-003': 1, 'D-004': 1, 'D-005': 1, 'D-006': 2, 'D-007': 1, 'D-008': 1} | Hit@4 8/8 CE@4 8/8 MRR@10 0.938
+
+=== K11 cost ladder (DERIVED arithmetic; prices from study/tools/examples/prices_2026-10-17.json)
+  doc tokens (o200k_harmony, P1 K5 measured) 12840; chapters 21, chars min/median/max 1591/3336/6058
+  rung 2 (chapter window, Groq): input tokens per call median 855, max 1322; total tokens 106743 (incl. output); USD 0.0124; fits TPD 200000: True; minutes at 8000 TPM >= 13.3
+  rung 3 (whole document) input tokens per call 13090; Groq free tier TPM 8000: per-request too large = True; 97 calls = 1269730 input tokens vs TPD 200000
+  rung 3 Haiku 5.5: uncached USD 0.1367; cached (write 1.25x once, read 0.1x) USD 0.0261; ratio 5.2x
+  rung 3 on a paid Groq tier with 50% cached input: USD 0.0542 (rate limits aside)
+  rung 0 (path header): 0 LLM calls; rung 1 (title/summary per document): 1-2 calls, not needed on D (the title is the 24 pt line)
+  general formula: cost_d = D*p_in*w + (n-1)*D*p_in*rho + n*(c+P)*p_in + n*o*p_out
+
+=== K12 cache keys after an edit on page 12 (whole-document prompt)
+  edit: ' (revised)' appended to the first line of page 12; changed chunks: [33] (page-12 chunks: [33, 34, 35])
+  chunk-text-hash key: 96 of 97 served from cache (stale: their prompt held the old document)
+  key over prompt version + document text + chunk: 0 of 97 served from cache (all rebuilt)
+  doc_text_sha256 before 5106772efa77 after 1377caa13861
+
+=== K13 toy: mean pooling with a shared header (d=64, seed 0; token = unit(topic + noise), cos(token, topic) ~ 0.5)
+  mean cos(token, its topic) 0.4965
+  h=  0 share s=0.000: cos(A with header, A bare) 1.0000 | cos(A, B), different topics, same header -0.1651 | cos(A with header, header topic) -0.1261
+  h= 19 share s=0.112: cos(A with header, A bare) 0.9897 | cos(A, B), different topics, same header -0.1857 | cos(A with header, header topic) 0.0078
+  h= 27 share s=0.153: cos(A with header, A bare) 0.9810 | cos(A, B), different topics, same header -0.1734 | cos(A with header, header topic) 0.0608
+  h= 50 share s=0.250: cos(A with header, A bare) 0.9423 | cos(A, B), different topics, same header -0.1265 | cos(A with header, header topic) 0.2047
+  h=100 share s=0.400: cos(A with header, A bare) 0.8014 | cos(A, B), different topics, same header 0.0964 | cos(A with header, header topic) 0.4850
+
+=== K14 upstream contextual_chunk_headers.ipynb @ 009adba (cells 0-based)
+  notebook sha256 11b78dc9cc583026 | cells 17
+  cell 8 code: contains ['nike', 'Understanding_Climate_Change']
+  cell 9 code: contains ['nike', 'chunk_size=800', 'chunk_overlap=0']
+  cell 11 code: contains ['MAX_CONTENT_TOKENS = 4000', 'gpt-3.5-turbo', 'gpt-4o-mini', 'temperature=0.2', 'Document Title']
+  cell 13 code: contains ['Nike', 'rerank-english-v3.0', 'cohere.Client', 'Document Title']
+  cell 13 saved output: Chunk header: | Document Title: NIKE, INC. ANNUAL REPORT ON FORM 10-K |  | Chunk text: | Given the broad and global scope of our operations, we are particularly vulnerable to the physical risks of climate change, such | as shifts in weather patterns. Extreme weather conditions in the areas in which our retail stores, suppliers, manufacturers, | customers, distribution centers, offices, headquarters and vendors are located could adversely affect our operating results and | financial condition. Moreover, natural disasters such as earthquakes, hurricanes, wildfires, tsunamis, floods or droughts, whether | occurring in the United States or abroad, and their related consequences and effects, including energy shortages and public | health issues, have in the past temporarily disrupted, and could in the future disrupt, our operations, the operations of our |  | Query: Nike climate change impact |  | Similarity w/o contextual chunk header: 0.10576342 | Similarity with contextual chunk header: 0.92206234
+  cell 11 saved output: NIKE, INC. ANNUAL REPORT ON FORM 10-K
+  execution counts: [None, 3, None, 4, 5, 13]
+
+=== K15 vendor numbers turned into absolute and relative change (formula)
+  1 - recall@20 5.7% -> 3.7% (contextual embeddings): absolute -2.0 points, relative -35.1%
+  1 - recall@20 5.7% -> 2.9% (+ contextual BM25): absolute -2.8 points, relative -49.1%
+  1 - recall@20 5.7% -> 1.9% (+ rerank): absolute -3.8 points, relative -66.7%
+  06 section 9.4: n=50 paired, b+c=10 -> SE 0.063, 95% half-width 0.124, 80%-power effect ~0.18
+  0.10576342 -> 0.92206234 (upstream cell 13): one chunk, one query, a cross-encoder relevance score; not a retrieval metric
+
+=== K16 MiniLM (all-MiniLM-L6-v2) per arm: margins and dev-seed retrieval
+  SKIPPED: sentence-transformers/all-MiniLM-L6-v2 is not in the local Hugging Face cache on this machine. Run this script (or the verify notebook) where the model is cached.
