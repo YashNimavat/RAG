@@ -729,7 +729,7 @@ Example output:
     <figcaption><span class="badge m">measured</span> spans, parents, overlap with the gold and CE@4 on the PyMuPDF text; the order is invented. Relevant chunks: D-002 → 27; D-007 → 27, 85; D-005 → 3, 4.</figcaption>
   </figure>
   <p>For D-002: arm (a) returns chunk 27 first, so RR = 1.000. Arm (b) also says 1.000, because p10-08 shares sentence 10:7 with the gold. But p10-08 talks about the 2 °C goal and never says "2015". The <b>text check</b> finds the first proposition that states the year at rank 3: RR = <b>0.333</b>. Arm (b) alone would have credited a unit that cannot answer the question.</p>
-  <p>Look at the parents too. The top 4 propositions give only <b>2 distinct parents</b> (27 and 68). LangChain's <code>MultiVectorRetriever</code> does the same: it asks for k child hits and keeps the first copy of each parent, so <b>k children give at most k parents, often fewer</b> (research, verified). The repo's own runs show it: in cells 20 and 32, all four proposition hits come from chunk 3, so a parent return would give one chunk, not four.</p>
+  <p>Look at the parents too. The top 4 propositions give only <b>2 distinct parents</b> (27 and 68). LangChain's <code>MultiVectorRetriever</code> does the same: it asks for k child hits and keeps the first copy of each parent, so <b>k children give at most k parents, often fewer</b> (research, verified). Its k is the vector store's own (its <code>search_kwargs</code> default to <code>{}</code>, and most stores then return 4), and it counts children, not parents. The repo's own runs show it: in cells 20 and 32, all four proposition hits come from chunk 3, so a parent return would give one chunk, not four.</p>
   <p class="call wrong"><b>Common mistake:</b> "both arms used k = 4, so the comparison is fair." Four propositions can return one or two chunks. Say whether k counts children or parents; to compare with a chunk index, read deeper until you have k parents, or compare at the same token budget.</p>
   <p class="call proj"><b>In your project:</b> arm (a) is the v1.4 headline metric (MRR@10 and CE@4 on parents, the same scorer as v0). Arm (b) and the text check are logged diagnostics.</p>
 </section>
@@ -805,6 +805,7 @@ Example output:
       <tr><td>propositions, arm (a), equal budget</td><td class="n">—</td><td class="n">—</td><td class="n">—</td><td class="n">—</td><td class="n">—</td></tr>
     </tbody>
     <caption>Empty until the recorded run exists. Fill it from your own run; do not copy numbers from papers.</caption></table></div>
+  <p><b>Where it sits among chunking strategies.</b> Propositions are one option in a family: fixed-size and recursive splitting (C2, I1), structure-aware chunks that follow headings (I2), semantic chunks cut where the topic shifts (I3), contextual headers (I5) and late chunking. Each trades cost against how sharply a unit matches a question. You pick one the same way every time: measure on your own labelled questions, at the same k and the same token budget (I-CMP compares them all).</p>
   <h3>When not to use it</h3>
   <ul>
     <li>Most questions <b>compare or summarise</b> (they need facts together, step 10).</li>

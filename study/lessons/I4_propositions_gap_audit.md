@@ -62,7 +62,32 @@ Ideas the research did not list but the lesson needed, found while writing:
 
 ## What step 4 found: the quiz against the lesson
 
-QUIZ_TABLE
+| Question | Taught in (lesson step, Short) |
+|---|---|
+| I4-PRE-01 | 1 |
+| I4-R-01 | 2 |
+| I4-R-02 | 6, 9 |
+| I4-R-03 | 8 (and 7 for the hand sample) |
+| I4-R-04 | 3, 7 (the pronoun check) |
+| I4-R-05 | 7 |
+| I4-R-06 (review) | 9 |
+| I4-R-07 (interview, AIQ 04 Q4) | 2, 11, 12 |
+| I4-A-01 | 2, 3, 6, 7 |
+| I4-A-02 | 8, 11 |
+| I4-A-03 | 9 |
+| I4-A-04 | 7 |
+| I4-A-05 (review) | 7 |
+| I4-T-01 | 7, 10, 11, 12 |
+| I4-T-02 | 7, 12 |
+| I4-T-03 | 5, 12 |
+| I4-T-04 (review) | 9, 12 |
+
+All 17 questions are answerable from the lesson's **Short** mode and from the short reading file. Checking every key point against Short caught **2 gaps**, both fixed in the lesson:
+
+| Question | Needs | Was | Fix |
+|---|---|---|---|
+| I4-R-07 (interview) | the other chunking strategies and how to choose between them | not in the lesson (owned by C2, I1–I3, I5) | step 12: one paragraph placing propositions among the strategies, chosen by measuring at the same k and budget |
+| I4-R-06 (for a 4) | `MultiVectorRetriever`'s k comes from the store's defaults and counts children | missing | step 9: one sentence |
 
 ## Left to other concepts on purpose (link only)
 
