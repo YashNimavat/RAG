@@ -1,0 +1,5 @@
+embedder: ONNX export of all-MiniLM-L6-v2 (/tmp/claude-0/dl/minilm/onnx)
+cells with errors: 0
+Plotly figures saved: 4; runtime 15.6 s; file study/notebooks/I2_structure_chunking_verify.ipynb 132 KiB
+128 checks, 0 failed, 0 skipped
+PASS lines: 128 · SKIPPED lines: 0

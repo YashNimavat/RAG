@@ -63,7 +63,33 @@
 
 ## What step 4 found: the quiz against the lesson
 
-QUIZ_TABLE
+All 20 questions (`study/questions/I2_questions.md`) are answerable from the lesson's **Short** mode and from the short reading file. Checking every key point and every "for a 4" point against Short found **5 gaps**, all fixed in the lesson (the reading file already had them):
+
+| Question | Needs | Was | Fix |
+|---|---|---|---|
+| I2-PRE-02 (4), I2-T-01 | outline first (`get_toc`), when present | Full step 14 only | step 4: one paragraph, "before any of this, check for an outline" |
+| I2-R-04 (4) | `MarkdownHeaderTextSplitter` drops the heading from the text and has no cap | Full step 15 only | step 6 mistake box |
+| I2-T-03 | published comparisons find no consistent winner | Full step 17 only | step 13: one paragraph, marked UNVERIFIED |
+| I2-R-05 (4) | the cross-page control also keeps the PPP sentence whole | not said | step 10 |
+| I2-R-06 | heading words also occur in body text ("Coal" opens its own paragraph) | not said | step 6 |
+| I2-T-01 (4), I2-T-03 (4) | when not to use it | no such paragraph | step 13: "When not to use it" |
+
+| Question | Taught in (lesson step) |
+|---|---|
+| I2-PRE-01, I2-R-05 | 1, 10 |
+| I2-PRE-02, I2-R-01 | 2, 4 |
+| I2-R-02 | 3 |
+| I2-A-01 | 4, 5 |
+| I2-A-05 | 5, 7 |
+| I2-R-04, I2-R-06 | 6 |
+| I2-R-03, I2-A-04 | 7 |
+| I2-R-07 | 4, 8 |
+| I2-A-02, I2-A-06 | 9 |
+| I2-A-03 | 11 |
+| I2-R-08 | 12 |
+| I2-A-07, I2-T-02 | 8, 10, 13 |
+| I2-T-01 | 4, 5, 12, 13 |
+| I2-T-03 (interview, AIQ 04 Q4) | 1, 7, 13 |
 
 ## Left to other concepts on purpose (link only)
 

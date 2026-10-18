@@ -649,6 +649,7 @@ tr.hl td{background:var(--accent-soft)}
     </tbody></table></div>
   <p><b>Size only misses 192 of 282 headings, 68.1%.</b> The four levels match the PDF's own structure: the research pass read Word's heading tags from the raw file (1 title, 21 chapters, 68 sections) and found the bold sub-headings untagged, so they are the deepest level (Full, step 14).</p>
   <p>A <b>numbering pattern</b> is a third signal: <code>^Chapter \d+:</code> or <code>^\d+(\.\d+)*\s</code> gives the level from the depth of the number (2.1.3 → level 3). The climate PDF numbers only its chapters, so it confirms level 2 here and nothing else.</p>
+  <p><b>Before any of this, check for an outline.</b> If the PDF has bookmarks, <code>doc.get_toc()</code> returns them as <code>[level, title, page]</code> rows: levels and titles the author chose. Use them first (still aligned to offsets, step 6) and fall back to typography only when the list is empty. The climate PDF's outline is empty (<code>[]</code>), so this lesson uses typography (Full, step 14).</p>
   <p class="call wrong"><b>Common mistake:</b> "headings are always bigger than the text." Many Word, LaTeX and report templates set their lowest heading level in body-size bold, or even in body-size italic. Check a corpus before you trust a size-only detector.</p>
   <p class="call proj"><b>In your project:</b> the experiment card 06 v1.1 must say "size rank, plus bold at body size", and the apply-it tool reports the size-only vs size + bold difference as its check S4.</p>
 </section>
@@ -692,8 +693,8 @@ for h in headings:                        # in reading order
     h.start, h.end = pos, pos + len(h.line)
     cursor = h.end</pre>
   <p>All <b>282 of 282</b> headings are found, each on its own page. "Coal" lands at <code>[2418, 2423)</code>; page 1's text ends at offset 2424, so "Coal" is the last word of page 1, followed by the page join and then "Coal is the most carbon-intensive…" on page 2.</p>
-  <p><b>Why the moving cursor?</b> Because of the repeated titles. A plain <code>doc_text.find("Paris Agreement")</code> for the p.23 heading would return the p.10 one, and the p.23 section would be built at the wrong place. The cursor only searches after the previous heading, so each heading finds its own copy. And if one is missing, the build stops instead of guessing: a chunker that silently drops a heading makes wrong chunks that every later metric would trust.</p>
-  <p class="call wrong"><b>Common mistake:</b> "convert the PDF to Markdown, chunk that, then find the chunks again." Converters rewrite the text (markup, joined lines, changed spacing), so their chunks are not slices of the snapshot and must be re-anchored, which can fail (Full, step 15).</p>
+  <p><b>Why the moving cursor?</b> Because of the repeated titles. A plain <code>doc_text.find("Paris Agreement")</code> for the p.23 heading would return the p.10 one, and the p.23 section would be built at the wrong place. Short titles also appear inside body text ("Coal" opens the very paragraph it heads). The cursor only searches after the previous heading, in reading order, so each heading finds its own copy. And if one is missing, the build stops instead of guessing: a chunker that silently drops a heading makes wrong chunks that every later metric would trust.</p>
+  <p class="call wrong"><b>Common mistake:</b> "convert the PDF to Markdown, chunk that, then find the chunks again." Converters rewrite the text (markup, joined lines, changed spacing), so their chunks are not slices of the snapshot and must be re-anchored, which can fail. LangChain's <code>MarkdownHeaderTextSplitter</code> also, by default, removes the heading from the chunk text (<code>strip_headers=True</code>, metadata only) and applies no size cap (Full, step 15).</p>
   <p class="call proj"><b>In your project:</b> the alignment rate is check S6 of the apply-it tool, and anything below 100% stops the build.</p>
 </section>
 
@@ -775,7 +776,7 @@ p.23  Chapter 16: Global Cooperation and Governance &gt; International Agreement
                         (page 1's text ends at 2424; 2424 is the join character)</pre>
   <p>The segments must rebuild the chunk's range exactly: the first starts at <code>a</code>, each ends where the next starts, the last ends at <code>b</code>. A citation can then say "pp.1–2" and still point to exact text.</p>
   <p class="call wrong"><b>Common mistake:</b> "cross-page chunks break page citations." They break only if the chunk stores a single page number. Segments keep page-level citations exact.</p>
-  <p class="call proj"><b>In your project:</b> v1.1 changes two things compared with a per-page v1.0 champion: the boundary rule <i>and</i> the page scope. So the experiment adds a control arm, the same recursive splitter run across pages (92 chunks, 41 on two pages), to tell the two apart (research error I2-E5).</p>
+  <p class="call proj"><b>In your project:</b> v1.1 changes two things compared with a per-page v1.0 champion: the boundary rule <i>and</i> the page scope. So the experiment adds a control arm, the same recursive splitter run across pages (92 chunks, 41 on two pages), to tell the two apart (research error I2-E5). That control also keeps the PPP sentence whole: page scope alone repairs cut sentences, so v1.1 must beat it, not only per-page v0.</p>
 </section>
 
 <!-- 11 -->
@@ -835,7 +836,9 @@ def test_no_gaps(chunks, doc_text):
     <li><b>The decisive bucket is empty.</b> I2 targets evidence that v0 cuts: spans that straddle a v0 chunk boundary, or cross a page. Of the 8 seeds, <b>0</b> straddle and <b>0</b> cross a page. These questions cannot show the gain I2 is built for.</li>
   </ul>
   <p><b>The honest verdict is "inconclusive".</b> To decide, the eval set needs items tagged <code>straddles_champion</code> (computed from the v1.0 champion's chunks before v1.1 runs) and <code>crosses_page</code>, frozen first; then v1.1 is compared with v0, the v1.0 champion and the cross-page control, at fixed k and equal budget, per bucket, reading 5 items that improved and 5 that got worse.</p>
-  <p class="call wrong"><b>Common mistake:</b> "structure-aware is the best choice whenever structure exists." Published comparisons disagree (Full, step 17), and on these 8 questions it does not win. It is a candidate to measure, with a likely "inconclusive" on a small set.</p>
+  <p><b>Outside this course, the evidence is mixed too:</b> published comparisons find <b>no consistent winner</b>. Structure-aware chunking won in some domains, plain recursive splitting or one chunk per page in others, and the parser mattered as much as the chunker (Full, step 17; search-checked, UNVERIFIED).</p>
+  <p><b>When not to use it.</b> Stay with the recursive splitter (the v1.0 champion) when a PDF has no text layer (scans), when its headings cannot be detected reliably (check S4 and the inspection sheet fail), when the reading order is wrong and cannot be fixed (columns), or when v1.1 shows no measured gain over the cross-page control. The other granularity choices have their own concepts: semantic chunking (I3), propositions (I4), and the comparison of all of them (I-CMP).</p>
+  <p class="call wrong"><b>Common mistake:</b> "structure-aware is the best choice whenever structure exists." Published comparisons disagree, and on these 8 questions it does not win. It is a candidate to measure, with a likely "inconclusive" on a small set.</p>
   <p class="call proj"><b>In your project:</b> M1 adds the boundary items before v1.1 is run; if v1.1 wins on them but loses on factual single-span questions, read the traces of the losers first: usually a chunk that got smaller, or a section split away from its key sentence.</p>
 </section>
 
@@ -915,11 +918,11 @@ def test_no_gaps(chunks, doc_text):
     <li>Choose the kernel: <b>Select Kernel → .venv (Python 3.12)</b> of <code>rag_learning</code>.</li>
     <li><b>Run All</b>. Each step prints its checks (PASS or FAIL); the last cell prints the total.</li>
   </ol>
-  <div class="card" id="nbSummary"><b>What it rebuilds</b> <span class="badge m" id="nbBadge">NB_BADGE</span>
+  <div class="card" id="nbSummary"><b>What it rebuilds</b> <span class="badge m" id="nbBadge">128 checks · 4 interactive charts · about 15 seconds</span>
     <ul style="margin-top:6px;font-size:.92rem">
       <li><b>Steps 2–6</b>: the snapshot id, one span dict, the size histogram, both heading rules, the joins, the dict-vs-text check on 33 pages and the alignment of all 282 headings.</li>
       <li><b>Steps 7–11</b>: the tree, the repeated titles, the page-break failures, every chunk arm, the balanced splits and the five invariants.</li>
-      <li><b>Steps 12–13</b>: the inspection sheet and the retrieval table, with MiniLM from your local cache.</li>
+      <li><b>Steps 12–13</b>: the inspection sheet (with empty verdict boxes for you) and the retrieval table, with MiniLM from your local cache. Without the model, that one block prints SKIPPED and the rest still runs.</li>
     </ul>
     <p style="margin-top:6px;font-size:.9rem;color:var(--muted)">A FAIL anywhere means the page and the code disagree: tell the tutor. Rebuild the notebook with <code>uv run python sources/verification/I2/i2_build_verify_nb.py</code>, then run it with <code>i2_verify_nb_run.py</code>.</p></div>
 </section>
